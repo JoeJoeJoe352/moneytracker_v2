@@ -1,0 +1,6 @@
+
+
+
+public class AuthController {
+    // This class can be used for authentication-related endpoints in the future
+}

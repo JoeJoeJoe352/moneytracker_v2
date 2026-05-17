@@ -1,5 +1,6 @@
 indítás: gyökérmappában kiadni a parancsot: 
-docker compose -f docker-compose.dev.yml up *--build*
+- docker desktop elindítása
+- docker compose -f docker-compose.dev.yml up *--build*
 
 (--build akkor kell, ha a pom.xml, package.json, vagy a docker változott)
 
@@ -8,3 +9,6 @@ Ezután:
 - frontend → http://localhost:3000
 - mysql → localhost:3306
 
+docker compose -f docker-compose.dev.yml restart dev-backend
+
+konténerbe belépni: docker exec -it *név*(dev-backend) sh

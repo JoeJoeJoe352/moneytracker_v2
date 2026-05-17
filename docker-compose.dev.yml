@@ -11,7 +11,7 @@ services:
       - ~/.m2:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mydb
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mydb?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     depends_on:
