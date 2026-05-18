@@ -32,9 +32,10 @@
 	<dependencies>
 		<!-- Adatbázis migráció -->
 		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>12.6.1</version>
+    		<groupId>org.flywaydb</groupId>
+    		<artifactId>flyway-mysql</artifactId>
+    		<version>12.6.1</version>
+    		<scope>compile</scope>
 		</dependency>
 		<!-- oauth2, jwt generáláshoz -->
 		<dependency>
