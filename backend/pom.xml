@@ -30,13 +30,14 @@
 		<java.version>26</java.version>
 	</properties>
 	<dependencies>
-		<!-- Adatbázis migráció -->
+		<!-- Adatbázis migráció. Jelenleg nincs használva 
 		<dependency>
     		<groupId>org.flywaydb</groupId>
     		<artifactId>flyway-mysql</artifactId>
     		<version>12.6.1</version>
     		<scope>compile</scope>
 		</dependency>
+		-->
 		<!-- oauth2, jwt generáláshoz -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

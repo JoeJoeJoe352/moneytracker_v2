@@ -1,9 +1,11 @@
 Ide kerül:
-- interfészek, amelyek az üzleti logikát definiálják
+- Az üzleti logikák és kommunikáció a repositoryval
 
 Pl:
 - UserService.java
 - ProductService.java
 
 Mit tartalmazzon?
-- metódusok deklarációja (pl. createUser, findById)
+- üzleti logika
+- repository hívások
+- entitás ↔ DTO konverzió (ha nincs mapper)

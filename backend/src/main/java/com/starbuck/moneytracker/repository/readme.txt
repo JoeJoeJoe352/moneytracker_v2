@@ -1,5 +1,5 @@
 Ide kerül:
-- Spring Data JPA repository-k
+- Spring Data JPA repository-k. Adatbázis query-k
 
 Pl:
 - UserRepository.java

@@ -1,6 +1,10 @@
 package com.starbuck.moneytracker.entity;
 
 import java.time.LocalDateTime;
+
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+
 import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,21 +17,26 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
     private Long id;
+
     @Column(unique = true, nullable = false)
     private String uuid;
+
     @Column(nullable = false)
     private String username;
+
     @Column(nullable = false)
     private String password;
+
     @Column(unique = true, nullable = false)
     private String email;
+
+    @CreatedDate
     private LocalDateTime createdAt;
+    
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public User() {
-        // uuid itt fog generálódni
-        this.uuid = java.util.UUID.randomUUID().toString();
-    }
+    public User() {}
 
     public User(Long id, String username, String password, String email) {
         this.id = id;
