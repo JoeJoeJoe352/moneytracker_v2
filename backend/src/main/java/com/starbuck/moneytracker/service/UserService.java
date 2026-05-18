@@ -13,9 +13,12 @@ public class UserService {
     private UserRepository userRepository;
 
     public User createUser(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
         user.setUuid(java.util.UUID.randomUUID().toString());
         userRepository.save(user);
         return user;
     }
-
 }

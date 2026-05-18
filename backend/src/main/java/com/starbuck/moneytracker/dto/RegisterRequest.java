@@ -1,9 +1,7 @@
 package com.starbuck.moneytracker.dto;
 
 import org.hibernate.validator.constraints.Length;
-
 import com.starbuck.moneytracker.validation.PasswordMatches;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -40,5 +38,4 @@ public record RegisterRequest(
     String email
 ) {
     // Konstruktor, getterek, setterek automatikusan generálódnak a record miatt
-    
 }
