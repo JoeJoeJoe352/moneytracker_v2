@@ -11,7 +11,7 @@ services:
       - ~/.m2:/root/.m2
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/mydb
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/moneytracker?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     depends_on:
@@ -37,11 +37,11 @@ services:
       - appnet
 
   db:
-    image: mysql:8
+    image: mysql:8.0.30
     container_name: dev-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: mydb
+      MYSQL_DATABASE: moneytracker
     ports:
       - "3306:3306"
     volumes:

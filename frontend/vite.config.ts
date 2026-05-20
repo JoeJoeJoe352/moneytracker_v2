@@ -7,6 +7,10 @@ export default defineConfig({
   server: {
     host:true, // emiatt működik dockeren is, nem csak localhoston
     port: 3000,
+    watch: {
+      usePolling: true,
+      interval: 100
+    },
     proxy: {
       // minden /api kezdetű kérés át lesz irányítva a backend szerverre
       '/api': {
