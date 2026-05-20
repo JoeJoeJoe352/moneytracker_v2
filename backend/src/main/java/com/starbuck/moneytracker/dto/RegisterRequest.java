@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.dto;
 
 import org.hibernate.validator.constraints.Length;
+
 import com.starbuck.moneytracker.validation.PasswordMatches;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +34,7 @@ public record RegisterRequest(
     /**
      * Felhasználó email címe
      */
+    @Length(min = 5, max = 100, message = "Email must be between 5 and 100 characters")
     @NotBlank(message = "Email is mandatory")
     @Email(message = "Email should be valid")
     String email

@@ -4,12 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.starbuck.moneytracker.dto.RegisterRequest;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.UserService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -29,7 +30,7 @@ public class AuthController {
      * 
      * @param RegisterRequest user
      */
-    @PostMapping("/auth/register")
+    @PostMapping(path = "/auth/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void authRegistUser(@Valid @RequestBody RegisterRequest user) {
         User newUser = new User();
