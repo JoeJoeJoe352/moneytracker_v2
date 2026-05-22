@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.starbuck.moneytracker.dto.LoginRequest;
+import com.starbuck.moneytracker.dto.LoginResponse;
 import com.starbuck.moneytracker.dto.RegisterRequest;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.UserService;
@@ -42,6 +45,24 @@ public class AuthController {
             userService.createUser(newUser);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("User registration failed: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Felhasználó beléptetése
+     * 
+     * @param username
+     * @param password
+     * @return LoginResponse, amiben a jwt token van
+     */
+    @PostMapping(path = "/auth/login")
+    public LoginResponse loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+        System.out.println("Login request received for username: " + loginRequest.username());
+        try {
+            String jwtToken = userService.login(loginRequest.username(), loginRequest.password());
+            return new LoginResponse(jwtToken);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("User login failed: " + e.getMessage());
         }
     }
 }

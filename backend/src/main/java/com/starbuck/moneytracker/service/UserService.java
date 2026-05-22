@@ -1,9 +1,11 @@
 package com.starbuck.moneytracker.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.starbuck.moneytracker.dto.LoginResponse;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 
@@ -15,6 +17,9 @@ public class UserService {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
 
     /**
      * Felhasználó létrehozása a megadott adatokkal. Username és email cím egyediség ellenőrzés
@@ -35,16 +40,14 @@ public class UserService {
     /**
      * Felhasználó bejelentkezése. Siker esetén visszaadja a felhasználó adatait, hiba esetén IllegalArgumentException-t dob.
      * 
-     * @param username
-     * @param password
+     * @param loginRequest
      * @return User
      */
-    public User login(String username, String password) {
+    public String login(String username, String password) {
         User user = this.userRepository.findByUsername(username);
-        if (user != null && this.passwordEncoder.matches(password, user.getPassword())) {
-            return user;
-        } else {
+        if (user == null || !this.passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("Invalid username or password");
         }
+        return this.jwtService.generateToken(username);
     }
 }

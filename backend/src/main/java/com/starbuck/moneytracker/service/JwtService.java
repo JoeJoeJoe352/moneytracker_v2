@@ -25,14 +25,14 @@ public class JwtService {
     }
 
     /**
-     * Token generálása a userdetails alapján. A tokenben a username lesz a subject, 1 napos érvényességgel.
+     * Token generálása a username alapján. A tokenben a username lesz a subject, 1 napos érvényességgel.
      * 
-     * @param UserDetails userDetails
+     * @param String username
      * @return String A generált token
      */
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(String username) {
         return Jwts.builder()
-                .subject(userDetails.getUsername()) // subject mező
+                .subject(username) // subject mező
                 .issuedAt(new Date()) // mikor generálódott
                 .expiration(new Date(System.currentTimeMillis() + 24 * 1000 * 60 * 60)) // lejárati idő
                 .signWith(getSignInKey()) // aláírás a titkos kulccsal
