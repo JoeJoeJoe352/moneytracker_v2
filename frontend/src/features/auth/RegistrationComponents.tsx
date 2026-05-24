@@ -1,5 +1,5 @@
 import { Formik } from "formik";
-import { registerUser } from "../../services/authService";
+import { registerUser, isUsernameOrEmailTaken } from "../../services/authService";
 
 interface RegistrationValues {
     username: string
@@ -12,8 +12,7 @@ function RegistrationComponents() {
     /**
      * Formik számára a validációs függvény
      */
-    function formikValidate(values: RegistrationValues): {[key: string]: string} {
-        console.log('validation')
+    async function formikValidate(values: RegistrationValues): Promise<{ [key: string]: string }> {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
         const errors: { [key: string]: string } = {}
         if (!values.username || values.username.length < 3) {
@@ -30,7 +29,27 @@ function RegistrationComponents() {
         if (values.password !== values.passwordAgain) {
             errors.passwordAgain = 'Passwords do not match'
         }
+
+        // Ha nincs még hiba, akkor megnézzük foglalt-e az email cím/username
+        if (Object.keys(errors).length === 0) {
+            const isUsernameOrEmailTaken = await checkUsernameOrEmailAvailability(values.username, values.email)
+            if (isUsernameOrEmailTaken) {
+                errors.username = 'Username or email is already taken'
+            }
+        }
+        console.log(errors)
         return errors
+    }
+
+    async function checkUsernameOrEmailAvailability(username: string, email: string): Promise<boolean> {
+        try {
+            const response = await isUsernameOrEmailTaken(username, email);
+            console.log(response.data)
+            return response.data === true
+        } catch (error) {
+            console.error('Error checking username/email:')
+            return true
+        }
     }
 
     /**

@@ -45,6 +45,7 @@ public class SecurityConfig implements WebMvcConfigurer {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/register").permitAll()        // <-- Regisztráció végpont publikus
                 .requestMatchers("/auth/login").permitAll()           // <-- Bejelentkezés végpont publikus
+                .requestMatchers("/auth/isUsernameOrEmailExists").permitAll()           // <-- Felhasználónév vagy email ellenőrzése végpont publikus
                 .anyRequest().authenticated()                         // minden más védett
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
