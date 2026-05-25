@@ -44,10 +44,9 @@ function RegistrationComponents() {
     async function checkUsernameOrEmailAvailability(username: string, email: string): Promise<boolean> {
         try {
             const response = await isUsernameOrEmailTaken(username, email);
-            console.log(response.data)
             return response.data === true
         } catch (error) {
-            console.error('Error checking username/email:')
+            console.error('Error checking username/email', error)
             return true
         }
     }
@@ -61,7 +60,7 @@ function RegistrationComponents() {
             console.log('Registration successful:', response.data)
         })
         .catch(error => {
-            console.error('Registration failed:', error.response ? error.response.data : error.message)
+            console.error('Registration failed:', error)
         })
     }
 
