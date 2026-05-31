@@ -21,16 +21,20 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+#      context: ./frontend
+      context: ./angular
       dockerfile: Dockerfile.dev
     container_name: dev-frontend
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
+#      - ./frontend:/app
+      - ./angular:/app
       - /app/node_modules
     environment:
-      - REACT_APP_API_URL=http://backend:8080
+      - CHOKIDAR_USEPOLLING=true
+      - API_URL=http://backend:8080
+#      - REACT_APP_API_URL=http://backend:8080
     depends_on:
       - backend
     networks:
