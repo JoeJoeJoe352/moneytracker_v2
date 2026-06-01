@@ -22,14 +22,14 @@ services:
   frontend:
     build:
 #      context: ./frontend
-      context: ./angular-frontend
+      context: ./angular
       dockerfile: Dockerfile.dev
     container_name: dev-frontend
     ports:
       - "3000:3000"
     volumes:
 #      - ./frontend:/app
-      - ./angular-frontend:/app
+      - ./angular:/app
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
