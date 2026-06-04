@@ -1,0 +1,14 @@
+$errorColor: red;
+
+.form-label-error {
+  color: $errorColor;
+}
+
+.form-input-error {
+  border: 1px solid $errorColor;
+}
+
+.form-field-error {
+  color: $errorColor;
+  font-size: 13px;
+}
