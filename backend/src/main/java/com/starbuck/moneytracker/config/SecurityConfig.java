@@ -63,7 +63,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:3000") // TODO frontend url
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowCredentials(true); // backend fogadja a cookie-kat
     }
 
     /**
