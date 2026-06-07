@@ -1,1 +1,65 @@
-register
+<h2>Registration</h2>
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="form">
+    
+    <!-- username-->
+    <div class="form-group mb-3">
+        <label for="reg-username">Felhasználónév</label>
+        <input
+            id="reg-username"
+            type="text"
+            formControlName="username"
+            class="form-control"
+            autocomplete="username"
+            [readonly]="isLoading()"
+        />
+    </div>
+
+    <!-- email-->
+    <div class="form-group mb-3">
+        <label for="reg-email">Email</label>
+        <input
+            id="reg-email"
+            type="email"
+            formControlName="email"
+            class="form-control"
+            autocomplete="email"
+            [readonly]="isLoading()"
+        />
+    </div>
+    
+    <!-- password-->
+    <div class="form-group mb-3">
+        <label for="reg-password">Jelszó</label>
+        <input
+            id="reg-password"
+            type="password"
+            formControlName="password"
+            class="form-control"
+            autocomplete="current-password"
+            [readonly]="isLoading()"
+        />
+    </div>
+
+    <!-- confirm password-->
+    <div class="form-group mb-3">
+        <label for="reg-password-again">Jelszó megerősítése</label>
+        <input
+            id="reg-password-again"
+            type="password"
+            formControlName="passwordAgain"
+            class="form-control"
+            autocomplete="current-password"
+            [readonly]="isLoading()"
+        />
+    </div>
+
+  @if (errorMsg() !== '') {
+    <div class="mb-3 form-field-error">{{errorMsg()}}</div>
+  }
+
+  <button type="submit" [disabled]="registerForm.invalid || isLoading()" class="btn btn-primary">
+    Regisztráció
+  </button>
+
+</form>
+ 

@@ -1,7 +1,12 @@
-import { Component, NgZone, signal, WritableSignal } from "@angular/core";
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { Component, signal, WritableSignal } from "@angular/core";
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgClass } from "@angular/common";
 import { AuthService } from "../services/auth-service";
+
+interface LoginData {
+    username: FormControl<string|null>,
+    password: FormControl<string|null>,
+}
 
 @Component({
     selector: "login-component",
@@ -13,30 +18,30 @@ import { AuthService } from "../services/auth-service";
 export class LoginComponent {
     loginForm: FormGroup;
     /**
-     * Hibaüzenet a backendtől
+     * Error message from backend when login fails
      */
     errorMsg: WritableSignal<string> = signal('');
     /**
-     * Töltődik-e a form
+     * Is the form loading?
      */
     isLoading: WritableSignal<boolean> = signal(false);
 
-    constructor(private fb: FormBuilder, private authService: AuthService, private ngZone: NgZone) {
+    constructor(private fb: FormBuilder, private authService: AuthService) {
         // AuthService injektálva van a komponensben, mert @Inject annotációs dekorátorral van ellátva, így a DI konténer tudja, hogy létre kell hoznia egy példányt belőle, és át kell adnia a konstruktorban.
-        this.loginForm = this.fb.group({
-            username: ["", Validators.required],
-            password: ["", Validators.required]
+        this.loginForm = this.fb.nonNullable.group<LoginData>({
+            username: new FormControl('', [Validators.required]),
+            password: new FormControl('', [Validators.required]),
         })
     }
 
     /**
-     * Login form elküldése
+     * Submit login form data to backend
      */
     onSubmit(): void {
         if (this.loginForm.invalid) {
             return;
         }
-        // így lehet zoneless módban reaktív elemet berakni
+        // reactive element in zoneless mode, so we need to manually update the signals
         this.errorMsg.update(() => '');
         this.isLoading.update(() => true);
         const { username, password } = this.loginForm.value;
@@ -46,11 +51,8 @@ export class LoginComponent {
                 // TODO redirect to home page
             },
             error: (response) => {
-                console.log('123', NgZone.isInAngularZone())
                 if (response.status === 401) {
-                    this.ngZone.run(() => {
-                        this.errorMsg.update(() => response.error.message);
-                    });
+                    this.errorMsg.update(() => response.error.message);
                 } else {
                     console.error("Ismeretlen hiba történt a bejelentkezés során!", response);
                 }
@@ -59,29 +61,39 @@ export class LoginComponent {
         })
     }
 
+    /////////////
+    // GETTERS //
+    /////////////
+    
     /**
-     * Megnézi, hogy valid-e a felhasználónév input. Csak azután mond hibát, ha a felhasználó hozzáért az inputhoz valaha
+     * Check if there is a problem with the username field after the user interacted with it.
      *
      * @return boolean
      */
     get isUsernameFieldHasError(): boolean {
-        const usernameInputContent = this.loginForm.get('username');
-        if (!usernameInputContent) {
-            throw new Error("Nincs ilyen nevű input a formban!");
-        }
-        return usernameInputContent.touched && usernameInputContent.invalid;
+        return (this.username.touched && this.username.invalid);
     }
     /**
-     * Megnézi, hogy valid-e a jelszó input. Csak azután mond hibát, ha a felhasználó hozzáért az inputhoz valaha
-     * 
+     * Check if there is a problem with the password field after the user interacted with it.
+     *
      * @return boolean
      */
     get isPasswordFieldHasError(): boolean {
-        const passwordInputContent = this.loginForm.get('password');
-        if (!passwordInputContent) {
-            throw new Error("Nincs ilyen nevű input a formban!");
-        }
-        return passwordInputContent.touched && passwordInputContent.invalid;
+        return this.password.touched && this.password.invalid;
     }
 
+    /**
+     * Get FormControl object of the username form field
+     */
+    get username(): FormControl<string> {
+        return this.loginForm.get('username') as FormControl<string>;
+    }
+
+    /**
+     * Get FormControl object of the password form field
+     */
+    get password(): FormControl<string> {
+        return this.loginForm.get('password') as FormControl<string>;
+    }
+    
 }
