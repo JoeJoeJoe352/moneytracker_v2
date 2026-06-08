@@ -47,8 +47,8 @@
 
   <!-- Print of general error -->
 
-  @if (errorMsg() !== '') {
-    <div class="mb-3 form-field-error">{{errorMsg()}}</div>
+  @if (backendErrorMsg() !== '') {
+    <div class="mb-3 form-field-error">{{backendErrorMsg()}}</div>
   }
 
 </form>

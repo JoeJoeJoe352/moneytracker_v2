@@ -105,14 +105,24 @@ public class AuthController {
     }
 
     /**
-     * Ellenőrzi, hogy a felhasználónév, vagy email cím foglalt-e már
+     * Ellenőrzi, hogy a felhasználónév foglalt-e már
      * 
      * @param username
+     * @return Boolean
+     */
+    @PostMapping(path = "/auth/isUsernameExists")
+    public boolean isUsernameExists(@RequestBody Map<String, String> body) {
+        return userService.isUsernameExists(body.get("username"));
+    }
+
+    /**
+     * Ellenőrzi, hogy az email cím foglalt-e már
+     * 
      * @param email
      * @return Boolean
      */
-    @PostMapping(path = "/auth/isUsernameOrEmailExists")
-    public boolean usernameOrEmailExists(@RequestBody UsernameEmailRequest request) {
-        return userService.usernameOrEmailExists(request.username(), request.email());
+    @PostMapping(path = "/auth/isEmailExists")
+    public boolean isEmailExists(@RequestBody Map<String, String> body) {
+        return userService.isEmailExists(body.get("email"));
     }
 }

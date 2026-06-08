@@ -49,13 +49,22 @@ public class UserService {
     }
 
     /**
-     * Megnézi, hogy felhasználónév vagy jelszó foglalt-e már
+     * Megnézi, hogy felhasználónév foglalt-e már
      * 
      * @param username
-     * @param email
-     * @return
+     * @return Boolean
      */
-    public Boolean usernameOrEmailExists(String username, String email) {
-        return userRepository.existsByEmailOrUsername(email, username);
+    public Boolean isUsernameExists(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    /**
+     * Megnézi, hogy az email cím foglalt-e már
+     * 
+     * @param email
+     * @return Boolean
+     */
+    public Boolean isEmailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 }

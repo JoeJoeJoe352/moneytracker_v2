@@ -23,6 +23,9 @@
             @if (username.hasError('maxlength')) {
                 <div class="form-field-error">Username must be at most 20 characters long.</div>
             }
+            @if (username.hasError('usernameTaken')) {
+                <div class="form-field-error">Username already used.</div>
+            }
         }
     </div>
 
@@ -44,6 +47,9 @@
             }
             @if (email.hasError('pattern')) {
                 <div class="form-field-error">Please enter a valid email address.</div>
+            }
+            @if (email.hasError('emailTaken')) {
+                <div class="form-field-error">Email already used.</div>
             }
         }
     </div>
@@ -100,8 +106,8 @@
         Register
     </button>
 
-    @if (errorMsg() !== '') {
-        <div class="mb-3 form-field-error">{{errorMsg()}}</div>
+    @if (backendErrorMsg() !== '') {
+        <div class="mb-3 form-field-error">{{backendErrorMsg()}}</div>
     }
 
 </form>

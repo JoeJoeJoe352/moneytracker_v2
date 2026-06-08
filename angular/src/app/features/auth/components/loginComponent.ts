@@ -18,7 +18,7 @@ export class LoginComponent {
     /**
      * Error message from backend when login fails
      */
-    errorMsg: WritableSignal<string> = signal('');
+    backendErrorMsg: WritableSignal<string> = signal('');
     /**
      * Is the form loading?
      */
@@ -44,7 +44,7 @@ export class LoginComponent {
             return;
         }
         // reactive element in zoneless mode, so we need to manually set the signals
-        this.errorMsg.set('');
+        this.backendErrorMsg.set('');
         this.isLoading.set(true);
         this.errorLevel.set(ERROR_LEVEL_NONE);
         const { username, password } = this.loginForm.getRawValue();
@@ -56,11 +56,11 @@ export class LoginComponent {
             error: (response) => {
                 if (response.status === 401) {
                     this.errorLevel.set(ERROR_LEVEL_USER_ERROR)
-                    this.errorMsg.set(response.error.message);
+                    this.backendErrorMsg.set(response.error.message);
                 } else {
                     this.errorLevel.set(ERROR_LEVEL_SYSTEM_ERROR)
                     console.error("Ismeretlen hiba történt a bejelentkezés során!", response);
-                    this.errorMsg.set('Unknown error happened, please try again later');
+                    this.backendErrorMsg.set('Unknown error happened, please try again later');
                 }
                 this.isLoading.set(false);
             },

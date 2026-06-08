@@ -3,6 +3,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
 import { AuthService } from "../services/auth-service";
 import { NgClass } from "@angular/common";
 import { passwordMismatchValidator } from "../directives/password-match.directive";
+import { UniqueNameAndEmailDirective } from "../directives/unique-username.directive.";
 
 const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 @Component({
@@ -14,13 +15,21 @@ const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 export class RegisterComponent {
     registerForm: FormGroup
     isLoading: WritableSignal<boolean> = signal(false);
-    errorMsg: WritableSignal<string> = signal('');
-    
-    constructor(private fb: FormBuilder, private authService: AuthService) {
+    backendErrorMsg: WritableSignal<string> = signal('');
+
+    constructor(private fb: FormBuilder, private authService: AuthService, private uniqueValidator: UniqueNameAndEmailDirective) {
         this.registerForm = this.fb.nonNullable.group(
             {
-                username: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(20)]],
-                email: ['', [Validators.pattern(STRICT_EMAIL_REGEX), Validators.required]],
+                username: ['', {
+                    validators: [Validators.required, Validators.minLength(5), Validators.maxLength(20)],
+                    asyncValidators: [this.uniqueValidator.validateUsername.bind(this.uniqueValidator)],
+                    updateOn: 'blur'
+                }],
+                email: ['', {
+                    validators: [Validators.pattern(STRICT_EMAIL_REGEX), Validators.required],
+                    asyncValidators: [this.uniqueValidator.validateEmail.bind(this.uniqueValidator)],
+                    updateOn: 'blur',
+                }],
                 password: ['', [Validators.required, Validators.minLength(6)]],
                 passwordAgain: ['', [Validators.required]],
             }, {
@@ -33,6 +42,22 @@ export class RegisterComponent {
         if (this.registerForm.invalid) {
             return;
         }
+
+        this.isLoading.set(true)
+        this.backendErrorMsg.set('')
+
+        this.authService.register(this.username.value, this.email.value, this.password.value, this.passwordAgain.value).subscribe({
+            next: () => {
+                this.isLoading.set(false);
+                console.log('success!')
+            },
+            error: (response) => {
+                console.error("unknown error during register!", response);
+                this.backendErrorMsg.set('Unknown error happened, please try again later');
+                this.isLoading.set(false);
+            },
+        })
+        
     }
 
     // Getters
