@@ -1,0 +1,18 @@
+@if(shown) {
+  <ng-container>
+    <div class="modal-container">
+      <div class="modal-header">
+        <h1>{{ title }}</h1>
+        <span (click)="closeModal()">X</span>
+      </div>
+      <div class="modal-content">
+        <ng-content></ng-content>
+      </div>
+    </div>
+      <div className="modal-footer">
+      <button type="button" className="btn btn-primary">Save changes</button>
+      <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
+    </div>
+    <div class="backdrop"></div>
+  </ng-container>
+}

@@ -1,19 +1,17 @@
 import { Component, signal, WritableSignal } from "@angular/core";
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgClass } from "@angular/common";
 import { AuthService } from "../services/auth-service";
 
-interface LoginData {
-    username: FormControl<string|null>,
-    password: FormControl<string|null>,
-}
+const ERROR_LEVEL_NONE = 0
+const ERROR_LEVEL_USER_ERROR = 1
+const ERROR_LEVEL_SYSTEM_ERROR = 2
 
 @Component({
     selector: "login-component",
     templateUrl: '../pages/login.html',
     imports: [ReactiveFormsModule, NgClass],
     styleUrls: ["../../../shared/components/form-style.scss"],
-    standalone: true,
 })
 export class LoginComponent {
     loginForm: FormGroup;
@@ -25,12 +23,16 @@ export class LoginComponent {
      * Is the form loading?
      */
     isLoading: WritableSignal<boolean> = signal(false);
+    /**
+     * Error level
+     */
+    errorLevel: WritableSignal<number> = signal(ERROR_LEVEL_NONE)
 
     constructor(private fb: FormBuilder, private authService: AuthService) {
         // AuthService injektálva van a komponensben, mert @Inject annotációs dekorátorral van ellátva, így a DI konténer tudja, hogy létre kell hoznia egy példányt belőle, és át kell adnia a konstruktorban.
-        this.loginForm = this.fb.nonNullable.group<LoginData>({
-            username: new FormControl('', [Validators.required]),
-            password: new FormControl('', [Validators.required]),
+        this.loginForm = this.fb.nonNullable.group({
+            username: ['', Validators.required],
+            password: ['', Validators.required],
         })
     }
 
@@ -41,59 +43,50 @@ export class LoginComponent {
         if (this.loginForm.invalid) {
             return;
         }
-        // reactive element in zoneless mode, so we need to manually update the signals
-        this.errorMsg.update(() => '');
-        this.isLoading.update(() => true);
-        const { username, password } = this.loginForm.value;
+        // reactive element in zoneless mode, so we need to manually set the signals
+        this.errorMsg.set('');
+        this.isLoading.set(true);
+        this.errorLevel.set(ERROR_LEVEL_NONE);
+        const { username, password } = this.loginForm.getRawValue();
         this.authService.login(username, password).subscribe({
             next: () => {
-                this.isLoading.update(() => false);
+                this.isLoading.set(false);
                 // TODO redirect to home page
             },
             error: (response) => {
                 if (response.status === 401) {
-                    this.errorMsg.update(() => response.error.message);
+                    this.errorLevel.set(ERROR_LEVEL_USER_ERROR)
+                    this.errorMsg.set(response.error.message);
                 } else {
+                    this.errorLevel.set(ERROR_LEVEL_SYSTEM_ERROR)
                     console.error("Ismeretlen hiba történt a bejelentkezés során!", response);
+                    this.errorMsg.set('Unknown error happened, please try again later');
                 }
-                this.isLoading.update(() => false);
+                this.isLoading.set(false);
             },
         })
     }
 
-    /////////////
-    // GETTERS //
-    /////////////
-    
     /**
      * Check if there is a problem with the username field after the user interacted with it.
-     *
-     * @return boolean
      */
     get isUsernameFieldHasError(): boolean {
-        return (this.username.touched && this.username.invalid);
+        return this.loginForm.controls['username'].touched && 
+            this.loginForm.controls['username'].hasError('required');
     }
     /**
      * Check if there is a problem with the password field after the user interacted with it.
-     *
-     * @return boolean
      */
     get isPasswordFieldHasError(): boolean {
-        return this.password.touched && this.password.invalid;
+        return this.loginForm.controls['password'].touched 
+            && this.loginForm.controls['password'].hasError('required');
     }
 
     /**
-     * Get FormControl object of the username form field
+     * Check if there is an user error from backend. 
+     * It modify the apperance of form elements in the html
      */
-    get username(): FormControl<string> {
-        return this.loginForm.get('username') as FormControl<string>;
+    get hasUserLoginError(): boolean {
+        return this.errorLevel() === ERROR_LEVEL_USER_ERROR
     }
-
-    /**
-     * Get FormControl object of the password form field
-     */
-    get password(): FormControl<string> {
-        return this.loginForm.get('password') as FormControl<string>;
-    }
-    
 }

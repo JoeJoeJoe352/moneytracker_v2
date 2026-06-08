@@ -3,14 +3,14 @@
   
   <!-- username -->
   <div class="form-group mb-3">
-    <label for="username">Felhasználónév</label>
+    <label for="username">Username</label>
     <input
       id="username"
       type="text"
       formControlName="username"
       class="form-control"
       autocomplete="username"
-      [ngClass]="isUsernameFieldHasError || errorMsg() !== '' ? 'form-input-error' : ''" 
+      [ngClass]="isUsernameFieldHasError || hasUserLoginError ? 'form-input-error' : ''" 
       [readonly]="isLoading()"
     />
 
@@ -23,14 +23,14 @@
 
   <!-- password -->
   <div class="form-group mb-3">
-    <label for="password">Jelszó</label>
+    <label for="password">Password</label>
     <input
       id="password"
       type="password"
       formControlName="password"
       class="form-control"
       autocomplete="current-password"
-      [ngClass]="isPasswordFieldHasError || errorMsg() !== '' ? 'form-input-error' : ''"
+      [ngClass]="isPasswordFieldHasError || hasUserLoginError ? 'form-input-error' : ''"
       [readonly]="isLoading()"
     />
 
@@ -42,8 +42,10 @@
   </div>
 
   <button type="submit" [disabled]="isLoading()" class="btn btn-primary">
-    Belépés
+    Login
   </button>
+
+  <!-- Print of general error -->
 
   @if (errorMsg() !== '') {
     <div class="mb-3 form-field-error">{{errorMsg()}}</div>
