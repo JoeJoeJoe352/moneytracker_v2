@@ -1,24 +1,36 @@
-import { Component, EventEmitter, Output, signal, WritableSignal } from "@angular/core";
+import { Component, EventEmitter, inject, Output, signal, WritableSignal } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { AuthService } from "../services/auth-service";
+import { AuthService } from "./auth-service";
 import { NgClass } from "@angular/common";
-import { passwordMismatchValidator } from "../directives/password-match.directive";
-import { UniqueNameAndEmailDirective } from "../directives/unique-username.directive.";
+import { passwordMismatchValidator } from "./password-match.directive";
+import { UniqueNameAndEmailDirective } from "./unique-username.directive.";
 
 const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 @Component({
-    selector: "register-component",
-    templateUrl: "../pages/register.html",
+    selector: "app-register-component",
+    templateUrl: "./register-component.html",
     imports: [ReactiveFormsModule, NgClass],
-    styleUrls: ["../../../shared/components/form-style.scss"],
+    styleUrls: ["../../shared/components/form-style.scss"],
 })
 export class RegisterComponent {
-    registerForm: FormGroup
-    isLoading: WritableSignal<boolean> = signal(false);
-    backendErrorMsg: WritableSignal<string> = signal('');
     @Output() closeModal = new EventEmitter<void>();
 
-    constructor(private fb: FormBuilder, private authService: AuthService, private uniqueValidator: UniqueNameAndEmailDirective) {
+    // injektálások 
+    private fb = inject(FormBuilder)
+    private authService = inject(AuthService)
+    private uniqueValidator = inject(UniqueNameAndEmailDirective)
+
+    registerForm: FormGroup
+    /**
+     * Töltődés alatt van-e a form
+     */
+    isLoading: WritableSignal<boolean> = signal(false);
+    /**
+     * Van-e a hiba a backendről
+     */
+    backendErrorMsg: WritableSignal<string> = signal('');
+
+    constructor() {
         this.registerForm = this.fb.nonNullable.group(
             {
                 username: ['', {
@@ -39,6 +51,9 @@ export class RegisterComponent {
         )
     }
 
+    /**
+     * Form küldéskor lefutó kódok
+     */
     onSubmit(): void {
         if (this.registerForm.invalid) {
             return;

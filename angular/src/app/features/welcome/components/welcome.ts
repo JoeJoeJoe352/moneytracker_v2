@@ -1,6 +1,6 @@
 import { Component, signal } from "@angular/core";
-import { LoginComponent } from "../../auth/components/loginComponent";
-import { RegisterModalComponent } from "../../auth/components/registerModal";
+import { LoginComponent } from "../../auth/login-component";
+import { RegisterModalComponent } from "../../auth/register-modal";
 
 @Component({
     selector: "app-welcome",

@@ -1,7 +1,7 @@
 import { inject, Injectable } from "@angular/core";
 import { AbstractControl } from "@angular/forms";
 import { catchError, map, of } from "rxjs";
-import { AuthService } from "../services/auth-service";
+import { AuthService } from "./auth-service";
 
 @Injectable({providedIn: 'root'})
 export class UniqueNameAndEmailDirective {
