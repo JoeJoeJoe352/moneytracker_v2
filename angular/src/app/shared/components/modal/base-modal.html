@@ -4,8 +4,14 @@
   role="dialog"
   style="display:block;"
 >
-  <div class="backdrop" (click)="onClose()"></div>
-  <div class="modal-dialog modal-content" role="document">
+<!-- Modal backdrop-ot szeretné focusolható és esc-re bezárhatóvá tenni. Utóbbit megteszem a hostlistener-el -->
+<!-- előbbit nem szabad megtenni, mert nincs értelme fókuszolhatóvá tenni ezt az elemet -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
+  <div
+    class="backdrop" 
+    (click)="onClose()" 
+  ></div>
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">{{ title }}</h5>

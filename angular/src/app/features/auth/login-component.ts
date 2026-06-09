@@ -1,19 +1,22 @@
-import { Component, signal, WritableSignal } from "@angular/core";
+import { Component, inject, signal, WritableSignal } from "@angular/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgClass } from "@angular/common";
-import { AuthService } from "../services/auth-service";
+import { AuthService } from "./auth-service";
 
 const ERROR_LEVEL_NONE = 0
 const ERROR_LEVEL_USER_ERROR = 1
 const ERROR_LEVEL_SYSTEM_ERROR = 2
 
 @Component({
-    selector: "login-component",
-    templateUrl: '../pages/login.html',
+    selector: "app-login-component",
+    templateUrl: './login-component.html',
     imports: [ReactiveFormsModule, NgClass],
-    styleUrls: ["../../../shared/components/form-style.scss"],
+    styleUrls: ["../../shared/components/form-style.scss"],
 })
 export class LoginComponent {
+    private fb = inject(FormBuilder)
+    private authService = inject(AuthService)
+
     loginForm: FormGroup;
     /**
      * Error message from backend when login fails
@@ -28,7 +31,8 @@ export class LoginComponent {
      */
     errorLevel: WritableSignal<number> = signal(ERROR_LEVEL_NONE)
 
-    constructor(private fb: FormBuilder, private authService: AuthService) {
+
+    constructor() {
         // AuthService injektálva van a komponensben, mert @Inject annotációs dekorátorral van ellátva, így a DI konténer tudja, hogy létre kell hoznia egy példányt belőle, és át kell adnia a konstruktorban.
         this.loginForm = this.fb.nonNullable.group({
             username: ['', Validators.required],

@@ -1,5 +1,8 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
 
+/**
+ * Jelszó és jelszó konfirm mező egyezőségét vizsgáló validátor
+ */
 export function passwordMismatchValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
         const password = control.get('password')?.value;
@@ -8,7 +11,7 @@ export function passwordMismatchValidator(): ValidatorFn {
         if (!password || !passwordAgain) {
             return null;
         }
-        console.log(password, passwordAgain)
+
         return password === passwordAgain ? null : { passwordMismatch: true };
     };
 }

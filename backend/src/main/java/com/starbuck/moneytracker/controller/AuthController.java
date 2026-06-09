@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.starbuck.moneytracker.dto.LoginRequest;
 import com.starbuck.moneytracker.dto.RegisterRequest;
-import com.starbuck.moneytracker.dto.UsernameEmailRequest;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
