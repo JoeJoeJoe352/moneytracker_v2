@@ -1,0 +1,19 @@
+.backdrop{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100vw;
+    height: 100vh;
+    background-color: grey;
+    opacity: 0.5;
+}
+
+.modal-content {
+    z-index: 3;
+}
+
+// bootstrap felülírás
+.modal-header {
+    justify-content: space-between;
+}

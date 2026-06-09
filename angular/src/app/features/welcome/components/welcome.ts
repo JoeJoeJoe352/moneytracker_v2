@@ -1,11 +1,21 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { LoginComponent } from "../../auth/components/loginComponent";
-import { RegisterComponent } from "../../auth/components/RegisterComponent";
+import { RegisterModalComponent } from "../../auth/components/registerModal";
 
 @Component({
     selector: "app-welcome",
     templateUrl: "../pages/welcome.html",
-    imports: [LoginComponent, RegisterComponent],
+    imports: [LoginComponent, RegisterModalComponent],
     standalone: true,
 })
-export class Welcome {}
+export class Welcome {
+    isModalOpen = signal(false);
+
+    openModal() {
+        this.isModalOpen.set(true);
+    }
+
+    closeModal() {
+        this.isModalOpen.set(false);
+    }
+}

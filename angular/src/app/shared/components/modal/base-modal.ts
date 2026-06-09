@@ -8,11 +8,9 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
 })
 export class baseModal{
     @Input({ required: true }) title: string = '';
-    @Input({ required: true }) shown: boolean = false;
-    @Output() shownChange = new EventEmitter<boolean>();
+    @Output() close = new EventEmitter<boolean>();
 
-    closeModal() {
-        this.shown = false;
-        this.shownChange.emit(this.shown);
+    onClose() {
+        this.close.emit();
     }
 }

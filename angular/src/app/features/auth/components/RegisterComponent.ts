@@ -1,4 +1,4 @@
-import { Component, signal, WritableSignal } from "@angular/core";
+import { Component, EventEmitter, Output, signal, WritableSignal } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { AuthService } from "../services/auth-service";
 import { NgClass } from "@angular/common";
@@ -16,6 +16,7 @@ export class RegisterComponent {
     registerForm: FormGroup
     isLoading: WritableSignal<boolean> = signal(false);
     backendErrorMsg: WritableSignal<string> = signal('');
+    @Output() closeModal = new EventEmitter<void>();
 
     constructor(private fb: FormBuilder, private authService: AuthService, private uniqueValidator: UniqueNameAndEmailDirective) {
         this.registerForm = this.fb.nonNullable.group(
@@ -49,7 +50,7 @@ export class RegisterComponent {
         this.authService.register(this.username.value, this.email.value, this.password.value, this.passwordAgain.value).subscribe({
             next: () => {
                 this.isLoading.set(false);
-                console.log('success!')
+                this.closeModal.emit()
             },
             error: (response) => {
                 console.error("unknown error during register!", response);

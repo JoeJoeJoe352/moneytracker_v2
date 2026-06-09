@@ -1,11 +1,16 @@
-<h1>welcome</h1>
-<p>
-    Welcome to moneytracker, the best app to track your expenses and income.
-</p>
-<p>
-    <login-component />
-</p>
-<p>
-    Or sign up:
-    <register-component />
-</p>
+<div>
+    <h1>welcome</h1>
+    <p>
+        Welcome to moneytracker, the best app to track your expenses and income.
+    </p>
+    <p>
+        <login-component />
+    </p>
+    <p>
+        <button class="btn btn-secondary" (click)="openModal()">Register</button>
+    </p>
+
+    @if (isModalOpen()) {
+        <register-modal (close)="closeModal()" />
+    }
+</div>
