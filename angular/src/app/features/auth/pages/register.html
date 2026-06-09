@@ -1,0 +1,112 @@
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="form">
+    
+    <!-- username-->
+    <div class="form-group mb-3">
+        <label for="reg-username">Username</label>
+        <input
+            id="reg-username"
+            type="text"
+            formControlName="username"
+            class="form-control"
+            [ngClass]="username.invalid && username.touched ? 'form-input-error' : ''" 
+            autocomplete="username"
+            [readonly]="isLoading()"
+        />
+        @if (username.invalid && username.touched) {
+            @if (username.hasError('required')) {
+                <div class="form-field-error">Username is required.</div>
+            }
+            @if (username.hasError('minlength')) {
+                <div class="form-field-error">Username must be at least 5 characters long.</div>
+            }
+            @if (username.hasError('maxlength')) {
+                <div class="form-field-error">Username must be at most 20 characters long.</div>
+            }
+            @if (username.hasError('usernameTaken')) {
+                <div class="form-field-error">Username already used.</div>
+            }
+        }
+    </div>
+
+    <!-- email-->
+    <div class="form-group mb-3">
+        <label for="reg-email">Email</label>
+        <input
+            id="reg-email"
+            type="email"
+            formControlName="email"
+            class="form-control"
+            [ngClass]="email.invalid && email.touched ? 'form-input-error' : ''"
+            autocomplete="email"
+            [readonly]="isLoading()"
+        />
+        @if (email.invalid && (email.touched)) {
+            @if (email.hasError('required')) {
+                <div class="form-field-error">Email is required.</div>
+            }
+            @if (email.hasError('pattern')) {
+                <div class="form-field-error">Please enter a valid email address.</div>
+            }
+            @if (email.hasError('emailTaken')) {
+                <div class="form-field-error">Email already used.</div>
+            }
+        }
+    </div>
+    
+    <!-- password-->
+    <div class="form-group mb-3">
+        <label for="reg-password">Password</label>
+        <input
+            id="reg-password"
+            type="password"
+            formControlName="password"
+            class="form-control"
+            [ngClass]="(password.invalid && password.touched) || (hasPasswordMismatchError && passwordAgain.touched) ? 'form-input-error' : ''"
+            autocomplete="current-password"
+            [readonly]="isLoading()"
+        />
+        @if (password.invalid && (password.dirty || password.touched)) {
+            @if (password.hasError('required')) {
+                <div class="form-field-error">Password is required.</div>
+            }
+            @if (password.hasError('minlength')) {
+                <div class="form-field-error">Password must be at least 6 characters long.</div>
+            }
+        }
+    </div>
+
+    <!-- confirm password-->
+    <div class="form-group mb-3">
+        <label for="reg-password-again">Confirm Password</label>
+        <input
+            id="reg-password-again"
+            type="password"
+            formControlName="passwordAgain"
+            class="form-control"
+            [ngClass]="(passwordAgain.invalid || hasPasswordMismatchError) && passwordAgain.touched ? 'form-input-error' : ''"
+            autocomplete="current-password"
+            [readonly]="isLoading()"
+        />
+        @if (passwordAgain.invalid && (passwordAgain.dirty || passwordAgain.touched)) {
+            @if (passwordAgain.hasError('required')) {
+                <div class="form-field-error">Password confirmation is required.</div>
+            }
+            @if (passwordAgain.hasError('minlength')) {
+                <div class="form-field-error">Password confirmation must be at least 6 characters long.</div>
+            }
+        }
+
+        @if (passwordAgain.touched && hasPasswordMismatchError) {
+            <div class="form-field-error">Passwords do not match.</div>
+        }
+    </div>
+
+    <button type="submit" [disabled]="registerForm.invalid || isLoading()" class="btn btn-primary">
+        Register
+    </button>
+
+    @if (backendErrorMsg() !== '') {
+        <div class="mb-3 form-field-error">{{backendErrorMsg()}}</div>
+    }
+
+</form>

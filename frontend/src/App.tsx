@@ -1,13 +1,13 @@
 import heroImg from './assets/moneytracker_large_logo.png' 
-import RegistrationComponents from './features/auth/RegistrationComponents'
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import LoginComponent from './features/auth/LoginComponent'
-import type { RootState } from './store/store'
-import { useSelector } from 'react-redux'
+import { useState } from 'react'
+import { LoginModal } from './features/auth/LoginModal'
+import { RegistrationModal } from './features/auth/RegistrationModal'
 
 function App() {
-  const token = useSelector((state: RootState) => state.auth.token)
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(false);
   return (
     <>
       <section id="center">
@@ -15,12 +15,20 @@ function App() {
           <img src={heroImg} className="base" width="170" height="179" alt="" />
         </div>
       </section>
-      token: {token}
-      <LoginComponent/>
-      <RegistrationComponents />
+
+      {/* Login Modal */}
+      <button onClick={() => {setLoginOpen(true)}}>Login</button>
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+
+      {/* Registration Modal */}
+      <button onClick={() => {setRegistrationOpen(true)}}>Register</button>
+      <RegistrationModal open={registrationOpen} onClose={() => setRegistrationOpen(false)} />
+      
       <section id="spacer"></section>
     </>
-  )
+  ) 
 }
 
 export default App
+
+

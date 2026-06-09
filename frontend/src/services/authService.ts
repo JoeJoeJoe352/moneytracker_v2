@@ -26,7 +26,7 @@ export const registerUser = (username: string, email: string, password: string, 
  * @returns Promise
  */
 export const isUsernameOrEmailTaken = (username: string, email: string) => {
-    return apiClient.post('/auth/isUsernameOrEmailExists', {
+    return apiClient.post<boolean>('/auth/isUsernameOrEmailExists', {
         username: username,
         email: email
     })
@@ -40,7 +40,7 @@ export const isUsernameOrEmailTaken = (username: string, email: string) => {
  * @returns 
  */
 export const loginUser = (username: string, password: string) => {
-    return apiClient.post('/auth/login', {
+    return apiClient.post<{token: string}>('/auth/login', {
         username: username,
         password: password
     })

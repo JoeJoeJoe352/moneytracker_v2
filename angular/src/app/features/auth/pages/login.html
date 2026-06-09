@@ -1,0 +1,55 @@
+<h2>Login</h2>
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
+  
+  <!-- username -->
+  <div class="form-group mb-3">
+    <label for="username">Username</label>
+    <input
+      id="username"
+      type="text"
+      formControlName="username"
+      class="form-control"
+      autocomplete="username"
+      [ngClass]="isUsernameFieldHasError || hasUserLoginError ? 'form-input-error' : ''" 
+      [readonly]="isLoading()"
+    />
+
+  @if (isUsernameFieldHasError) {
+      <div class="form-field-error">
+        username is required!
+      </div>
+    }
+  </div>
+
+  <!-- password -->
+  <div class="form-group mb-3">
+    <label for="password">Password</label>
+    <input
+      id="password"
+      type="password"
+      formControlName="password"
+      class="form-control"
+      autocomplete="current-password"
+      [ngClass]="isPasswordFieldHasError || hasUserLoginError ? 'form-input-error' : ''"
+      [readonly]="isLoading()"
+    />
+
+    @if (isPasswordFieldHasError) {
+      <div class="form-field-error">
+        password is required!
+      </div>
+    }
+  </div>
+
+  <button type="submit" [disabled]="isLoading()" class="btn btn-primary">
+    Login
+  </button>
+
+  <!-- Print of general error -->
+
+  @if (backendErrorMsg() !== '') {
+    <div class="mb-3 form-field-error">{{backendErrorMsg()}}</div>
+  }
+
+</form>
+ 
