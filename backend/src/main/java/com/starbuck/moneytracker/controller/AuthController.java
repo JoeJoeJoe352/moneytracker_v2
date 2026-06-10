@@ -23,7 +23,7 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     // Authentikációs cookie neve
-    private static final String AUTH_COOKIE_NAME = "AUTH_TOKEN";
+    public static final String AUTH_COOKIE_NAME = "AUTH_TOKEN";
 
     /**
      * Felhasználó autentikációs szolgáltatás

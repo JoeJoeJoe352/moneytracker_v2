@@ -4,7 +4,7 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, injec
 @Component({
     selector: "app-base-modal",
     templateUrl: "./base-modal.html",
-    styleUrls: ["./modal.scss"],
+    styleUrls: ["./base-modal.scss"],
 })
 export class BaseModal implements AfterViewInit, OnDestroy {
     @Input({ required: true }) title = '';
