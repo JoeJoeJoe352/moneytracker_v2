@@ -2,6 +2,7 @@ import { Component, inject, signal, WritableSignal } from "@angular/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgClass } from "@angular/common";
 import { AuthService } from "./auth-service";
+import { UserDataStore } from "../../shared/services/user-data-store";
 
 const ERROR_LEVEL_NONE = 0
 const ERROR_LEVEL_USER_ERROR = 1
@@ -16,6 +17,7 @@ const ERROR_LEVEL_SYSTEM_ERROR = 2
 export class LoginComponent {
     private fb = inject(FormBuilder)
     private authService = inject(AuthService)
+    private userDataStore = inject(UserDataStore)
 
     loginForm: FormGroup;
     /**
@@ -53,8 +55,10 @@ export class LoginComponent {
         this.errorLevel.set(ERROR_LEVEL_NONE);
         const { username, password } = this.loginForm.getRawValue();
         this.authService.login(username, password).subscribe({
-            next: () => {
+            next: () => { 
                 this.isLoading.set(false);
+                this.userDataStore.isLoaded.set(true)
+                this.userDataStore.username.set(username)
                 // TODO redirect to home page
             },
             error: (response) => {

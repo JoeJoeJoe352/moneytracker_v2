@@ -1,22 +1,20 @@
 <header>
-    @if(menuOpen) {
-        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
-        <div class="navbar-backdrop" (click)="menuOpen = false"></div>
-    }
+  @if (menuOpen) {
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
+    <div class="navbar-backdrop" (click)="menuOpen = false"></div>
+  }
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container">
       <a class="navbar-brand" href="#">Navbar</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        (click)="toggleMenu()"
-      >
+      <button class="navbar-toggler" type="button" (click)="toggleMenu()">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent" [class.show]="menuOpen">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          @if (userData.isUserLogged()) {
             <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
             <a class="nav-link active" (click)="logout()">Logout</a>
+          }
         </ul>
       </div>
     </div>
