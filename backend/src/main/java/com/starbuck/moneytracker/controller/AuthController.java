@@ -8,14 +8,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.starbuck.moneytracker.dto.LoginRequest;
 import com.starbuck.moneytracker.dto.RegisterRequest;
+import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.UserService;
+import com.starbuck.moneytracker.util.CurrentUserUtil;
+
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -35,7 +40,10 @@ public class AuthController {
      * Jelszó kódoló bean
      */
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;   
+
+    @Autowired
+    private CurrentUserUtil userUtil;
 
     /**
      * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba esetén 400-as választ ad vissza a validációs hibák miatt.
@@ -123,5 +131,19 @@ public class AuthController {
     @PostMapping(path = "/auth/isEmailExists")
     public boolean isEmailExists(@RequestBody Map<String, String> body) {
         return userService.isEmailExists(body.get("email"));
+    }
+
+    /**
+     * User alapadatokkal tér vissza. Gyakorlatilag a bejelentkezés tényét dönti el
+     * Ha be van loginolva a user, akkor visszaadja az adatokat, egyébként el sem éri ezt a végpontot
+     * Így pl.: frontend újrabetöltéskor azonnal le tudja ellenőrizni a frontend, hogy be vagyunk-e jelentkezve
+     * 
+     * @return
+     */
+    @GetMapping(path = "auth/authenticateUser")
+    public UserDataResponseDto authenticateUser() {
+        User user = this.userUtil.getUser();
+
+        return new UserDataResponseDto(user.getUsername());
     }
 }

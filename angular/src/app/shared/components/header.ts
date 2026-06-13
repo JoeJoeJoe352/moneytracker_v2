@@ -2,6 +2,7 @@ import { Component, HostListener, inject } from '@angular/core';
 import { AuthService } from '../../features/auth/auth-service';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserDataStore } from '../services/user-data-store';
 
 @Component({
   selector: 'app-header',
@@ -12,6 +13,8 @@ export class Header {
   private authService = inject(AuthService);
   private router = inject(Router);
   private snackbar = inject(MatSnackBar);
+  protected userData = inject(UserDataStore)
+
   /**
    * Is hamburger menu open
    */
@@ -36,6 +39,7 @@ export class Header {
     this.authService.logout().subscribe({
       next: () => {
         this.router.navigate(["/"])
+        this.userData.resetData()
       },
       error: (response) => {
         console.error(response)

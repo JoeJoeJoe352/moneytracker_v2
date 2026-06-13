@@ -4,13 +4,15 @@ import java.io.IOException;
 import java.util.Arrays;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.starbuck.moneytracker.controller.AuthController;
+import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.service.CustomUserDetailService;
 import com.starbuck.moneytracker.service.JwtService;
+
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -25,11 +27,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
     /** Token validálása + username kiolvasás */
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService; 
+    private final CustomUserDetailService userService;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(
+        JwtService jwtService, 
+        CustomUserDetailService userService
+    ) {
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
+        this.userService = userService;
     }
 
     @Override
@@ -51,19 +56,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
             return; 
         }
 
-        final String username = jwtService.extractUsername(jwt);
+        String username = null;
+        try {
+            username = jwtService.extractUsername(jwt);
+        } catch(ExpiredJwtException exception) {
+            // lejárt a token, nem gond, majd bejelentkezik a user újból
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Nem voltunk még bejelentkezve ebben a requestben, de van username a tokenben
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            User user = this.userService.loadUserByUsername(username);
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                // Security context feltöltése a userdetails alapjánuser
+            if (jwtService.isTokenValid(jwt, user)) {
+                // Security context feltöltése a userdetails alapján
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken (
-                        userDetails,
+                        user,
                         null,
-                        userDetails.getAuthorities()
+                        user.getAuthorities()
                     );
+                // beállítja a securitycontextbe a user adatokat
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
