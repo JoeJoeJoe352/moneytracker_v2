@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { UserDataStore } from '../../shared/services/user-data-store';
 
 interface UserData {
   username: string,
@@ -15,6 +16,7 @@ interface GeneralResponse {
 })
 export class AuthService {
   private http = inject(HttpClient)
+  private userDataStore = inject(UserDataStore)
 
   /**
    * Check if user is already signed in
@@ -95,5 +97,29 @@ export class AuthService {
       '/api/auth/isEmailExists',
       { email }
     )
+  }
+
+  /**
+   * Bootstrap előtt lefutó authcheck
+   * 
+   * @returns 
+   */
+  loadUser(): Promise<void> {
+    return new Promise((resolve) => {
+      this.authenticateUser().subscribe({
+        next: (response) => {
+          this.userDataStore.loadUser(response.username);
+          resolve();
+        },
+        error: (error) => {
+          this.userDataStore.resetData()
+          // 403 = nem vagyunk bejelentkezve
+          if (error.status !== 403) {
+            console.error('unknown error during authcheck!', error);
+          }
+          resolve();
+        }
+      });
+    });
   }
 }

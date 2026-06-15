@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                 .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);
-            }
+        }
         if (jwt == null) {
             // Ha nincs authentikációs süti, akkor továbbengedi a requestet. A nem kivételes végpontoknál így nem lesz hiba
             // A többi végpontnál viszont ettől még az lesz

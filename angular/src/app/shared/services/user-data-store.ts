@@ -19,7 +19,7 @@ export class UserDataStore {
    * @returns
    */
   public isUserLogged(): boolean {
-    return this.username() != '';
+    return this.isLoaded() && this.username() !== '';
   }
 
   /**
@@ -28,5 +28,15 @@ export class UserDataStore {
   public resetData(): void {
     this.username.set('');
     this.isLoaded.set(false);
+  }
+
+  /**
+   * User betöltése
+   * 
+   * @param String username 
+   */
+  public loadUser(username: string): void {
+    this.username.set(username);
+    this.isLoaded.set(true);
   }
 }
