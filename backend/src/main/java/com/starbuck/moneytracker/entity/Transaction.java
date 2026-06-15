@@ -1,12 +1,13 @@
 package com.starbuck.moneytracker.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +18,7 @@ import jakarta.persistence.OneToMany;
 
 @Entity(name = "transactions")
 public class Transaction {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
     private Long id;
@@ -25,13 +27,13 @@ public class Transaction {
     private String name;
 
     @Column(nullable = false)
-    private String transaction_date;
+    private LocalDate transactionDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionTpye transaction_type;
+    private TransactionTpye transactionType;
 
-    @CreatedDate
+    @CreationTimestamp
     private LocalDateTime createdAt;
     
     @UpdateTimestamp
@@ -42,12 +44,12 @@ public class Transaction {
 
     public Transaction() {}
     
-    public Transaction(Long id, String name, String transaction_date, TransactionTpye transaction_type,
+    public Transaction(Long id, String name, LocalDate transactionDate, TransactionTpye transactionType,
             LocalDateTime createdAt, LocalDateTime updatedAt, Set<TransactionDetail> transactionDetails) {
         this.id = id;
         this.name = name;
-        this.transaction_date = transaction_date;
-        this.transaction_type = transaction_type;
+        this.transactionDate = transactionDate;
+        this.transactionType = transactionType;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.transactionDetails = transactionDetails;
@@ -69,20 +71,20 @@ public class Transaction {
         this.name = name;
     }
 
-    public String getTransaction_date() {
-        return transaction_date;
+    public LocalDate getTransactionDate() {
+        return transactionDate;
     }
 
-    public void setTransaction_date(String transaction_date) {
-        this.transaction_date = transaction_date;
+    public void setTransactionDate(LocalDate transactionDate) {
+        this.transactionDate = transactionDate;
     }
 
-    public TransactionTpye getTransaction_type() {
-        return transaction_type;
+    public TransactionTpye getTransactionType() {
+        return transactionType;
     }
 
-    public void setTransaction_type(TransactionTpye transaction_type) {
-        this.transaction_type = transaction_type;
+    public void setTransactionType(TransactionTpye transactionType) {
+        this.transactionType = transactionType;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -21,8 +21,9 @@ export class AuthService {
    * @returns Observable
    */
   authenticateUser(): Observable<UserData> {
-    return this.http.get<UserData>(
+    return this.http.post<UserData>(
       '/api/auth/authenticateUser', 
+      {},
       { withCredentials: true } 
     );
   }

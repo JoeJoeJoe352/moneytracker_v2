@@ -2,10 +2,10 @@ package com.starbuck.moneytracker.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,24 +20,21 @@ public class TransactionDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
     private Long id;
 
-    @Column(nullable = false)
-    private Long transaction_id;
-
     @Column(unique = true, nullable = false)
     private String name;
 
     @Column(nullable = true)
-    private float price;
+    private Float price;
 
     @Column(nullable = true)
-    private float weight;
+    private Float weight;
 
     @Column(nullable = true)
-    private float unit_price;
+    private Float unitPrice;
     
     // TODO category field
 
-    @CreatedDate
+    @CreationTimestamp
     private LocalDateTime createdAt;
     
     @UpdateTimestamp
@@ -49,14 +46,13 @@ public class TransactionDetail {
 
     public TransactionDetail() {}
 
-    public TransactionDetail(Long id, Long transaction_id, String name, float price, float weight, float unit_price,
+    public TransactionDetail(Long id, Long transaction_id, String name, Float price, Float weight, Float unitPrice,
             LocalDateTime createdAt, LocalDateTime updatedAt, Transaction transaction) {
         this.id = id;
-        this.transaction_id = transaction_id;
         this.name = name;
         this.price = price;
         this.weight = weight;
-        this.unit_price = unit_price;
+        this.unitPrice = unitPrice;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.transaction = transaction;
@@ -70,14 +66,6 @@ public class TransactionDetail {
         this.id = id;
     }
 
-    public Long getTransaction_id() {
-        return transaction_id;
-    }
-
-    public void setTransaction_id(Long transaction_id) {
-        this.transaction_id = transaction_id;
-    }
-
     public String getName() {
         return name;
     }
@@ -86,28 +74,28 @@ public class TransactionDetail {
         this.name = name;
     }
 
-    public float getPrice() {
+    public Float getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(Float price) {
         this.price = price;
     }
 
-    public float getWeight() {
+    public Float getWeight() {
         return weight;
     }
 
-    public void setWeight(float weight) {
+    public void setWeight(Float weight) {
         this.weight = weight;
     }
 
-    public float getUnit_price() {
-        return unit_price;
+    public Float getUnitPrice() {
+        return unitPrice;
     }
 
-    public void setUnit_price(float unit_price) {
-        this.unit_price = unit_price;
+    public void setUnitPrice(Float unitPrice) {
+        this.unitPrice = unitPrice;
     }
 
     public LocalDateTime getCreatedAt() {

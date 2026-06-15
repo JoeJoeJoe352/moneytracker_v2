@@ -43,12 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
         // Sütikből megkeressük a JWT sütit
         final Cookie[] cookies = request.getCookies();
-        String jwt = Arrays.stream(cookies)
-            .filter(cookie -> AuthController.AUTH_COOKIE_NAME.equals(cookie.getName()))
-            .map(Cookie::getValue)
-            .findFirst()
-            .orElse(null);
-
+        String jwt = null;
+        // Pl.: postmanben a cookies az üres
+        if (cookies != null) {
+            jwt = Arrays.stream(cookies)
+                .filter(cookie -> AuthController.AUTH_COOKIE_NAME.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+            }
         if (jwt == null) {
             // Ha nincs authentikációs süti, akkor továbbengedi a requestet. A nem kivételes végpontoknál így nem lesz hiba
             // A többi végpontnál viszont ettől még az lesz
