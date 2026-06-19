@@ -25,7 +25,6 @@ public class TransactionService {
     public Transaction createTransaction(Transaction transaction, TransactionDetail transactionDetail) {
         try {
             Transaction transactionModel = this.transactionRepo.save(transaction);
-
             transactionDetail.setTransaction(transactionModel);
             transactionDetail.setName("sum");
             this.transactionDetailRepo.save(transactionDetail);

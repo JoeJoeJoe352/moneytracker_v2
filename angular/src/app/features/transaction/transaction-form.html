@@ -1,0 +1,53 @@
+<form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form">
+    
+    <!-- name -->
+    <div class="form-group mb-3">
+        <label for="transaction-name">Name</label>
+        <input
+            id="transaction-name"
+            type="text"
+            formControlName="name"
+            class="form-control"
+            autocomplete="name"
+        />
+    </div>
+
+    <!-- transactionType -->
+    <div class="form-group mb-3">
+        <label for="transaction-transactionType">Type of transaction</label>
+        <div>
+            <app-switch
+                labelBefore="Kiadás"
+                labelAfter="Bevétel"
+                [checked]="transactionForm.get('transactionType')?.value"
+                (checkedChange)="transactionForm.get('transactionType')?.setValue($event)"
+            />
+        </div>
+    </div>
+    
+    <!-- Price-->
+    <div class="form-group mb-3">
+        <label for="transaction-price">price</label>
+        <input
+            id="transaction-price"
+            type="number"
+            formControlName="price"
+            class="form-control"
+        />
+    </div>
+    
+    <!-- date -->
+    <div class="form-group mb-3">
+        <label for="transaction-date">Date of transaction</label><br>
+        <ngxsmk-datepicker
+            id="transaction-date"
+            mode="single" 
+            formControlName="transactionDate"
+            placeholder="Select a date"
+        />
+    </div>
+    
+    <button type="submit" [disabled]="transactionForm.invalid || isLoading()" class="btn btn-primary">
+        Register
+    </button>
+</form>

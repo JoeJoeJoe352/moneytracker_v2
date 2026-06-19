@@ -1,22 +1,7 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
-@use '@angular/material' as mat;
-
+@import 'bootstrap/dist/css/bootstrap.min.css';
+ 
 html {
   height: 100%;
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    )
-  );
 }
 
 body {
@@ -25,15 +10,28 @@ body {
   // user's system settings.
   color-scheme: light;
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
   // Reset the user agent margin.
   margin: 0;
   height: 100%;
 }
-@import 'bootstrap/dist/css/bootstrap.min.css';
+
+// datepicker felülírás
+ngxsmk-datepicker, .ngxsmk-popover-container, .ngxsmk-backdrop {
+  --datepicker-primary-color: #3b82f6 !important;
+  --datepicker-shadow-focus: #3b82f6 !important;
+  --datepicker-primary-contrast: #ffffff !important;
+  --datepicker-range-background: #dbeafe !important;
+  --datepicker-background: #ffffff !important;
+  --datepicker-text-color: #var(--bs-body-color) !important;
+  --datepicker-subtle-text-color: #6b7280 !important;
+  --datepicker-border-color: #d1d5db !important;
+  --datepicker-hover-background: #f3f4f6 !important;
+  --ngxsmk-space-md: .375rem !important;
+  --ngxsmk-space-lg: .75rem !important;
+  --datepicker-shadow-md: 0 !important;
+}
+
+// input mező magasságának csökkentése
+.ngxsmk-input-group {
+  height: 38px;
+}

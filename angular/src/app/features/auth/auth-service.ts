@@ -113,8 +113,8 @@ export class AuthService {
         },
         error: (error) => {
           this.userDataStore.resetData()
-          // 403 = nem vagyunk bejelentkezve
-          if (error.status !== 403) {
+          // 401 = nem vagyunk bejelentkezve
+          if (error.status !== 401) {
             console.error('unknown error during authcheck!', error);
           }
           resolve();
