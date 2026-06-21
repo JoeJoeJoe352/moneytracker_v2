@@ -140,7 +140,7 @@ public class AuthController {
      * 
      * @return
      */
-    @GetMapping(path = "auth/authenticateUser")
+    @PostMapping(path = "auth/authenticateUser")
     public UserDataResponseDto authenticateUser() {
         User user = this.userUtil.getUser();
 

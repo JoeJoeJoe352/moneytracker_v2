@@ -3,9 +3,10 @@ package com.starbuck.moneytracker.entity;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -14,6 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity(name = "users")
 public class User implements UserDetails {
@@ -34,13 +36,16 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @CreatedDate
+    @CreationTimestamp
     private LocalDateTime createdAt;
     
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     private List<GrantedAuthority> authorities;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Transaction> transactions;
 
     public User() {}
 
@@ -105,6 +110,18 @@ public class User implements UserDetails {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public void setAuthorities(List<GrantedAuthority> authorities) {
+        this.authorities = authorities;
+    }
+
+    public Set<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(Set<Transaction> transactions) {
+        this.transactions = transactions;
     }
 
     @Override

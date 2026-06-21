@@ -1,7 +1,6 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { AuthService } from '../../features/auth/auth-service';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserDataStore } from '../services/user-data-store';
 
 @Component({
@@ -12,7 +11,6 @@ import { UserDataStore } from '../services/user-data-store';
 export class Header {
   private authService = inject(AuthService);
   private router = inject(Router);
-  private snackbar = inject(MatSnackBar);
   protected userData = inject(UserDataStore)
 
   /**
@@ -43,7 +41,7 @@ export class Header {
       },
       error: (response) => {
         console.error(response)
-        this.snackbar.open('Error during logout', 'close');
+        //TODO: új toast: this.snackbar.open('Error during logout', 'close');
       }
     });
   }

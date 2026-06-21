@@ -1,0 +1,10 @@
+<label class="switch">
+  <span class="label-text">{{ labelBefore }}</span>
+  <input
+    type="checkbox"
+    [checked]="checked"
+    (change)="toggle($event)"
+  />
+  <span class="slider"></span>
+  <span class="label-text">{{ labelAfter }}</span>
+</label>

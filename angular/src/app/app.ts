@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Header } from './shared/components/header';
 import { Footer } from './shared/components/footer';
@@ -12,23 +12,8 @@ import { UserDataStore } from './shared/services/user-data-store';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App implements OnInit {
+export class App {
   protected readonly title = signal('Moneytracker');
   private authService = inject(AuthService);
   private userDataStore = inject(UserDataStore)
-
-  ngOnInit() {
-    // app indításkor (pl.: f5 után) authentikáljuk a usert, hogy be van-e jelentkezve
-    this.authService.authenticateUser().subscribe({
-      next: (response) => {
-        this.userDataStore.username.set(response.username)
-        this.userDataStore.isLoaded.set(true)
-      },
-      error: (error) => {
-        if (error.status !== 401) {
-          console.error('unknown error during authcheck!', error);
-        }
-      },
-    });
-  }
 }
