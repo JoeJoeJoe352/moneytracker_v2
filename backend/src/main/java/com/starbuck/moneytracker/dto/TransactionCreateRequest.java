@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.starbuck.moneytracker.entity.TransactionTpye;
+import com.starbuck.moneytracker.entity.TransactionType;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,7 +16,7 @@ public record TransactionCreateRequest (
     String name,
 
     @NotNull(message = "transactionType is mandatory")
-    TransactionTpye transactionType,
+    TransactionType transactionType,
 
     @NotNull(message = "Price is mandatory")
     @Positive(message = "Price must be greater than 0") 

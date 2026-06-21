@@ -7,7 +7,7 @@ interface UserData {
   username: string,
 }
 
-interface GeneralResponse {
+export interface GeneralResponse {
   message: string,
 }
 

@@ -10,17 +10,29 @@
             class="form-control"
             autocomplete="name"
         />
+        @if (name.invalid && name.touched) {
+            @if (name.hasError('required')) {
+                <div class="form-field-error">Transaction name is required.</div>
+            }
+            @if (name.hasError('minlength')) {
+                <div class="form-field-error">Transaction name must be at least 3 characters long.</div>
+            }
+            @if (name.hasError('maxlength')) {
+                <div class="form-field-error">Transaction name must be at most 200 characters long.</div>
+            }
+        }
     </div>
 
     <!-- transactionType -->
     <div class="form-group mb-3">
-        <label for="transaction-transactionType">Type of transaction</label>
+        <label for="transaction-transactionType-bool">Type of transaction</label>
         <div>
             <app-switch
-                labelBefore="Kiadás"
-                labelAfter="Bevétel"
-                [checked]="transactionForm.get('transactionType')?.value"
-                (checkedChange)="transactionForm.get('transactionType')?.setValue($event)"
+                id="transaction-transactionType-bool"
+                labelBefore="Outcome"
+                labelAfter="Income"
+                [checked]="transactionForm.get('transactionTypeBool')?.value"
+                (checkedChange)="transactionForm.get('transactionTypeBool')?.setValue($event)"
             />
         </div>
     </div>
@@ -34,6 +46,14 @@
             formControlName="price"
             class="form-control"
         />
+        @if (price.invalid && price.touched) {
+            @if (price.hasError('required')) {
+                <div class="form-field-error">Price name is required.</div>
+            }
+            @if (price.hasError('min')) {
+                <div class="form-field-error">Price must be at least 1.</div>
+            }
+        }
     </div>
     
     <!-- date -->
@@ -45,9 +65,17 @@
             formControlName="transactionDate"
             placeholder="Select a date"
         />
+        @if (transactionDate.invalid && transactionDate.touched) {
+            @if (transactionDate.hasError('required')) {
+                <div class="form-field-error">date is required.</div>
+            }
+            @if (transactionDate.hasError('invalidDate')) {
+                <div class="form-field-error">Date is invalid.</div>
+            }
+        }
     </div>
     
     <button type="submit" [disabled]="transactionForm.invalid || isLoading()" class="btn btn-primary">
-        Register
+        Save transaction
     </button>
 </form>

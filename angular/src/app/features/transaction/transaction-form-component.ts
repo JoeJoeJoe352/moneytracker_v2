@@ -1,8 +1,9 @@
-import { Component, EventEmitter, inject, Output } from "@angular/core";
+import { Component, EventEmitter, inject, Output, signal } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { AuthService } from "../auth/auth-service";
 import { NgxsmkDatepickerComponent } from "ngxsmk-datepicker";
 import { SwitchComponent } from "../../shared/components/switch.component";
+import { validDate } from "./valid-date-validator";
+import { TransactionService } from "./transaction-service";
 
 @Component({
     selector: "app-transaction-form-component",
@@ -12,17 +13,16 @@ import { SwitchComponent } from "../../shared/components/switch.component";
         NgxsmkDatepickerComponent,
         SwitchComponent,
     ],
-    providers: [],
     styleUrls: ["../../shared/components/form-style.scss", "./transaction-form.scss"],
 })
 export class TransactionFormComponent {
     @Output() closeModal = new EventEmitter<void>();
 
-    // csak komponensben elérhető változók  
     private fb = inject(FormBuilder)
-    private authService = inject(AuthService)
+    private transactionService = inject(TransactionService)
 
     protected transactionForm: FormGroup
+    protected isLoading = signal(false)
 
     constructor() {
         this.transactionForm = this.fb.nonNullable.group(
@@ -30,24 +30,50 @@ export class TransactionFormComponent {
                 name: ['', {
                     validators: [Validators.required, Validators.minLength(3), Validators.maxLength(200)],
                 }],
-                transactionType: new FormControl(true),
-                price: [0, [Validators.required, Validators.min(1)]],
-                transactionDate: new FormControl<Date | null>(null),
+                transactionTypeBool: new FormControl(true),
+                price: [null, [Validators.required, Validators.min(1)]],
+                transactionDate: [new FormControl<Date | null>(null), {
+                    validators: [Validators.required, validDate]
+                }],
             }
         )
     }
 
-    isLoading() {
-        return 0
-    }
-
     onSubmit() {
+        if (this.transactionForm.invalid) {
+            return;
+        }
+        this.isLoading.set(true)
+
         const raw = this.transactionForm.value;
 
         const payload = {
-        ...raw,
-        transactionDate: raw.transactionDate?.toISOString().slice(0, 10)
+            ...raw,
+            transactionDate: raw.transactionDate?.toISOString().slice(0, 10)
         };
-        console.log('qwe')
+
+        this.transactionService.saveTransaction(payload).subscribe({
+            next: () => {
+                this.isLoading.set(false);
+                this.closeModal.emit()
+            },
+            error: (response) => {
+                console.error("unknown error during transaction creation!", response);
+                this.isLoading.set(false);
+            },
+        })
+    }
+
+    // getters
+    get name(): FormControl<string> {
+        return this.transactionForm.get('name') as FormControl<string>;
+    }
+
+    get price(): FormControl<string> {
+        return this.transactionForm.get('price') as FormControl<string>;
+    }
+
+    get transactionDate(): FormControl<string> {
+        return this.transactionForm.get('transactionDate') as FormControl<string>;
     }
 }

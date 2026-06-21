@@ -73,7 +73,6 @@ export class RegisterComponent {
                 this.isLoading.set(false);
             },
         })
-        
     }
 
     // Getters

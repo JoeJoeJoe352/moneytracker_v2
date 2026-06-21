@@ -3,6 +3,6 @@ package com.starbuck.moneytracker.entity;
 /**
  * Tranzakció típusa. 
  */
-public enum TransactionTpye {
+public enum TransactionType {
     INCOME, OUTCOME;
 }

@@ -33,7 +33,7 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionTpye transactionType;
+    private TransactionType transactionType;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -50,7 +50,7 @@ public class Transaction {
 
     public Transaction() {}
     
-    public Transaction(Long id, String name, LocalDate transactionDate, TransactionTpye transactionType,
+    public Transaction(Long id, String name, LocalDate transactionDate, TransactionType transactionType,
             LocalDateTime createdAt, LocalDateTime updatedAt, Set<TransactionDetail> transactionDetails) {
         this.id = id;
         this.name = name;
@@ -85,11 +85,11 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    public TransactionTpye getTransactionType() {
+    public TransactionType getTransactionType() {
         return transactionType;
     }
 
-    public void setTransactionType(TransactionTpye transactionType) {
+    public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
     }
 
