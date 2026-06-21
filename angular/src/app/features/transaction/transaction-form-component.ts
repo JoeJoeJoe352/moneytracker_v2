@@ -13,7 +13,7 @@ import { TransactionService } from "./transaction-service";
         NgxsmkDatepickerComponent,
         SwitchComponent,
     ],
-    styleUrls: ["../../shared/components/form-style.scss", "./transaction-form.scss"],
+    styleUrls: ["../../shared/components/form-style.scss"],
 })
 export class TransactionFormComponent {
     @Output() closeModal = new EventEmitter<void>();
@@ -30,7 +30,7 @@ export class TransactionFormComponent {
                 name: ['', {
                     validators: [Validators.required, Validators.minLength(3), Validators.maxLength(200)],
                 }],
-                transactionTypeBool: new FormControl(true),
+                isIncome: new FormControl(true),
                 price: [null, [Validators.required, Validators.min(1)]],
                 transactionDate: [new FormControl<Date | null>(null), {
                     validators: [Validators.required, validDate]
@@ -75,5 +75,9 @@ export class TransactionFormComponent {
 
     get transactionDate(): FormControl<string> {
         return this.transactionForm.get('transactionDate') as FormControl<string>;
+    }
+
+    get isIncome(): FormControl<boolean> {
+        return this.transactionForm.get('isIncome') as FormControl<boolean>;
     }
 }

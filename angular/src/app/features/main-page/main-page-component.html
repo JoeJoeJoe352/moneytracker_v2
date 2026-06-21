@@ -1,0 +1,8 @@
+<div>main page</div>
+<p>
+    <button class="btn btn-secondary" (click)="openTransactionModal()">Create new transaction</button>
+</p>
+
+@if (isNewTransactionModalOpen()) {
+    <app-create-transaction-modal (closeModal)="closeTransactionModal()" />
+}

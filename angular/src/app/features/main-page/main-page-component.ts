@@ -3,27 +3,27 @@ import { RegisterModalComponent } from "../transaction/create-transaction-modal"
 
 @Component({
     selector: "app-main-page-component",
-    template: `
-        <div>main page</div>
-        <p>
-            <button class="btn btn-secondary" (click)="openModal()">Create new transaction</button>
-        </p>
-        
-        @if (isModalOpen()) {
-            <app-create-transaction-modal (closeModal)="closeModal()" />
-        }
-    `,
+    templateUrl: "./main-page-component.html",
     standalone: true,
     imports: [RegisterModalComponent],
 })
 export class MainPage {
-    isModalOpen = signal(false);
+    /**
+     * Tranzakció létrehozó modal nyitva van-e
+     */
+    protected isNewTransactionModalOpen = signal(false);
 
-    openModal() {
-        this.isModalOpen.set(true);
+    /**
+     * Tranzakció létrehozó modal felnyitása
+     */
+    protected openTransactionModal(): void {
+        this.isNewTransactionModalOpen.set(true);
     }
 
-    closeModal() {
-        this.isModalOpen.set(false);
+    /**
+     * Tranzakció létrehozó modal becsukása
+     */
+    protected closeTransactionModal(): void {
+        this.isNewTransactionModalOpen.set(false);
     }
 }
