@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { GeneralResponse } from "../auth/auth-service";
+import { TransactionTypeEnum } from "./transaction-type-enum";
 
 interface newTransaction {
 	name: string,
@@ -21,7 +22,7 @@ export class TransactionService {
 			
 			const payload = {
 			  ...rest,
-			  transactionType: transactionTypeBool ? 'INCOME' : 'OUTCOME',
+			  transactionType: transactionTypeBool ? TransactionTypeEnum.INCOME : TransactionTypeEnum.OUTCOME,
 			};
 
 
