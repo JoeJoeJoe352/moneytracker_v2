@@ -56,6 +56,12 @@ public class User implements UserDetails {
         this.email = email;
     }
 
+    public User(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+
     public Long getId() {
         return id;
     }
@@ -108,8 +114,8 @@ public class User implements UserDetails {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setUuid() {
+        this.uuid = java.util.UUID.randomUUID().toString();
     }
 
     public void setAuthorities(List<GrantedAuthority> authorities) {
