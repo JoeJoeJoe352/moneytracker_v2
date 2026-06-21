@@ -29,7 +29,7 @@ public class UserService {
             throw new IllegalArgumentException("Username or email already exists");
         }
 
-        user.setUuid(java.util.UUID.randomUUID().toString());
+        user.setUuid();
         userRepository.save(user);
         return user;
     }
