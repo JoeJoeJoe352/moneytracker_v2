@@ -7,10 +7,12 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
+import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 import jakarta.transaction.Transactional;
 
 import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.entity.TransactionType;
 
 @Service
 public class TransactionService {
@@ -19,12 +21,19 @@ public class TransactionService {
      * Ez a neve a transactionDetailnek, hogyha a user összegezve adja meg a tranzakció összeget
      */
     private final String DEFAULT_DETAIL_NAME = "sum";
+    /**
+     * Utolsó hány tranzakcióval térjünk vissza?
+     */
+    private final int LAST_TRANSACTION_LIMIT = 5;
 
     @Autowired
     private TransactionRepository transactionRepo;
 
     @Autowired
     private TransactionDetailRepository transactionDetailRepo;
+
+    @Autowired
+    private CurrentUserUtil currentUser;
 
     /**
      * Tranzakció létrehozása
@@ -50,8 +59,29 @@ public class TransactionService {
      */
     private void prepareDetail(TransactionDetail detail, Transaction transaction) {
         detail.setTransaction(transaction);
+        // TODO ha csak egy detail van, akkor elfogadható a name null-ság, egyébként hiba
         if (detail.getName() == null) {
             detail.setName(DEFAULT_DETAIL_NAME);
         }
+    }
+
+    /**
+     * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
+     * 
+     * @return float
+     */
+    public float sumAllMoney() {
+        // TODO kiadások negatív értékek, ezek most nincsenek kezelve
+        Float sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
+        return sum == null ? 0 : sum;
+    }
+
+    /**
+     * Visszatér az utolsó x darab tranzakció objektummal
+     * 
+     * @return Transaction[]
+     */
+    public Transaction[] getLastTransactions() {
+        return this.transactionRepo.getLastTransactionsForUserWithLimit(currentUser.getUser().getId(), LAST_TRANSACTION_LIMIT);
     }
 }

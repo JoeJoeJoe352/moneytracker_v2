@@ -18,8 +18,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
-@Entity(name = "transactions")
+@Entity
+@Table(name = "transactions")
 public class Transaction {
 
     @Id

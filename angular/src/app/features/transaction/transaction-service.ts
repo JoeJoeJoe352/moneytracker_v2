@@ -21,11 +21,14 @@ export class TransactionService {
    * Tranzakció elmentése
    */
   saveTransaction(transactionData: newTransaction): Observable<GeneralResponse> {
-    const { isIncome, ...rest } = transactionData;
+    const { isIncome, price, ...rest } = transactionData;
 
-	// átalakítjuk az isIncome mező értékét a backend enum-jára
+	  // átalakítjuk az isIncome mező értékét a backend enum-jára
+    // kavarodások elkerülése végett nem lehet negatív értéket beírni az árba
+    // a kiadás kapcsoló alapján itt állítjuk át negatív értékre, hogyha kell
     const payload = {
       ...rest,
+      price: isIncome ? price : price * -1,
       transactionType: isIncome ? TransactionTypeEnum.INCOME : TransactionTypeEnum.OUTCOME,
     };
 
