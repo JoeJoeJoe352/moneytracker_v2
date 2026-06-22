@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,8 +18,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
-@Entity(name = "transactions")
+@Entity
+@Table(name = "transactions")
 public class Transaction {
 
     @Id
@@ -35,6 +38,13 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionType transactionType;
 
+    @Column(nullable = false)
+    private float priceSum;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    @ColumnDefault("0")
+    private int status;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
     
@@ -50,15 +60,14 @@ public class Transaction {
 
     public Transaction() {}
     
-    public Transaction(Long id, String name, LocalDate transactionDate, TransactionType transactionType,
-            LocalDateTime createdAt, LocalDateTime updatedAt, Set<TransactionDetail> transactionDetails) {
+    public Transaction(Long id, String name, LocalDate transactionDate, TransactionType transactionType, float priceSum,
+            int status) {
         this.id = id;
         this.name = name;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.transactionDetails = transactionDetails;
+        this.priceSum = priceSum;
+        this.status = status;
     }
 
     public Long getId() {
@@ -124,5 +133,23 @@ public class Transaction {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public float getPriceSum() {
+        return priceSum;
+    }
+
+    public void setPriceSum(float priceSum) {
+        this.priceSum = priceSum;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    
 
 }

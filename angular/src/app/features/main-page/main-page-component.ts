@@ -1,11 +1,13 @@
 import { Component, signal } from "@angular/core";
 import { RegisterModalComponent } from "../transaction/create-transaction-modal";
+import MoneySumComponent from "../transaction/money-sum-component";
+import TransactionListComponent from "../transaction/transaction-list-component";
 
 @Component({
     selector: "app-main-page-component",
     templateUrl: "./main-page-component.html",
     standalone: true,
-    imports: [RegisterModalComponent],
+    imports: [RegisterModalComponent, MoneySumComponent, TransactionListComponent],
 })
 export class MainPage {
     /**

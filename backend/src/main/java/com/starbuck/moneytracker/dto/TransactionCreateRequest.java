@@ -8,7 +8,6 @@ import com.starbuck.moneytracker.entity.TransactionType;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 
 public record TransactionCreateRequest (
     @NotBlank(message = "Name is mandatory")
@@ -19,7 +18,6 @@ public record TransactionCreateRequest (
     TransactionType transactionType,
 
     @NotNull(message = "Price is mandatory")
-    @Positive(message = "Price must be greater than 0") 
     Float price,
 
     @NotNull(message = "Date is mandatory")
