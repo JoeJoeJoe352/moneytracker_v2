@@ -1,4 +1,9 @@
 <div>main page</div>
+
+<div>
+    <app-money-sum />
+</div>
+
 <p>
     <button class="btn btn-secondary" (click)="openTransactionModal()">Create new transaction</button>
 </p>
@@ -6,3 +11,5 @@
 @if (isNewTransactionModalOpen()) {
     <app-create-transaction-modal (closeModal)="closeTransactionModal()" />
 }
+
+<app-transaction-list />
