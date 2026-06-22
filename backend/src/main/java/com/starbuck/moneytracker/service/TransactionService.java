@@ -32,6 +32,8 @@ public class TransactionService {
     @Transactional
     public Transaction createTransaction(Transaction transaction, TransactionDetail transactionDetail) {
         try {
+            // TODO ha több tranzakció van, akkor össze kell adni őket
+            transaction.setPriceSum(transactionDetail.getPrice());
             Transaction transactionModel = this.transactionRepo.save(transaction);
             this.prepareDetail(transactionDetail, transactionModel);
             this.transactionDetailRepo.saveAndFlush(transactionDetail);
