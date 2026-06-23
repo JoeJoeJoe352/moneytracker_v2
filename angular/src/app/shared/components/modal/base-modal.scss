@@ -1,3 +1,5 @@
+@use "../../variables.scss" as *;
+
 .backdrop{
     position: fixed;
     top: 0;
@@ -15,5 +17,10 @@
 
 // bootstrap felülírás
 .modal-header {
+    color: $moneytracker-white;
     justify-content: space-between;
+}
+
+.modal-header {
+    background-color: $moneytracker-green;
 }

@@ -55,6 +55,8 @@ export class TransactionFormComponent {
         this.transactionService.saveTransaction(payload).subscribe({
             next: () => {
                 this.isLoading.set(false);
+                // Frissíteni kell minden listát, ahol ezek a tranzakciók megjelennek
+                this.transactionService.notifyRefresh();
                 this.closeModal.emit()
             },
             error: (response) => {

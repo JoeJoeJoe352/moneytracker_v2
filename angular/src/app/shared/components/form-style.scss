@@ -1,14 +1,14 @@
-$errorColor: red;
+@use '../variables.scss' as *;
 
 .form-label-error {
-  color: $errorColor;
+  color: $moneytracker-red;
 }
 
 .form-input-error {
-  border: 1px solid $errorColor;
+  border: 1px solid $moneytracker-red;
 }
 
 .form-field-error {
-  color: $errorColor;
+  color: $moneytracker-red;
   font-size: 13px;
 }

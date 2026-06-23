@@ -1,3 +1,5 @@
+@use '../variables.scss' as *;
+
 .navbar-backdrop {
   position: fixed;
   inset: 0;
@@ -7,4 +9,14 @@
 
 .navbar {
   z-index: 2;
+  background-color: $moneytracker-green !important;
+
+  .navbar-brand {
+    color: $moneytracker-white;
+  }
+
+  .nav-link {
+    cursor: pointer;
+    color: $moneytracker-white;
+  }
 }

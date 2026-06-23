@@ -1,7 +1,7 @@
 @use '../../shared/variables.scss' as *; // így lesz globálisan elérhető a változók
 
 .transaction-card-wrapper {
-  border: 1px solid lightgrey;
+  border: 1px solid $moneytracker-grey;
   margin-bottom: 10px;
   border-radius: 10px;
 
@@ -26,7 +26,7 @@
         }
 
         &.outcome {
-          color: red;
+          color: $moneytracker-red;
         }
       }
 

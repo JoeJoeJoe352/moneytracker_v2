@@ -1,3 +1,5 @@
+@use "../variables.scss" as *;
+
 .switch {
   display: inline-flex;
   align-items: center;
@@ -12,7 +14,7 @@
   .slider {
     width: 42px;
     height: 22px;
-    background: var(--bs-border-color, #ced4da);
+    background: $moneytracker-red;
     border-radius: 22px;
     position: relative;
     transition: background 0.25s ease;
@@ -32,7 +34,7 @@
   }
 
   input:checked + .slider {
-    background: var(--bs-primary, #0d6efd);
+    background: $moneytracker-green;
 
     &::before {
       transform: translateX(20px);
