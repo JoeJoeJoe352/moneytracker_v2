@@ -1,7 +1,20 @@
-<div>
-    <ul>
-        <li>{{transaction().name}}</li>
-        <li>{{transaction().priceSum}}</li>
-        <li>{{transaction().transactionDate}}</li>
-    </ul>
+<div class="transaction-card">
+    <div class="row">
+        <div class="col-1">
+            <div
+                [class]="transaction().transactionType "
+            >
+            </div>
+        </div>
+
+        <div class="col-8">
+            {{ transaction().name }}
+            <br>
+            {{ transaction().priceSum }}
+        </div>
+
+        <div class="col-3">
+            {{transaction().transactionDate}}
+        </div>
+    </div>
 </div>

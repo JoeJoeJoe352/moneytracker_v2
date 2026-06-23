@@ -4,7 +4,8 @@ import { Transaction } from "./interfaces";
 @Component({
     selector: "app-transaction-card",
     templateUrl: "./transaction-card.html",
-    styleUrl: "./transaction-card.scss"
+    styleUrl: "./transaction-card.scss",
+    imports: []
 })
 export default class TransactionCardComponent {
     transaction = input.required<Transaction>()

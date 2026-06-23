@@ -54,10 +54,10 @@ public class AuthController {
     public void authRegisterUser(@Valid @RequestBody RegisterRequest user) {
         User newUser = new User();
         newUser.setUsername(user.username());
-        newUser.setPassword(this.passwordEncoder.encode(user.password()));
+        
         newUser.setEmail(user.email());
         try {
-            userService.createUser(newUser);
+            userService.createUser(newUser, user.password());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("User registration failed: " + e.getMessage());
         }

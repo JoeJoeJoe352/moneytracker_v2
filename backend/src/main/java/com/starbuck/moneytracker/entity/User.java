@@ -134,4 +134,10 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities;
     }
+
+    @Override
+    public boolean isEnabled() {
+        // TODO statust berakni a userhez
+        return UserDetails.super.isEnabled();
+    }
 }
