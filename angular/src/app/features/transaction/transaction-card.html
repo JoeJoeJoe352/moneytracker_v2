@@ -1,19 +1,25 @@
-<div class="transaction-card">
-    <div class="row">
-        <div class="col-1">
-            <div
-                [class]="transaction().transactionType "
-            >
+<div class="transaction-card-wrapper">
+    <div class="transaction-card">
+        <div class="card-element transaction-type d-flex">
+            <div class="transaction-icon" [class]="isIncome() ? 'income' : 'outcome'">
+                @if (isIncome()) {
+                    <i class="bi bi-arrow-up-circle-fill"></i>
+                } @else {
+                    <i class="bi bi-arrow-down-circle-fill"></i>
+                }
             </div>
+
+            <div class="transaction-price">
+                {{ transaction().priceSum }}
+            </div>
+
         </div>
 
-        <div class="col-8">
+        <div class="card-element transaction-name">
             {{ transaction().name }}
-            <br>
-            {{ transaction().priceSum }}
         </div>
 
-        <div class="col-3">
+        <div class="card-element transaction-date">
             {{transaction().transactionDate}}
         </div>
     </div>
