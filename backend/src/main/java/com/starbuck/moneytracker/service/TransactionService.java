@@ -84,4 +84,31 @@ public class TransactionService {
     public Transaction[] getLastTransactions() {
         return this.transactionRepo.getLastTransactionsForUserWithLimit(currentUser.getUser().getId(), LAST_TRANSACTION_LIMIT);
     }
+
+    /**
+     * Lekéri az adott id-jú tranzakcióját a usernek
+     * 
+     * @param transactionId
+     * @return
+     */
+    public Transaction getTransactionById(Long transactionId) {
+        return this.transactionRepo.getTransactionById(transactionId,  currentUser.getUser().getId());
+    }
+
+    /**
+     * Frissíti a user adott id-jú tranzakcióját
+     * 
+     * @param id
+     * @param updatedTransaction
+     */
+    public void updateTransaction(Long id, Transaction updatedTransaction) {
+        // így ellenőrzöm, hogy a tranzakció a useré-e
+        Transaction transaction = this.getTransactionById(id);
+        
+        transaction.setName(updatedTransaction.getName());
+        transaction.setPriceSum(updatedTransaction.getPriceSum());
+        transaction.setTransactionDate(updatedTransaction.getTransactionDate());
+        transaction.setTransactionType(updatedTransaction.getTransactionType());
+        this.transactionRepo.save(transaction);
+    }
 }

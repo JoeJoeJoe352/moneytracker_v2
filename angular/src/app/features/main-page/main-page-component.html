@@ -14,7 +14,10 @@
 </div>
 
 @if (isNewTransactionModalOpen()) {
-    <app-create-transaction-modal (closeModal)="closeTransactionModal()" />
+    <app-create-transaction-modal
+        (closeModal)="closeTransactionModal()" 
+        [transaction]="transaction()" 
+    />
 }
 
 <app-transaction-list />

@@ -34,7 +34,7 @@ export class TransactionService {
       transactionType: isIncome ? TransactionTypeEnum.INCOME : TransactionTypeEnum.OUTCOME,
     };
 
-    return this.http.post<GeneralResponse>('/api/transaction/create', payload, {
+    return this.http.post<GeneralResponse>('/api/transaction', payload, {
       withCredentials: true,
     });
   }
@@ -53,6 +53,18 @@ export class TransactionService {
    */
   getMoneySum(): Observable<number> {
     return this.http.get<number>('/api/transaction/sum', {
+      withCredentials: true,
+    })
+  }
+
+  /**
+   * Lekéri a megadott azonosítójú tranzakciót
+   * 
+   * @param transactionId 
+   * @returns 
+   */
+  getTransactionById(transactionId: number): Observable<Transaction> {
+    return this.http.get<Transaction>('/api/transaction/' + transactionId, {
       withCredentials: true,
     })
   }

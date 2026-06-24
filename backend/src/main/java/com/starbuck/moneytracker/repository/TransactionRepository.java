@@ -26,4 +26,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>{
      */
     @Query("SELECT t FROM Transaction t where t.user.id = ?1 ORDER BY t.id DESC LIMIT ?2")
     Transaction[] getLastTransactionsForUserWithLimit(Long userId, int limit);
+
+    /**
+     * Id alapján lekéri a tranzakciós adatokat
+     * 
+     * @param userId
+     * @param transactionId
+     * @return
+     */
+    @Query("SELECT t FROM Transaction t WHERE t.user.id = ?1 AND t.id = ?2 AND t.status = 0")
+    Transaction getTransactionById(Long transactionId, Long userId);
 }

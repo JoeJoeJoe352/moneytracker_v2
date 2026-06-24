@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
@@ -32,7 +34,7 @@ public class TransactionController {
     @Autowired
     private TransactionMapper transactionMapper;
 
-    @PostMapping(path = "/transaction/create")
+    @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
     public void createTransaction(@Valid @RequestBody TransactionCreateRequest request, @AuthenticationPrincipal User user) {
         Transaction transaction = new Transaction();
@@ -51,9 +53,27 @@ public class TransactionController {
     }
 
     /**
+     * Frissíti a usernek a megadott id-jú tranzakcióját
+     * 
+     * @param TransactionCreateRequest request
+     * @param int id
+     */
+    @PutMapping(path = "/transaction/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable  Long id) {
+        Transaction transaction = new Transaction();
+        transaction.setName(request.name());
+        transaction.setTransactionDate(request.transactionDate());
+        transaction.setTransactionType(request.transactionType());
+        //TODO detailnak is frissíteni az árát
+
+        this.transactionService.updateTransaction(id, transaction);
+    }
+
+    /**
      * Összegzi a bevételeket/kiadásokat, visszatér az összes pénzzel
      * 
-     * @return
+     * @return float
      */
     @GetMapping(path = "transaction/sum")
     public float sumAllMoney() {
@@ -63,11 +83,22 @@ public class TransactionController {
     /**
      * Visszatér az utolsó x darab tranzakcióval
      * 
-     * @return
+     * @return List<TransactionDto>
      */
     @GetMapping(path = "transaction/last")
     public List<TransactionDto> getLastTransactions() {
         Transaction[] transactions = this.transactionService.getLastTransactions();
         return this.transactionMapper.toDtoList(Arrays.asList(transactions));
+    }
+
+    /**
+     * Visszaadja a user megadott id-jú tranzakcióját
+     * 
+     * @param id
+     * @return TransactionDto
+     */
+    @GetMapping(path = "/transaction/{id}")
+    public TransactionDto getTransactionById(@PathVariable  Long id) {
+        return this.transactionMapper.toDto(transactionService.getTransactionById(id));
     }
 }

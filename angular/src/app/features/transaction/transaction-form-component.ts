@@ -1,9 +1,10 @@
-import { Component, EventEmitter, inject, Output, signal } from "@angular/core";
+import { Component, EventEmitter, inject, Input, Output, signal } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgxsmkDatepickerComponent } from "ngxsmk-datepicker";
 import { SwitchComponent } from "../../shared/components/switch.component";
 import { validDate } from "./valid-date-validator";
 import { TransactionService } from "./transaction-service";
+import { Transaction } from "./interfaces";
 
 @Component({
     selector: "app-transaction-form-component",
@@ -16,6 +17,8 @@ import { TransactionService } from "./transaction-service";
     styleUrls: ["../../shared/components/form-style.scss"],
 })
 export class TransactionFormComponent {
+    @Input() transaction: Transaction | null = null;
+
     @Output() closeModal = new EventEmitter<void>();
 
     private fb = inject(FormBuilder)
