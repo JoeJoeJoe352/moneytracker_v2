@@ -3,7 +3,7 @@
 .transaction-card-wrapper {
   border: 1px solid $moneytracker-grey;
   margin-bottom: 10px;
-  border-radius: 10px;
+  border-radius: $border-radius;
 
   .transaction-card {
     display: flex;

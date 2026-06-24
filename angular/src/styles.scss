@@ -18,14 +18,14 @@ body {
 
 // OVERRIDES
 
-// datepicker felülírás
+// datepicker felülírás. Mivel ezek konstans felülírások, muszáj színkódot használnom
 ngxsmk-datepicker, .ngxsmk-popover-container, .ngxsmk-backdrop {
-  --datepicker-primary-color: #3b82f6 !important;
-  --datepicker-shadow-focus: #3b82f6 !important;
+  --datepicker-primary-color: #3ba43f !important;
+  --datepicker-shadow-focus: #3ba43f !important;
   --datepicker-primary-contrast: #ffffff !important;
   --datepicker-range-background: #dbeafe !important;
   --datepicker-background: #ffffff !important;
-  --datepicker-text-color: #var(--bs-body-color) !important;
+  --datepicker-text-color: var(--bs-body-color) !important;
   --datepicker-subtle-text-color: #6b7280 !important;
   --datepicker-border-color: #d1d5db !important;
   --datepicker-hover-background: #f3f4f6 !important;
@@ -34,7 +34,83 @@ ngxsmk-datepicker, .ngxsmk-popover-container, .ngxsmk-backdrop {
   --datepicker-shadow-md: 0 !important;
 }
 
+// kis javítás a datepickeren, tablet nézetben a clear és close gombokon el volt csúszva a szöveg
+.ngxsmk-footer{
+  button {
+    @media (min-width: 768px) and (max-width: 1023px) {
+      padding: 0 28px !important; 
+    }
+  }
+}
+
 // input mező magasságának csökkentése
 .ngxsmk-input-group {
   height: 38px;
+}
+
+.btn-green-hollow {
+  color: $moneytracker-green;
+  background-color: $moneytracker-white;
+  border-color: $moneytracker-white;
+  
+  &:hover {
+    color: $moneytracker-white;
+    background-color: $moneytracker-darker-green;
+    border-color: $moneytracker-grey;
+  }
+
+  &:focus-visible {
+    color: $moneytracker-white;
+    background-color: $moneytracker-darkest-green;
+    border-color: $moneytracker-grey;
+    //box-shadow: 130, 138, 145; // lehet még kell
+  }
+
+  &:active {
+    color: $moneytracker-white !important;
+    background-color: $moneytracker-darkest-green !important;
+    border-color: $moneytracker-grey !important;
+  }
+
+  &:disabled {
+    color: $moneytracker-white;
+    background-color: $moneytracker-grey;
+    border-color: $moneytracker-grey;
+  }
+}
+
+.btn-secondary-green {
+  font-weight: bold; 
+  background-color: $moneytracker-secondary-color;
+}
+
+.btn-primary-green {
+  color: $moneytracker-white;
+  background-color: $moneytracker-green;
+  border-color: $moneytracker-white;
+  
+  &:hover {
+    color: $moneytracker-white;
+    background-color: $moneytracker-darker-green;
+    border-color: $moneytracker-grey;
+  }
+
+  &:focus-visible {
+    color: $moneytracker-white;
+    background-color: $moneytracker-secondary-color;
+    border-color: $moneytracker-grey;
+    //box-shadow: 130, 138, 145; // lehet még kell
+  }
+
+  &:active {
+    color: $moneytracker-white !important;
+    background-color: $moneytracker-darkest-green !important;
+    border-color: $moneytracker-grey !important;
+  }
+
+  &:disabled {
+    color: $moneytracker-white;
+    background-color: darkslategray;
+    border-color: darkslategray;
+  }
 }
