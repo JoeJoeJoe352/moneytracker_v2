@@ -5,4 +5,12 @@ import { Component } from "@angular/core";
   templateUrl: "footer.html",
   styleUrl: "./footer.scss",
 })
-export class Footer {}
+export class Footer {
+  
+  /**
+   * Visszatér az aktuális dátummal
+   */
+  getYear(): number {
+    return new Date().getFullYear();
+  }
+}

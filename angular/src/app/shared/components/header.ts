@@ -14,7 +14,7 @@ export class Header {
   protected userData = inject(UserDataStore)
 
   /**
-   * Is hamburger menu open
+   * Hamburger menu open
    */
   protected menuOpen = false;
   

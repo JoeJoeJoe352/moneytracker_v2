@@ -19,4 +19,15 @@
     cursor: pointer;
     color: $moneytracker-white;
   }
+
+  .logo-wrapper {
+    background: $moneytracker-white;
+    border-radius: 20px;
+    padding: 5px 10px;
+    color: $moneytracker-black;
+
+    img {
+      height: 25px;
+    }
+  }
 }
