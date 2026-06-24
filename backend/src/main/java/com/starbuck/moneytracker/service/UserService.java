@@ -24,11 +24,12 @@ public class UserService {
      * @param User user
      * @return User
      */
-    public User createUser(User user) {
+    public User createUser(User user, String password) {
         if (userRepository.existsByEmail(user.getEmail()) || userRepository.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username or email already exists");
         }
 
+        user.setPassword(passwordEncoder.encode(password));
         user.setUuid();
         userRepository.save(user);
         return user;

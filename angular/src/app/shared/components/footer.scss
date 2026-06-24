@@ -1,0 +1,9 @@
+@use '../variables.scss' as *;
+
+footer {
+    background-color: $moneytracker-green;
+
+    .text-body-secondary {
+        color: $moneytracker-white !important;
+    }
+}

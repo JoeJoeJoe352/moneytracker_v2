@@ -1,0 +1,45 @@
+@use '../../shared/variables.scss' as *; // így lesz globálisan elérhető a változók
+
+.transaction-card-wrapper {
+  border: 1px solid $moneytracker-grey;
+  margin-bottom: 10px;
+  border-radius: $border-radius;
+
+  .transaction-card {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 15px;
+
+
+    .transaction-type {
+      flex: 0 1 auto;
+      align-items: center;
+      gap: 10px;
+      
+      .transaction-icon {
+        font-size: 25px;
+
+        &.income {
+          color: $moneytracker-green;
+        }
+
+        &.outcome {
+          color: $moneytracker-red;
+        }
+      }
+
+    }
+
+    .transaction-name {
+      flex: 1 1 auto;
+    }
+
+    .transaction-date {
+
+    }
+  }
+}
+
+

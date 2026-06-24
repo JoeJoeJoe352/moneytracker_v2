@@ -1,12 +1,13 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { AuthService } from '../../features/auth/auth-service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { UserDataStore } from '../services/user-data-store';
 
 @Component({
   selector: 'app-header',
   templateUrl: 'header.html',
   styleUrl: './header.scss',
+  imports: [RouterLink],
 })
 export class Header {
   private authService = inject(AuthService);
@@ -14,7 +15,7 @@ export class Header {
   protected userData = inject(UserDataStore)
 
   /**
-   * Is hamburger menu open
+   * Hamburger menu open
    */
   protected menuOpen = false;
   
@@ -36,8 +37,8 @@ export class Header {
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
-        this.router.navigate(["/"])
         this.userData.resetData()
+        this.router.navigate(["/"]) // ez az utolsó mindig
       },
       error: (response) => {
         console.error(response)

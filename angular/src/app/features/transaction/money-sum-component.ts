@@ -1,11 +1,13 @@
 import { Component, inject, OnInit, signal } from "@angular/core";
 import { TransactionService } from "./transaction-service";
+import { DecimalPipe } from "@angular/common";
 
 @Component({
     selector: "app-money-sum",
     template: `
-        {{moneySum()}}
+        {{ moneySum() | number }} Ft
     `,
+    imports: [DecimalPipe],
 })
 export default class MoneySumComponent implements OnInit {
     transactionService = inject(TransactionService)

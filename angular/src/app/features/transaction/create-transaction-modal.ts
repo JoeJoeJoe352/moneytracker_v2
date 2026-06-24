@@ -11,6 +11,6 @@ import { TransactionFormComponent } from "./transaction-form-component";
     `,
     imports: [BaseModal, TransactionFormComponent],
 })
-export class RegisterModalComponent {
+export class TransactionModalComponent {
     @Output() closeModal = new EventEmitter<void>();
 }

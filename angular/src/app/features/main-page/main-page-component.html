@@ -1,12 +1,17 @@
-<div>main page</div>
+<div class="green-block">
+    <div class="mb-3">
+        <div class="my-2">Total balance</div>
 
-<div>
-    <app-money-sum />
+        <h2><app-money-sum /></h2>
+    </div>
+    
+    <div>
+        <button class="btn btn-green-hollow" (click)="openTransactionModal()">
+            Create new transaction
+        </button>
+    </div>
+
 </div>
-
-<p>
-    <button class="btn btn-secondary" (click)="openTransactionModal()">Create new transaction</button>
-</p>
 
 @if (isNewTransactionModalOpen()) {
     <app-create-transaction-modal (closeModal)="closeTransactionModal()" />

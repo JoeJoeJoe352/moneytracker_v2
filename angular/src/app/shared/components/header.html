@@ -5,7 +5,20 @@
   }
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container">
-      <a class="navbar-brand" href="#">Navbar</a>
+      <a class="navbar-brand" routerLink="/">
+        <div class="logo-wrapper">
+          <img src="assets/images/logo-color.svg" alt="logo" />
+          Moneytracker
+        </div>
+      </a>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" routerLink="/welcome">Welcome</a>
+          </li>
+        </ul>
+      </div>
+
       <button class="navbar-toggler" type="button" (click)="toggleMenu()">
         <span class="navbar-toggler-icon"></span>
       </button>
