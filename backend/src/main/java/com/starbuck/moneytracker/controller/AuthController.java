@@ -35,12 +35,6 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-    /**
-     * Jelszó kódoló bean
-     */
-    @Autowired
-    private PasswordEncoder passwordEncoder;   
-
     @Autowired
     private CurrentUserUtil userUtil;
 
