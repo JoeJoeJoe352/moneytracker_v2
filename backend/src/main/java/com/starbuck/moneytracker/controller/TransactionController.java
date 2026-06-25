@@ -65,7 +65,8 @@ public class TransactionController {
         transaction.setName(request.name());
         transaction.setTransactionDate(request.transactionDate());
         transaction.setTransactionType(request.transactionType());
-        //TODO detailnak is frissíteni az árát
+        transaction.setPriceSum(request.price());
+        //TODO detailnak is frissíteni az árát majd
 
         this.transactionService.updateTransaction(id, transaction);
     }
@@ -98,7 +99,7 @@ public class TransactionController {
      * @return TransactionDto
      */
     @GetMapping(path = "/transaction/{id}")
-    public TransactionDto getTransactionById(@PathVariable  Long id) {
+    public TransactionDto getTransactionById(@PathVariable Long id) {
         return this.transactionMapper.toDto(transactionService.getTransactionById(id));
     }
 }

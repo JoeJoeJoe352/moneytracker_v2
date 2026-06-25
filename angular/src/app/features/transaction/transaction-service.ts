@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { GeneralResponse } from '../auth/auth-service';
 import { TransactionTypeEnum } from './transaction-type-enum';
-import { newTransaction, Transaction } from './interfaces';
+import { newTransaction, Transaction, TransactionInput } from './interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -12,9 +11,9 @@ export class TransactionService {
   private http = inject(HttpClient);
 
   /**
-   * Tranzakció elmentése
+   * Tranzakció elmentése. Létrehoz, vagy frissít
    */
-  saveTransaction(transactionData: newTransaction): Observable<GeneralResponse> {
+  saveTransaction(transactionData: newTransaction, id: number|null): Observable<void> {
     const { isIncome, price, ...rest } = transactionData;
 
 	  // átalakítjuk az isIncome mező értékét a backend enum-jára
@@ -26,9 +25,17 @@ export class TransactionService {
       transactionType: isIncome ? TransactionTypeEnum.INCOME : TransactionTypeEnum.OUTCOME,
     };
 
-    return this.http.post<GeneralResponse>('/api/transaction', payload, {
-      withCredentials: true,
-    });
+    if (id === null) {
+      // Tranzakció létrehozása
+      return this.http.post<void>('/api/transaction', payload, {
+        withCredentials: true,
+      });
+    } else {
+      // Meglévő tranzakció frissítése
+      return this.http.put<void>('/api/transaction/' + id, payload, {
+        withCredentials: true,
+      });
+    }
   }
 
   /**
@@ -51,13 +58,26 @@ export class TransactionService {
 
   /**
    * Lekéri a megadott azonosítójú tranzakciót
-   * 
-   * @param transactionId 
-   * @returns 
    */
   getTransactionById(transactionId: number): Observable<Transaction> {
     return this.http.get<Transaction>('/api/transaction/' + transactionId, {
       withCredentials: true,
     })
+  }
+
+  /**
+   * Átalakítja a tranzakciós adat modellt arra  formára, amit az inputok elvárnak
+   */
+  convertDataToInput(transaction: Transaction): TransactionInput {
+    const isIncome = transaction.transactionType === TransactionTypeEnum.INCOME;
+    const transactionDate = new Date(transaction.transactionDate);
+
+    return {
+      name: transaction.name,
+      // backend negatívba tárolja a kiadást
+      price: isIncome ? transaction.priceSum : transaction.priceSum * -1,
+      isIncome: isIncome,
+      transactionDate: transactionDate,
+    }
   }
 }

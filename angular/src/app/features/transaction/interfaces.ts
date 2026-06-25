@@ -1,3 +1,16 @@
+/**
+ * Tranzakciós adatok, ahogy a form inpujai elvárja kezdőértéknek
+ */
+export interface TransactionInput {
+  name: string,
+  isIncome: boolean,
+  price: null|number, // kezdőértéknek null a price
+  transactionDate: Date,
+}
+
+/**
+ * Tranzakciós adatok, ahogy a form kitöltése után lesznek
+ */
 export interface newTransaction {
   name: string;
   isIncome: boolean;
@@ -5,6 +18,9 @@ export interface newTransaction {
   transactionDate: string;
 }
 
+/**
+ * Tranzakció adatai a backendről
+ */
 export interface Transaction {
   id: number,
   name: string,
@@ -12,3 +28,4 @@ export interface Transaction {
   transactionDate: string,
   transactionType: string,
 }
+

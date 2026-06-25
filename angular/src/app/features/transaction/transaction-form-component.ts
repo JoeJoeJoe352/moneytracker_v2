@@ -1,10 +1,10 @@
-import { Component, EventEmitter, inject, Input, Output, signal } from "@angular/core";
+import { Component, EventEmitter, inject, Input, OnChanges, Output, signal, SimpleChanges } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { NgxsmkDatepickerComponent } from "ngxsmk-datepicker";
 import { SwitchComponent } from "../../shared/components/switch.component";
 import { validDate } from "./valid-date-validator";
 import { TransactionService } from "./transaction-service";
-import { Transaction } from "./interfaces";
+import { Transaction, TransactionInput } from "./interfaces";
 
 @Component({
     selector: "app-transaction-form-component",
@@ -16,9 +16,15 @@ import { Transaction } from "./interfaces";
     ],
     styleUrls: ["../../shared/components/form-style.scss"],
 })
-export class TransactionFormComponent {
+export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder)
     private transactionService = inject(TransactionService)
+    private defaultValues: TransactionInput = {
+        name: '',
+        isIncome: true,
+        price: null,
+        transactionDate: new Date(),
+    }
 
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
@@ -34,23 +40,28 @@ export class TransactionFormComponent {
      */
     @Output() dataChanged = new EventEmitter<void>();
 
-
     protected transactionForm: FormGroup
     protected isLoading = signal(false)
 
     constructor() {
-        this.transactionForm = this.fb.nonNullable.group(
-            {
-                name: ['', {
+        this.transactionForm = this.fb.nonNullable.group({
+                name: [this.defaultValues.name, {
                     validators: [Validators.required, Validators.minLength(3), Validators.maxLength(200)],
                 }],
-                isIncome: new FormControl(true),
-                price: [null, [Validators.required, Validators.min(1)]],
-                transactionDate: this.fb.control<Date | null>(new Date(), {
+                isIncome: new FormControl(this.defaultValues.isIncome),
+                price: [this.defaultValues.price, [Validators.required, Validators.min(1)]],
+                transactionDate: this.fb.control<Date | null>(this.defaultValues.transactionDate, {
                     validators: [Validators.required, validDate]
                 })
             }
         )
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes["transaction"] && this.transaction !== null) {
+            this.defaultValues = this.transactionService.convertDataToInput(this.transaction)
+            this.transactionForm.patchValue(this.defaultValues)
+        }
     }
 
     onSubmit() {
@@ -66,7 +77,9 @@ export class TransactionFormComponent {
             transactionDate: raw.transactionDate?.toISOString().slice(0, 10)
         };
 
-        this.transactionService.saveTransaction(payload).subscribe({
+        const transactionId = this.transaction?.id ?? null;
+
+        this.transactionService.saveTransaction(payload, transactionId).subscribe({
             next: () => {
                 this.isLoading.set(false);
                 this.dataChanged.emit()

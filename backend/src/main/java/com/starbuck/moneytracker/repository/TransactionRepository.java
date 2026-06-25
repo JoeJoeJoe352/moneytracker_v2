@@ -34,6 +34,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>{
      * @param transactionId
      * @return
      */
-    @Query("SELECT t FROM Transaction t WHERE t.user.id = ?1 AND t.id = ?2 AND t.status = 0")
+    @Query("SELECT t FROM Transaction t WHERE t.id = ?1 AND t.user.id = ?2 AND t.status = 0")
     Transaction getTransactionById(Long transactionId, Long userId);
 }

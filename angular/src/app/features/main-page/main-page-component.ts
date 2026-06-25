@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from "@angular/core";
 import MoneySumComponent from "../transaction/money-sum-component";
 import TransactionListComponent from "../transaction/transaction-list-component";
-import { TransactionModalComponent } from "../transaction/create-transaction-modal";
+import { TransactionModalComponent } from "../transaction/transaction-modal";
 import { Transaction } from "../transaction/interfaces";
 import { TransactionService } from "../transaction/transaction-service";
 
@@ -16,30 +16,14 @@ export class MainPage implements OnInit{
     private transactionService = inject(TransactionService);
 
     // Tranzakció lista adatok és betöltési állapot
-    protected transactionList = signal<Transaction[]>([])
+    protected transactionListData = signal<Transaction[]>([])
     protected isTransactionListLoaded = signal(false)
     // Tranzakció adatai, amit szerkeszteni szeretnénk. Adatok és betöltési állapot
-    protected transaction = signal<Transaction|null>(null);
+    protected transactionData = signal<Transaction|null>(null);
     protected isTransactionDataLoading = signal(false);
 
     ngOnInit() {
         this.loadTransactionList()
-    }
-
-    /**
-     * Tranzakciók betöltése a listába
-     */
-    loadTransactionList(): void {
-        this.transactionService.getLastTransactions().subscribe({
-            next: (response) => {
-                this.isTransactionListLoaded.set(true);
-                this.transactionList.set(response)
-            },
-            error: (response) => {
-                console.error("unknown error during transaction creation!", response);
-                this.isTransactionListLoaded.set(false);
-            },
-        })
     }
 
     /**
@@ -58,6 +42,7 @@ export class MainPage implements OnInit{
      * Tranzakció létrehozó modal becsukása
      */
     protected closeTransactionModal(): void {
+        this.transactionData.set(null);
         this.isNewTransactionModalOpen.set(false);
     }
 
@@ -70,16 +55,30 @@ export class MainPage implements OnInit{
     }
 
     /**
-     * Tranzakció lekérése
-     * 
-     * @param transactionId 
+     * Tranzakciók letöltése a backendről, a kártyás listához
+     */
+    loadTransactionList(): void {
+        this.transactionService.getLastTransactions().subscribe({
+            next: (response) => {
+                this.isTransactionListLoaded.set(true);
+                this.transactionListData.set(response)
+            },
+            error: (response) => {
+                console.error("unknown error during transaction creation!", response);
+                this.isTransactionListLoaded.set(false);
+            },
+        })
+    }
+
+    /**
+     * Adott tranzakció letöltése a backendről, a szerkesztő formnak
      */
     protected loadTransaction(transactionId: number): void {
         this.isTransactionDataLoading.set(true)
         this.transactionService.getTransactionById(transactionId).subscribe({
             next: (response) => {
                 this.isTransactionDataLoading.set(false);
-                this.transaction.set(response);
+                this.transactionData.set(response);
                 this.openTransactionModal();
             },
             error: (response) => {

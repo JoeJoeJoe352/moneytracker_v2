@@ -1,7 +1,14 @@
+@if (isNewTransactionModalOpen()) {
+    <app-create-transaction-modal
+        [transaction]="transactionData()" 
+        (closeModal)="closeTransactionModal()"
+        (dataChanged)="handleMondalDataChange()"
+    />
+}
+
 <div class="green-block">
     <div class="mb-3">
         <div class="my-2">Total balance</div>
-
         <h2><app-money-sum /></h2>
     </div>
     
@@ -10,20 +17,14 @@
             Create new transaction
         </button>
     </div>
-
 </div>
 
-@if (isNewTransactionModalOpen()) {
-    <app-create-transaction-modal
-        (closeModal)="closeTransactionModal()"
-        (dataChanged)="handleMondalDataChange()"
-        [transaction]="transaction()" 
-    />
-}
-
 @if (isTransactionListLoaded()) {
-    @if(transactionList() !== null) {
-        <app-transaction-list [transactions]="transactionList()" />
+    @if(transactionListData() !== null) {
+        <app-transaction-list
+            [transactions]="transactionListData()"
+            (editTransaction)="(loadTransaction($event.transactionId))"
+        />
     } @else {
         <p>No transaction to show</p>
     }
