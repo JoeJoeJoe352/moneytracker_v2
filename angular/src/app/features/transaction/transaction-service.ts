@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { GeneralResponse } from '../auth/auth-service';
 import { TransactionTypeEnum } from './transaction-type-enum';
 import { newTransaction, Transaction } from './interfaces';
@@ -10,14 +10,6 @@ import { newTransaction, Transaction } from './interfaces';
 })
 export class TransactionService {
   private http = inject(HttpClient);
-  // Ez egy globális event, amire fel lehet íratkozni. Nincs értéke, csak az esemény számít
-  private refresh$ = new Subject<void>();
-  public refreshNeeded$ = this.refresh$.asObservable();
-
-  notifyRefresh() {
-    // így lehet egy ilyen eseményt elindítani
-    this.refresh$.next();
-  }
 
   /**
    * Tranzakció elmentése

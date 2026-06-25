@@ -15,9 +15,20 @@
 
 @if (isNewTransactionModalOpen()) {
     <app-create-transaction-modal
-        (closeModal)="closeTransactionModal()" 
+        (closeModal)="closeTransactionModal()"
+        (dataChanged)="handleMondalDataChange()"
         [transaction]="transaction()" 
     />
 }
 
-<app-transaction-list />
+@if (isTransactionListLoaded()) {
+    @if(transactionList() !== null) {
+        <app-transaction-list [transactions]="transactionList()" />
+    } @else {
+        <p>No transaction to show</p>
+    }
+} @else {
+    <div class="text-center">
+        <div class="spinner-border" role="status" ></div>
+    </div>
+}

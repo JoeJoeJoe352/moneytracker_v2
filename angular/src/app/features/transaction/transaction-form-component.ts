@@ -17,12 +17,23 @@ import { Transaction } from "./interfaces";
     styleUrls: ["../../shared/components/form-style.scss"],
 })
 export class TransactionFormComponent {
-    @Input() transaction: Transaction | null = null;
-
-    @Output() closeModal = new EventEmitter<void>();
-
     private fb = inject(FormBuilder)
     private transactionService = inject(TransactionService)
+
+    /**
+     * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
+     */
+    @Input() transaction: Transaction | null = null;
+
+    /**
+     * Event, ha csak bezártuk a modalt
+     */
+    @Output() closeModal = new EventEmitter<void>();
+    /**
+     * Event, ha változott adat
+     */
+    @Output() dataChanged = new EventEmitter<void>();
+
 
     protected transactionForm: FormGroup
     protected isLoading = signal(false)
@@ -35,9 +46,9 @@ export class TransactionFormComponent {
                 }],
                 isIncome: new FormControl(true),
                 price: [null, [Validators.required, Validators.min(1)]],
-                transactionDate: [new FormControl<Date | null>(null), {
+                transactionDate: this.fb.control<Date | null>(new Date(), {
                     validators: [Validators.required, validDate]
-                }],
+                })
             }
         )
     }
@@ -58,9 +69,7 @@ export class TransactionFormComponent {
         this.transactionService.saveTransaction(payload).subscribe({
             next: () => {
                 this.isLoading.set(false);
-                // Frissíteni kell minden listát, ahol ezek a tranzakciók megjelennek
-                this.transactionService.notifyRefresh();
-                this.closeModal.emit()
+                this.dataChanged.emit()
             },
             error: (response) => {
                 console.error("unknown error during transaction creation!", response);

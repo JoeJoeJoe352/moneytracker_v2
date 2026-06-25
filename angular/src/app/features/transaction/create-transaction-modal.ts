@@ -8,7 +8,8 @@ import { Transaction } from "./interfaces";
     template: `
         <app-base-modal [title]="'Create transaction'" (closeModal)="closeModal.emit()">
             <app-transaction-form-component
-             (closeModal)="closeModal.emit()" 
+             (closeModal)="closeModal.emit()"
+             (dataChanged)="dataChanged.emit()"
              [transaction]="transaction"
              />
         </app-base-modal>
@@ -19,4 +20,5 @@ export class TransactionModalComponent {
     @Input() transaction: Transaction | null = null
     
     @Output() closeModal = new EventEmitter<void>();
+    @Output() dataChanged = new EventEmitter<void>();
 }
