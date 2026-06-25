@@ -1,16 +1,16 @@
 import { Component, inject, OnInit, signal } from "@angular/core";
-import MoneySumComponent from "../transaction/money-sum-component";
 import TransactionListComponent from "../transaction/transaction-list-component";
 import { TransactionModalComponent } from "../transaction/transaction-modal";
 import { Transaction } from "../transaction/interfaces";
 import { TransactionService } from "../transaction/transaction-service";
+import { DecimalPipe } from "@angular/common";
 
 @Component({
     selector: "app-main-page-component",
     templateUrl: "./main-page-component.html",
     styleUrl: "./main-page-component.scss",
     standalone: true,
-    imports: [TransactionModalComponent, MoneySumComponent, TransactionListComponent],
+    imports: [TransactionModalComponent, TransactionListComponent, DecimalPipe],
 })
 export class MainPage implements OnInit{
     private transactionService = inject(TransactionService);
@@ -22,8 +22,10 @@ export class MainPage implements OnInit{
     protected transactionData = signal<Transaction|null>(null);
     protected isTransactionDataLoading = signal(false);
 
+    protected moneySum = signal<number|null>(null);
+
     ngOnInit() {
-        this.loadTransactionList()
+        this.loadMoneyData();
     }
 
     /**
@@ -50,8 +52,16 @@ export class MainPage implements OnInit{
      * Tranzakció létrehozó modal bezárása, ha változott az adat 
      */
     protected handleMondalDataChange(): void {
-        this.loadTransactionList()
+        this.loadMoneyData();
         this.closeTransactionModal();
+    }
+
+    /**
+     * Újratölti a pénzhez tartozó adatokat a főoldalon
+     */
+    private loadMoneyData():void {
+        this.loadTransactionList();
+        this.loadMoneySum();
     }
 
     /**
@@ -84,6 +94,20 @@ export class MainPage implements OnInit{
             error: (response) => {
                 console.error("unknown error during data loading!", response);
                 this.isTransactionDataLoading.set(false);
+            },
+        })
+    }
+
+    /**
+     * Betölti az összesített pénzét a usernek
+     */
+    protected loadMoneySum(): void {
+        this.transactionService.getMoneySum().subscribe({
+            next: (response) => {
+                this.moneySum.set(response)
+            },
+            error: (response) => {
+                console.error("unknown error during transaction creation!", response);
             },
         })
     }
