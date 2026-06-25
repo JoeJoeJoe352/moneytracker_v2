@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
@@ -23,6 +25,8 @@ import com.starbuck.moneytracker.service.TransactionService;
 import io.jsonwebtoken.lang.Arrays;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -102,4 +106,22 @@ public class TransactionController {
     public TransactionDto getTransactionById(@PathVariable Long id) {
         return this.transactionMapper.toDto(transactionService.getTransactionById(id));
     }
+
+    /**
+     * History listázása
+     * 
+     * @param name
+     * @param dateString
+     * @return
+     */
+    @GetMapping(path = "/transaction/history")
+    public List<TransactionDto> listTransactionHistory(
+        @RequestParam(required = false) String name, 
+        @RequestParam(required = false) LocalDate date
+    ) {
+        TransactionFilter filter = new TransactionFilter(name, date);
+        List<Transaction> transactions = this.transactionService.getHistory(filter);
+        return this.transactionMapper.toDtoList(transactions);
+    }
+
 }

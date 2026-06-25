@@ -1,6 +1,9 @@
 package com.starbuck.moneytracker.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -8,11 +11,12 @@ import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 import jakarta.transaction.Transactional;
 
 import com.starbuck.moneytracker.entity.TransactionDetail;
-import com.starbuck.moneytracker.entity.TransactionType;
+import com.starbuck.moneytracker.entity.TransactionFilter;
 
 @Service
 public class TransactionService {
@@ -110,5 +114,20 @@ public class TransactionService {
         transaction.setTransactionDate(updatedTransaction.getTransactionDate());
         transaction.setTransactionType(updatedTransaction.getTransactionType());
         this.transactionRepo.save(transaction);
+    }
+
+    /**
+     * Listázza valamilyen feltételek alapján a tranzakciókat
+     * @param TransactionFilter filter
+     * @return
+     */
+    public List<Transaction> getHistory(TransactionFilter filter) {
+        Long userId = currentUser.getUser().getId();
+        var spec = Specification
+            .where(TransactionSpecifications.hasName(filter.name()))
+            .and(TransactionSpecifications.hasDate(filter.dateString()))
+            .and(TransactionSpecifications.hasUserId(userId));
+
+        return this.transactionRepo.findAll(spec);
     }
 }
