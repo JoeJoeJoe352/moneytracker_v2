@@ -1,0 +1,9 @@
+@use "../../shared/variables.scss" as *;
+
+.green-block {
+    background-color: $moneytracker-green;
+    margin: 15px 0;
+    padding: 15px;
+    color: $moneytracker-white;
+    border-radius: $border-radius;
+}

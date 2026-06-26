@@ -25,8 +25,7 @@ export class AuthService {
   authenticateUser(): Observable<UserData> {
     return this.http.post<UserData>(
       '/api/auth/authenticateUser', 
-      {},
-      { withCredentials: true } 
+      {}
     );
   }
 
@@ -68,8 +67,7 @@ export class AuthService {
   logout(): Observable<GeneralResponse> {
     return this.http.post<GeneralResponse>(
       '/api/auth/logout',
-      {},
-      { withCredentials: true }
+      {}
     );
   }
 

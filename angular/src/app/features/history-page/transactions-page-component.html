@@ -1,0 +1,72 @@
+@if (isNewTransactionModalOpen()) {
+  <app-create-transaction-modal
+    [transaction]="transactionData()"
+    (closeModal)="closeTransactionModal()"
+    (dataChanged)="handleMondalDataChange()"
+  />
+}
+
+<h1>Transactions</h1>
+
+<div>
+  <button class="btn btn-primary-green" (click)="openTransactionModal()">
+    Create new transaction
+  </button>
+</div>
+
+<div class="green-block">
+  <!-- filter form -->
+  <form [formGroup]="filterForm" (ngSubmit)="loadTransactionHistory()" class="form">
+    <!-- Transaction name -->
+    <div class="form-group mb-3">
+      <label for="name">Transaction name</label>
+      <input
+        id="name"
+        type="text"
+        formControlName="name"
+        class="form-control"
+        autocomplete="name"
+        [readonly]="isTransactionListLoading()"
+      />
+    </div>
+
+    <!-- Transaction date -->
+    <div class="form-group mb-3">
+      <label for="date">Transaction date</label>
+      <ngxsmk-datepicker
+        id="date"
+        mode="single" 
+        formControlName="date"
+        placeholder="Select a date"
+      />
+    </div>
+
+    <button type="submit" [disabled]="isTransactionListLoading()" class="btn btn-green-hollow me-2">
+      Search
+    </button>
+
+    <button 
+      type="button" 
+      [disabled]="isTransactionListLoading()" 
+      class="btn btn-green-hollow"
+      (click)="clearInputs()"
+    >
+      Clear
+    </button>
+  </form>
+</div>
+<!-- Transaction list -->
+@if (isTransactionListLoading()) {
+  <div class="text-center">
+    <div class="spinner-border" role="status"></div>
+  </div>
+} @else {
+  @if (transactionListData() !== null) {
+    <app-transaction-list
+      [transactions]="transactionListData()"
+      (editTransaction)="loadTransaction($event.transactionId)"
+    />
+  } @else {
+    <p>No transaction to show</p>
+  }
+}

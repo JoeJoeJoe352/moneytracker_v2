@@ -17,20 +17,10 @@ import { Transaction, TransactionInput } from "./interfaces";
     styleUrls: ["../../shared/components/form-style.scss"],
 })
 export class TransactionFormComponent implements OnChanges {
-    private fb = inject(FormBuilder)
-    private transactionService = inject(TransactionService)
-    private defaultValues: TransactionInput = {
-        name: '',
-        isIncome: true,
-        price: null,
-        transactionDate: new Date(),
-    }
-
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
     @Input() transaction: Transaction | null = null;
-
     /**
      * Event, ha csak bezártuk a modalt
      */
@@ -39,6 +29,15 @@ export class TransactionFormComponent implements OnChanges {
      * Event, ha változott adat
      */
     @Output() dataChanged = new EventEmitter<void>();
+
+    private fb = inject(FormBuilder)
+    private transactionService = inject(TransactionService)
+    private defaultValues: TransactionInput = {
+        name: '',
+        isIncome: true,
+        price: null,
+        transactionDate: new Date(),
+    }
 
     protected transactionForm: FormGroup
     protected isLoading = signal(false)

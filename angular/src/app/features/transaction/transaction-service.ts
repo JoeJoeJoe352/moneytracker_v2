@@ -8,7 +8,7 @@ import { newTransaction, Transaction, TransactionInput } from './interfaces';
   providedIn: 'root',
 })
 export class TransactionService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   /**
    * Tranzakció elmentése. Létrehoz, vagy frissít
@@ -27,14 +27,10 @@ export class TransactionService {
 
     if (id === null) {
       // Tranzakció létrehozása
-      return this.http.post<void>('/api/transaction', payload, {
-        withCredentials: true,
-      });
+      return this.http.post<void>('/api/transaction', payload);
     } else {
       // Meglévő tranzakció frissítése
-      return this.http.put<void>('/api/transaction/' + id, payload, {
-        withCredentials: true,
-      });
+      return this.http.put<void>('/api/transaction/' + id, payload);
     }
   }
 
@@ -42,27 +38,32 @@ export class TransactionService {
    * Utolsó X darab tranzakciót lekéri
    */
   getLastTransactions(): Observable<Transaction[]> {
-    return this.http.get<Transaction[]>('/api/transaction/last', {
-      withCredentials: true,
-    })
+    return this.http.get<Transaction[]>('/api/transaction/last')
+  }
+
+  /**
+   * History lekérdezése, paraméterekkel
+   * 
+   * @param params 
+   * @returns 
+   */
+  getTransactionHistory(params: URLSearchParams): Observable<Transaction[]> {
+    const paramString = params.toString()
+    return this.http.get<Transaction[]>('/api/transaction/history?' + paramString)
   }
 
   /**
    * Utolsó X darab tranzakciót lekéri
    */
   getMoneySum(): Observable<number> {
-    return this.http.get<number>('/api/transaction/sum', {
-      withCredentials: true,
-    })
+    return this.http.get<number>('/api/transaction/sum')
   }
 
   /**
    * Lekéri a megadott azonosítójú tranzakciót
    */
   getTransactionById(transactionId: number): Observable<Transaction> {
-    return this.http.get<Transaction>('/api/transaction/' + transactionId, {
-      withCredentials: true,
-    })
+    return this.http.get<Transaction>('/api/transaction/' + transactionId)
   }
 
   /**
