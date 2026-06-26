@@ -114,6 +114,7 @@ public class TransactionService {
         transaction.setTransactionDate(updatedTransaction.getTransactionDate());
         transaction.setTransactionType(updatedTransaction.getTransactionType());
         this.transactionRepo.save(transaction);
+        //TODO detailnak is frissíteni az árát majd
     }
 
     /**

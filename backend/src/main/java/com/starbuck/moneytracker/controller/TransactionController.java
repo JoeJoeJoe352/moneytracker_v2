@@ -70,7 +70,6 @@ public class TransactionController {
         transaction.setTransactionDate(request.transactionDate());
         transaction.setTransactionType(request.transactionType());
         transaction.setPriceSum(request.price());
-        //TODO detailnak is frissíteni az árát majd
 
         this.transactionService.updateTransaction(id, transaction);
     }
@@ -108,7 +107,7 @@ public class TransactionController {
     }
 
     /**
-     * History listázása
+     * Tranzakció history listázása
      * 
      * @param name
      * @param dateString
@@ -119,7 +118,7 @@ public class TransactionController {
         @RequestParam(required = false) String name, 
         @RequestParam(required = false) LocalDate date
     ) {
-        TransactionFilter filter = new TransactionFilter(name, date);
+        final TransactionFilter filter = new TransactionFilter(name, date);
         List<Transaction> transactions = this.transactionService.getHistory(filter);
         return this.transactionMapper.toDtoList(transactions);
     }

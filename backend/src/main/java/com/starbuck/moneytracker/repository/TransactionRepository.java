@@ -7,7 +7,7 @@ import com.starbuck.moneytracker.entity.Transaction;
 public interface TransactionRepository extends 
         JpaRepository<Transaction, Long>, 
         JpaSpecificationExecutor<Transaction>
-    {
+{
     /**
      * Visszatér a user összes pénzével. 
      * Lehet null, hogyha még nincs neki tranzakciója
