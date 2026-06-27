@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { BaseModal } from "../../shared/components/modal/base-modal";
 import { TransactionFormComponent } from "./transaction-form-component";
-import { Transaction } from "./interfaces";
+import { TransactionDataFromBackend } from "./interfaces";
 
 @Component({
     selector: "app-create-transaction-modal",
@@ -17,7 +17,7 @@ import { Transaction } from "./interfaces";
     imports: [BaseModal, TransactionFormComponent],
 })
 export class TransactionModalComponent {
-    @Input() transaction: Transaction | null = null;
+    @Input() transaction: TransactionDataFromBackend | null = null;
     
     @Output() closeModal = new EventEmitter<void>();
     @Output() dataChanged = new EventEmitter<void>();

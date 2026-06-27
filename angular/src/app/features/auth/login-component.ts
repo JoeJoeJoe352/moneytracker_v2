@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angula
 import { NgClass } from "@angular/common";
 import { AuthService } from "./auth-service";
 import { UserDataStore } from "../../shared/services/user-data-store";
+import { Router } from "@angular/router";
 
 const ERROR_LEVEL_NONE = 0
 const ERROR_LEVEL_USER_ERROR = 1
@@ -18,6 +19,7 @@ export class LoginComponent {
     private fb = inject(FormBuilder)
     private authService = inject(AuthService)
     private userDataStore = inject(UserDataStore)
+    private router = inject(Router);
 
     loginForm: FormGroup;
     /**
@@ -32,7 +34,6 @@ export class LoginComponent {
      * Error level
      */
     errorLevel: WritableSignal<number> = signal(ERROR_LEVEL_NONE)
-
 
     constructor() {
         // AuthService injektálva van a komponensben, mert @Inject annotációs dekorátorral van ellátva, így a DI konténer tudja, hogy létre kell hoznia egy példányt belőle, és át kell adnia a konstruktorban.
@@ -59,6 +60,7 @@ export class LoginComponent {
                 this.isLoading.set(false);
                 this.userDataStore.isLoaded.set(true)
                 this.userDataStore.username.set(username)
+                this.router.navigate(['/']);
                 // TODO redirect to home page
             },
             error: (response) => {

@@ -38,7 +38,7 @@ export class Header {
     this.authService.logout().subscribe({
       next: () => {
         this.userData.resetData()
-        this.router.navigate(["/"]) // ez az utolsó mindig
+        this.router.navigate(["/welcome"]) // ez az utolsó mindig
       },
       error: (response) => {
         console.error(response)

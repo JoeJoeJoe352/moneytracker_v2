@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from "@angular/core";
 import TransactionListComponent from "../transaction/transaction-list-component";
 import { TransactionModalComponent } from "../transaction/transaction-modal";
-import { Transaction } from "../transaction/interfaces";
+import { TransactionDataFromBackend } from "../transaction/interfaces";
 import { TransactionService } from "../transaction/transaction-service";
 import { DecimalPipe } from "@angular/common";
 
@@ -16,10 +16,10 @@ export class MainPage implements OnInit{
     private transactionService = inject(TransactionService);
 
     // Tranzakció lista adatok és betöltési állapot
-    protected transactionListData = signal<Transaction[]>([])
+    protected transactionListData = signal<TransactionDataFromBackend[]>([])
     protected isTransactionListLoaded = signal(false)
     // Tranzakció adatai, amit szerkeszteni szeretnénk. Adatok és betöltési állapot
-    protected transactionData = signal<Transaction|null>(null);
+    protected transactionData = signal<TransactionDataFromBackend|null>(null);
     protected isTransactionDataLoading = signal(false);
 
     protected moneySum = signal<number|null>(null);

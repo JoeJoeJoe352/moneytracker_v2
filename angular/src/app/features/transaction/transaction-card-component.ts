@@ -1,5 +1,5 @@
 import { Component, input } from "@angular/core";
-import { Transaction } from "./interfaces";
+import { TransactionDataFromBackend } from "./interfaces";
 import { TransactionTypeEnum } from "./transaction-type-enum";
 import { DecimalPipe } from "@angular/common";
 
@@ -10,7 +10,7 @@ import { DecimalPipe } from "@angular/common";
     imports: [DecimalPipe]
 })
 export default class TransactionCardComponent {
-    transaction = input.required<Transaction>()
+    transaction = input.required<TransactionDataFromBackend>()
 
     /**
      * Tranzakció típusa bevétel-e
