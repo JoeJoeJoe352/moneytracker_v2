@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Id;
@@ -20,6 +22,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+// soft delete
+@SQLDelete(sql = "UPDATE transactions SET status = 1 WHERE id = ?")
+// autogenerált sql-ekben csak a nem töröltek jelennek meg
+@SQLRestriction("status = 0")
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -68,6 +74,15 @@ public class Transaction {
         this.transactionType = transactionType;
         this.priceSum = priceSum;
         this.status = status;
+    }
+
+    /**
+     * Törölt-e a tranzakció
+     * 
+     * @return boolean
+     */
+    public boolean isDeleted() {
+        return this.status == 1;
     }
 
     public Long getId() {
@@ -149,7 +164,4 @@ public class Transaction {
     public void setStatus(int status) {
         this.status = status;
     }
-
-    
-
 }

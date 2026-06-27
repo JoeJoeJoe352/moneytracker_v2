@@ -13,6 +13,7 @@ import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 import com.starbuck.moneytracker.entity.TransactionDetail;
@@ -92,11 +93,14 @@ public class TransactionService {
     /**
      * Lekéri az adott id-jú tranzakcióját a usernek
      * 
+     * @throws EntityNotFoundException, ha nincs találat
      * @param transactionId
      * @return
      */
     public Transaction getTransactionById(Long transactionId) {
-        return this.transactionRepo.getTransactionById(transactionId,  currentUser.getUser().getId());
+        return this.transactionRepo
+            .getTransactionById(transactionId,  currentUser.getUser().getId())
+            .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
     }
 
     /**
@@ -130,5 +134,17 @@ public class TransactionService {
             .and(TransactionSpecifications.hasUserId(userId));
 
         return this.transactionRepo.findAll(spec);
+    }
+
+    /**
+     * Törli a tranzakciót
+     * 
+     * @param transactionId
+     */
+    public void deleteTransaction(long transactionId) {
+        Transaction transaction = this.getTransactionById(transactionId);
+        // JPA-ban ellenőrizve van, hogy törölt-e
+
+        this.transactionRepo.delete(transaction);
     }
 }

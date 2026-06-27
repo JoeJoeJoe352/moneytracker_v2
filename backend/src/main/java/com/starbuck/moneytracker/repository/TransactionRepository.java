@@ -1,4 +1,6 @@
 package com.starbuck.moneytracker.repository;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +17,7 @@ public interface TransactionRepository extends
      * @param userId
      * @return
      */
-    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.user.id = ?1 AND t.status = 0")
+    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.user.id = ?1")
     Float summarizeTotalMoneyForUser(long userId); 
 
     /**
@@ -26,7 +28,7 @@ public interface TransactionRepository extends
      * @param limit
      * @return
      */
-    @Query("SELECT t FROM Transaction t where t.user.id = ?1 AND t.status = 0 ORDER BY t.id DESC LIMIT ?2")
+    @Query("SELECT t FROM Transaction t where t.user.id = ?1 ORDER BY t.id DESC LIMIT ?2")
     Transaction[] getLastTransactionsForUserWithLimit(long userId, int limit);
 
     /**
@@ -36,6 +38,6 @@ public interface TransactionRepository extends
      * @param transactionId
      * @return
      */
-    @Query("SELECT t FROM Transaction t WHERE t.id = ?1 AND t.user.id = ?2 AND t.status = 0")
-    Transaction getTransactionById(long transactionId, long userId);
+    @Query("SELECT t FROM Transaction t WHERE t.id = ?1 AND t.user.id = ?2")
+    Optional<Transaction> getTransactionById(long transactionId, long userId);
 }

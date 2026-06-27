@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -104,6 +105,17 @@ public class TransactionController {
     @GetMapping(path = "/transaction/{id}")
     public TransactionDto getTransactionById(@PathVariable Long id) {
         return this.transactionMapper.toDto(transactionService.getTransactionById(id));
+    }
+
+    /**
+     * Törli a user megadott id-jú tranzakcióját
+     * 
+     * @param id
+     * @return TransactionDto
+     */
+    @DeleteMapping(path = "/transaction/{id}")
+    public void deleteTransactionById(@PathVariable Long id) {
+        transactionService.deleteTransaction(id);
     }
 
     /**
