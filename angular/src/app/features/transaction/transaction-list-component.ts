@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import TransactionCardComponent from "./transaction-card-component";
-import { Transaction } from "./interfaces";
+import { TransactionDataFromBackend } from "./interfaces";
 
 @Component({
     selector: "app-transaction-list",
@@ -15,7 +15,7 @@ import { Transaction } from "./interfaces";
     imports: [TransactionCardComponent]
 })
 export default class TransactionListComponent {
-    @Input({ required: true }) transactions!: Transaction[];
+    @Input({ required: true }) transactions!: TransactionDataFromBackend[];
 
     @Output() editTransaction = new EventEmitter<{transactionId: number}>();
 }

@@ -4,11 +4,11 @@ import { NgxsmkDatepickerComponent } from "ngxsmk-datepicker";
 import { SwitchComponent } from "../../shared/components/switch.component";
 import { validDate } from "./valid-date-validator";
 import { TransactionService } from "./transaction-service";
-import { Transaction, TransactionInput } from "./interfaces";
+import { TransactionDataFromBackend, TransactionInputDefaultValues } from "./interfaces";
 
 @Component({
     selector: "app-transaction-form-component",
-    templateUrl: './transaction-form.html',
+    templateUrl: './transaction-form-component.html',
     imports: [
         ReactiveFormsModule, 
         NgxsmkDatepickerComponent,
@@ -20,7 +20,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
-    @Input() transaction: Transaction | null = null;
+    @Input() transaction: TransactionDataFromBackend | null = null;
     /**
      * Event, ha csak bezártuk a modalt
      */
@@ -32,7 +32,7 @@ export class TransactionFormComponent implements OnChanges {
 
     private fb = inject(FormBuilder)
     private transactionService = inject(TransactionService)
-    private defaultValues: TransactionInput = {
+    private defaultValues: TransactionInputDefaultValues = {
         name: '',
         isIncome: true,
         price: null,
@@ -69,25 +69,32 @@ export class TransactionFormComponent implements OnChanges {
         }
         this.isLoading.set(true)
 
-        const raw = this.transactionForm.value;
-
-        const payload = {
-            ...raw,
-            transactionDate: raw.transactionDate?.toISOString().slice(0, 10)
-        };
+        const payload = this.transactionForm.value;
 
         const transactionId = this.transaction?.id ?? null;
-
-        this.transactionService.saveTransaction(payload, transactionId).subscribe({
-            next: () => {
-                this.isLoading.set(false);
-                this.dataChanged.emit()
-            },
-            error: (response) => {
-                console.error("unknown error during transaction creation!", response);
-                this.isLoading.set(false);
-            },
-        })
+        if (transactionId) {
+            this.transactionService.updateTransaction(payload, transactionId).subscribe({
+                next: () => {
+                    this.isLoading.set(false);
+                    this.dataChanged.emit()
+                },
+                error: (response) => {
+                    console.error("unknown error during transaction creation!", response);
+                    this.isLoading.set(false);
+                },
+            })
+        } else {
+            this.transactionService.saveTransaction(payload).subscribe({
+                next: () => {
+                    this.isLoading.set(false);
+                    this.dataChanged.emit()
+                },
+                error: (response) => {
+                    console.error("unknown error during transaction creation!", response);
+                    this.isLoading.set(false);
+                },
+            })
+        }
     }
 
     // getters

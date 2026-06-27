@@ -1,27 +1,35 @@
 /**
  * Tranzakciós adatok, ahogy a form inpujai elvárja kezdőértéknek
  */
-export interface TransactionInput {
+export interface TransactionInputDefaultValues {
   name: string,
   isIncome: boolean,
-  price: null|number, // kezdőértéknek null a price
+  price: null|number,
   transactionDate: Date,
 }
 
 /**
  * Tranzakciós adatok, ahogy a form kitöltése után lesznek
+ * Kezdőértéknek lehet null a price, de elküldés után már nem
  */
-export interface newTransaction {
-  name: string;
-  isIncome: boolean;
+export interface NewTransaction extends Omit<TransactionInputDefaultValues, 'price'> {
   price: number;
-  transactionDate: string;
 }
 
 /**
- * Tranzakció adatai a backendről
+ * Tranzakciós adatok, abban a formában, ahogy a backend feldolgozná
  */
-export interface Transaction {
+export interface TransactionDataForBackend {
+  name: string;
+  price: number;
+  transactionDate: string;
+  transactionType: string;
+}
+
+/**
+ * Tranzakció adatai, abban a formában, ahogyan a backendről jön
+ */
+export interface TransactionDataFromBackend {
   id: number,
   name: string,
   priceSum: number,

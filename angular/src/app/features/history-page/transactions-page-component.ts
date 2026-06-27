@@ -1,7 +1,7 @@
 import { Component, inject, signal } from "@angular/core";
 import TransactionListComponent from "../transaction/transaction-list-component";
 import { TransactionModalComponent } from "../transaction/transaction-modal";
-import { Transaction } from "../transaction/interfaces";
+import { TransactionDataFromBackend } from "../transaction/interfaces";
 import { TransactionService } from "../transaction/transaction-service";
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -27,10 +27,10 @@ export class TransactionsPage {
 
     // Tranzakció lista adatok és betöltési állapot
     protected isTransactionListLoading = signal(false)
-    protected transactionListData = signal<Transaction[]>([])
+    protected transactionListData = signal<TransactionDataFromBackend[]>([])
     // Tranzakció adatai, amit szerkeszteni szeretnénk. Adatok és betöltési állapot
     protected isTransactionDataLoading = signal(false);
-    protected transactionData = signal<Transaction|null>(null);
+    protected transactionData = signal<TransactionDataFromBackend|null>(null);
     /**
      * Tranzakció létrehozó modal bezárása
      */
@@ -44,9 +44,19 @@ export class TransactionsPage {
     protected filterForm!: FormGroup<FilterFormInterface>;
     
     constructor() {
+        const queryParams = this.route.snapshot.queryParams;
+        let nameDefaultValue = '';
+        let dateDefaultValue: Date|null = null;
+
+        if (queryParams['name'] !== undefined) {
+            nameDefaultValue = queryParams['name'];
+        }
+        if (queryParams['date'] !== undefined) {
+            dateDefaultValue = new Date(queryParams['date']);
+        }
         this.filterForm = this.fb.nonNullable.group({
-            name: [''],
-            date: this.fb.control<Date | null>(null)
+            name: [nameDefaultValue],
+            date: this.fb.control<Date | null>(dateDefaultValue)
         });
     }
 
@@ -66,8 +76,15 @@ export class TransactionsPage {
         this.closeTransactionModal();
     }
 
+    /**
+     * keresési adatok resetelése
+     */
     protected clearInputs(): void {
         this.filterForm.reset()
+        // query paraméterek kiszedése az egy navigáció ugyanarra az url-re, csak queryk nélkül
+        this.router.navigate([], {
+            queryParams: {},
+        });
     }
 
     /**
