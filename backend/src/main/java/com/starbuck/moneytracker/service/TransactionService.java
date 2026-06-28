@@ -144,8 +144,6 @@ public class TransactionService {
      */
     public void deleteTransaction(long transactionId) {
         Transaction transaction = this.getTransactionById(transactionId);
-        // 
-
         this.transactionRepo.delete(transaction);
     }
 }
