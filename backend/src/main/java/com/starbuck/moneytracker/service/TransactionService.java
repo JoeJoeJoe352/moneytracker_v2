@@ -138,12 +138,13 @@ public class TransactionService {
 
     /**
      * Törli a tranzakciót
+     * JPA-ban szűrve van, hogy törölt-e és olyankor nem adja vissza (entity-ben vna beállítva)
      * 
      * @param transactionId
      */
     public void deleteTransaction(long transactionId) {
         Transaction transaction = this.getTransactionById(transactionId);
-        // JPA-ban ellenőrizve van, hogy törölt-e
+        // 
 
         this.transactionRepo.delete(transaction);
     }
