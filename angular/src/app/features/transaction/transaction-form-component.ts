@@ -1,116 +1,171 @@
-import { Component, EventEmitter, inject, Input, OnChanges, Output, signal, SimpleChanges } from "@angular/core";
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { NgxsmkDatepickerComponent } from "ngxsmk-datepicker";
-import { SwitchComponent } from "../../shared/components/switch.component";
-import { validDate } from "./valid-date-validator";
-import { TransactionService } from "./transaction-service";
-import { TransactionDataFromBackend, TransactionInputDefaultValues } from "./interfaces";
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  Output,
+  signal,
+  SimpleChanges,
+} from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
+import { SwitchComponent } from '../../shared/components/switch.component';
+import { validDate } from './valid-date-validator';
+import { TransactionService } from './transaction-service';
+import { TransactionDataFromBackend, TransactionInputDefaultValues } from './interfaces';
 
 @Component({
-    selector: "app-transaction-form-component",
-    templateUrl: './transaction-form-component.html',
-    imports: [
-        ReactiveFormsModule, 
-        NgxsmkDatepickerComponent,
-        SwitchComponent,
-    ],
-    styleUrls: ["../../shared/components/form-style.scss"],
+  selector: 'app-transaction-form-component',
+  templateUrl: './transaction-form-component.html',
+  imports: [ReactiveFormsModule, NgxsmkDatepickerComponent, SwitchComponent],
+  styleUrls: ['../../shared/components/form-style.scss'],
 })
 export class TransactionFormComponent implements OnChanges {
-    /**
-     * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
-     */
-    @Input() transaction: TransactionDataFromBackend | null = null;
-    /**
-     * Event, ha csak bezártuk a modalt
-     */
-    @Output() closeModal = new EventEmitter<void>();
-    /**
-     * Event, ha változott adat
-     */
-    @Output() dataChanged = new EventEmitter<void>();
+  /**
+   * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
+   */
+  @Input() transaction: TransactionDataFromBackend | null = null;
+  /**
+   * Event, ha csak bezártuk a modalt
+   */
+  @Output() closeModal = new EventEmitter<void>();
+  /**
+   * Event, ha változott adat
+   */
+  @Output() dataChanged = new EventEmitter<void>();
 
-    private fb = inject(FormBuilder)
-    private transactionService = inject(TransactionService)
-    private defaultValues: TransactionInputDefaultValues = {
-        name: '',
-        isIncome: true,
-        price: null,
-        transactionDate: new Date(),
+  private fb = inject(FormBuilder);
+  private transactionService = inject(TransactionService);
+  private defaultValues: TransactionInputDefaultValues = {
+    name: '',
+    isIncome: true,
+    price: null,
+    transactionDate: new Date(),
+  };
+
+  protected transactionForm: FormGroup;
+  protected isLoading = signal(false);
+
+  constructor() {
+    this.transactionForm = this.fb.nonNullable.group({
+      name: [
+        this.defaultValues.name,
+        {
+          validators: [Validators.required, Validators.minLength(3), Validators.maxLength(200)],
+        },
+      ],
+      isIncome: new FormControl(this.defaultValues.isIncome),
+      price: [this.defaultValues.price, [Validators.required, Validators.min(1)]],
+      transactionDate: this.fb.control<Date | null>(this.defaultValues.transactionDate, {
+        validators: [Validators.required, validDate],
+      }),
+    });
+  }
+
+  /**
+   * @param changes Betöltés után ha van kezdőérték beállítva, akkor a formba azokat állítjuk be
+   */
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['transaction'] && this.transaction !== null) {
+      this.defaultValues = this.transactionService.utils.convertDataToInput(this.transaction);
+      this.transactionForm.patchValue(this.defaultValues);
     }
+  }
 
-    protected transactionForm: FormGroup
-    protected isLoading = signal(false)
-
-    constructor() {
-        this.transactionForm = this.fb.nonNullable.group({
-                name: [this.defaultValues.name, {
-                    validators: [Validators.required, Validators.minLength(3), Validators.maxLength(200)],
-                }],
-                isIncome: new FormControl(this.defaultValues.isIncome),
-                price: [this.defaultValues.price, [Validators.required, Validators.min(1)]],
-                transactionDate: this.fb.control<Date | null>(this.defaultValues.transactionDate, {
-                    validators: [Validators.required, validDate]
-                })
-            }
-        )
+  /**
+   * Form elküldésekori műveletek
+   */
+  onSubmit(): void {
+    if (this.transactionForm.invalid) {
+      return;
     }
+    this.isLoading.set(true);
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes["transaction"] && this.transaction !== null) {
-            this.defaultValues = this.transactionService.convertDataToInput(this.transaction)
-            this.transactionForm.patchValue(this.defaultValues)
-        }
+    const payload = this.transactionForm.value;
+
+    if (this.isExistingTransaction()) {
+      const transactionId = this.transaction.id;
+      this.transactionService.updateTransaction(payload, transactionId).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.dataChanged.emit();
+        },
+        error: (response) => {
+          console.error('unknown error during transaction creation!', response);
+          this.isLoading.set(false);
+        },
+      });
+    } else {
+      this.transactionService.saveTransaction(payload).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.dataChanged.emit();
+        },
+        error: (response) => {
+          console.error('unknown error during transaction creation!', response);
+          this.isLoading.set(false);
+        },
+      });
     }
+  }
 
-    onSubmit() {
-        if (this.transactionForm.invalid) {
-            return;
-        }
-        this.isLoading.set(true)
-
-        const payload = this.transactionForm.value;
-
-        const transactionId = this.transaction?.id ?? null;
-        if (transactionId) {
-            this.transactionService.updateTransaction(payload, transactionId).subscribe({
-                next: () => {
-                    this.isLoading.set(false);
-                    this.dataChanged.emit()
-                },
-                error: (response) => {
-                    console.error("unknown error during transaction creation!", response);
-                    this.isLoading.set(false);
-                },
-            })
-        } else {
-            this.transactionService.saveTransaction(payload).subscribe({
-                next: () => {
-                    this.isLoading.set(false);
-                    this.dataChanged.emit()
-                },
-                error: (response) => {
-                    console.error("unknown error during transaction creation!", response);
-                    this.isLoading.set(false);
-                },
-            })
-        }
+  /**
+   * Feldob egy confirmot, hogy biztosan törölni szeretné-e a user a confirmot
+   */
+  popupDeletionConfirm(): void {
+    if (confirm("Are you sure to delete?")) {
+      this.deleteTransaction();
     }
+  }
 
-    // getters
-    get name(): FormControl<string> {
-        return this.transactionForm.get('name') as FormControl<string>;
+  /**
+   * Tranzakció törlése
+   */
+  deleteTransaction() {
+    if (!this.isExistingTransaction()) {
+        console.error("Cannot delete new transaction. Error!")
+        return;
     }
+    this.isLoading.set(true);
+    this.transactionService.deleteTransaction(this.transaction.id).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.dataChanged.emit();
+        },
+        error: (response) => {
+          console.error('unknown error during transaction deletion!', response);
+          this.isLoading.set(false);
+        },
+      });
+  }
 
-    get price(): FormControl<string> {
-        return this.transactionForm.get('price') as FormControl<string>;
-    }
+  /**
+   * Létező tranzakció adatai vannak-e a formban
+   */
+  isExistingTransaction(): this is { transaction: TransactionDataFromBackend } {
+    return this.transaction !== null;
+  }
 
-    get transactionDate(): FormControl<string> {
-        return this.transactionForm.get('transactionDate') as FormControl<string>;
-    }
+  get name(): FormControl<string> {
+    return this.transactionForm.get('name') as FormControl<string>;
+  }
 
-    get isIncome(): FormControl<boolean> {
-        return this.transactionForm.get('isIncome') as FormControl<boolean>;
-    }
+  get price(): FormControl<string> {
+    return this.transactionForm.get('price') as FormControl<string>;
+  }
+
+  get transactionDate(): FormControl<string> {
+    return this.transactionForm.get('transactionDate') as FormControl<string>;
+  }
+
+  get isIncome(): FormControl<boolean> {
+    return this.transactionForm.get('isIncome') as FormControl<boolean>;
+  }
 }

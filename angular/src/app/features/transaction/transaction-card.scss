@@ -1,9 +1,14 @@
 @use '../../shared/variables.scss' as *; // így lesz globálisan elérhető a változók
 
 .transaction-card-wrapper {
+  cursor: pointer;
   border: 1px solid $moneytracker-grey;
   margin-bottom: 10px;
   border-radius: $border-radius;
+
+  &:hover {
+    background-color: #ebebeb;
+  }
 
   .transaction-card {
     display: flex;

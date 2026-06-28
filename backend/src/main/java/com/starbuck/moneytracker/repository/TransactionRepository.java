@@ -1,9 +1,15 @@
 package com.starbuck.moneytracker.repository;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import com.starbuck.moneytracker.entity.Transaction;
+
+/**
+ * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az autógenerált lekérdezésekben status = 0 szűrést mindig bele fogja tenni
+ */
 public interface TransactionRepository extends 
         JpaRepository<Transaction, Long>, 
         JpaSpecificationExecutor<Transaction>
@@ -37,5 +43,5 @@ public interface TransactionRepository extends
      * @return
      */
     @Query("SELECT t FROM Transaction t WHERE t.id = ?1 AND t.user.id = ?2 AND t.status = 0")
-    Transaction getTransactionById(long transactionId, long userId);
+    Optional<Transaction> getTransactionById(long transactionId, long userId);
 }

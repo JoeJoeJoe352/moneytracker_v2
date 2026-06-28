@@ -78,4 +78,14 @@
     <button type="submit" [disabled]="transactionForm.invalid || isLoading()" class="btn btn-primary-green">
         Save transaction
     </button>
+    @if (isExistingTransaction()) {
+      <button 
+        type="button" 
+        [disabled]="isLoading()" 
+        class="btn btn-primary-red ms-2"
+        (click)="popupDeletionConfirm()"
+      >
+        Delete transaction
+      </button>
+    }
 </form>

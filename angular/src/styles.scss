@@ -114,3 +114,33 @@ ngxsmk-datepicker, .ngxsmk-popover-container, .ngxsmk-backdrop {
     border-color: darkslategray;
   }
 }
+
+.btn-primary-red {
+  color: $moneytracker-white;
+  background-color: $moneytracker-red;
+  border-color: $moneytracker-red;
+  
+  &:hover {
+    color: $moneytracker-white;
+    background-color: $moneytracker-darker-red;
+    border-color: $moneytracker-darker-red;
+  }
+
+  &:focus-visible {
+    color: $moneytracker-white;
+    background-color: $moneytracker-darker-red;
+    border-color: $moneytracker-darker-red;
+  }
+
+  &:active {
+    color: $moneytracker-white !important;
+    background-color: $moneytracker-darkest-red !important;
+    border-color: $moneytracker-darkest-red !important;
+  }
+
+  &:disabled {
+    color: $moneytracker-white;
+    background-color: darkslategray;
+    border-color: darkslategray;
+  }
+}
