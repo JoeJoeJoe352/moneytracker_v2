@@ -8,6 +8,6 @@ import { TransactionsPage } from './features/history-page/transactions-page-comp
 export const routes: Routes = [
     {path: '', component: MainPage, canActivate: [authGuard]},
     {path: 'welcome', component: Welcome},
-    {path: 'transactions', component: TransactionsPage},
+    {path: 'transactions', component: TransactionsPage, canActivate: [authGuard]},
     {path: '**', component: ErrorPage}
 ];
