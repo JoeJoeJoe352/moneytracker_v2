@@ -18,7 +18,7 @@ public record TransactionCreateRequest (
     TransactionType transactionType,
 
     @NotNull(message = "Price is mandatory")
-    Float price,
+    Double price,
 
     @NotNull(message = "Date is mandatory")
     LocalDate transactionDate

@@ -78,10 +78,10 @@ public class TransactionController {
     /**
      * Összegzi a bevételeket/kiadásokat, visszatér az összes pénzzel
      * 
-     * @return float
+     * @return double
      */
     @GetMapping(path = "transaction/sum")
-    public float sumAllMoney() {
+    public double sumAllMoney() {
         return this.transactionService.sumAllMoney();
     }
 

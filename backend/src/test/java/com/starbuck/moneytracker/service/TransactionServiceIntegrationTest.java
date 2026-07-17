@@ -58,7 +58,7 @@ class TransactionServiceIntegrationTest {
         transaction.setUser(this.user);
 
         TransactionDetail transactionDetails = new TransactionDetail();
-        transactionDetails.setPrice(100f);
+        transactionDetails.setPrice(100.0);
 
         // WHEN
         Transaction saved = transactionService.createTransaction(transaction, transactionDetails);

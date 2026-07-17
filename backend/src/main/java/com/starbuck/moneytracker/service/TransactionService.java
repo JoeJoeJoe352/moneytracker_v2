@@ -73,11 +73,11 @@ public class TransactionService {
     /**
      * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
      * 
-     * @return float
+     * @return double
      */
-    public float sumAllMoney() {
+    public double sumAllMoney() {
         // TODO kiadások negatív értékek, ezek most nincsenek kezelve
-        Float sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
+        Double sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
         return sum == null ? 0 : sum;
     }
 

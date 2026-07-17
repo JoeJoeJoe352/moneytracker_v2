@@ -1,4 +1,6 @@
 package com.starbuck.moneytracker.repository;
+
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,25 +10,27 @@ import org.springframework.data.jpa.repository.Query;
 import com.starbuck.moneytracker.entity.Transaction;
 
 /**
- * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az autógenerált lekérdezésekben status = 0 szűrést mindig bele fogja tenni
+ * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az
+ * autógenerált lekérdezésekben status = 0 szűrést mindig bele fogja tenni
  */
-public interface TransactionRepository extends 
-        JpaRepository<Transaction, Long>, 
-        JpaSpecificationExecutor<Transaction>
-{
+public interface TransactionRepository extends
+        JpaRepository<Transaction, Long>,
+        JpaSpecificationExecutor<Transaction> {
     /**
-     * Visszatér a user összes pénzével. 
+     * Visszatér a user összes pénzével.
      * Lehet null, hogyha még nincs neki tranzakciója
      * 
      * @param userId
      * @return
      */
     @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.user.id = ?1 AND t.status = 0")
-    Float summarizeTotalMoneyForUser(long userId); 
+    Double summarizeTotalMoneyForUser(long userId);
 
     /**
-     * Utolsó X darab tranzakcióval tér vissza (id alapján van csökkenő sorrendbe rendezve)
-     * TODO átgondolni a feltételt, a pl.: jövő hétre felvett tranzakciók hol jelenjenek meg? Legelején?
+     * Utolsó X darab tranzakcióval tér vissza (id alapján van csökkenő sorrendbe
+     * rendezve)
+     * TODO átgondolni a feltételt, a pl.: jövő hétre felvett tranzakciók hol
+     * jelenjenek meg? Legelején?
      *
      * @param userId
      * @param limit
@@ -44,4 +48,15 @@ public interface TransactionRepository extends
      */
     @Query("SELECT t FROM Transaction t WHERE t.id = ?1 AND t.user.id = ?2 AND t.status = 0")
     Optional<Transaction> getTransactionById(long transactionId, long userId);
+
+    /**
+     * Lekéri az összes tranzakciót a tranzakció részletekkel együtt
+     * JOIN FETCH, mert alapból lazy a tranzakció részletek betöltése, így a
+     * tranzakció részletek nem lennének elérhetőek
+     * todo ha sok az elem, akkor gond lehet a sok lekérésből (elfogy a mem)
+     * 
+     * @return
+     */
+    @Query("SELECT t FROM Transaction t JOIN FETCH t.transactionDetails td WHERE t.status = 0 ")
+    List<Transaction> getAllTransaction();
 }
