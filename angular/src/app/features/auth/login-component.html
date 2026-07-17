@@ -1,55 +1,47 @@
-<h2>Login</h2>
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
-  
-  <!-- username -->
-  <div class="form-group mb-3">
-    <label for="username">Username</label>
-    <input
-      id="username"
-      type="text"
-      formControlName="username"
-      class="form-control"
-      autocomplete="username"
-      [ngClass]="isUsernameFieldHasError || hasUserLoginError ? 'form-input-error' : ''" 
-      [readonly]="isLoading()"
-    />
+    <!-- username -->
+    <div class="form-group mb-3">
+        <label for="username">{{ 'login.username' | translate }}</label>
+        <input
+            id="username"
+            type="text"
+            formControlName="username"
+            class="form-control"
+            autocomplete="username"
+            [ngClass]="isUsernameFieldHasError || hasUserLoginError ? 'form-input-error' : ''"
+            [readonly]="isLoading()"
+        />
 
-  @if (isUsernameFieldHasError) {
-      <div class="form-field-error">
-        username is required!
-      </div>
+        @if (isUsernameFieldHasError) {
+            <div class="form-field-error">{{ 'login.username.required-error' | translate }}</div>
+        }
+    </div>
+
+    <!-- password -->
+    <div class="form-group mb-3">
+        <label for="password">{{ 'login.password' | translate }}</label>
+        <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="form-control"
+            autocomplete="current-password"
+            [ngClass]="isPasswordFieldHasError || hasUserLoginError ? 'form-input-error' : ''"
+            [readonly]="isLoading()"
+        />
+
+        @if (isPasswordFieldHasError) {
+            <div class="form-field-error">{{ 'login.password.required-error' | translate }}</div>
+        }
+    </div>
+
+    <button type="submit" [disabled]="isLoading()" class="btn btn-primary-green">
+        {{ 'login.submit' | translate }}
+    </button>
+
+    <!-- Print of general error -->
+
+    @if (backendErrorMsg() !== '') {
+        <div class="mb-3 form-field-error">{{ backendErrorMsg() }}</div>
     }
-  </div>
-
-  <!-- password -->
-  <div class="form-group mb-3">
-    <label for="password">Password</label>
-    <input
-      id="password"
-      type="password"
-      formControlName="password"
-      class="form-control"
-      autocomplete="current-password"
-      [ngClass]="isPasswordFieldHasError || hasUserLoginError ? 'form-input-error' : ''"
-      [readonly]="isLoading()"
-    />
-
-    @if (isPasswordFieldHasError) {
-      <div class="form-field-error">
-        password is required!
-      </div>
-    }
-  </div>
-
-  <button type="submit" [disabled]="isLoading()" class="btn btn-primary-green">
-    Login
-  </button>
-
-  <!-- Print of general error -->
-
-  @if (backendErrorMsg() !== '') {
-    <div class="mb-3 form-field-error">{{backendErrorMsg()}}</div>
-  }
-
 </form>
- 

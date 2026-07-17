@@ -1,24 +1,27 @@
-import { Component, inject, signal, WritableSignal } from "@angular/core";
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { NgClass } from "@angular/common";
-import { AuthService } from "./auth-service";
-import { UserDataStore } from "../../shared/services/user-data-store";
-import { Router } from "@angular/router";
+import { Component, EventEmitter, inject, Output, signal, WritableSignal } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NgClass } from '@angular/common';
+import { AuthService } from './auth-service';
+import { UserDataStore } from '../../shared/services/user-data-store';
+import { Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
-const ERROR_LEVEL_NONE = 0
-const ERROR_LEVEL_USER_ERROR = 1
-const ERROR_LEVEL_SYSTEM_ERROR = 2
+const ERROR_LEVEL_NONE = 0;
+const ERROR_LEVEL_USER_ERROR = 1;
+const ERROR_LEVEL_SYSTEM_ERROR = 2;
 
 @Component({
-    selector: "app-login-component",
+    selector: 'app-login-component',
     templateUrl: './login-component.html',
-    imports: [ReactiveFormsModule, NgClass],
-    styleUrls: ["../../shared/components/form-style.scss"],
+    imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+    styleUrls: ['../../shared/components/form-style.scss'],
 })
 export class LoginComponent {
-    private fb = inject(FormBuilder)
-    private authService = inject(AuthService)
-    private userDataStore = inject(UserDataStore)
+    @Output() closeModal = new EventEmitter<void>();
+
+    private fb = inject(FormBuilder);
+    private authService = inject(AuthService);
+    private userDataStore = inject(UserDataStore);
     private router = inject(Router);
 
     loginForm: FormGroup;
@@ -33,14 +36,14 @@ export class LoginComponent {
     /**
      * Error level
      */
-    errorLevel: WritableSignal<number> = signal(ERROR_LEVEL_NONE)
+    errorLevel: WritableSignal<number> = signal(ERROR_LEVEL_NONE);
 
     constructor() {
         // AuthService injektálva van a komponensben, mert @Inject annotációs dekorátorral van ellátva, így a DI konténer tudja, hogy létre kell hoznia egy példányt belőle, és át kell adnia a konstruktorban.
         this.loginForm = this.fb.nonNullable.group({
             username: ['', Validators.required],
             password: ['', Validators.required],
-        })
+        });
     }
 
     /**
@@ -56,47 +59,51 @@ export class LoginComponent {
         this.errorLevel.set(ERROR_LEVEL_NONE);
         const { username, password } = this.loginForm.getRawValue();
         this.authService.login(username, password).subscribe({
-            next: () => { 
+            next: () => {
                 this.isLoading.set(false);
-                this.userDataStore.isLoaded.set(true)
-                this.userDataStore.username.set(username)
+                this.userDataStore.isLoaded.set(true);
+                this.userDataStore.username.set(username);
                 this.router.navigate(['/']);
-                // TODO redirect to home page
+                this.closeModal.emit();
             },
             error: (response) => {
                 if (response.status === 401) {
-                    this.errorLevel.set(ERROR_LEVEL_USER_ERROR)
+                    this.errorLevel.set(ERROR_LEVEL_USER_ERROR);
                     this.backendErrorMsg.set(response.error.message);
                 } else {
-                    this.errorLevel.set(ERROR_LEVEL_SYSTEM_ERROR)
-                    console.error("Ismeretlen hiba történt a bejelentkezés során!", response);
+                    this.errorLevel.set(ERROR_LEVEL_SYSTEM_ERROR);
+                    console.error('Ismeretlen hiba történt a bejelentkezés során!', response);
                     this.backendErrorMsg.set('Unknown error happened, please try again later');
                 }
                 this.isLoading.set(false);
             },
-        })
+        });
     }
 
     /**
      * Check if there is a problem with the username field after the user interacted with it.
      */
     get isUsernameFieldHasError(): boolean {
-        return this.loginForm.controls['username'].touched && 
-            this.loginForm.controls['username'].hasError('required');
+        return (
+            this.loginForm.controls['username'].touched &&
+            this.loginForm.controls['username'].hasError('required')
+        );
     }
     /**
      * Check if there is a problem with the password field after the user interacted with it.
      */
     get isPasswordFieldHasError(): boolean {
-        return this.loginForm.controls['password'].touched 
-            && this.loginForm.controls['password'].hasError('required');
+        return (
+            this.loginForm.controls['password'].touched &&
+            this.loginForm.controls['password'].hasError('required')
+        );
     }
 
     /**
-     * Check if there is an user error from backend. 
+     * Check if there is an user error from backend.
      * It modify the apperance of form elements in the html
      */
     get hasUserLoginError(): boolean {
-        return this.errorLevel() === ERROR_LEVEL_USER_ERROR
+        return this.errorLevel() === ERROR_LEVEL_USER_ERROR;
     }
 }

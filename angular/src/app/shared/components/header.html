@@ -1,38 +1,44 @@
 <header>
-  @if (menuOpen) {
-    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
-    <div class="navbar-backdrop" (click)="menuOpen = false"></div>
-  }
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container">
-      <a class="navbar-brand" routerLink="/">
-        <div class="logo-wrapper">
-          <img src="assets/images/logo-color.svg" alt="logo" />
-          Moneytracker
-        </div>
-      </a>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" routerLink="/welcome">Welcome</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" routerLink="/transactions">Transactions</a>
-          </li>
-        </ul>
-      </div>
+    @if (menuOpen) {
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
+        <div class="navbar-backdrop" (click)="menuOpen = false"></div>
+    }
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container">
+            <a class="navbar-brand" routerLink="/">
+                <div class="logo-wrapper">
+                    <img src="assets/images/logo-color.svg" alt="logo" />
+                    Moneytracker
+                </div>
+            </a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/welcome">{{"header.welcome" | translate}}</a>
+                    </li>
+                    @if (userData.isUserLogged()) {
+                        <li class="nav-item">
+                            <a class="nav-link" routerLink="/transactions">{{"header.transactions" | translate}}</a>
+                        </li>
+                    }
+                </ul>
+            </div>
 
-      <button class="navbar-toggler" type="button" (click)="toggleMenu()">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent" [class.show]="menuOpen">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          @if (userData.isUserLogged()) {
-            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
-            <a class="nav-link active" (click)="logout()">Logout</a>
-          }
-        </ul>
-      </div>
-    </div>
-  </nav>
+            <button class="navbar-toggler" type="button" (click)="toggleMenu()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div
+                class="collapse navbar-collapse"
+                id="navbarSupportedContent"
+                [class.show]="menuOpen"
+            >
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    @if (userData.isUserLogged()) {
+                        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
+                        <a class="nav-link active" (click)="logout()">{{"header.logout" | translate}}</a>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
 </header>

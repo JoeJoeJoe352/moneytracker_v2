@@ -1,18 +1,51 @@
 <div>
     <h1>welcome</h1>
-    <p>
-        Welcome to moneytracker, the best app to track your expenses and income.
+
+    <img src="../../../assets/images/moneytracker_large_logo.png" alt="logo" height="500" />
+    <p class="mt-3">
+        {{ 'welcome.welcomeText' | translate }}
     </p>
-    @if(!userData.isUserLogged()) {
+    <h3>{{ 'welcome.benefitsTitle' | translate }}</h3>
+    <ul>
+        <li>
+            {{ 'welcome.liquidityTitle' | translate }}
+        </li>
+        <li>
+            {{ 'welcome.easier' | translate }}
+        </li>
+        <li>
+            {{ 'welcome.decisions' | translate }}
+        </li>
+        <li>
+            {{ 'welcome.financial-stress' | translate }}
+        </li>
+        <li>
+            {{ 'welcome.faster' | translate }}
+        </li>
+        <li>
+            {{ 'welcome.security' | translate }}
+        </li>
+        <li>
+            {{ 'welcome.goals' | translate }}
+        </li>
+    </ul>
+    @if (!userData.isUserLogged()) {
+        <p>{{ 'welcome.register' | translate }}</p>
+        <!-- todo legyen a login is modalban és kerüljön ki a fejlécbe -->
         <p>
-            <app-login-component />
+            <button class="btn btn-primary" (click)="openLoginModal()">
+                {{ 'welcome.login.title' | translate }}
+            </button>
+            <button class="btn btn-secondary" (click)="openRegisterModal()">
+                {{ 'welcome.register.title' | translate }}
+            </button>
         </p>
-        <p>
-            <button class="btn btn-secondary" (click)="openModal()">Register</button>
-        </p>
-        
-        @if (isModalOpen()) {
-            <app-register-modal (closeModal)="closeModal()" />
+
+        @if (isRegisterModalOpen()) {
+            <app-register-modal (closeModal)="closeRegisterModal()" />
+        }
+        @if (isLoginModalOpen()) {
+            <app-login-modal (closeModal)="closeLoginModal()" />
         }
     }
 </div>

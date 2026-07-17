@@ -1,0 +1,29 @@
+{
+  "welcome": {
+    "welcomeText": "A kiadásaink rendszeres nyomonkövetése segít tudatosabbá válni a mindennapokban. Megmutatja, hol szivárog el a pénz, mely szokások támogatnak, és melyek húznak vissza. Ha látod a valós számokat, könnyebb okos döntéseket hozni: félretenni, tervezni, vagy épp bátran megengedni magadnak valamit. A pénzügyi átláthatóság nem korlátoz, hanem szabadságot ad — pontosan tudod, hol tartasz, és merre szeretnél menni.",
+    "benefitsTitle": "Miért érdemes követni a kiadásainkat?",
+    "liquidityTitle": "Átláthatóvá válik, mire megy el a pénz — megszűnnek a „hova tűnt ennyi?” pillanatok.",
+    "easier": "Könnyebb felismerni a felesleges költéseket — észreveszed a rejtett pénznyelő szokásokat.",
+    "decisions": "Tudatosabb döntéseket hozol — nem érzésből, hanem valós adatok alapján tervezel.",
+    "financial-stress": "Csökken a pénzügyi stressz — kevesebb a váratlan helyzet, több a kontroll.",
+    "faster": "Gyorsabban tudsz félretenni — látod, hol tudsz okosan optimalizálni.",
+    "security": "Biztonságot és szabadságot ad — pontosan tudod, hogy megengedhetsz-e valamit magadnak.",
+    "goals": "Segít elérni hosszú távú célokat — lakás, utazás, tartalék, bármi, ami fontos.",
+    "register": "A folytatáshoz regisztrálj, vagy lépj be!",
+    "register.title": "Regisztráció",
+    "login.title": "Bejelentkezés"
+  },
+  "login": {
+    "title": "Bejelentkezés",
+    "username": "Felhasználónév",
+    "password": "Jelszó",
+    "submit": "Bejelentkezés",
+    "username.required-error": "A felhasználónév megadása kötelező!",
+    "password.required-error": "A jelszó megadása kötelező!"
+  },
+  "header": {
+    "welcome": "Üdvözlünk",
+    "transactions": "Tranzakciók",
+    "logout": "Kijelentkezés"
+  }
+}

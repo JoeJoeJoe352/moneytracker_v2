@@ -1,24 +1,34 @@
-import { Component, inject, signal } from "@angular/core";
-import { LoginComponent } from "../auth/login-component";
-import { RegisterModalComponent } from "../auth/register-modal";
-import { UserDataStore } from "../../shared/services/user-data-store";
+import { Component, inject, signal } from '@angular/core';
+import { RegisterModalComponent } from '../auth/register-modal';
+import { UserDataStore } from '../../shared/services/user-data-store';
+import { TranslatePipe } from '@ngx-translate/core';
+import { LoginModalComponent } from '../auth/login.modal';
 
 @Component({
-    selector: "app-welcome",
-    templateUrl: "./welcome.html",
-    imports: [LoginComponent, RegisterModalComponent],
+    selector: 'app-welcome',
+    templateUrl: './welcome.html',
+    imports: [LoginModalComponent, RegisterModalComponent, TranslatePipe],
     standalone: true,
 })
 export class Welcome {
-    protected userData = inject(UserDataStore)
+    protected userData = inject(UserDataStore);
 
-    isModalOpen = signal(false);
+    protected isLoginModalOpen = signal(false);
+    protected isRegisterModalOpen = signal(false);
 
-    openModal() {
-        this.isModalOpen.set(true);
+    openLoginModal() {
+        this.isLoginModalOpen.set(true);
     }
 
-    closeModal() {
-        this.isModalOpen.set(false);
+    openRegisterModal() {
+        this.isRegisterModalOpen.set(true);
+    }
+
+    closeRegisterModal() {
+        this.isRegisterModalOpen.set(false);
+    }
+
+    closeLoginModal() {
+        this.isLoginModalOpen.set(false);
     }
 }
