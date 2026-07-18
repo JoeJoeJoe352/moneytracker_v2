@@ -104,21 +104,34 @@ public class TransactionService {
     }
 
     /**
-     * Frissíti a user adott id-jú tranzakcióját
+     * Frissíti a user adott id-jú tranzakcióját. 
+     * Akkor használatos, ha a csak egy tranzakciótétel van  
      * 
      * @param id
      * @param updatedTransaction
      */
-    public void updateTransaction(Long id, Transaction updatedTransaction) {
+    @Transactional
+    public void updateSimpleTransaction(Long id, Transaction updatedTransaction) {
         // így ellenőrzöm, hogy a tranzakció a useré-e
         Transaction transaction = this.getTransactionById(id);
+
+        if (transaction.getTransactionDetails().isEmpty()) {
+            throw new IllegalStateException("Transaction has no details to update.");
+        }
+        if (transaction.getTransactionDetails().size() > 1) {
+            throw new IllegalStateException("Transaction has multiple details. Use updateComplexTransaction for complex updates.");
+        }
+
+        TransactionDetail detail = transaction.getTransactionDetails().iterator().next();
         
         transaction.setName(updatedTransaction.getName());
         transaction.setPriceSum(updatedTransaction.getPriceSum());
         transaction.setTransactionDate(updatedTransaction.getTransactionDate());
         transaction.setTransactionType(updatedTransaction.getTransactionType());
+
         this.transactionRepo.save(transaction);
-        //TODO detailnak is frissíteni az árát majd
+        detail.setPrice(updatedTransaction.getPriceSum());
+        transactionDetailRepo.save(detail);
     }
 
     /**

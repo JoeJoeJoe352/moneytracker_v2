@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -58,7 +59,7 @@ class TransactionServiceIntegrationTest {
         transaction.setUser(this.user);
 
         TransactionDetail transactionDetails = new TransactionDetail();
-        transactionDetails.setPrice(100.0);
+        transactionDetails.setPrice(new BigDecimal(100.00));
 
         // WHEN
         Transaction saved = transactionService.createTransaction(transaction, transactionDetails);
@@ -75,6 +76,8 @@ class TransactionServiceIntegrationTest {
 
         this.transactionDetailRepo.delete(transactionDetails);
         this.transactionRepo.delete(transaction);
+
+        userRepo.delete(user);
     }
 
     @Test
@@ -100,5 +103,7 @@ class TransactionServiceIntegrationTest {
         //rollback miatt nincs egy sem a db-ben
         assertEquals(0, transactionRepo.count());
         assertEquals(0, transactionDetailRepo.count());
+
+        userRepo.delete(user);
     }
 }
