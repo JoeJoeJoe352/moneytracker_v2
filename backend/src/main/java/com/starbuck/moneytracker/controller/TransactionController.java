@@ -65,23 +65,23 @@ public class TransactionController {
      */
     @PutMapping(path = "/transaction/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable  Long id) {
+    public void updateTransactionSimple(@Valid @RequestBody TransactionCreateRequest request, @PathVariable  Long id) {
         Transaction transaction = new Transaction();
         transaction.setName(request.name());
         transaction.setTransactionDate(request.transactionDate());
         transaction.setTransactionType(request.transactionType());
         transaction.setPriceSum(request.price());
 
-        this.transactionService.updateTransaction(id, transaction);
+        this.transactionService.updateSimpleTransaction(id, transaction);
     }
 
     /**
      * Összegzi a bevételeket/kiadásokat, visszatér az összes pénzzel
      * 
-     * @return float
+     * @return double
      */
     @GetMapping(path = "transaction/sum")
-    public float sumAllMoney() {
+    public double sumAllMoney() {
         return this.transactionService.sumAllMoney();
     }
 
