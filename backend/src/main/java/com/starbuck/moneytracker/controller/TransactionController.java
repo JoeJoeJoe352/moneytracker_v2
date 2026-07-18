@@ -2,6 +2,7 @@ package com.starbuck.moneytracker.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,8 +23,6 @@ import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
-
-import io.jsonwebtoken.lang.Arrays;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,10 +47,12 @@ public class TransactionController {
         transaction.setTransactionType(request.transactionType());
         transaction.setUser(user);
         
-        TransactionDetail TransactionDetailModel = new TransactionDetail();
-        TransactionDetailModel.setPrice(request.price());
+        TransactionDetail transactionDetailModel = new TransactionDetail();
+        transactionDetailModel.setPrice(request.price());
+
+        List<TransactionDetail> transactionDetails = Arrays.asList(transactionDetailModel);
         try {
-            this.transactionService.createTransaction(transaction, TransactionDetailModel);
+            this.transactionService.createTransaction(transaction, transactionDetails);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Transaction create failed: " + e.getMessage());
         }

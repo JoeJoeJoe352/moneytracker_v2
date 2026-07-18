@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -58,8 +60,10 @@ class TransactionServiceIntegrationTest {
         transaction.setTransactionDate(LocalDate.of(2026, 6, 8));
         transaction.setUser(this.user);
 
-        TransactionDetail transactionDetails = new TransactionDetail();
-        transactionDetails.setPrice(new BigDecimal(100.00));
+        TransactionDetail transactionDetail = new TransactionDetail();
+        transactionDetail.setPrice(new BigDecimal(100.00));
+
+        List<TransactionDetail> transactionDetails = Arrays.asList(transactionDetail);
 
         // WHEN
         Transaction saved = transactionService.createTransaction(transaction, transactionDetails);
@@ -74,7 +78,7 @@ class TransactionServiceIntegrationTest {
         assertEquals(1, transactionRepo.count());
         assertEquals(1, transactionDetailRepo.count());
 
-        this.transactionDetailRepo.delete(transactionDetails);
+        this.transactionDetailRepo.delete(transactionDetail);
         this.transactionRepo.delete(transaction);
 
         userRepo.delete(user);
@@ -88,13 +92,14 @@ class TransactionServiceIntegrationTest {
         transaction.setTransactionDate(LocalDate.of(2026, 6, 8));
         transaction.setUser(this.user);
 
-        TransactionDetail transactionDetails = new TransactionDetail();
-
+        TransactionDetail transactionDetail =  new TransactionDetail();
         // emiatt nem fogja tudni elmenteni a detailst és rollback az egész
-        transactionDetails.setName("hosszunev0".repeat(26));
+        transactionDetail.setName("hosszunev0".repeat(26));
 
         // hibát generálunk: pl. null price
-        transactionDetails.setPrice(null);
+        transactionDetail.setPrice(null);
+
+        List<TransactionDetail> transactionDetails = Arrays.asList();
 
         assertThrows(IllegalArgumentException.class, () -> {
             transactionService.createTransaction(transaction, transactionDetails);

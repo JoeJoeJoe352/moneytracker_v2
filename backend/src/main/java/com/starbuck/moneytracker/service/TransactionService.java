@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,14 +45,15 @@ public class TransactionService {
      * Tranzakció létrehozása
      */
     @Transactional
-    public Transaction createTransaction(Transaction transaction, TransactionDetail transactionDetail) {
+    public Transaction createTransaction(Transaction transaction, List<TransactionDetail> transactionDetails) {
         try {
-            // TODO ha több tranzakció van, akkor össze kell adni őket
-            transaction.setPriceSum(transactionDetail.getPrice());
+            BigDecimal sumOfDetailsPrice = transactionDetails.stream().map(TransactionDetail::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+            transaction.setPriceSum(sumOfDetailsPrice);
             Transaction transactionModel = this.transactionRepo.save(transaction);
-            this.prepareDetail(transactionDetail, transactionModel);
-            this.transactionDetailRepo.saveAndFlush(transactionDetail);
-
+            for (TransactionDetail detail : transactionDetails) {
+                this.prepareDetail(detail, transactionModel);
+                this.transactionDetailRepo.saveAndFlush(detail);
+            }
             return transactionModel;
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
