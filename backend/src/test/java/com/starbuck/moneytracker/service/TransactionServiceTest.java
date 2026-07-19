@@ -2,6 +2,7 @@ package com.starbuck.moneytracker.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +35,7 @@ class TransactionServiceTest {
         // GIVEN - előkészületek
         Transaction transaction = new Transaction();
         TransactionDetail detail = new TransactionDetail();
+        detail.setPrice(new BigDecimal(100));
 
         List<TransactionDetail> transactionDetails = Arrays.asList(detail);
 
@@ -54,6 +56,7 @@ class TransactionServiceTest {
         // ugyanaz a tranzakció osztály, ami a details-ben is meg van adva
         assertEquals(savedTransaction, detail.getTransaction());
         assertEquals("sum", detail.getName());
+        assertEquals(new BigDecimal(100), transaction.getPriceSum());
 
         // save mindkét repo-ban meg volt hívva
         Mockito.verify(transactionRepo).save(transaction);
