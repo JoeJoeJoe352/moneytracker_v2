@@ -21,6 +21,6 @@ public record TransactionCreateRequest(
     @NotNull(message = "Date is mandatory") 
     LocalDate transactionDate,
     
-    /** Ez lehet null, ha simple tranzakció */
+    @NotNull(message = "TransactionDetails are mandatory")
     List<TransactionDetailCreateDto> transactionDetails
 ) {}

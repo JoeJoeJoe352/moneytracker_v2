@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Arrays;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,10 +41,11 @@ public class TransactionController {
 
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createTransaction(@Valid @RequestBody TransactionCreateRequest request, @AuthenticationPrincipal User user) {
+    public void createTransaction(@Valid @RequestBody TransactionCreateRequest request, @AuthenticationPrincipal @NonNull User user) {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
         transaction.setUser(user);
         List<TransactionDetail> transactionDetails = transactionMapper.fromDetailCreateRequestList(request.transactionDetails());
+        
         try {
             this.transactionService.createTransaction(transaction, transactionDetails);
         } catch (IllegalArgumentException e) {
