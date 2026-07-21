@@ -41,16 +41,9 @@ public class TransactionController {
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
     public void createTransaction(@Valid @RequestBody TransactionCreateRequest request, @AuthenticationPrincipal User user) {
-        Transaction transaction = new Transaction();
-        transaction.setName(request.name());
-        transaction.setTransactionDate(request.transactionDate());
-        transaction.setTransactionType(request.transactionType());
+        Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
         transaction.setUser(user);
-        
-        TransactionDetail transactionDetailModel = new TransactionDetail();
-        transactionDetailModel.setPrice(request.price());
-
-        List<TransactionDetail> transactionDetails = Arrays.asList(transactionDetailModel);
+        List<TransactionDetail> transactionDetails = transactionMapper.fromDetailCreateRequestList(request.transactionDetails());
         try {
             this.transactionService.createTransaction(transaction, transactionDetails);
         } catch (IllegalArgumentException e) {
@@ -71,7 +64,7 @@ public class TransactionController {
         transaction.setName(request.name());
         transaction.setTransactionDate(request.transactionDate());
         transaction.setTransactionType(request.transactionType());
-        transaction.setPriceSum(request.price());
+        transaction.setPriceSum(request.transactionDetails().get(0).price());
 
         this.transactionService.updateSimpleTransaction(id, transaction);
     }

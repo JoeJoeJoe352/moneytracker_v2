@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
-import com.starbuck.moneytracker.entity.TransactionType;
+import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -78,7 +78,7 @@ class TransactionServiceIntegrationTest {
         // GIVEN
         Transaction transaction = new Transaction();
         transaction.setName("Test");
-        transaction.setTransactionType(TransactionType.INCOME);
+        transaction.setTransactionType(TransactionTypeEnum.INCOME);
         transaction.setTransactionDate(LocalDate.of(2026, 6, 8));
         transaction.setUser(this.user);
 
@@ -94,7 +94,7 @@ class TransactionServiceIntegrationTest {
         assertNotNull(saved.getId());
 
         TransactionDetail detail = transactionDetailRepo.findAll().get(0);
-        assertEquals("sum", detail.getName());
+        assertEquals(transactionService.DEFAULT_DETAIL_NAME, detail.getName());
         assertEquals(saved.getId(), detail.getTransaction().getId());
 
         assertEquals(1, transactionRepo.count());
@@ -106,7 +106,7 @@ class TransactionServiceIntegrationTest {
     void createTransaction_throwsExceptionAndRollsBack() {
         Transaction transaction = new Transaction();
         transaction.setName("hibásteszt");
-        transaction.setTransactionType(TransactionType.INCOME);
+        transaction.setTransactionType(TransactionTypeEnum.INCOME);
         transaction.setTransactionDate(LocalDate.of(2026, 6, 8));
         transaction.setUser(this.user);
 

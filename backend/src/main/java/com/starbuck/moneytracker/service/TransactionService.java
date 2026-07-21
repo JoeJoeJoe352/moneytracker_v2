@@ -26,7 +26,7 @@ public class TransactionService {
      * Ez a neve a transactionDetailnek, hogyha a user összegezve adja meg a
      * tranzakció összeget
      */
-    private final String DEFAULT_DETAIL_NAME = "sum";
+    public final String DEFAULT_DETAIL_NAME = "sum";
     /**
      * Utolsó hány tranzakcióval térjünk vissza?
      */
@@ -47,26 +47,32 @@ public class TransactionService {
      */
     @Transactional
     public Transaction createTransaction(Transaction transaction, List<TransactionDetail> transactionDetails) {
-        BigDecimal sumOfDetailsPrice = transactionDetails.stream().map(TransactionDetail::getPrice)
+        BigDecimal sumOfDetailsPrice = transactionDetails.stream()
+                .map(TransactionDetail::getCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         transaction.setPriceSum(sumOfDetailsPrice);
-        Transaction transactionModel = this.transactionRepo.save(transaction);
-        for (TransactionDetail detail : transactionDetails) {
-            this.prepareDetail(detail, transactionModel);
-            this.transactionDetailRepo.save(detail);
-        }
-        return transactionModel;
+        Transaction savedTransactionModel = this.transactionRepo.save(transaction);
+        this.saveDetails(savedTransactionModel, transactionDetails);
+        return savedTransactionModel;
     }
 
     /**
-     * Detail osztályt feltölti a default értékekkel
+     * Feltölti és elmenti a tranzakciós részleteket
+     * 
+     * @param savedTransaction
+     * @param transactionDetails
      */
-    private void prepareDetail(TransactionDetail detail, Transaction transaction) {
-        detail.setTransaction(transaction);
-        // TODO ha csak egy detail van, akkor elfogadható a name null-ság, egyébként
-        // hiba
-        if (detail.getName() == null) {
-            detail.setName(DEFAULT_DETAIL_NAME);
+    private void saveDetails(Transaction savedTransaction, List<TransactionDetail> transactionDetails) {
+        int countOfDetails = transactionDetails.size();
+        for (TransactionDetail detail : transactionDetails) {
+            if (countOfDetails > 1 && detail.getName() == null) {
+                throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
+            } else if (countOfDetails == 1 && detail.getName() == null) {
+                detail.setName(DEFAULT_DETAIL_NAME);
+            }
+            detail.setTransaction(savedTransaction);
+
+            this.transactionDetailRepo.save(detail);
         }
     }
 

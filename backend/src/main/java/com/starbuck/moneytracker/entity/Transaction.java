@@ -44,13 +44,13 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionType transactionType;
+    private TransactionTypeEnum transactionType;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal priceSum;
 
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("0") // todo legyen enum
     private int status;
 
     @CreationTimestamp
@@ -62,7 +62,7 @@ public class Transaction {
     @OneToMany(mappedBy = "transaction")
     private Set<TransactionDetail> transactionDetails;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -90,7 +90,7 @@ public class Transaction {
     public Transaction() {
     }
 
-    public Transaction(Long id, String name, LocalDate transactionDate, TransactionType transactionType,
+    public Transaction(Long id, String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
             BigDecimal priceSum,
             int status) {
         this.id = id;
@@ -125,11 +125,11 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    public TransactionType getTransactionType() {
+    public TransactionTypeEnum getTransactionType() {
         return transactionType;
     }
 
-    public void setTransactionType(TransactionType transactionType) {
+    public void setTransactionType(TransactionTypeEnum transactionType) {
         this.transactionType = transactionType;
     }
 
