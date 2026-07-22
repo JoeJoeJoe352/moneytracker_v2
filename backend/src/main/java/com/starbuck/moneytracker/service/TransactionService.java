@@ -26,7 +26,7 @@ public class TransactionService {
      * Ez a neve a transactionDetailnek, hogyha a user összegezve adja meg a
      * tranzakció összeget
      */
-    public final String DEFAULT_DETAIL_NAME = "sum";
+    public static final String DEFAULT_DETAIL_NAME = "sum";
     /**
      * Utolsó hány tranzakcióval térjünk vissza?
      */

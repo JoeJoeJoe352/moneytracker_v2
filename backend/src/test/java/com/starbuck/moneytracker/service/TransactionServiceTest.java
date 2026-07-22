@@ -72,7 +72,7 @@ class TransactionServiceTest {
         // ugyanaz a tranzakció osztály, ami a details-ben is meg van adva
         assertEquals(savedTransaction, detail.getTransaction());
         // csak egy, név nélküli tranzakció van, ezért default nevet kapott
-        assertEquals(transactionService.DEFAULT_DETAIL_NAME, detail.getName());
+        assertEquals(TransactionService.DEFAULT_DETAIL_NAME, detail.getName());
         assertEquals(new BigDecimal(100), transaction.getPriceSum());
 
         // Megpróbálta elmenteni a transaction nevű és a detail nevű példányt is

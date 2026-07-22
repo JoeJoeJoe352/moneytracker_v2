@@ -32,20 +32,22 @@ import jakarta.validation.Valid;
 
 @RestController
 public class TransactionController {
-    
+
     @Autowired
     TransactionService transactionService;
-    
+
     @Autowired
     private TransactionMapper transactionMapper;
 
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createTransaction(@Valid @RequestBody TransactionCreateRequest request, @AuthenticationPrincipal @NonNull User user) {
+    public void createTransaction(@Valid @RequestBody TransactionCreateRequest request,
+            @AuthenticationPrincipal @NonNull User user) {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
         transaction.setUser(user);
-        List<TransactionDetail> transactionDetails = transactionMapper.fromDetailCreateRequestList(request.transactionDetails());
-        
+        List<TransactionDetail> transactionDetails = transactionMapper
+                .fromDetailCreateRequestList(request.transactionDetails());
+
         try {
             this.transactionService.createTransaction(transaction, transactionDetails);
         } catch (IllegalArgumentException e) {
@@ -57,13 +59,14 @@ public class TransactionController {
      * Frissíti a usernek a megadott id-jú tranzakcióját
      * 
      * @param TransactionCreateRequest request
-     * @param int id
+     * @param int                      id
      */
     @PutMapping(path = "/transaction/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable  Long id) {
+    public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable Long id) {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
-        List<TransactionDetail> updatedDetails = transactionMapper.fromDetailCreateRequestList(request.transactionDetails());
+        List<TransactionDetail> updatedDetails = transactionMapper
+                .fromDetailCreateRequestList(request.transactionDetails());
 
         this.transactionService.updateTransaction(id, transaction, updatedDetails);
     }
@@ -120,12 +123,10 @@ public class TransactionController {
      */
     @GetMapping(path = "/transaction/history")
     public List<TransactionDto> listTransactionHistory(
-        @RequestParam(required = false) String name, 
-        @RequestParam(required = false) LocalDate date
-    ) {
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) LocalDate date) {
         final TransactionFilter filter = new TransactionFilter(name, date);
         List<Transaction> transactions = this.transactionService.getHistory(filter);
         return this.transactionMapper.toDtoList(transactions);
     }
-
 }
