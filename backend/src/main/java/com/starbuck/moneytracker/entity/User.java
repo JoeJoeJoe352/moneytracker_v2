@@ -17,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
+// todo user soft delete
 @Entity(name = "users")
 public class User implements UserDetails {
 

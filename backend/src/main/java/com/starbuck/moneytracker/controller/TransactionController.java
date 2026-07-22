@@ -2,7 +2,9 @@ package com.starbuck.moneytracker.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Arrays;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +25,6 @@ import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
 
-import io.jsonwebtoken.lang.Arrays;
-
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -32,26 +32,24 @@ import jakarta.validation.Valid;
 
 @RestController
 public class TransactionController {
-    
+
     @Autowired
     TransactionService transactionService;
-    
+
     @Autowired
     private TransactionMapper transactionMapper;
 
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createTransaction(@Valid @RequestBody TransactionCreateRequest request, @AuthenticationPrincipal User user) {
-        Transaction transaction = new Transaction();
-        transaction.setName(request.name());
-        transaction.setTransactionDate(request.transactionDate());
-        transaction.setTransactionType(request.transactionType());
+    public void createTransaction(@Valid @RequestBody TransactionCreateRequest request,
+            @AuthenticationPrincipal @NonNull User user) {
+        Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
         transaction.setUser(user);
-        
-        TransactionDetail TransactionDetailModel = new TransactionDetail();
-        TransactionDetailModel.setPrice(request.price());
+        List<TransactionDetail> transactionDetails = transactionMapper
+                .fromDetailCreateRequestList(request.transactionDetails());
+
         try {
-            this.transactionService.createTransaction(transaction, TransactionDetailModel);
+            this.transactionService.createTransaction(transaction, transactionDetails);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Transaction create failed: " + e.getMessage());
         }
@@ -61,18 +59,16 @@ public class TransactionController {
      * Frissíti a usernek a megadott id-jú tranzakcióját
      * 
      * @param TransactionCreateRequest request
-     * @param int id
+     * @param int                      id
      */
     @PutMapping(path = "/transaction/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateTransactionSimple(@Valid @RequestBody TransactionCreateRequest request, @PathVariable  Long id) {
-        Transaction transaction = new Transaction();
-        transaction.setName(request.name());
-        transaction.setTransactionDate(request.transactionDate());
-        transaction.setTransactionType(request.transactionType());
-        transaction.setPriceSum(request.price());
+    public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable Long id) {
+        Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
+        List<TransactionDetail> updatedDetails = transactionMapper
+                .fromDetailCreateRequestList(request.transactionDetails());
 
-        this.transactionService.updateSimpleTransaction(id, transaction);
+        this.transactionService.updateTransaction(id, transaction, updatedDetails);
     }
 
     /**
@@ -127,12 +123,10 @@ public class TransactionController {
      */
     @GetMapping(path = "/transaction/history")
     public List<TransactionDto> listTransactionHistory(
-        @RequestParam(required = false) String name, 
-        @RequestParam(required = false) LocalDate date
-    ) {
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) LocalDate date) {
         final TransactionFilter filter = new TransactionFilter(name, date);
         List<Transaction> transactions = this.transactionService.getHistory(filter);
         return this.transactionMapper.toDtoList(transactions);
     }
-
 }
