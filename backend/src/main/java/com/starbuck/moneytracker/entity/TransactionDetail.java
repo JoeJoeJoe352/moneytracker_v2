@@ -81,16 +81,12 @@ public class TransactionDetail {
     public TransactionDetail() {
     }
 
-    public TransactionDetail(Long id, Long transaction_id, String name, BigDecimal price, BigDecimal weight,
-            BigDecimal unitPrice,
-            LocalDateTime createdAt, LocalDateTime updatedAt, Transaction transaction) {
+    public TransactionDetail(Long id, String name, BigDecimal price, BigDecimal weight, BigDecimal unitPrice, Transaction transaction) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.weight = weight;
         this.unitPrice = unitPrice;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.transaction = transaction;
     }
 

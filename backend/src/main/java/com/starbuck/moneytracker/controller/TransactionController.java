@@ -61,14 +61,11 @@ public class TransactionController {
      */
     @PutMapping(path = "/transaction/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateTransactionSimple(@Valid @RequestBody TransactionCreateRequest request, @PathVariable  Long id) {
-        Transaction transaction = new Transaction();
-        transaction.setName(request.name());
-        transaction.setTransactionDate(request.transactionDate());
-        transaction.setTransactionType(request.transactionType());
-        transaction.setPriceSum(request.transactionDetails().get(0).price());
+    public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable  Long id) {
+        Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
+        List<TransactionDetail> updatedDetails = transactionMapper.fromDetailCreateRequestList(request.transactionDetails());
 
-        this.transactionService.updateSimpleTransaction(id, transaction);
+        this.transactionService.updateTransaction(id, transaction, updatedDetails);
     }
 
     /**

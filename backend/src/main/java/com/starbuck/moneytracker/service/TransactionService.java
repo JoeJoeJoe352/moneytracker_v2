@@ -57,6 +57,38 @@ public class TransactionService {
     }
 
     /**
+     * Frissíti a user adott id-jú tranzakcióját.
+     * Akkor használatos, ha a csak egy tranzakciótétel van
+     * 
+     * @param id
+     * @param updatedTransaction
+     */
+    @Transactional
+    public void updateTransaction(Long id, Transaction updatedTransaction,
+            List<TransactionDetail> updatedDetails) {
+        // ellenőrzöm, hogy a tranzakció a useré-e (nem fogja megtalálni, hogyha nem)
+        Transaction transaction = this.getTransactionById(id);
+
+        if (updatedDetails.isEmpty()) {
+            throw new IllegalStateException("Transaction has no details to update.");
+        }
+
+        BigDecimal sumOfDetailsPrice = updatedDetails.stream()
+                .map(TransactionDetail::getCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        transaction.setPriceSum(sumOfDetailsPrice);
+        transaction.setName(updatedTransaction.getName());
+        transaction.setTransactionDate(updatedTransaction.getTransactionDate());
+        transaction.setTransactionType(updatedTransaction.getTransactionType());
+
+        this.transactionRepo.save(transaction);
+        // egyszerűbb törölni a detailokat, mint kikeresni a meglévőket és frissíteni
+        this.transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
+        this.saveDetails(transaction, updatedDetails);
+    }
+
+    /**
      * Feltölti és elmenti a tranzakciós részleteket
      * 
      * @param savedTransaction
@@ -111,38 +143,6 @@ public class TransactionService {
     }
 
     /**
-     * Frissíti a user adott id-jú tranzakcióját.
-     * Akkor használatos, ha a csak egy tranzakciótétel van
-     * 
-     * @param id
-     * @param updatedTransaction
-     */
-    @Transactional
-    public void updateSimpleTransaction(Long id, Transaction updatedTransaction) {
-        // így ellenőrzöm, hogy a tranzakció a useré-e
-        Transaction transaction = this.getTransactionById(id);
-
-        if (transaction.getTransactionDetails().isEmpty()) {
-            throw new IllegalStateException("Transaction has no details to update.");
-        }
-        if (transaction.getTransactionDetails().size() > 1) {
-            throw new IllegalStateException(
-                    "Transaction has multiple details. Use updateComplexTransaction for complex updates.");
-        }
-
-        TransactionDetail detail = transaction.getTransactionDetails().iterator().next();
-
-        transaction.setName(updatedTransaction.getName());
-        transaction.setPriceSum(updatedTransaction.getPriceSum());
-        transaction.setTransactionDate(updatedTransaction.getTransactionDate());
-        transaction.setTransactionType(updatedTransaction.getTransactionType());
-
-        this.transactionRepo.save(transaction);
-        detail.setPrice(updatedTransaction.getPriceSum());
-        transactionDetailRepo.save(detail);
-    }
-
-    /**
      * Listázza valamilyen feltételek alapján a tranzakciókat
      * 
      * @param TransactionFilter filter
@@ -159,8 +159,8 @@ public class TransactionService {
     }
 
     /**
-     * Törli a tranzakciót
-     * JPA-ban szűrve van, hogy törölt-e és olyankor nem adja vissza (entity-ben vna
+     * Törli a tranzakciót (soft delete)
+     * JPA-ban szűrve van, hogy törölt-e és olyankor nem adja vissza (entity-ben van
      * beállítva)
      * 
      * @param transactionId
