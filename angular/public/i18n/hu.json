@@ -46,6 +46,13 @@
     "date.required": "A dátum megadása kötelező!",
     "date.invalid": "A dátum érvénytelen!",
     "expense": "Kiadás",
-    "income": "Bevétel"
+    "income": "Bevétel",
+    "hide_details": "Részletek elrejtése",
+    "show_details": "Részletek megjelenítése",
+    "detail": {
+      "name": "Tétel neve",
+      "price": "Tétel ára",
+      "add-detail": "Tétel hozzáadása"
+    }
   }
 }

@@ -52,8 +52,7 @@
 
     <!-- date -->
     <div class="form-group mb-3">
-        <label for="transaction-date">{{ 'transaction.date' | translate }}</label
-        ><br />
+        <label class="d-block" for="transaction-date">{{ 'transaction.date' | translate }}</label>
         <ngxsmk-datepicker
             id="transaction-date"
             mode="single"
@@ -70,12 +69,70 @@
         }
     </div>
 
+    <!-- showDetails -->
+    <div class="form-group mb-3">
+        <label for="transaction-show-details">{{
+            'transaction.show_details.label' | translate
+        }}</label>
+        <div>
+            <app-switch
+                id="transaction-show-details"
+                [labelBefore]="'transaction.hide_details' | translate"
+                [labelAfter]="'transaction.show_details' | translate"
+                [checked]="showDetailsToggleIsOn()"
+                (checkedChange)="showDetailsToggleIsOn.set(!showDetailsToggleIsOn())"
+            />
+        </div>
+    </div>
+
+    @if (transaction?.isComplexTransaction || showDetailsToggleIsOn()) {
+        <div class="detail-inputs">
+            details:
+            @for (detail of details.controls; track $index) {
+                <div [formGroup]="detail" class="d-flex">
+                    <div class="me-2">
+                        <label for="detail-name">{{ 'transaction.detail.name' | translate }}</label>
+                        <input
+                            id="detail-name"
+                            type="text"
+                            formControlName="detailName"
+                            class="form-control"
+                        />
+                    </div>
+                    <div class="me-2">
+                        <label for="detail-price">{{
+                            'transaction.detail.price' | translate
+                        }}</label>
+                        <input
+                            id="detail-price"
+                            type="number"
+                            formControlName="detailPrice"
+                            class="form-control"
+                        />
+                    </div>
+
+                    <div>
+                        <button type="button" class="btn-primary-red" (click)="deleteRow($index)">
+                            x
+                        </button>
+                    </div>
+                </div>
+            }
+            <button type="button" class="btn-primary-green" (click)="addRow()">
+                {{ 'transaction.detail.add-detail' | translate }}
+            </button>
+        </div>
+    }
     <button
         type="submit"
         [disabled]="transactionForm.invalid || isLoading()"
         class="btn btn-primary-green"
     >
-        {{ isExistingTransaction() ? ('transaction.update' | translate) : ('transaction.create' | translate) }}
+        {{
+            isExistingTransaction()
+                ? ('transaction.update' | translate)
+                : ('transaction.create' | translate)
+        }}
     </button>
     @if (isExistingTransaction()) {
         <button
