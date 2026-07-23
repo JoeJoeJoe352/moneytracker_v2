@@ -1,8 +1,7 @@
 <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form">
-    
     <!-- name -->
     <div class="form-group mb-3">
-        <label for="transaction-name">Name</label>
+        <label for="transaction-name">{{ 'transaction.name' | translate }}</label>
         <input
             id="transaction-name"
             type="text"
@@ -12,80 +11,80 @@
         />
         @if (name.invalid && name.touched) {
             @if (name.hasError('required')) {
-                <div class="form-field-error">Transaction name is required.</div>
+                <div class="form-field-error">{{ 'transaction.name.required' | translate }}</div>
             }
             @if (name.hasError('minlength')) {
-                <div class="form-field-error">Transaction name must be at least 3 characters long.</div>
+                <div class="form-field-error">{{ 'transaction.name.minlength' | translate }}</div>
             }
             @if (name.hasError('maxlength')) {
-                <div class="form-field-error">Transaction name must be at most 200 characters long.</div>
+                <div class="form-field-error">{{ 'transaction.name.maxlength' | translate }}</div>
             }
         }
     </div>
 
     <!-- transactionType -->
     <div class="form-group mb-3">
-        <label for="transaction-transactionType-bool">Type of transaction</label>
+        <label for="transaction-transactionType-bool">{{ 'transaction.type' | translate }}</label>
         <div>
             <app-switch
                 id="transaction-transactionType-bool"
-                labelBefore="Outcome"
-                labelAfter="Income"
+                [labelBefore]="'transaction.expense' | translate"
+                [labelAfter]="'transaction.income' | translate"
                 [checked]="isIncome.value"
                 (checkedChange)="isIncome.setValue($event)"
             />
         </div>
     </div>
-    
+
     <!-- Price-->
     <div class="form-group mb-3">
-        <label for="transaction-price">price</label>
-        <input
-            id="transaction-price"
-            type="number"
-            formControlName="price"
-            class="form-control"
-        />
+        <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
+        <input id="transaction-price" type="number" formControlName="price" class="form-control" />
         @if (price.invalid && price.touched) {
             @if (price.hasError('required')) {
-                <div class="form-field-error">Price name is required.</div>
+                <div class="form-field-error">{{ 'transaction.price.required' | translate }}</div>
             }
             @if (price.hasError('min')) {
-                <div class="form-field-error">Price must be greater than zero.</div>
+                <div class="form-field-error">{{ 'transaction.price.min' | translate }}</div>
             }
         }
     </div>
-    
+
     <!-- date -->
     <div class="form-group mb-3">
-        <label for="transaction-date">Date of transaction</label><br>
+        <label for="transaction-date">{{ 'transaction.date' | translate }}</label
+        ><br />
         <ngxsmk-datepicker
             id="transaction-date"
-            mode="single" 
+            mode="single"
             formControlName="transactionDate"
             placeholder="Select a date"
         />
         @if (transactionDate.invalid && transactionDate.touched) {
             @if (transactionDate.hasError('required')) {
-                <div class="form-field-error">date is required.</div>
+                <div class="form-field-error">{{ 'transaction.date.required' | translate }}</div>
             }
             @if (transactionDate.hasError('invalidDate')) {
-                <div class="form-field-error">Date is invalid.</div>
+                <div class="form-field-error">{{ 'transaction.date.invalid' | translate }}</div>
             }
         }
     </div>
-    
-    <button type="submit" [disabled]="transactionForm.invalid || isLoading()" class="btn btn-primary-green">
-        Save transaction
+
+    <button
+        type="submit"
+        [disabled]="transactionForm.invalid || isLoading()"
+        class="btn btn-primary-green"
+    >
+        {{ isExistingTransaction() ? ('transaction.update' | translate) : ('transaction.create' | translate) }}
     </button>
     @if (isExistingTransaction()) {
-      <button 
-        type="button" 
-        [disabled]="isLoading()" 
-        class="btn btn-primary-red ms-2"
-        (click)="popupDeletionConfirm()"
-      >
-        Delete transaction
-      </button>
+        <button
+            type="button"
+            [disabled]="isLoading()"
+            class="btn btn-primary-red ms-2"
+            (click)="popupDeletionConfirm()"
+        >
+            {{ 'transaction.delete' | translate }}
+        </button>
     }
 </form>

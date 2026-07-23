@@ -25,5 +25,27 @@
     "welcome": "Üdvözlünk",
     "transactions": "Tranzakciók",
     "logout": "Kijelentkezés"
+  },
+  "transaction": {
+    "create": "Tranzakció létrehozása",
+    "update": "Tranzakció módosítása",
+    "delete": "Tranzakció törlése",
+    "delete.confirm": "Biztosan törölni szeretnéd a tranzakciót?",
+    "delete.error": "Hiba történt a tranzakció törlése közben!",
+    "update.error": "Hiba történt a tranzakció módosítása közben!",
+    "create.error": "Hiba történt a tranzakció létrehozása közben!",
+    "name": "Tranzakció neve",
+    "name.required": "A tranzakció nevének megadása kötelező!",
+    "name.minlength": "A tranzakció nevének legalább 3 karakter hosszúnak kell lennie!",
+    "name.maxLength": "A tranzakció nevének legfeljebb 50 karakter hosszúnak kell lennie!",
+    "type": "Tranzakció típusa",
+    "price": "Összeg",
+    "price.required": "Az összeg megadása kötelező!",
+    "price.min": "Az összegnek nagyobbnak kell lennie, mint nulla!",
+    "date": "Dátum",
+    "date.required": "A dátum megadása kötelező!",
+    "date.invalid": "A dátum érvénytelen!",
+    "expense": "Kiadás",
+    "income": "Bevétel"
   }
 }
