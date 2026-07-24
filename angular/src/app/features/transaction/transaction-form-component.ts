@@ -20,7 +20,11 @@ import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
 import { SwitchComponent } from '../../shared/components/switch.component';
 import { validDate } from './valid-date-validator';
 import { TransactionService } from './transaction-service';
-import { NewTransaction, TransactionDataFromBackend } from './interfaces';
+import {
+    NewTransaction,
+    TransactionDataFromBackend,
+    TransactionInputDefaultValuesWithDetails,
+} from './interfaces';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 /**
@@ -72,23 +76,12 @@ export class TransactionFormComponent implements OnChanges {
     protected showDetailsToggleIsOn = signal(false);
 
     constructor() {
-        this.transactionForm = this.fb.nonNullable.group({
-            name: [
-                '',
-                {
-                    validators: [
-                        Validators.required,
-                        Validators.minLength(3),
-                        Validators.maxLength(200),
-                    ],
-                },
-            ],
-            isIncome: new FormControl(false),
-            price: [null, [Validators.required, Validators.min(1)]],
-            transactionDate: this.fb.control<Date | null>(null, {
-                validators: [Validators.required, validDate],
-            }),
-            details: this.fb.array<FormGroup<DetailForm>>([]),
+        this.transactionForm = this.buildForm({
+            name: '',
+            isIncome: false,
+            price: null,
+            transactionDate: null,
+            details: [],
         });
     }
 
@@ -100,21 +93,35 @@ export class TransactionFormComponent implements OnChanges {
             const convertedInputValues = this.transactionService.utils.convertDataToInput(
                 this.transaction,
             );
-            this.transactionForm.patchValue(convertedInputValues);
             this.showDetailsToggleIsOn.set(this.transaction.isComplexTransaction);
-            // betöltés után töröljük a form detail elemeit és beállítjuk a backendről kapottakat
-            this.details.clear();
-            convertedInputValues.details.forEach((d) => {
-                this.details.push(
-                    this.fb.group({
-                        detailName: new FormControl(d.name, { validators: Validators.required }),
-                        detailPrice: new FormControl(d.price, { validators: [Validators.min(1)] }),
-                        detailWeight: new FormControl(d.weight),
-                        detailUnitPrice: new FormControl(d.unitPrice),
-                    }) as FormGroup<DetailForm>,
-                );
-            });
+
+            // Új form a frissen betöltött adatokkal
+            this.transactionForm = this.buildForm(convertedInputValues);
         }
+    }
+
+    /**
+     * Létrehozza a formot a validációs adatokkal
+     */
+    private buildForm(defaults: TransactionInputDefaultValuesWithDetails) {
+        return this.fb.nonNullable.group({
+            name: [
+                defaults.name,
+                {
+                    validators: [
+                        Validators.required,
+                        Validators.minLength(3),
+                        Validators.maxLength(200),
+                    ],
+                },
+            ],
+            isIncome: new FormControl(defaults.isIncome),
+            price: [defaults.price, { validators: [Validators.min(1)] }],
+            transactionDate: this.fb.control(defaults.transactionDate, {
+                validators: [Validators.required, validDate],
+            }),
+            details: this.fb.array(defaults.details.map((d) => this.generateNewRow(d))),
+        });
     }
 
     /**
@@ -251,9 +258,9 @@ export class TransactionFormComponent implements OnChanges {
         unitPrice: number | null;
     }): FormGroup<DetailForm> {
         return this.fb.group({
-            detailName: new FormControl(params.name),
+            detailName: new FormControl(params.name, { validators: Validators.required }),
             detailPrice: new FormControl<number | null>(params.price, {
-                validators: [Validators.min(1)],
+                validators: [Validators.min(1), Validators.required],
             }),
             detailWeight: new FormControl<number | null>(params.weight),
             detailUnitPrice: new FormControl<number | null>(params.unitPrice),
@@ -278,8 +285,8 @@ export class TransactionFormComponent implements OnChanges {
         return this.transactionForm.get('name') as FormControl<string>;
     }
 
-    get price(): FormControl<string> {
-        return this.transactionForm.get('price') as FormControl<string>;
+    get price(): FormControl<number | null> {
+        return this.transactionForm.get('price') as FormControl<number | null>;
     }
 
     get transactionDate(): FormControl<string> {

@@ -5,7 +5,7 @@ export interface TransactionInputDefaultValuesWithDetails {
     name: string;
     isIncome: boolean;
     price: null | number;
-    transactionDate: Date;
+    transactionDate: Date | null;
     details: TransactionDetailsDataFromBackend[];
 }
 
@@ -16,7 +16,7 @@ export interface TransactionInputDefaultValuesWithDetails {
 export interface NewTransaction {
     name: string;
     isIncome: boolean;
-    price: number|null;
+    price: number | null;
     transactionDate: Date;
     details: { detailName: string; detailPrice: number }[];
 }
@@ -25,7 +25,7 @@ export interface NewTransaction {
  * Tranzakciós adatok, abban a formában, ahogy a backend szeretné feldolgozni
  */
 export interface TransactionDataForBackend {
-    globalPrice: number|null;
+    globalPrice: number | null;
     name: string;
     transactionDate: string;
     transactionType: string;
