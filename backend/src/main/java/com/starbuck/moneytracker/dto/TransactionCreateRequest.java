@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,7 +15,9 @@ public record TransactionCreateRequest(
     @NotBlank(message = "Name is mandatory")
     @Length(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
     String name,
-            
+
+    BigDecimal globalPrice,
+
     @NotNull(message = "transactionType is mandatory")
     TransactionTypeEnum transactionType,
 

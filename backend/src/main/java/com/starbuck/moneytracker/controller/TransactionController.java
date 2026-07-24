@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
+import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
 import com.starbuck.moneytracker.dto.TransactionDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
@@ -45,8 +46,17 @@ public class TransactionController {
             @AuthenticationPrincipal @NonNull User user) {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
         transaction.setUser(user);
-        List<TransactionDetail> transactionDetails = transactionMapper
-                .fromDetailCreateRequestList(request.transactionDetails());
+        List<TransactionDetail> transactionDetails;
+        if (request.transactionDetails().size() > 0) {
+            transactionDetails = transactionMapper
+                    .fromDetailCreateRequestList(request.transactionDetails());
+        } else if (request.globalPrice() != null) {
+            transactionDetails = transactionMapper
+                    .fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(request.globalPrice(),
+                            TransactionService.DEFAULT_DETAIL_NAME)));
+        } else {
+            throw new IllegalArgumentException("No detail in list and price is also null. Error!");
+        }
 
         try {
             this.transactionService.createTransaction(transaction, transactionDetails);
@@ -65,8 +75,18 @@ public class TransactionController {
     @ResponseStatus(HttpStatus.OK)
     public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable Long id) {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
-        List<TransactionDetail> updatedDetails = transactionMapper
-                .fromDetailCreateRequestList(request.transactionDetails());
+
+        List<TransactionDetail> updatedDetails;
+        if (request.transactionDetails().size() > 0) {
+            updatedDetails = transactionMapper
+                    .fromDetailCreateRequestList(request.transactionDetails());
+        } else if (request.globalPrice() != null) {
+            updatedDetails = transactionMapper
+                    .fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(request.globalPrice(),
+                            TransactionService.DEFAULT_DETAIL_NAME)));
+        } else {
+            throw new IllegalArgumentException("No detail in list and price is also null. Error!");
+        }
 
         this.transactionService.updateTransaction(id, transaction, updatedDetails);
     }

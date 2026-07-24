@@ -69,7 +69,7 @@ export class TransactionFormComponent implements OnChanges {
      */
     protected isLoading = signal(false);
 
-    protected showDetailsToggleIsOn = signal(false); 
+    protected showDetailsToggleIsOn = signal(false);
 
     constructor() {
         this.transactionForm = this.fb.nonNullable.group({
@@ -88,7 +88,7 @@ export class TransactionFormComponent implements OnChanges {
             transactionDate: this.fb.control<Date | null>(null, {
                 validators: [Validators.required, validDate],
             }),
-            details: this.fb.array<FormGroup<DetailForm>>([this.generateNewRow()]),
+            details: this.fb.array<FormGroup<DetailForm>>([]),
         });
     }
 
@@ -101,10 +101,10 @@ export class TransactionFormComponent implements OnChanges {
                 this.transaction,
             );
             this.transactionForm.patchValue(convertedInputValues);
-
+            this.showDetailsToggleIsOn.set(this.transaction.isComplexTransaction);
             // betöltés után töröljük a form detail elemeit és beállítjuk a backendről kapottakat
             this.details.clear();
-            convertedInputValues.transactionDetails.forEach((d) => {
+            convertedInputValues.details.forEach((d) => {
                 this.details.push(
                     this.fb.group({
                         detailName: new FormControl(d.name, { validators: Validators.required }),
@@ -118,6 +118,23 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
+     * Részletek megjelenítése/elrejtése kapcsoló átáll
+     */
+    onSwitchDetailToggle() {
+        if (!this.showDetailsToggleIsOn()) {
+            this.showDetailsToggleIsOn.set(true);
+            return;
+        }
+        if (
+            this.details.length === 0 ||
+            confirm(this.translateService.instant(_('transaction.detail.toggle.confirm')))
+        ) {
+            this.showDetailsToggleIsOn.set(false);
+            this.details.clear();
+        }
+    }
+
+    /**
      * Form elküldésekori műveletek
      */
     onSubmit(): void {
@@ -127,6 +144,7 @@ export class TransactionFormComponent implements OnChanges {
         this.isLoading.set(true);
 
         const payload = this.transactionForm.value;
+        console.log(payload);
 
         if (this.isExistingTransaction()) {
             const transactionId = this.transaction.id;
@@ -160,6 +178,8 @@ export class TransactionFormComponent implements OnChanges {
         }
     }
 
+    // todo validáció -> hiba kiírása formon, törlés gomb legyen az inputokkal egyvonalban
+
     /**
      * Feldob egy confirmot, hogy biztosan törölni szeretné-e a user a confirmot
      */
@@ -173,7 +193,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Tranzakció törlése
      */
-    deleteTransaction() {
+    deleteTransaction(): void {
         if (!this.isExistingTransaction()) {
             console.error('Cannot delete new transaction. Error!');
             return;
@@ -196,34 +216,55 @@ export class TransactionFormComponent implements OnChanges {
         });
     }
 
-    deleteRow(index: number) {
+    /**
+     * Törli a megadott indexű tétel sort
+     */
+    deleteRow(index: number): void {
+        if (this.details.length === 1) {
+            console.error('utolsó sort nem lehet törölni');
+            //todo ez legyen majd toast
+            alert(this.translateService.instant(_('transaction.detail.delete.last-one-error')));
+
+            return;
+        }
         this.details.removeAt(index);
     }
 
-    addRow() {
+    /**
+     * Létrehoz egy új üres sort
+     */
+    addRow(): void {
         if (!this.transactionForm.valid) {
-            console.error('form is invalid');
-            console.error(this.transactionForm.errors);
+            console.error('form is invalid', this.transactionForm.errors);
             return;
         }
-        this.details.push(this.generateNewRow());
+        this.details.push(this.generateNewEmptyRow());
     }
 
     /**
-     * alapértelmezett detail, amit új tranzakciónál (mert mindig kell lennie egy detailnak, csak nem látszik a usernek esetleg),
-     * vagy új detail hozzáadásánál bővítjük vele a formot
-     * Fontos, hogy mindig új példányt hozzunk létre, mert ha változóba lenne kirakva, akkor ugyanazt a példányt adná át
-     * és ugyanaz az érték íródna be a form elemekbe
+     * Detail struktúra, amit új tranzakciónál, vagy új detail hozzáadásánál bővítjük vele a formot
      */
-    generateNewRow(): FormGroup<DetailForm> {
+    generateNewRow(params: {
+        name: string;
+        price: number | null;
+        weight: number | null;
+        unitPrice: number | null;
+    }): FormGroup<DetailForm> {
         return this.fb.group({
-            detailName: new FormControl(''),
-            detailPrice: new FormControl<number | null>(null, {
+            detailName: new FormControl(params.name),
+            detailPrice: new FormControl<number | null>(params.price, {
                 validators: [Validators.min(1)],
             }),
-            detailWeight: new FormControl<number | null>(null),
-            detailUnitPrice: new FormControl<number | null>(null),
+            detailWeight: new FormControl<number | null>(params.weight),
+            detailUnitPrice: new FormControl<number | null>(params.unitPrice),
         }) as FormGroup<DetailForm>;
+    }
+
+    /**
+     * Generál egy új input sort, üres adatokkal
+     */
+    generateNewEmptyRow() {
+        return this.generateNewRow({ name: '', price: null, unitPrice: null, weight: null });
     }
 
     /**

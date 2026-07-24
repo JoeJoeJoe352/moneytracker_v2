@@ -37,18 +37,27 @@
     </div>
 
     <!-- Price-->
-    <div class="form-group mb-3">
-        <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
-        <input id="transaction-price" type="number" formControlName="price" class="form-control" />
-        @if (price.invalid && price.touched) {
-            @if (price.hasError('required')) {
-                <div class="form-field-error">{{ 'transaction.price.required' | translate }}</div>
+    @if (!showDetailsToggleIsOn()) {
+        <div class="form-group mb-3">
+            <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
+            <input
+                id="transaction-price"
+                type="number"
+                formControlName="price"
+                class="form-control"
+            />
+            @if (price.invalid && price.touched) {
+                @if (price.hasError('required')) {
+                    <div class="form-field-error">
+                        {{ 'transaction.price.required' | translate }}
+                    </div>
+                }
+                @if (price.hasError('min')) {
+                    <div class="form-field-error">{{ 'transaction.price.min' | translate }}</div>
+                }
             }
-            @if (price.hasError('min')) {
-                <div class="form-field-error">{{ 'transaction.price.min' | translate }}</div>
-            }
-        }
-    </div>
+        </div>
+    }
 
     <!-- date -->
     <div class="form-group mb-3">
@@ -71,21 +80,18 @@
 
     <!-- showDetails -->
     <div class="form-group mb-3">
-        <label for="transaction-show-details">{{
-            'transaction.show_details.label' | translate
-        }}</label>
         <div>
             <app-switch
                 id="transaction-show-details"
                 [labelBefore]="'transaction.hide_details' | translate"
                 [labelAfter]="'transaction.show_details' | translate"
                 [checked]="showDetailsToggleIsOn()"
-                (checkedChange)="showDetailsToggleIsOn.set(!showDetailsToggleIsOn())"
+                (checkedChange)="onSwitchDetailToggle()"
             />
         </div>
     </div>
 
-    @if (transaction?.isComplexTransaction || showDetailsToggleIsOn()) {
+    @if (showDetailsToggleIsOn()) {
         <div class="detail-inputs">
             details:
             @for (detail of details.controls; track $index) {
@@ -99,6 +105,7 @@
                             class="form-control"
                         />
                     </div>
+                    <!-- todo ez az input csak virtuális input, ami a legelső detail price mezőjére mutat, egyébként legyen rejtve -->
                     <div class="me-2">
                         <label for="detail-price">{{
                             'transaction.detail.price' | translate
@@ -111,7 +118,7 @@
                         />
                     </div>
 
-                    <div>
+                    <div class="mt-auto">
                         <button type="button" class="btn-primary-red" (click)="deleteRow($index)">
                             x
                         </button>

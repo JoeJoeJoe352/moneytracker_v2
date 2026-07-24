@@ -52,7 +52,9 @@
     "detail": {
       "name": "Tétel neve",
       "price": "Tétel ára",
-      "add-detail": "Tétel hozzáadása"
+      "add-detail": "Tétel hozzáadása",
+      "delete.last-one-error": "Utolsó tétel nem törölhető",
+      "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek."
     }
   }
 }
