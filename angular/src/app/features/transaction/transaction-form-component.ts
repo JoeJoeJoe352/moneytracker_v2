@@ -7,6 +7,7 @@ import {
     Output,
     signal,
     SimpleChanges,
+    WritableSignal,
 } from '@angular/core';
 import {
     FormArray,
@@ -48,6 +49,7 @@ export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
 
+    @Input({ required: true }) isTransactionFormDisabled!: WritableSignal<boolean>;
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
@@ -193,39 +195,15 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
-     * Feldob egy confirmot, hogy biztosan törölni szeretné-e a user a confirmot
-     */
-    popupDeletionConfirm(): void {
-        // todo kiszervezni szülő komponensbe
-        if (confirm(this.translateService.instant(_('transaction.delete.confirm')))) {
-            this.deleteTransaction();
-        }
-    }
-
-    /**
      * Tranzakció törlése
      */
-    deleteTransaction(): void {
+    public deleteTransaction(): void {
         if (!this.isExistingTransaction()) {
             console.error('Cannot delete new transaction. Error!');
             return;
         }
+
         this.deleted.emit(this.transaction.id);
-        // todo kiszervezni szülő komponensbe a törlés logikát, isLoading az legyen paraméter
-        this.isLoading.set(true);
-        this.transactionService.deleteTransaction(this.transaction.id).subscribe({
-            next: () => {
-                this.isLoading.set(false);
-                this.dataChanged.emit();
-            },
-            error: (response) => {
-                console.error(
-                    this.translateService.instant(_('transaction.delete.error')),
-                    response,
-                );
-                this.isLoading.set(false);
-            },
-        });
     }
 
     /**

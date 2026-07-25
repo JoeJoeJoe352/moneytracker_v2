@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output, WritableSignal } from "@angular/core";
 import { BaseModal } from "../../shared/components/modal/base-modal";
 import { TransactionFormComponent } from "./transaction-form-component";
 import { TransactionDataFromBackend } from "./interfaces";
@@ -8,9 +8,11 @@ import { TransactionDataFromBackend } from "./interfaces";
     template: `
         <app-base-modal [title]="'Create transaction'" (closeModal)="closeModal.emit()">
             <app-transaction-form-component
+                [isTransactionFormDisabled]="isTransactionFormDisabled"
+                [transaction]="transaction"
                 (closeModal)="closeModal.emit()"
                 (dataChanged)="dataChanged.emit()"
-                [transaction]="transaction"
+                (deleted)="deleteTransactionRequested.emit($event)"
              />
         </app-base-modal>
     `,
@@ -18,7 +20,9 @@ import { TransactionDataFromBackend } from "./interfaces";
 })
 export class TransactionModalComponent {
     @Input() transaction: TransactionDataFromBackend | null = null;
+    @Input({required: true}) isTransactionFormDisabled!: WritableSignal<boolean>
     
     @Output() closeModal = new EventEmitter<void>();
     @Output() dataChanged = new EventEmitter<void>();
+    @Output() deleteTransactionRequested = new EventEmitter<number>();
 }
