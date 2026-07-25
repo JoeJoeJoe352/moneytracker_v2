@@ -7,7 +7,6 @@ import {
     Output,
     signal,
     SimpleChanges,
-    WritableSignal,
 } from '@angular/core';
 import {
     FormArray,
@@ -49,7 +48,7 @@ export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
 
-    @Input({ required: true }) isTransactionFormDisabled!: WritableSignal<boolean>;
+    @Input({ required: true }) isTransactionFormDisabled!: boolean;
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
@@ -70,15 +69,10 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakció törlés gombra kattintott a user
      */
     @Output() deleted = new EventEmitter<number>();
-
     /**
      * Tranzakciós form
      */
     protected transactionForm: FormGroup;
-    /**
-     * Api válaszra várunk-e (mentés, adatbetöltés)
-     */
-    protected isLoading = signal(false);
     /**
      * Tranzakciós részletek mutatása kapcsoló állása benyomott-e
      */
@@ -141,6 +135,7 @@ export class TransactionFormComponent implements OnChanges {
             this.showDetailsToggleIsOn.set(true);
             return;
         }
+        
         if (
             this.details.length === 0 ||
             confirm(this.translateService.instant(_('transaction.detail.toggle.confirm')))
@@ -155,55 +150,11 @@ export class TransactionFormComponent implements OnChanges {
      */
     onSubmit(): void {
         if (this.transactionForm.invalid) {
+            this.transactionForm.markAllAsTouched();
+            console.error(this.transactionForm.errors);
             return;
         }
-        this.isLoading.set(true);
-
-        const payload = this.transactionForm.value;
-        console.log(payload);
-
-        if (this.isExistingTransaction()) {
-            const transactionId = this.transaction.id;
-            this.transactionService.updateTransaction(payload, transactionId).subscribe({
-                next: () => {
-                    this.isLoading.set(false);
-                    this.dataChanged.emit();
-                },
-                error: (response) => {
-                    console.error(
-                        this.translateService.instant(_('transaction.update.error')),
-                        response,
-                    );
-                    this.isLoading.set(false);
-                },
-            });
-        } else {
-            this.transactionService.saveTransaction(payload).subscribe({
-                next: () => {
-                    this.isLoading.set(false);
-                    this.dataChanged.emit();
-                },
-                error: (response) => {
-                    console.error(
-                        this.translateService.instant(_('transaction.create.error')),
-                        response,
-                    );
-                    this.isLoading.set(false);
-                },
-            });
-        }
-    }
-
-    /**
-     * Tranzakció törlése
-     */
-    public deleteTransaction(): void {
-        if (!this.isExistingTransaction()) {
-            console.error('Cannot delete new transaction. Error!');
-            return;
-        }
-
-        this.deleted.emit(this.transaction.id);
+        this.saved.emit(this.transactionForm.value);
     }
 
     /**
@@ -224,10 +175,6 @@ export class TransactionFormComponent implements OnChanges {
      * Létrehoz egy új üres sort
      */
     addRow(): void {
-        if (!this.transactionForm.valid) {
-            console.error('form is invalid', this.transactionForm.errors);
-            return;
-        }
         this.details.push(this.generateNewEmptyRow());
     }
 
@@ -241,12 +188,10 @@ export class TransactionFormComponent implements OnChanges {
         unitPrice: number | null;
     }): FormGroup<DetailForm> {
         return this.fb.group({
-            detailName: new FormControl(params.name, { validators: Validators.required }),
-            detailPrice: new FormControl<number | null>(params.price, {
-                validators: [Validators.min(1), Validators.required],
-            }),
-            detailWeight: new FormControl<number | null>(params.weight),
-            detailUnitPrice: new FormControl<number | null>(params.unitPrice),
+            detailName: [params.name, Validators.required],
+            detailPrice: [params.price, [Validators.min(1), Validators.required]],
+            detailWeight: [params.weight],
+            detailUnitPrice: [params.unitPrice],
         }) as FormGroup<DetailForm>;
     }
 
@@ -274,8 +219,8 @@ export class TransactionFormComponent implements OnChanges {
         return this.transactionForm.get('price') as FormControl<number | null>;
     }
 
-    get transactionDate(): FormControl<string> {
-        return this.transactionForm.get('transactionDate') as FormControl<string>;
+    get transactionDate(): FormControl<Date | null> {
+        return this.transactionForm.get('transactionDate') as FormControl<Date | null>;
     }
 
     get isIncome(): FormControl<boolean> {

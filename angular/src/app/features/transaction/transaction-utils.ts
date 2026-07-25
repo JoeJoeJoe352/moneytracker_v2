@@ -23,14 +23,16 @@ export class TransactionUtils {
         const transactionDate = new Date(transaction.transactionDate);
 
         const transactionDetailsFormatted = [] as TransactionDetailsDataFromBackend[];
-        transaction.transactionDetails.forEach((detail) => {
-            const { price, ...rest } = detail;
-            transactionDetailsFormatted.push({
-                ...rest,
-                // Frontenden a kavarodások elkerülése végett az inputban mindig csak pozitív értékeket fogunk tenni
-                price: isIncome ? price : price * -1,
+        if (transaction.isComplexTransaction) {
+            transaction.transactionDetails.forEach((detail) => {
+                const { price, ...rest } = detail;
+                transactionDetailsFormatted.push({
+                    ...rest,
+                    // Frontenden a kavarodások elkerülése végett az inputban mindig csak pozitív értékeket fogunk tenni
+                    price: isIncome ? price : price * -1,
+                });
             });
-        });
+        }
 
         return {
             name: transaction.name,

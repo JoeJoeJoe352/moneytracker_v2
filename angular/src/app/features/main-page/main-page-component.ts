@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
-import { TransactionDataFromBackend } from '../transaction/interfaces';
+import { NewTransaction, TransactionDataFromBackend } from '../transaction/interfaces';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
 import { _, TranslateService } from '@ngx-translate/core';
@@ -87,6 +87,44 @@ export class MainPage implements OnInit {
                 this.isTransactionFormDisabled.set(false);
             },
         });
+    }
+
+    /**
+     * Tranzakció mentése a főoldalon
+     */
+    protected saveTransaction(payload: NewTransaction) {
+        const transaction = this.transactionData()
+        // Létezik a tranzakció, update!
+        if (transaction !== null) {
+            const transactionId = transaction.id;
+            this.transactionService.updateTransaction(payload, transactionId).subscribe({
+                next: () => {
+                    this.isTransactionFormDisabled.set(false);
+                    this.handleModalDataChange()
+                },
+                error: (response) => {
+                    console.error(
+                        this.translateService.instant(_('transaction.update.error')),
+                        response,
+                    );
+                    this.isTransactionFormDisabled.set(false);
+                },
+            });
+        } else {
+            this.transactionService.saveTransaction(payload).subscribe({
+                next: () => {
+                    this.isTransactionFormDisabled.set(false);
+                    this.handleModalDataChange()
+                },
+                error: (response) => {
+                    console.error(
+                        this.translateService.instant(_('transaction.create.error')),
+                        response,
+                    );
+                    this.isTransactionFormDisabled.set(false);
+                },
+            });
+        }
     }
 
     /**
