@@ -53,15 +53,20 @@ export class TransactionFormComponent implements OnChanges {
      */
     @Input() transaction: TransactionDataFromBackend | null = null;
     /**
-     * Event, ha csak bezártuk a modalt
+     * Event, ha a bezárás gombra kattintott a user
      */
     @Output() closeModal = new EventEmitter<void>();
     /**
      * Event, ha változott adat
      */
     @Output() dataChanged = new EventEmitter<void>();
-
+    /**
+     * Mentés gombra kattintott a user
+     */
     @Output() saved = new EventEmitter<NewTransaction>();
+    /**
+     * Tranzakció törlés gombra kattintott a user
+     */
     @Output() deleted = new EventEmitter<number>();
 
     /**
@@ -72,7 +77,9 @@ export class TransactionFormComponent implements OnChanges {
      * Api válaszra várunk-e (mentés, adatbetöltés)
      */
     protected isLoading = signal(false);
-
+    /**
+     * Tranzakciós részletek mutatása kapcsoló állása benyomott-e
+     */
     protected showDetailsToggleIsOn = signal(false);
 
     constructor() {
@@ -120,12 +127,12 @@ export class TransactionFormComponent implements OnChanges {
             transactionDate: this.fb.control(defaults.transactionDate, {
                 validators: [Validators.required, validDate],
             }),
-            details: this.fb.array(defaults.details.map((d) => this.generateNewRow(d))),
+            details: this.fb.array(defaults.details.map((detail) => this.generateNewRow(detail))),
         });
     }
 
     /**
-     * Részletek megjelenítése/elrejtése kapcsoló átáll
+     * Részletek megjelenítése/elrejtése kapcsoló átállítás
      */
     onSwitchDetailToggle() {
         if (!this.showDetailsToggleIsOn()) {
@@ -184,8 +191,6 @@ export class TransactionFormComponent implements OnChanges {
             });
         }
     }
-
-    // todo validáció -> hiba kiírása formon, törlés gomb legyen az inputokkal egyvonalban
 
     /**
      * Feldob egy confirmot, hogy biztosan törölni szeretné-e a user a confirmot
@@ -275,11 +280,13 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
-     * Létező tranzakció adatai vannak-e a formban
+     * Létező tranzakció adatai vannak-e a formban (+ guard)
      */
     isExistingTransaction(): this is { transaction: TransactionDataFromBackend } {
         return this.transaction !== null;
     }
+
+    // Getters
 
     get name(): FormControl<string> {
         return this.transactionForm.get('name') as FormControl<string>;

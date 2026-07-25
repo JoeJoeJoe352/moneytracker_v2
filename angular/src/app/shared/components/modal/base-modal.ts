@@ -1,23 +1,34 @@
-import { FocusTrap, FocusTrapFactory } from "@angular/cdk/a11y";
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, inject, Input, OnDestroy, Output } from "@angular/core";
+import { FocusTrap, FocusTrapFactory } from '@angular/cdk/a11y';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    EventEmitter,
+    HostListener,
+    inject,
+    Input,
+    OnDestroy,
+    Output,
+} from '@angular/core';
 
 @Component({
-    selector: "app-base-modal",
-    templateUrl: "./base-modal.html",
-    styleUrls: ["./base-modal.scss"],
+    selector: 'app-base-modal',
+    templateUrl: './base-modal.html',
+    styleUrls: ['./base-modal.scss'],
 })
 export class BaseModal implements AfterViewInit, OnDestroy {
+    private focusTrapFactory = inject(FocusTrapFactory);
+    private el = inject(ElementRef);
+
     @Input({ required: true }) title = '';
     @Output() closeModal = new EventEmitter<boolean>();
-    // Injektált elemek
-    private focusTrapFactory = inject(FocusTrapFactory)
-    private el = inject(ElementRef)
+
     /**
      * Modal felnyitása esetén garantálja, hogy a tab gomb nem tud kiszökni a modal területéről
      * ngAfterViewInit-ben inicializálódik
      */
     private focusTrap!: FocusTrap;
-    
+
     // esc lenyomását figyeli
     @HostListener('document:keydown.escape')
 
