@@ -7,6 +7,7 @@ export interface TransactionInputDefaultValuesWithDetails {
     price: null | number;
     transactionDate: Date | null;
     details: TransactionDetailsDataFromBackend[];
+    isComplexTransaction: boolean,
 }
 
 /**
@@ -19,6 +20,7 @@ export interface NewTransaction {
     price: number | null;
     transactionDate: Date;
     details: { detailName: string; detailPrice: number }[];
+    isComplexTransaction: boolean,
 }
 
 /**

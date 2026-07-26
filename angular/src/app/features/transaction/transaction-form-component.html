@@ -28,36 +28,12 @@
         <div>
             <app-switch
                 id="transaction-transactionType-bool"
+                formControlName="isIncome"
                 [labelBefore]="'transaction.expense' | translate"
                 [labelAfter]="'transaction.income' | translate"
-                [checked]="isIncome.value"
-                (checkedChange)="isIncome.setValue($event)"
             />
         </div>
     </div>
-
-    <!-- Price-->
-    @if (!showDetailsToggleIsOn()) {
-        <div class="form-group mb-3">
-            <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
-            <input
-                id="transaction-price"
-                type="number"
-                formControlName="price"
-                class="form-control"
-            />
-            @if (price.invalid && price.touched) {
-                @if (price.hasError('required')) {
-                    <div class="form-field-error">
-                        {{ 'transaction.price.required' | translate }}
-                    </div>
-                }
-                @if (price.hasError('min')) {
-                    <div class="form-field-error">{{ 'transaction.price.min' | translate }}</div>
-                }
-            }
-        </div>
-    }
 
     <!-- date -->
     <div class="form-group mb-3">
@@ -82,43 +58,90 @@
     <div class="form-group mb-3">
         <div>
             <app-switch
+                formControlName="isComplexTransaction"
                 id="transaction-show-details"
                 [labelBefore]="'transaction.hide_details' | translate"
                 [labelAfter]="'transaction.show_details' | translate"
-                [checked]="showDetailsToggleIsOn()"
-                (checkedChange)="onSwitchDetailToggle()"
             />
         </div>
     </div>
 
-    @if (showDetailsToggleIsOn()) {
+    <!-- Price-->
+    @if (!isComplexTransaction.value) {
+        <div class="form-group mb-3">
+            <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
+            <input
+                id="transaction-price"
+                type="number"
+                formControlName="price"
+                class="form-control"
+            />
+            @if (price.invalid && price.touched) {
+                @if (price.hasError('required')) {
+                    <div class="form-field-error">
+                        {{ 'transaction.price.required' | translate }}
+                    </div>
+                }
+                @if (price.hasError('min')) {
+                    <div class="form-field-error">{{ 'transaction.price.min' | translate }}</div>
+                }
+            }
+        </div>
+    } @else {
         <div class="detail-inputs">
-            details:
+            <div class="mb-1">{{ "transaction.detail.title" | translate }}</div>
             @for (detail of details.controls; track $index) {
                 <div [formGroup]="detail" class="d-flex">
                     <div class="me-2">
                         <label for="detail-name">{{ 'transaction.detail.name' | translate }}</label>
                         <input
-                            id="detail-name"
+                            id="detail-name-{{ $index }}"
                             type="text"
                             formControlName="detailName"
                             class="form-control"
                         />
+                        @if (
+                            detail.get('detailName')?.invalid && detail.get('detailName')?.touched
+                        ) {
+                            @if (detail.get('detailName')?.hasError('required')) {
+                                <div class="form-field-error">
+                                    {{ 'transaction.detail.name.required' | translate }}
+                                </div>
+                            }
+                        }
                     </div>
                     <div class="me-2">
                         <label for="detail-price">{{
                             'transaction.detail.price' | translate
                         }}</label>
                         <input
-                            id="detail-price"
+                            id="detail-price-{{ $index }}"
                             type="number"
                             formControlName="detailPrice"
                             class="form-control"
                         />
+                        @if (
+                            detail.get('detailPrice')?.invalid && detail.get('detailPrice')?.touched
+                        ) {
+                            @if (detail.get('detailPrice')?.hasError('required')) {
+                                <div class="form-field-error">
+                                    {{ 'transaction.detail.price.required' | translate }}
+                                </div>
+                            } @else if (detail.get('detailPrice')?.hasError('min')) {
+                                <div class="form-field-error">
+                                    {{ 'transaction.detail.price.min' | translate }}
+                                </div>
+                            }
+                        }
                     </div>
 
                     <div class="mt-auto">
-                        <button type="button" class="btn-primary-red" (click)="deleteRow($index)">
+                        <button
+                            type="button"
+                            class="btn-primary-red"
+                            (click)="deleteRow($index)"
+                            [disabled]="isDetailDeleteButtonDisabled"
+                        >
                             x
                         </button>
                     </div>

@@ -23,16 +23,14 @@ export class TransactionUtils {
         const transactionDate = new Date(transaction.transactionDate);
 
         const transactionDetailsFormatted = [] as TransactionDetailsDataFromBackend[];
-        if (transaction.isComplexTransaction) {
-            transaction.transactionDetails.forEach((detail) => {
-                const { price, ...rest } = detail;
-                transactionDetailsFormatted.push({
-                    ...rest,
-                    // Frontenden a kavarodások elkerülése végett az inputban mindig csak pozitív értékeket fogunk tenni
-                    price: isIncome ? price : price * -1,
-                });
+        transaction.transactionDetails.forEach((detail) => {
+            const { price, ...rest } = detail;
+            transactionDetailsFormatted.push({
+                ...rest,
+                // Frontenden a kavarodások elkerülése végett az inputban mindig csak pozitív értékeket fogunk tenni
+                price: isIncome ? price : price * -1,
             });
-        }
+        });
 
         return {
             name: transaction.name,
@@ -41,6 +39,7 @@ export class TransactionUtils {
             price: isIncome ? transaction.priceSum : transaction.priceSum * -1,
             isIncome: isIncome,
             transactionDate: transactionDate,
+            isComplexTransaction: transaction.isComplexTransaction,
             details: transactionDetailsFormatted,
         };
     }
@@ -57,7 +56,8 @@ export class TransactionUtils {
             : TransactionTypeEnum.OUTCOME;
 
         const transactionDetailsFormatted = [] as TransactionDetailsDataForBackend2[];
-        if (input.details.length > 0) {
+        // Ha nem complex a transaction, akkor nem küldjük el a detail adatokat, mert a price érték lesz a mérvadó
+        if (input.details.length > 0 && input.isComplexTransaction) {
             input.details.forEach((detail) => {
                 transactionDetailsFormatted.push({
                     name: detail.detailName,

@@ -5,7 +5,6 @@ import {
     Input,
     OnChanges,
     Output,
-    signal,
     SimpleChanges,
 } from '@angular/core';
 import {
@@ -25,7 +24,7 @@ import {
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
 } from './interfaces';
-import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 /**
  * Detail form elemei
@@ -73,15 +72,12 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakciós form
      */
     protected transactionForm: FormGroup;
-    /**
-     * Tranzakciós részletek mutatása kapcsoló állása benyomott-e
-     */
-    protected showDetailsToggleIsOn = signal(false);
 
     constructor() {
         this.transactionForm = this.buildForm({
             name: '',
             isIncome: false,
+            isComplexTransaction: false,
             price: null,
             transactionDate: null,
             details: [],
@@ -89,17 +85,21 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
-     * @param changes Betöltés után ha van kezdőérték beállítva, akkor a formba azokat állítjuk be
+     * Changes Betöltés után ha van kezdőérték beállítva, akkor a formba azokat állítjuk be
      */
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['transaction'] && this.transaction !== null) {
+        if (changes['transaction']) {
+            if (this.transaction === null) {
+                console.error("transaction has loaded, but still null!")
+                return
+            }
             const convertedInputValues = this.transactionService.utils.convertDataToInput(
                 this.transaction,
             );
-            this.showDetailsToggleIsOn.set(this.transaction.isComplexTransaction);
 
             // Új form a frissen betöltött adatokkal
             this.transactionForm = this.buildForm(convertedInputValues);
+            this.transactionForm.markAllAsTouched()
         }
     }
 
@@ -119,6 +119,7 @@ export class TransactionFormComponent implements OnChanges {
                 },
             ],
             isIncome: new FormControl(defaults.isIncome),
+            isComplexTransaction: new FormControl(defaults.isComplexTransaction),
             price: [defaults.price, { validators: [Validators.min(1)] }],
             transactionDate: this.fb.control(defaults.transactionDate, {
                 validators: [Validators.required, validDate],
@@ -128,27 +129,10 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
-     * Részletek megjelenítése/elrejtése kapcsoló átállítás
-     */
-    onSwitchDetailToggle() {
-        if (!this.showDetailsToggleIsOn()) {
-            this.showDetailsToggleIsOn.set(true);
-            return;
-        }
-        
-        if (
-            this.details.length === 0 ||
-            confirm(this.translateService.instant(_('transaction.detail.toggle.confirm')))
-        ) {
-            this.showDetailsToggleIsOn.set(false);
-            this.details.clear();
-        }
-    }
-
-    /**
      * Form elküldésekori műveletek
      */
     onSubmit(): void {
+
         if (this.transactionForm.invalid) {
             this.transactionForm.markAllAsTouched();
             console.error(this.transactionForm.errors);
@@ -161,11 +145,8 @@ export class TransactionFormComponent implements OnChanges {
      * Törli a megadott indexű tétel sort
      */
     deleteRow(index: number): void {
-        if (this.details.length === 1) {
+        if (this.isDetailDeleteButtonDisabled) {
             console.error('utolsó sort nem lehet törölni');
-            //todo ez legyen majd toast
-            alert(this.translateService.instant(_('transaction.detail.delete.last-one-error')));
-
             return;
         }
         this.details.removeAt(index);
@@ -210,6 +191,10 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     // Getters
+ 
+    get isDetailDeleteButtonDisabled() {
+        return this.details.length < 2;
+    }
 
     get name(): FormControl<string> {
         return this.transactionForm.get('name') as FormControl<string>;
@@ -225,6 +210,10 @@ export class TransactionFormComponent implements OnChanges {
 
     get isIncome(): FormControl<boolean> {
         return this.transactionForm.get('isIncome') as FormControl<boolean>;
+    }
+
+    get isComplexTransaction(): FormControl<boolean> {
+        return this.transactionForm.get('isComplexTransaction') as FormControl<boolean>;
     }
 
     get details(): FormArray<FormGroup<DetailForm>> {
