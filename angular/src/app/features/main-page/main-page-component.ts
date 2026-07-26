@@ -1,70 +1,132 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
-import { NewTransaction, TransactionDataFromBackend } from '../transaction/interfaces';
+import { NewTransaction } from '../transaction/interfaces';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
-import { _, TranslateService } from '@ngx-translate/core';
-import { forkJoin, Observable } from 'rxjs';
+import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { of, switchMap, tap } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-main-page-component',
     templateUrl: './main-page-component.html',
     styleUrl: './main-page-component.scss',
     standalone: true,
-    imports: [TransactionModalComponent, TransactionListComponent, DecimalPipe],
+    imports: [TransactionModalComponent, TransactionListComponent, DecimalPipe, TranslatePipe],
 })
-export class MainPage implements OnInit {
+export class MainPage {
     private transactionService = inject(TransactionService);
     private translateService = inject(TranslateService);
 
-    // Tranzakció lista adatok és betöltési állapot
-    protected transactionListData = signal<TransactionDataFromBackend[]>([]);
-    protected isTransactionListLoaded = signal(false);
-    // Tranzakció adatai, amit szerkeszteni szeretnénk. Adatok és betöltési állapot
-    protected transactionData = signal<TransactionDataFromBackend | null>(null);
-    protected isTransactionDataLoading = signal(false);
-
-    protected moneySum = signal<number | null>(null);
-
+    /**
+     * Töltődik-e jelenleg a tranzakciós lista
+     */
+    protected isTransactionListLoading = signal(true);
+    /**
+     * Összes pénz töltődik-e
+     */
+    protected isMoneySumLoading = signal(true);
+    /**
+     * Kiválasztott tranzakció azonosítója.
+     * Ha ez változik, akkor le fog futni a tranzakció betöltés is (transactionData)
+     */
+    protected selectedTransactionIdTrigger = signal<number | null>(null);
+    /**
+     * Tranzakciós form írható-e
+     */
     protected isTransactionFormDisabled = signal(false);
-
-    ngOnInit() {
-        this.loadMoneyData();
-    }
-
     /**
      * Tranzakció létrehozó modal bezárása
      */
-    protected isNewTransactionModalOpen = signal(false);
+    protected isTransactionModalOpen = signal(false);
+    /**
+     * Újra kell-e tölteni az adatokat
+     * Ha ez változik, akkor újra fogja tölteni a listát
+     * Azért számot növelünk és nem boolean érték, mert ha gyorsan, többször hívódik egymás után, akkor kétszer true-ra állítódik az érték és az nem vált ki új letöltés eventet
+     */
+    protected reloadTransactionMoneyDataTrigger = signal(0);
+
+    /**
+     *  Betöltés alatt van-e a tranzakció
+     */
+    protected isTransactionDataLoading = computed(
+        () => this.selectedTransactionIdTrigger() !== null && this.transactionData() === null,
+    );
+
+    /**
+     * Tranzakciós lista adatok
+     */
+    protected transactionListData = toSignal(
+        toObservable(this.reloadTransactionMoneyDataTrigger).pipe(
+            tap(() => this.isTransactionListLoading.set(true)),
+            switchMap(() =>
+                this.transactionService.getLastTransactions().pipe(
+                    tap(() => {
+                        this.isTransactionListLoading.set(false);
+                    }),
+                ),
+            ),
+        ),
+        {
+            initialValue: [],
+        },
+    );
+    /**
+     * Felhasználó összes pénze.
+     */
+    protected moneySum = toSignal(
+        toObservable(this.reloadTransactionMoneyDataTrigger).pipe(
+            tap(() => this.isMoneySumLoading.set(true)),
+            switchMap(() =>
+                this.transactionService.getMoneySum().pipe(
+                    tap(() => {
+                        this.isMoneySumLoading.set(false);
+                    }),
+                ),
+            ),
+        ),
+        { initialValue: null },
+    );
+    /**
+     * Kiválasztott tranzakció adatai
+     */
+    protected transactionData = toSignal(
+        toObservable(this.selectedTransactionIdTrigger).pipe(
+            switchMap((id) =>
+                id === null ? of(null) : this.transactionService.getTransactionById(id),
+            ),
+        ),
+        { initialValue: null },
+    );
 
     /**
      * Tranzakció létrehozó modal felnyitása
      */
     protected openTransactionModal(): void {
-        this.isNewTransactionModalOpen.set(true);
+        this.isTransactionModalOpen.set(true);
     }
 
     /**
      * Tranzakció létrehozó modal becsukása
      */
     protected closeTransactionModal(): void {
-        this.transactionData.set(null);
-        this.isNewTransactionModalOpen.set(false);
+        this.selectedTransactionIdTrigger.set(null);
+        this.isTransactionModalOpen.set(false);
     }
 
     /**
-     * Tranzakció létrehozó modal bezárása, ha változott az adat
+     * Tranzakció betöltése szerkesztéshez
      */
-    protected refreshAfterSave(): void {
-        this.loadMoneyData();
-        this.closeTransactionModal();
+    protected loadTransaction(id: number): void {
+        this.selectedTransactionIdTrigger.set(id);
+        this.openTransactionModal();
     }
 
     /**
      * Feldob egy confirmot, hogy biztosan törölni szeretné-e a user a tranzakciót
      */
-    popupDeletionConfirm(transactionId: number): void {
+    protected popupDeletionConfirm(transactionId: number): void {
         if (confirm(this.translateService.instant(_('transaction.delete.confirm')))) {
             this.deleteTransaction(transactionId);
         }
@@ -74,82 +136,41 @@ export class MainPage implements OnInit {
      * Tranzakció törlése a főoldalon
      */
     protected deleteTransaction(transactionId: number): void {
-        this.runWithFormDisabled(this.transactionService.deleteTransaction(transactionId), () =>
-            this.refreshAfterSave(),
-        );
+        this.isTransactionFormDisabled.set(true);
+        this.transactionService.deleteTransaction(transactionId).subscribe({
+            next: () => {
+                this.isTransactionFormDisabled.set(false);
+                this.handleModalDataChange();
+            },
+            error: () => this.isTransactionFormDisabled.set(false),
+        });
     }
 
     /**
      * Elment egy tranzakció adatait
      */
-    saveTransaction(payload: NewTransaction): void {
-        const transaction = this.transactionData();
-        const obs =
-            transaction !== null
-                ? this.transactionService.updateTransaction(payload, transaction.id)
-                : this.transactionService.saveTransaction(payload);
-
-        this.runWithFormDisabled(obs, () => this.refreshAfterSave());
-    }
-
-    /**
-     * Futtat egy api hívást és siker esetén meghív egy függvényt
-     *
-     * @param observable pl.: egy api hívás, ami observable-t ad vissza
-     * @param onSuccess függvény, ami siker esetén lefut
-     */
-    private runWithFormDisabled<T>(observable: Observable<T>, onSuccess: () => void) {
+    protected saveTransaction(payload: NewTransaction): void {
         this.isTransactionFormDisabled.set(true);
+
+        const transaction = this.transactionData();
+        const observable = transaction
+            ? this.transactionService.updateTransaction(payload, transaction.id)
+            : this.transactionService.saveTransaction(payload);
 
         observable.subscribe({
             next: () => {
                 this.isTransactionFormDisabled.set(false);
-                onSuccess();
+                this.handleModalDataChange();
             },
-            error: (response) => {
-                console.error(
-                    this.translateService.instant(_('transaction.delete.error')),
-                    response,
-                );
-                this.isTransactionFormDisabled.set(false);
-            },
+            error: () => this.isTransactionFormDisabled.set(false),
         });
     }
 
     /**
-     * Újratölti a pénzhez tartozó adatokat a főoldalon
+     * Modal adatváltozás lekezelése
      */
-    private loadMoneyData(): void {
-        forkJoin({
-            list: this.transactionService.getLastTransactions(),
-            sum: this.transactionService.getMoneySum(),
-        }).subscribe({
-            next: ({ list, sum }) => {
-                this.transactionListData.set(list);
-                this.moneySum.set(sum);
-                this.isTransactionListLoaded.set(true);
-            },
-            error: () => {
-                this.isTransactionListLoaded.set(false);
-            },
-        });
-    }
-
-    /**
-     * Adott tranzakció letöltése a backendről, a szerkesztő formnak
-     */
-    protected loadTransaction(transactionId: number): void {
-        this.isTransactionDataLoading.set(true);
-        this.openTransactionModal();
-        this.transactionService.getTransactionById(transactionId).subscribe({
-            next: (response) => {
-                this.isTransactionDataLoading.set(false);
-                this.transactionData.set(response);
-            },
-            error: (response) => {
-                console.error('unknown error during data loading!', response);
-                this.isTransactionDataLoading.set(false);
-            },
-        });
+    private handleModalDataChange(): void {
+        this.reloadTransactionMoneyDataTrigger.update((value) => value + 1);
+        this.closeTransactionModal();
     }
 }

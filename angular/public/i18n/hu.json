@@ -60,5 +60,10 @@
       "delete.last-one-error": "Utolsó tétel nem törölhető",
       "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek."
     }
+  },
+  "mainpage": {
+    "total_balance": "Összes pénz",
+    "create_transaction.button": "Tranzakció létrehozása",
+    "no_transaction": "Nincs még felvett tranzakció"
   }
 }
