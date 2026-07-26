@@ -10,17 +10,16 @@
             </div>
 
             <div class="transaction-price">
-                {{ transaction().priceSum | number  }}
+                {{ transaction.priceSum | number }}
             </div>
-
         </div>
 
         <div class="card-element transaction-name">
-            {{ transaction().name }}
+            {{ transaction.name }}
         </div>
 
         <div class="card-element transaction-date">
-            {{transaction().transactionDate}}
+            {{ transaction.transactionDate }}
         </div>
     </div>
 </div>
