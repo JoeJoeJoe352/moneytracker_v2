@@ -24,7 +24,7 @@ import {
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
 } from './interfaces';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * Detail form elemei
@@ -43,23 +43,18 @@ interface DetailForm {
     imports: [ReactiveFormsModule, NgxsmkDatepickerComponent, SwitchComponent, TranslatePipe],
 })
 export class TransactionFormComponent implements OnChanges {
-    private translateService = inject(TranslateService);
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
 
+    /**
+     * Form disabled-e (pl.: töltődéskor)
+     */
     @Input({ required: true }) isTransactionFormDisabled!: boolean;
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
     @Input() transaction: TransactionDataFromBackend | null = null;
-    /**
-     * Event, ha a bezárás gombra kattintott a user
-     */
-    @Output() closeModal = new EventEmitter<void>();
-    /**
-     * Event, ha változott adat
-     */
-    @Output() dataChanged = new EventEmitter<void>();
+
     /**
      * Mentés gombra kattintott a user
      */
@@ -71,6 +66,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Tranzakciós form
      */
+    
     protected transactionForm: FormGroup;
 
     constructor() {
@@ -99,7 +95,6 @@ export class TransactionFormComponent implements OnChanges {
 
             // Új form a frissen betöltött adatokkal
             this.transactionForm = this.buildForm(convertedInputValues);
-            this.transactionForm.markAllAsTouched()
         }
     }
 
@@ -132,7 +127,6 @@ export class TransactionFormComponent implements OnChanges {
      * Form elküldésekori műveletek
      */
     onSubmit(): void {
-
         if (this.transactionForm.invalid) {
             this.transactionForm.markAllAsTouched();
             console.error(this.transactionForm.errors);
@@ -145,7 +139,7 @@ export class TransactionFormComponent implements OnChanges {
      * Törli a megadott indexű tétel sort
      */
     deleteRow(index: number): void {
-        if (this.isDetailDeleteButtonDisabled) {
+        if (this.canDeleteDetailRow) {
             console.error('utolsó sort nem lehet törölni');
             return;
         }
@@ -192,7 +186,7 @@ export class TransactionFormComponent implements OnChanges {
 
     // Getters
  
-    get isDetailDeleteButtonDisabled() {
+    get canDeleteDetailRow() {
         return this.details.length < 2;
     }
 
