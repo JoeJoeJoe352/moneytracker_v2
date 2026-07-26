@@ -4,9 +4,10 @@ import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { NewTransaction } from '../transaction/interfaces';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
-import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { TransactionActionService } from '../transaction/transaction-action-service';
 
 @Component({
     selector: 'app-main-page-component',
@@ -17,7 +18,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 })
 export class MainPage {
     private transactionService = inject(TransactionService);
-    private translateService = inject(TranslateService);
+    private transactionActionService = inject(TransactionActionService);
 
     /**
      * Töltődik-e jelenleg a tranzakciós lista
@@ -103,7 +104,8 @@ export class MainPage {
     /**
      * Tranzakció létrehozó modal felnyitása
      */
-    protected openTransactionModal(): void {
+    protected openTransactionModal(id: number | null): void {
+        this.selectedTransactionIdTrigger.set(id);
         this.isTransactionModalOpen.set(true);
     }
 
@@ -116,60 +118,35 @@ export class MainPage {
     }
 
     /**
-     * Tranzakció betöltése szerkesztéshez
-     */
-    protected loadTransaction(id: number): void {
-        this.selectedTransactionIdTrigger.set(id);
-        this.openTransactionModal();
-    }
-
-    /**
-     * Feldob egy confirmot, hogy biztosan törölni szeretné-e a user a tranzakciót
+     * Feldob egy confirmot, hogy biztosan törölni szeretné-e a user a tranzakciót, ha igent nyom, törli
      */
     protected popupDeletionConfirm(transactionId: number): void {
-        if (confirm(this.translateService.instant(_('transaction.delete.confirm')))) {
-            this.deleteTransaction(transactionId);
+        if (this.transactionActionService.confirmDeletion()) {
+            this.transactionActionService.deleteTransaction(
+                transactionId,
+                this.isTransactionFormDisabled,
+                () => this.refreshAfterSave(),
+            );
         }
-    }
-
-    /**
-     * Tranzakció törlése a főoldalon
-     */
-    protected deleteTransaction(transactionId: number): void {
-        this.isTransactionFormDisabled.set(true);
-        this.transactionService.deleteTransaction(transactionId).subscribe({
-            next: () => {
-                this.isTransactionFormDisabled.set(false);
-                this.handleModalDataChange();
-            },
-            error: () => this.isTransactionFormDisabled.set(false),
-        });
     }
 
     /**
      * Elment egy tranzakció adatait
      */
     protected saveTransaction(payload: NewTransaction): void {
-        this.isTransactionFormDisabled.set(true);
-
-        const transaction = this.transactionData();
-        const observable = transaction
-            ? this.transactionService.updateTransaction(payload, transaction.id)
-            : this.transactionService.saveTransaction(payload);
-
-        observable.subscribe({
-            next: () => {
-                this.isTransactionFormDisabled.set(false);
-                this.handleModalDataChange();
-            },
-            error: () => this.isTransactionFormDisabled.set(false),
-        });
+        const transactionData = this.transactionData();
+        this.transactionActionService.saveTransaction(
+            payload,
+            transactionData?.id ?? null,
+            this.isTransactionFormDisabled,
+            () => this.refreshAfterSave(),
+        );
     }
 
     /**
      * Modal adatváltozás lekezelése
      */
-    private handleModalDataChange(): void {
+    private refreshAfterSave(): void {
         this.reloadTransactionMoneyDataTrigger.update((value) => value + 1);
         this.closeTransactionModal();
     }

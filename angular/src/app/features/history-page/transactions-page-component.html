@@ -1,4 +1,4 @@
-@if (isNewTransactionModalOpen()) {
+@if (isTransactionModalOpen()) {
     <app-create-transaction-modal
         [isTransactionFormDisabled]="isTransactionFormDisabled()"
         [transaction]="transactionData()"
@@ -11,8 +11,8 @@
 <h1>Transactions</h1>
 
 <div>
-    <button class="btn btn-primary-green" (click)="openTransactionModal()">
-        Create new transaction
+    <button class="btn btn-primary-green" (click)="openTransactionModal(null)">
+        {{ 'mainpage.create_transaction.button' | translate }}
     </button>
 </div>
 
@@ -67,12 +67,12 @@
         <div class="spinner-border" role="status"></div>
     </div>
 } @else {
-    @if (transactionListData() !== null) {
+    @if (transactionListData() !== null && transactionListData().length > 0) {
         <app-transaction-list
             [transactions]="transactionListData()"
-            (editTransaction)="loadTransaction($event.transactionId)"
+            (editTransaction)="openTransactionModal($event.transactionId)"
         />
     } @else {
-        <p>No transaction to show</p>
+        <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
     }
 }

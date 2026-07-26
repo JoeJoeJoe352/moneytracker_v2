@@ -19,7 +19,7 @@
     </div>
 
     <div>
-        <button class="btn btn-green-hollow" (click)="openTransactionModal()">
+        <button class="btn btn-green-hollow" (click)="openTransactionModal(null)">
             {{ 'mainpage.create_transaction.button' | translate }}
         </button>
     </div>
@@ -33,7 +33,7 @@
     @if (transactionListData() !== null && transactionListData().length > 0) {
         <app-transaction-list
             [transactions]="transactionListData()"
-            (editTransaction)="loadTransaction($event.transactionId)"
+            (editTransaction)="openTransactionModal($event.transactionId)"
         />
     } @else {
         <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
