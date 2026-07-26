@@ -11,7 +11,6 @@ import { NewTransaction, TransactionDataFromBackend } from './interfaces';
                 [isTransactionFormDisabled]="isTransactionFormDisabled"
                 [transaction]="transaction"
                 (closeModal)="closeModal.emit()"
-                (dataChanged)="dataChanged.emit()"
                 (deleted)="deleteTransactionRequested.emit($event)"
                 (saved)="saved.emit($event)"
             />
@@ -24,7 +23,6 @@ export class TransactionModalComponent {
     @Input({ required: true }) isTransactionFormDisabled!: boolean;
 
     @Output() closeModal = new EventEmitter<void>();
-    @Output() dataChanged = new EventEmitter<void>();
     @Output() deleteTransactionRequested = new EventEmitter<number>();
     @Output() saved = new EventEmitter<NewTransaction>();
 }

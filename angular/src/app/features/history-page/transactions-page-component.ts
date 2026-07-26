@@ -7,6 +7,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angul
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
 import { _, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
 
 interface FilterFormInterface {
     name: FormControl<string>;
@@ -80,7 +81,7 @@ export class TransactionsPage {
     /**
      * Tranzakció létrehozó modal bezárása, ha változott az adat
      */
-    protected handleModalDataChange(): void {
+    protected refreshAfterSave(): void {
         this.loadTransactionHistory();
         this.closeTransactionModal();
     }
@@ -109,11 +110,37 @@ export class TransactionsPage {
      * Tranzakció törlése a főoldalon
      */
     protected deleteTransaction(transactionId: number): void {
+        this.runWithFormDisabled(this.transactionService.deleteTransaction(transactionId), () =>
+            this.refreshAfterSave(),
+        );
+    }
+
+    /**
+     * Elment egy tranzakció adatait
+     */
+    saveTransaction(payload: NewTransaction): void {
+        const transaction = this.transactionData();
+        const obs =
+            transaction !== null
+                ? this.transactionService.updateTransaction(payload, transaction.id)
+                : this.transactionService.saveTransaction(payload);
+
+        this.runWithFormDisabled(obs, () => this.refreshAfterSave());
+    }
+
+    /**
+     * Futtat egy api hívást és siker esetén meghív egy függvényt
+     *
+     * @param observable pl.: egy api hívás, ami observable-t ad vissza
+     * @param onSuccess függvény, ami siker esetén lefut
+     */
+    private runWithFormDisabled<T>(observable: Observable<T>, onSuccess: () => void) {
         this.isTransactionFormDisabled.set(true);
-        this.transactionService.deleteTransaction(transactionId).subscribe({
+
+        observable.subscribe({
             next: () => {
                 this.isTransactionFormDisabled.set(false);
-                this.handleModalDataChange();
+                onSuccess();
             },
             error: (response) => {
                 console.error(
@@ -123,44 +150,6 @@ export class TransactionsPage {
                 this.isTransactionFormDisabled.set(false);
             },
         });
-    }
-
-    /**
-     * Tranzakció mentése a főoldalon
-     */
-    protected saveTransaction(payload: NewTransaction) {
-        const transaction = this.transactionData();
-        // Létezik a tranzakció, update!
-        if (transaction !== null) {
-            const transactionId = transaction.id;
-            this.transactionService.updateTransaction(payload, transactionId).subscribe({
-                next: () => {
-                    this.isTransactionFormDisabled.set(false);
-                    this.handleModalDataChange();
-                },
-                error: (response) => {
-                    console.error(
-                        this.translateService.instant(_('transaction.update.error')),
-                        response,
-                    );
-                    this.isTransactionFormDisabled.set(false);
-                },
-            });
-        } else {
-            this.transactionService.saveTransaction(payload).subscribe({
-                next: () => {
-                    this.isTransactionFormDisabled.set(false);
-                    this.handleModalDataChange();
-                },
-                error: (response) => {
-                    console.error(
-                        this.translateService.instant(_('transaction.create.error')),
-                        response,
-                    );
-                    this.isTransactionFormDisabled.set(false);
-                },
-            });
-        }
     }
 
     /**
@@ -204,11 +193,11 @@ export class TransactionsPage {
      */
     protected loadTransaction(transactionId: number): void {
         this.isTransactionDataLoading.set(true);
+        this.openTransactionModal();
         this.transactionService.getTransactionById(transactionId).subscribe({
             next: (response) => {
                 this.isTransactionDataLoading.set(false);
                 this.transactionData.set(response);
-                this.openTransactionModal();
             },
             error: (response) => {
                 console.error('unknown error during data loading!', response);

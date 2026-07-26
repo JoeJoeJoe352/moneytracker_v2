@@ -3,7 +3,6 @@
         [isTransactionFormDisabled]="isTransactionFormDisabled()"
         [transaction]="transactionData()"
         (closeModal)="closeTransactionModal()"
-        (dataChanged)="handleModalDataChange()"
         (deleteTransactionRequested)="popupDeletionConfirm($event)"
         (saved)="saveTransaction($event)"
     />

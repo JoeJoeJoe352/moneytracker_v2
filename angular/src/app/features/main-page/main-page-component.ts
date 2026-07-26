@@ -5,6 +5,7 @@ import { NewTransaction, TransactionDataFromBackend } from '../transaction/inter
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
 import { _, TranslateService } from '@ngx-translate/core';
+import { forkJoin, Observable } from 'rxjs';
 
 @Component({
     selector: 'app-main-page-component',
@@ -55,7 +56,7 @@ export class MainPage implements OnInit {
     /**
      * Tranzakció létrehozó modal bezárása, ha változott az adat
      */
-    protected handleModalDataChange(): void {
+    protected refreshAfterSave(): void {
         this.loadMoneyData();
         this.closeTransactionModal();
     }
@@ -73,11 +74,37 @@ export class MainPage implements OnInit {
      * Tranzakció törlése a főoldalon
      */
     protected deleteTransaction(transactionId: number): void {
+        this.runWithFormDisabled(this.transactionService.deleteTransaction(transactionId), () =>
+            this.refreshAfterSave(),
+        );
+    }
+
+    /**
+     * Elment egy tranzakció adatait
+     */
+    saveTransaction(payload: NewTransaction): void {
+        const transaction = this.transactionData();
+        const obs =
+            transaction !== null
+                ? this.transactionService.updateTransaction(payload, transaction.id)
+                : this.transactionService.saveTransaction(payload);
+
+        this.runWithFormDisabled(obs, () => this.refreshAfterSave());
+    }
+
+    /**
+     * Futtat egy api hívást és siker esetén meghív egy függvényt
+     *
+     * @param observable pl.: egy api hívás, ami observable-t ad vissza
+     * @param onSuccess függvény, ami siker esetén lefut
+     */
+    private runWithFormDisabled<T>(observable: Observable<T>, onSuccess: () => void) {
         this.isTransactionFormDisabled.set(true);
-        this.transactionService.deleteTransaction(transactionId).subscribe({
+
+        observable.subscribe({
             next: () => {
                 this.isTransactionFormDisabled.set(false);
-                this.handleModalDataChange();
+                onSuccess();
             },
             error: (response) => {
                 console.error(
@@ -90,62 +117,19 @@ export class MainPage implements OnInit {
     }
 
     /**
-     * Tranzakció mentése a főoldalon
-     */
-    protected saveTransaction(payload: NewTransaction) {
-        const transaction = this.transactionData()
-        // Létezik a tranzakció, update!
-        if (transaction !== null) {
-            const transactionId = transaction.id;
-            this.transactionService.updateTransaction(payload, transactionId).subscribe({
-                next: () => {
-                    this.isTransactionFormDisabled.set(false);
-                    this.handleModalDataChange()
-                },
-                error: (response) => {
-                    console.error(
-                        this.translateService.instant(_('transaction.update.error')),
-                        response,
-                    );
-                    this.isTransactionFormDisabled.set(false);
-                },
-            });
-        } else {
-            this.transactionService.saveTransaction(payload).subscribe({
-                next: () => {
-                    this.isTransactionFormDisabled.set(false);
-                    this.handleModalDataChange()
-                },
-                error: (response) => {
-                    console.error(
-                        this.translateService.instant(_('transaction.create.error')),
-                        response,
-                    );
-                    this.isTransactionFormDisabled.set(false);
-                },
-            });
-        }
-    }
-
-    /**
      * Újratölti a pénzhez tartozó adatokat a főoldalon
      */
     private loadMoneyData(): void {
-        this.loadTransactionList();
-        this.loadMoneySum();
-    }
-
-    /**
-     * Tranzakciók letöltése a backendről, a kártyás listához
-     */
-    loadTransactionList(): void {
-        this.transactionService.getLastTransactions().subscribe({
-            next: (response) => {
+        forkJoin({
+            list: this.transactionService.getLastTransactions(),
+            sum: this.transactionService.getMoneySum(),
+        }).subscribe({
+            next: ({ list, sum }) => {
+                this.transactionListData.set(list);
+                this.moneySum.set(sum);
                 this.isTransactionListLoaded.set(true);
-                this.transactionListData.set(response);
             },
-            error: (response) => {
-                console.error('unknown error during transaction creation!', response);
+            error: () => {
                 this.isTransactionListLoaded.set(false);
             },
         });
@@ -156,29 +140,15 @@ export class MainPage implements OnInit {
      */
     protected loadTransaction(transactionId: number): void {
         this.isTransactionDataLoading.set(true);
+        this.openTransactionModal();
         this.transactionService.getTransactionById(transactionId).subscribe({
             next: (response) => {
                 this.isTransactionDataLoading.set(false);
                 this.transactionData.set(response);
-                this.openTransactionModal();
             },
             error: (response) => {
                 console.error('unknown error during data loading!', response);
                 this.isTransactionDataLoading.set(false);
-            },
-        });
-    }
-
-    /**
-     * Betölti az összesített pénzét a usernek
-     */
-    protected loadMoneySum(): void {
-        this.transactionService.getMoneySum().subscribe({
-            next: (response) => {
-                this.moneySum.set(response);
-            },
-            error: (response) => {
-                console.error('unknown error during transaction creation!', response);
             },
         });
     }
