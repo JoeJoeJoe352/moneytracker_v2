@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, Input } from '@angular/core';
 import { TransactionDataFromBackend } from './interfaces';
 import { TransactionTypeEnum } from './transaction-type-enum';
 import { DecimalPipe } from '@angular/common';
@@ -10,12 +10,15 @@ import { DecimalPipe } from '@angular/common';
     imports: [DecimalPipe],
 })
 export default class TransactionCardComponent {
-    transaction = input.required<TransactionDataFromBackend>();
+    /**
+     * Megjelenítendő tranzakció adatai
+     */
+    @Input({ required: true }) transaction!: TransactionDataFromBackend;
 
     /**
      * Tranzakció típusa bevétel-e
      */
-    isIncome(): boolean {
-        return this.transaction().transactionType == TransactionTypeEnum.INCOME;
-    }
+    protected isIncome = computed(
+        () => this.transaction.transactionType == TransactionTypeEnum.INCOME,
+    );
 }

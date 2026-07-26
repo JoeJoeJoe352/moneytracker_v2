@@ -18,6 +18,7 @@ import jakarta.persistence.EntityNotFoundException;
 
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionFilter;
+import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 
 @Service
 public class TransactionService {
@@ -97,12 +98,32 @@ public class TransactionService {
     private void saveDetails(Transaction savedTransaction, List<TransactionDetail> transactionDetails) {
         int countOfDetails = transactionDetails.size();
         for (TransactionDetail detail : transactionDetails) {
+
+            if (
+                savedTransaction.getTransactionType() == TransactionTypeEnum.INCOME &&
+                detail.getPrice().compareTo(new BigDecimal(0)) != 1
+            ) {
+                throw new IllegalArgumentException("Income transaction, but detail are not greater than 0. Error!");
+            }
+            if (
+                savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME &&
+                detail.getPrice().compareTo(new BigDecimal(0)) != -1
+            ) {
+                throw new IllegalArgumentException("Expense transaction, but detail is not smaller than 0!");
+            }
+
             if (countOfDetails > 1 && detail.getName() == null) {
                 throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
             } else if (countOfDetails == 1 && detail.getName() == null) {
                 detail.setName(DEFAULT_DETAIL_NAME);
             }
             detail.setTransaction(savedTransaction);
+
+            BigDecimal price = detail.getPrice();
+            if (savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME) {
+                price.negate();
+            }
+            detail.setPrice(price);
 
             this.transactionDetailRepo.save(detail);
         }

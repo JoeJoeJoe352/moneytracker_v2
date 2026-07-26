@@ -2,7 +2,6 @@ package com.starbuck.moneytracker.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 
 import java.math.BigDecimal;
@@ -169,9 +168,9 @@ class TransactionServiceTest {
         Transaction updatedTransaction = new Transaction(1l, "updated", LocalDate.of(2023, 1, 1),
                 TransactionTypeEnum.OUTCOME,
                 new BigDecimal(100), 0);
-        TransactionDetail updatedDetail = new TransactionDetail(1l, "updatedDetail", new BigDecimal(200), null, null,
+        TransactionDetail updatedDetail = new TransactionDetail(1l, "updatedDetail", new BigDecimal(-200), null, null,
                 updatedTransaction);
-        TransactionDetail updatedDetail2 = new TransactionDetail(2l, "updatedDetail2", new BigDecimal(300), null, null,
+        TransactionDetail updatedDetail2 = new TransactionDetail(2l, "updatedDetail2", new BigDecimal(-300), null, null,
                 updatedTransaction);
 
         transactionService.updateTransaction(1l, updatedTransaction, List.of(updatedDetail, updatedDetail2));
@@ -182,7 +181,7 @@ class TransactionServiceTest {
         assertEquals("updated", savedTransaction.getName());
         assertEquals(LocalDate.of(2023, 1, 1), savedTransaction.getTransactionDate());
         assertEquals(TransactionTypeEnum.OUTCOME, savedTransaction.getTransactionType());
-        assertEquals(new BigDecimal(500), savedTransaction.getPriceSum());
+        assertEquals(new BigDecimal(-500), savedTransaction.getPriceSum());
         // törli az eddigi detailokat
         Mockito.verify(transactionDetailRepo).deleteAll(Set.of(detailInDB));
         // elmenti az új detailokat

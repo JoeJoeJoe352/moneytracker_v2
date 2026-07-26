@@ -1,35 +1,41 @@
-@if (isNewTransactionModalOpen()) {
+@if (isTransactionModalOpen()) {
     <app-create-transaction-modal
-        [transaction]="transactionData()" 
+        [transaction]="transactionData()"
+        [isTransactionFormDisabled]="isTransactionFormDisabled() || isTransactionDataLoading()"
         (closeModal)="closeTransactionModal()"
-        (dataChanged)="handleMondalDataChange()"
+        (deleteTransactionRequested)="popupDeletionConfirm($event)"
+        (saved)="saveTransaction($event)"
     />
 }
 
 <div class="green-block">
     <div class="mb-3">
-        <div class="my-2">Total balance</div>
-        <h2>{{ moneySum() | number }} Ft</h2>
+        <div class="my-2">{{ 'mainpage.total_balance' | translate }}</div>
+        @if (isMoneySumLoading()) {
+            <div class="spinner-border" role="status"></div>
+        } @else {
+            <h2>{{ moneySum() | number }} Ft</h2>
+        }
     </div>
-    
+
     <div>
-        <button class="btn btn-green-hollow" (click)="openTransactionModal()">
-            Create new transaction
+        <button class="btn btn-green-hollow" (click)="openTransactionModal(null)">
+            {{ 'mainpage.create_transaction.button' | translate }}
         </button>
     </div>
 </div>
 
-@if (isTransactionListLoaded()) {
-    @if(transactionListData() !== null) {
+@if (isTransactionListLoading()) {
+    <div class="text-center">
+        <div class="spinner-border" role="status"></div>
+    </div>
+} @else {
+    @if (transactionListData() !== null && transactionListData().length > 0) {
         <app-transaction-list
             [transactions]="transactionListData()"
-            (editTransaction)="(loadTransaction($event.transactionId))"
+            (editTransaction)="openTransactionModal($event.transactionId)"
         />
     } @else {
-        <p>No transaction to show</p>
+        <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
     }
-} @else {
-    <div class="text-center">
-        <div class="spinner-border" role="status" ></div>
-    </div>
 }
