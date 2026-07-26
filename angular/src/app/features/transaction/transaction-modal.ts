@@ -10,7 +10,6 @@ import { NewTransaction, TransactionDataFromBackend } from './interfaces';
             <app-transaction-form-component
                 [isTransactionFormDisabled]="isTransactionFormDisabled"
                 [transaction]="transaction"
-                (closeModal)="closeModal.emit()"
                 (deleted)="deleteTransactionRequested.emit($event)"
                 (saved)="saved.emit($event)"
             />

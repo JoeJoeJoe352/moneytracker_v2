@@ -15,7 +15,13 @@ import { TransactionDataFromBackend } from './interfaces';
     imports: [TransactionCardComponent],
 })
 export default class TransactionListComponent {
+    /**
+     * Megjelenítendő tranzakciók listája
+     */
     @Input({ required: true }) transactions!: TransactionDataFromBackend[];
 
+    /**
+     * Ha user módosítani szeretne egy tranzakciót
+     */
     @Output() editTransaction = new EventEmitter<{ transactionId: number }>();
 }
