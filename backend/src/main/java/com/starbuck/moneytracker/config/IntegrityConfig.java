@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.config;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -10,12 +11,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.repository.TransactionRepository;
+import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 
 @Configuration
 @EnableScheduling
 public class IntegrityConfig {
-    Logger logger = LoggerFactory.getLogger(IntegrityConfig.class);
-    TransactionRepository transactionRepository;
+    private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
+    private Logger logger = LoggerFactory.getLogger(IntegrityConfig.class);
+    private TransactionRepository transactionRepository;
 
     public IntegrityConfig(TransactionRepository transactionRepository) {
         this.transactionRepository = transactionRepository;
@@ -31,14 +34,17 @@ public class IntegrityConfig {
         logger.info("Checking integrity of the transactions...");
         List<Transaction> transactions = transactionRepository.getAllTransaction();
 
-        transactions.stream()
-                .filter(
-                        t -> t.getPriceSum() == null ||
-                        t.sumDetailsCost().compareTo(t.getPriceSum()) != 0)
-                .forEach(t -> logger.warn(
+        for (Transaction t : transactions) {
+            BigDecimal calculated = costCalculator.calculateTransactionCost(t);
+            BigDecimal cached = t.getPriceSum();
+
+            if (cached == null || calculated.compareTo(cached) != 0) {
+                logger.warn(
                         "Calculated ({}) and cached ({}) cost of transactionDetails not equals in Transaction with ID {}",
-                        t.sumDetailsCost(),
-                        t.getPriceSum(),
-                        t.getId()));
+                        calculated,
+                        cached,
+                        t.getId());
+            }
+        }
     }
 }

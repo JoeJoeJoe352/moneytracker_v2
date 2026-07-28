@@ -41,7 +41,7 @@ public class TransactionMapper {
                 entity.getPriceSum(),
                 entity.getTransactionDate(),
                 entity.getTransactionType(),
-                entity.getIsComplexTransaction(),
+                entity.isComplexTransaction(),
                 detailDto);
 
         return dto;

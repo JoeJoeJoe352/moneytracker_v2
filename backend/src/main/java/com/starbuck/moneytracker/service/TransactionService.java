@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
+import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
@@ -23,11 +24,6 @@ import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 @Service
 public class TransactionService {
 
-    /**
-     * Ez a neve a transactionDetailnek, hogyha a user összegezve adja meg a
-     * tranzakció összeget
-     */
-    public static final String DEFAULT_DETAIL_NAME = "sum";
     /**
      * Utolsó hány tranzakcióval térjünk vissza?
      */
@@ -42,6 +38,8 @@ public class TransactionService {
     @Autowired
     private CurrentUserUtil currentUser;
 
+    private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
+
     /**
      * Tranzakció létrehozása
      * Ha hiba van, magától rollbackel a spring
@@ -49,7 +47,7 @@ public class TransactionService {
     @Transactional
     public Transaction createTransaction(Transaction transaction, List<TransactionDetail> transactionDetails) {
         BigDecimal sumOfDetailsPrice = transactionDetails.stream()
-                .map((detail) -> detail.getCost(transaction.isOutcome()))
+                .map((detail) -> costCalculator.calculateCost(detail, transaction.isOutcome()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         transaction.setPriceSum(sumOfDetailsPrice);
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
@@ -79,13 +77,13 @@ public class TransactionService {
         transaction.setTransactionType(updatedTransaction.getTransactionType());
 
         BigDecimal sumOfDetailsPrice = updatedDetails.stream()
-                .map((detail) -> detail.getCost(updatedTransaction.isOutcome()))
+                .map((detail) -> costCalculator.calculateCost(detail, updatedTransaction.isOutcome()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         transaction.setPriceSum(sumOfDetailsPrice);
 
-        this.transactionRepo.save(transaction);
+        transactionRepo.save(transaction);
         // egyszerűbb törölni a detailokat, mint kikeresni a meglévőket és frissíteni
-        this.transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
+        transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
         this.saveDetails(transaction, updatedDetails);
     }
 
@@ -99,7 +97,7 @@ public class TransactionService {
         int countOfDetails = transactionDetails.size();
         for (TransactionDetail detail : transactionDetails) {
 
-            detail.setPrice(detail.getCost(savedTransaction.isOutcome()));
+            detail.setPrice(costCalculator.calculateCost(detail, savedTransaction.isOutcome()));
 
             if (savedTransaction.getTransactionType() == TransactionTypeEnum.INCOME &&
                     detail.getPrice().compareTo(new BigDecimal(0)) != 1) {
@@ -117,7 +115,7 @@ public class TransactionService {
             if (countOfDetails > 1 && detail.getName() == null) {
                 throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
             } else if (countOfDetails == 1 && detail.getName() == null) {
-                detail.setName(DEFAULT_DETAIL_NAME);
+                detail.setName(TransactionDetail.DEFAULT_DETAIL_NAME);
             }
             detail.setTransaction(savedTransaction);
 

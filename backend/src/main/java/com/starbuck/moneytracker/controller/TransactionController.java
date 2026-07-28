@@ -53,7 +53,7 @@ public class TransactionController {
         } else if (request.globalPrice() != null) {
             transactionDetails = transactionMapper
                     .fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(request.globalPrice(),
-                            TransactionService.DEFAULT_DETAIL_NAME)));
+                            TransactionDetail.DEFAULT_DETAIL_NAME)));
         } else {
             throw new IllegalArgumentException("No detail in list and price is also null. Error!");
         }
@@ -83,7 +83,7 @@ public class TransactionController {
         } else if (request.globalPrice() != null) {
             updatedDetails = transactionMapper
                     .fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(request.globalPrice(),
-                            TransactionService.DEFAULT_DETAIL_NAME)));
+                            TransactionDetail.DEFAULT_DETAIL_NAME)));
         } else {
             throw new IllegalArgumentException("No detail in list and price is also null. Error!");
         }

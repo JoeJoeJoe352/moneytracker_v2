@@ -90,7 +90,7 @@ class TransactionServiceTest {
         assertUtil.assertTransaction(result, "simpleTransaction", LocalDate.now(), new BigDecimal(100),
                 TransactionTypeEnum.INCOME);
         // csak egy, név nélküli tranzakció van, ezért default nevet kap
-        assertUtil.assertDetail(captor.getValue(), TransactionService.DEFAULT_DETAIL_NAME, new BigDecimal(100), null,
+        assertUtil.assertDetail(captor.getValue(), TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(100), null,
                 null,
                 result);
     }

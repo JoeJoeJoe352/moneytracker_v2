@@ -94,7 +94,7 @@ class TransactionServiceIntegrationTest {
         assertNotNull(saved.getId());
 
         TransactionDetail detail = transactionDetailRepo.findAll().get(0);
-        assertEquals(TransactionService.DEFAULT_DETAIL_NAME, detail.getName());
+        assertEquals(TransactionDetail.DEFAULT_DETAIL_NAME, detail.getName());
         assertEquals(saved.getId(), detail.getTransaction().getId());
 
         assertEquals(1, transactionRepo.count());
