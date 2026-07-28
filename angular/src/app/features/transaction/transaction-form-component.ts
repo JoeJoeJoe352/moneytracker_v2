@@ -164,7 +164,7 @@ export class TransactionFormComponent implements OnChanges {
     }): FormGroup<DetailForm> {
         return this.fb.group({
             detailName: [params.name, Validators.required],
-            detailPrice: [params.price, [Validators.min(1), Validators.required]],
+            detailPrice: [params.price, [Validators.min(1)]],
             detailWeight: [params.weight],
             detailUnitPrice: [params.unitPrice],
         }) as FormGroup<DetailForm>;

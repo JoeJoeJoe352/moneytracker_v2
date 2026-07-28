@@ -13,11 +13,9 @@ public record TransactionDetailCreateDto(
 
         // Ez lehet null, ha simple tranzakcióról van szó. Todo ez nem fogja meg az egy
         // karakteres nevet
-        @Length(min = 3, max = 50, message = "Name must be between 3 and 50 characters") 
-        String name,
+        @Length(min = 3, max = 50, message = "Name must be between 3 and 50 characters") String name,
 
         BigDecimal weight,
 
-        BigDecimal unitPrice
-    ) {
+        BigDecimal unitPrice) {
 }

@@ -7,7 +7,7 @@ export interface TransactionInputDefaultValuesWithDetails {
     price: null | number;
     transactionDate: Date | null;
     details: TransactionDetailsDataFromBackend[];
-    isComplexTransaction: boolean,
+    isComplexTransaction: boolean;
 }
 
 /**
@@ -19,8 +19,13 @@ export interface NewTransaction {
     isIncome: boolean;
     price: number | null;
     transactionDate: Date;
-    details: { detailName: string; detailPrice: number }[];
-    isComplexTransaction: boolean,
+    details: {
+        detailName: string;
+        detailPrice: number;
+        detailWeight: number;
+        detailUnitPrice: number;
+    }[];
+    isComplexTransaction: boolean;
 }
 
 /**
@@ -31,7 +36,17 @@ export interface TransactionDataForBackend {
     name: string;
     transactionDate: string;
     transactionType: string;
-    transactionDetails: TransactionDetailsDataForBackend2[];
+    transactionDetails: TransactionDetailsDataForBackend[];
+}
+
+/**
+ * Detail adatok a backendnek
+ */
+export interface TransactionDetailsDataForBackend {
+    name: string;
+    price: number | null;
+    weight: number | null;
+    unitPrice: number | null;
 }
 
 /**
@@ -52,13 +67,7 @@ export interface TransactionDataFromBackend {
  */
 export interface TransactionDetailsDataFromBackend {
     name: string;
-    price: number; // todo ez később lehet null
+    price: number; // ha backendről jön, akkor ez sose lesz null
     weight: number | null;
     unitPrice: number | null;
-}
-
-// todo ez majd később nem kell, TransactionDetailsDataFromBackend-el helyettesíthető
-export interface TransactionDetailsDataForBackend2 {
-    name: string;
-    price: number;
 }

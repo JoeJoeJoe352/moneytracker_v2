@@ -89,7 +89,7 @@
         </div>
     } @else {
         <div class="detail-inputs">
-            <div class="mb-1">{{ "transaction.detail.title" | translate }}</div>
+            <div class="mb-1">{{ 'transaction.detail.title' | translate }}</div>
             @for (detail of details.controls; track $index) {
                 <div [formGroup]="detail" class="d-flex">
                     <div class="me-2">
@@ -123,16 +123,33 @@
                         @if (
                             detail.get('detailPrice')?.invalid && detail.get('detailPrice')?.touched
                         ) {
-                            @if (detail.get('detailPrice')?.hasError('required')) {
-                                <div class="form-field-error">
-                                    {{ 'transaction.detail.price.required' | translate }}
-                                </div>
-                            } @else if (detail.get('detailPrice')?.hasError('min')) {
+                            @if (detail.get('detailPrice')?.hasError('min')) {
                                 <div class="form-field-error">
                                     {{ 'transaction.detail.price.min' | translate }}
                                 </div>
                             }
                         }
+                    </div>
+
+                    <div class="me-2">
+                        <label for="detail-weight">{{
+                            'transaction.detail.weight' | translate
+                        }}</label>
+                        <input
+                            id="detail-weight-{{ $index }}"
+                            type="number"
+                            formControlName="detailWeight"
+                            class="form-control"
+                        />
+                        <label for="detail-unitprice">{{
+                            'transaction.detail.unit-price' | translate
+                        }}</label>
+                        <input
+                            id="detail-unitprice-{{ $index }}"
+                            type="number"
+                            formControlName="detailUnitPrice"
+                            class="form-control"
+                        />
                     </div>
 
                     <div class="mt-auto">

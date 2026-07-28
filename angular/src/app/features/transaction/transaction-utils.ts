@@ -52,11 +52,16 @@ export class TransactionUtils {
             ? input.details.map((detail) => ({
                   name: detail.detailName,
                   price: this.deNormalizePriceForBackend(detail.detailPrice, input.isIncome),
+                  weight: detail.detailWeight,
+                  unitPrice: detail.detailUnitPrice,
               }))
             : [];
 
         return {
-            globalPrice: input.price !== null ? this.deNormalizePriceForBackend(input.price, input.isIncome) : null,
+            globalPrice:
+                input.price !== null
+                    ? this.deNormalizePriceForBackend(input.price, input.isIncome)
+                    : null,
             name: input.name,
             transactionType: TransactionTypeString,
             transactionDate: transactionDateString,

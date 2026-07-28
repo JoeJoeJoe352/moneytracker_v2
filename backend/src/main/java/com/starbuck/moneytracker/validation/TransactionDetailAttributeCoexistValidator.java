@@ -10,11 +10,10 @@ public class TransactionDetailAttributeCoexistValidator
 
     @Override
     public boolean isValid(TransactionDetailCreateDto dto, ConstraintValidatorContext context) {
-        // Két eset elfogadható: price létezik és a többi null, vagy a weight és a unitprice együtt létezik és a price null
-        if (
-            (dto.price() != null && (dto.weight() != null || dto.unitPrice() != null)) ||
-            (dto.price() == null && (dto.weight() == null || dto.unitPrice() == null))
-        ) {
+        // Két eset elfogadható: price létezik és a többi null, vagy a weight és a
+        // unitprice együtt létezik és a price null
+        if ((dto.price() != null && (dto.weight() != null || dto.unitPrice() != null))
+                || (dto.price() == null && (dto.weight() == null || dto.unitPrice() == null))) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Illegal attribute coexist")
                     .addPropertyNode("coExist")
