@@ -49,7 +49,7 @@ public class TransactionService {
     @Transactional
     public Transaction createTransaction(Transaction transaction, List<TransactionDetail> transactionDetails) {
         BigDecimal sumOfDetailsPrice = transactionDetails.stream()
-                .map(TransactionDetail::getCost)
+                .map((detail) -> detail.getCost(transaction.isOutcome()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         transaction.setPriceSum(sumOfDetailsPrice);
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
@@ -74,14 +74,14 @@ public class TransactionService {
             throw new IllegalStateException("Transaction has no details to update.");
         }
 
-        BigDecimal sumOfDetailsPrice = updatedDetails.stream()
-                .map(TransactionDetail::getCost)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        transaction.setPriceSum(sumOfDetailsPrice);
         transaction.setName(updatedTransaction.getName());
         transaction.setTransactionDate(updatedTransaction.getTransactionDate());
         transaction.setTransactionType(updatedTransaction.getTransactionType());
+
+        BigDecimal sumOfDetailsPrice = updatedDetails.stream()
+                .map((detail) -> detail.getCost(updatedTransaction.isOutcome()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        transaction.setPriceSum(sumOfDetailsPrice);
 
         this.transactionRepo.save(transaction);
         // egyszerűbb törölni a detailokat, mint kikeresni a meglévőket és frissíteni
@@ -99,17 +99,19 @@ public class TransactionService {
         int countOfDetails = transactionDetails.size();
         for (TransactionDetail detail : transactionDetails) {
 
-            if (
-                savedTransaction.getTransactionType() == TransactionTypeEnum.INCOME &&
-                detail.getPrice().compareTo(new BigDecimal(0)) != 1
-            ) {
-                throw new IllegalArgumentException("Income transaction, but detail are not greater than 0. Error!");
+            detail.setPrice(detail.getCost(savedTransaction.isOutcome()));
+
+            if (savedTransaction.getTransactionType() == TransactionTypeEnum.INCOME &&
+                    detail.getPrice().compareTo(new BigDecimal(0)) != 1) {
+                throw new IllegalArgumentException("Income transaction, with a negative or zero detail!");
             }
-            if (
-                savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME &&
-                detail.getPrice().compareTo(new BigDecimal(0)) != -1
-            ) {
-                throw new IllegalArgumentException("Expense transaction, but detail is not smaller than 0!");
+            if (savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME &&
+                    detail.getPrice().compareTo(new BigDecimal(0)) != -1) {
+                throw new IllegalArgumentException("Expense transaction, with a positive or zero detail!");
+            }
+            if ((detail.getWeight() != null && detail.getUnitPrice() == null) ||
+                    (detail.getWeight() == null && detail.getUnitPrice() != null)) {
+                throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
             }
 
             if (countOfDetails > 1 && detail.getName() == null) {
@@ -118,12 +120,6 @@ public class TransactionService {
                 detail.setName(DEFAULT_DETAIL_NAME);
             }
             detail.setTransaction(savedTransaction);
-
-            BigDecimal price = detail.getPrice();
-            if (savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME) {
-                price.negate();
-            }
-            detail.setPrice(price);
 
             this.transactionDetailRepo.save(detail);
         }
@@ -135,7 +131,6 @@ public class TransactionService {
      * @return double
      */
     public double sumAllMoney() {
-        // TODO kiadások negatív értékek, ezek most nincsenek kezelve
         Double sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
         return sum == null ? 0 : sum;
     }
