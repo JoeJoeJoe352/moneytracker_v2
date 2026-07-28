@@ -46,14 +46,20 @@ public class TransactionController {
             @AuthenticationPrincipal @NonNull User user) {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
         transaction.setUser(user);
+
         List<TransactionDetail> transactionDetails;
+
         if (request.transactionDetails().size() > 0) {
             transactionDetails = transactionMapper
                     .fromDetailCreateRequestList(request.transactionDetails());
         } else if (request.globalPrice() != null) {
+            // Defauld detail létrehozása
             transactionDetails = transactionMapper
-                    .fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(request.globalPrice(),
-                            TransactionDetail.DEFAULT_DETAIL_NAME)));
+                    .fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(
+                            request.globalPrice(),
+                            TransactionDetail.DEFAULT_DETAIL_NAME,
+                            null,
+                            null)));
         } else {
             throw new IllegalArgumentException("No detail in list and price is also null. Error!");
         }
@@ -77,13 +83,18 @@ public class TransactionController {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
 
         List<TransactionDetail> updatedDetails;
+        
         if (request.transactionDetails().size() > 0) {
             updatedDetails = transactionMapper
                     .fromDetailCreateRequestList(request.transactionDetails());
         } else if (request.globalPrice() != null) {
+            // Default detail létrehozása
             updatedDetails = transactionMapper
-                    .fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(request.globalPrice(),
-                            TransactionDetail.DEFAULT_DETAIL_NAME)));
+                    .fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(
+                            request.globalPrice(),
+                            TransactionDetail.DEFAULT_DETAIL_NAME,
+                            null,
+                            null)));
         } else {
             throw new IllegalArgumentException("No detail in list and price is also null. Error!");
         }

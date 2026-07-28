@@ -26,6 +26,8 @@ public class CostCalculatorDomainService {
         }
 
         if (detail.getPrice() != null) {
+            // Db-ben két tizedesjegyre lesz szűkítve, de ha nem volt még mentve, akkor
+            // jobb, ha forceoljuk a két tizedesjegyet
             return detail.getPrice().setScale(2, RoundingMode.HALF_UP);
         }
 
@@ -35,7 +37,8 @@ public class CostCalculatorDomainService {
     }
 
     /**
-     * Adott tranzakció összes detail-jához kiszámolja az áraikat és össze is adja őket
+     * Adott tranzakció összes detail-jához kiszámolja az áraikat és össze is adja
+     * őket
      * 
      * @param transaction
      * @return

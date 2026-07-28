@@ -84,6 +84,8 @@ public class TransactionMapper {
         TransactionDetail entity = new TransactionDetail();
         entity.setName(request.name());
         entity.setPrice(request.price());
+        entity.setWeight(request.weight());
+        entity.setUnitPrice(request.unitPrice());
 
         return entity;
     }
