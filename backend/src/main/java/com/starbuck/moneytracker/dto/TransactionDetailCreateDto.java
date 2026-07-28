@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 
 import org.hibernate.validator.constraints.Length;
 
+import com.starbuck.moneytracker.validation.TransactionDetailAttributeCoexist;
+
+@TransactionDetailAttributeCoexist
 public record TransactionDetailCreateDto(
 
         BigDecimal price,
