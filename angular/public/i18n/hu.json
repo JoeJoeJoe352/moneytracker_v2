@@ -58,6 +58,7 @@
       "price.min": "Az 0-nál nagyobb számnak kell lennie",
       "add-detail": "Tétel hozzáadása",
       "delete.last-one-error": "Utolsó tétel nem törölhető",
+      "delete_row.tooltip": "sor törlése",
       "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek.",
       "weight": "Súly",
       "unit_price": "Egységár",
