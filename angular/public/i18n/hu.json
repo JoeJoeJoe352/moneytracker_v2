@@ -58,7 +58,12 @@
       "price.min": "Az 0-nál nagyobb számnak kell lennie",
       "add-detail": "Tétel hozzáadása",
       "delete.last-one-error": "Utolsó tétel nem törölhető",
-      "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek."
+      "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek.",
+      "weight": "Súly",
+      "unit_price": "Egységár",
+      "simple_price_mode": "Ár megadása",
+      "complex_price_mode": "Mennyiség és egységár megadása",
+      "total_price": "Teljes ár"
     }
   },
   "mainpage": {

@@ -32,7 +32,8 @@ public class TransactionMapper {
                         detail.getName(),
                         detail.getPrice(),
                         detail.getWeight(),
-                        detail.getUnitPrice()))
+                        detail.getUnitPrice(),
+                        detail.isComplexPriceMode()))
                 .collect(Collectors.toSet());
 
         TransactionDto dto = new TransactionDto(

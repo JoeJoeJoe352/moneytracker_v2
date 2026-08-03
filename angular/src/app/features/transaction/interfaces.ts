@@ -70,4 +70,5 @@ export interface TransactionDetailsDataFromBackend {
     price: number; // ha backendről jön, akkor ez sose lesz null
     weight: number | null;
     unitPrice: number | null;
+    isComplexPriceMode: boolean;
 }
