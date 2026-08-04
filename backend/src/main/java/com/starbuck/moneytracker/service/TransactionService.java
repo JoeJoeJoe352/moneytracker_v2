@@ -24,11 +24,6 @@ import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 @Service
 public class TransactionService {
 
-    /**
-     * Utolsó hány tranzakcióval térjünk vissza?
-     */
-    private final int LAST_TRANSACTION_LIMIT = 5;
-
     @Autowired
     private TransactionRepository transactionRepo;
 
@@ -139,8 +134,9 @@ public class TransactionService {
      * @return Transaction[]
      */
     public Transaction[] getLastTransactions() {
+        int lastTransactionLimit = 5;
         return this.transactionRepo.getLastTransactionsForUserWithLimit(currentUser.getUser().getId(),
-                LAST_TRANSACTION_LIMIT);
+                lastTransactionLimit);
     }
 
     /**

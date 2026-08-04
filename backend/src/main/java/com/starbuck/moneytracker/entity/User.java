@@ -16,13 +16,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 
 // todo user soft delete
 @Entity(name = "users")
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -39,16 +40,17 @@ public class User implements UserDetails {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-    
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    private List<GrantedAuthority> authorities;
 
     @OneToMany(mappedBy = "user")
     private Set<Transaction> transactions;
 
-    public User() {}
+    private List<GrantedAuthority> authorities;
+
+    public User() {
+    }
 
     public User(Long id, String username, String password, String email) {
         this.id = id;
