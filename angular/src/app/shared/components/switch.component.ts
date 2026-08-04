@@ -15,6 +15,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
     ],
 })
 export class SwitchComponent {
+    @Input() theme: 'income-expense' | 'on-off' = 'income-expense';
     @Input() checked = false;
     @Input() labelBefore = '';
     @Input() labelAfter = '';

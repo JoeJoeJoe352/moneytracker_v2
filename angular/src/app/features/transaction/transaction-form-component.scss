@@ -1,0 +1,57 @@
+@use '../../shared/variables.scss' as *; // így lesz globálisan elérhető a változók
+
+.detail-rows {
+    &:not(:last-child) {
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid $moneytracker-green;
+    }
+}
+
+.detail-add-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+    position: relative;
+
+    &::before,
+    &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background-color: $moneytracker-grey;
+    }
+
+    & button {
+        // távolság a csíkoktól
+        margin: 0 1rem;
+    }
+}
+
+.input-with-suffix {
+    position: relative;
+    display: inline-block;
+
+    .suffix {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #777;
+        pointer-events: none;
+    }
+
+    // nyilak bezavarják a suffixet, tüntessük el őket
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    // Nyilak eltüntetése firefox alatt
+    input[type='number'] {
+        -moz-appearance: textfield;
+        appearance: inherit;
+    }
+}

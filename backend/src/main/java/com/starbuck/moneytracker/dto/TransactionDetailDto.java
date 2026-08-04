@@ -6,7 +6,8 @@ public record TransactionDetailDto(
     String name,
     BigDecimal price,
     BigDecimal weight,
-    BigDecimal unitPrice
+    BigDecimal unitPrice,
+    boolean isComplexPriceMode
 ) {
     
 }

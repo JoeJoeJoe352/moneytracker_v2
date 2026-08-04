@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
+import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
@@ -23,11 +24,6 @@ import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 @Service
 public class TransactionService {
 
-    /**
-     * Ez a neve a transactionDetailnek, hogyha a user összegezve adja meg a
-     * tranzakció összeget
-     */
-    public static final String DEFAULT_DETAIL_NAME = "sum";
     /**
      * Utolsó hány tranzakcióval térjünk vissza?
      */
@@ -42,6 +38,8 @@ public class TransactionService {
     @Autowired
     private CurrentUserUtil currentUser;
 
+    private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
+
     /**
      * Tranzakció létrehozása
      * Ha hiba van, magától rollbackel a spring
@@ -49,7 +47,7 @@ public class TransactionService {
     @Transactional
     public Transaction createTransaction(Transaction transaction, List<TransactionDetail> transactionDetails) {
         BigDecimal sumOfDetailsPrice = transactionDetails.stream()
-                .map(TransactionDetail::getCost)
+                .map((detail) -> costCalculator.calculateCost(detail, transaction.isOutcome()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         transaction.setPriceSum(sumOfDetailsPrice);
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
@@ -74,18 +72,18 @@ public class TransactionService {
             throw new IllegalStateException("Transaction has no details to update.");
         }
 
-        BigDecimal sumOfDetailsPrice = updatedDetails.stream()
-                .map(TransactionDetail::getCost)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        transaction.setPriceSum(sumOfDetailsPrice);
         transaction.setName(updatedTransaction.getName());
         transaction.setTransactionDate(updatedTransaction.getTransactionDate());
         transaction.setTransactionType(updatedTransaction.getTransactionType());
 
-        this.transactionRepo.save(transaction);
+        BigDecimal sumOfDetailsPrice = updatedDetails.stream()
+                .map((detail) -> costCalculator.calculateCost(detail, updatedTransaction.isOutcome()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        transaction.setPriceSum(sumOfDetailsPrice);
+
+        transactionRepo.save(transaction);
         // egyszerűbb törölni a detailokat, mint kikeresni a meglévőket és frissíteni
-        this.transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
+        transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
         this.saveDetails(transaction, updatedDetails);
     }
 
@@ -99,31 +97,27 @@ public class TransactionService {
         int countOfDetails = transactionDetails.size();
         for (TransactionDetail detail : transactionDetails) {
 
-            if (
-                savedTransaction.getTransactionType() == TransactionTypeEnum.INCOME &&
-                detail.getPrice().compareTo(new BigDecimal(0)) != 1
-            ) {
-                throw new IllegalArgumentException("Income transaction, but detail are not greater than 0. Error!");
+            detail.setPrice(costCalculator.calculateCost(detail, savedTransaction.isOutcome()));
+
+            if (savedTransaction.getTransactionType() == TransactionTypeEnum.INCOME &&
+                    detail.getPrice().compareTo(new BigDecimal(0)) != 1) {
+                throw new IllegalArgumentException("Income transaction, with a negative or zero detail!");
             }
-            if (
-                savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME &&
-                detail.getPrice().compareTo(new BigDecimal(0)) != -1
-            ) {
-                throw new IllegalArgumentException("Expense transaction, but detail is not smaller than 0!");
+            if (savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME &&
+                    detail.getPrice().compareTo(new BigDecimal(0)) != -1) {
+                throw new IllegalArgumentException("Expense transaction, with a positive or zero detail!");
+            }
+            if ((detail.getWeight() != null && detail.getUnitPrice() == null) ||
+                    (detail.getWeight() == null && detail.getUnitPrice() != null)) {
+                throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
             }
 
             if (countOfDetails > 1 && detail.getName() == null) {
                 throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
             } else if (countOfDetails == 1 && detail.getName() == null) {
-                detail.setName(DEFAULT_DETAIL_NAME);
+                detail.setName(TransactionDetail.DEFAULT_DETAIL_NAME);
             }
             detail.setTransaction(savedTransaction);
-
-            BigDecimal price = detail.getPrice();
-            if (savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME) {
-                price.negate();
-            }
-            detail.setPrice(price);
 
             this.transactionDetailRepo.save(detail);
         }
@@ -135,7 +129,6 @@ public class TransactionService {
      * @return double
      */
     public double sumAllMoney() {
-        // TODO kiadások negatív értékek, ezek most nincsenek kezelve
         Double sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
         return sum == null ? 0 : sum;
     }

@@ -34,12 +34,13 @@ interface DetailForm {
     detailPrice: FormControl<number | null>;
     detailWeight: FormControl<number | null>;
     detailUnitPrice: FormControl<number | null>;
+    detailIsComplexPriceMode: FormControl<boolean>;
 }
 
 @Component({
     selector: 'app-transaction-form-component',
     templateUrl: './transaction-form-component.html',
-    styleUrls: ['../../shared/components/form-style.scss'],
+    styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
     imports: [ReactiveFormsModule, NgxsmkDatepickerComponent, SwitchComponent, TranslatePipe],
 })
 export class TransactionFormComponent implements OnChanges {
@@ -66,7 +67,6 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Tranzakciós form
      */
-
     protected transactionForm: FormGroup;
 
     constructor() {
@@ -86,7 +86,7 @@ export class TransactionFormComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['transaction']) {
             if (this.transaction === null) {
-                // Nincs átadva paraméterül transaction (ngonchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
+                // Nincs átadva paraméterül transaction (ngOnchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
                 return;
             }
             const convertedInputValues = this.transactionService.utils.convertDataToInput(
@@ -150,6 +150,7 @@ export class TransactionFormComponent implements OnChanges {
      * Létrehoz egy új üres sort
      */
     addRow(): void {
+        // todo ugorjon az oldal az aljára
         this.details.push(this.generateNewEmptyRow());
     }
 
@@ -161,20 +162,31 @@ export class TransactionFormComponent implements OnChanges {
         price: number | null;
         weight: number | null;
         unitPrice: number | null;
+        isComplexPriceMode: boolean | null;
     }): FormGroup<DetailForm> {
-        return this.fb.group({
+        const detailGroup = this.fb.group({
             detailName: [params.name, Validators.required],
-            detailPrice: [params.price, [Validators.min(1), Validators.required]],
+            detailPrice: [params.price, [Validators.min(1)]],
             detailWeight: [params.weight],
             detailUnitPrice: [params.unitPrice],
+            detailIsComplexPriceMode: [params.isComplexPriceMode],
         }) as FormGroup<DetailForm>;
+
+        this.setupDetailReactiveLogic(detailGroup);
+        return detailGroup;
     }
 
     /**
      * Generál egy új input sort, üres adatokkal
      */
     generateNewEmptyRow() {
-        return this.generateNewRow({ name: '', price: null, unitPrice: null, weight: null });
+        return this.generateNewRow({
+            name: '',
+            price: null,
+            unitPrice: null,
+            weight: null,
+            isComplexPriceMode: false,
+        });
     }
 
     /**
@@ -182,6 +194,41 @@ export class TransactionFormComponent implements OnChanges {
      */
     isExistingTransaction(): this is { transaction: TransactionDataFromBackend } {
         return this.transaction !== null;
+    }
+
+    /**
+     * A detailhez tartozó logikát beállítja (ha a price inputba gépelünk, akkor a weight és unit price inputok letiltódnak, és fordítva)
+     */
+    private setupDetailReactiveLogic(detailGroup: FormGroup<DetailForm>) {
+        const priceControl = detailGroup.controls.detailPrice;
+        const unitControl = detailGroup.controls.detailUnitPrice;
+        const weightControl = detailGroup.controls.detailWeight;
+        const isComplexModeControl = detailGroup.controls.detailIsComplexPriceMode;
+
+        // már létező tranzakciónál a disabled/enabled-ek beállítása
+        if (isComplexModeControl.value) {
+            priceControl.disable({ emitEvent: false });
+        } else {
+            // Az ár ki van írva a usernek mindenképpen, ezért valid állapot, hogy mindhárom adat ki van töltve, ezért itt elég csak a price-t disabled-re tenni
+            unitControl.disable({ emitEvent: false });
+            weightControl.disable({ emitEvent: false });
+        }
+
+        // PRICE inputba gépelés
+        isComplexModeControl.valueChanges.subscribe((isComplexMode) => {
+            if (isComplexMode) {
+                // emitEvent azért kell, hogy disable ne emiteljen egy újabb change-t, mert akkor végtelen ciklusba kerülünk
+                priceControl.disable({ emitEvent: false });
+
+                weightControl.enable({ emitEvent: false });
+                unitControl.enable({ emitEvent: false });
+            } else {
+                priceControl.enable({ emitEvent: false });
+
+                unitControl.disable({ emitEvent: false });
+                weightControl.disable({ emitEvent: false });
+            }
+        });
     }
 
     // Getters

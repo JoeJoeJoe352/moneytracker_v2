@@ -1,5 +1,5 @@
 <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form">
-    <!-- name -->
+    <!-- Név -->
     <div class="form-group mb-3">
         <label for="transaction-name">{{ 'transaction.name' | translate }}</label>
         <input
@@ -22,7 +22,7 @@
         }
     </div>
 
-    <!-- transactionType -->
+    <!-- Tranzakciótípus -->
     <div class="form-group mb-3">
         <label for="transaction-transactionType-bool">{{ 'transaction.type' | translate }}</label>
         <div>
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <!-- date -->
+    <!-- Dátum -->
     <div class="form-group mb-3">
         <label class="d-block" for="transaction-date">{{ 'transaction.date' | translate }}</label>
         <ngxsmk-datepicker
@@ -54,10 +54,11 @@
         }
     </div>
 
-    <!-- showDetails -->
+    <!-- részletek mutatása/elrejtése kapcsoló -->
     <div class="form-group mb-3">
         <div>
             <app-switch
+                theme="on-off"
                 formControlName="isComplexTransaction"
                 id="transaction-show-details"
                 [labelBefore]="'transaction.hide_details' | translate"
@@ -66,16 +67,19 @@
         </div>
     </div>
 
-    <!-- Price-->
+    <!-- Ár -->
     @if (!isComplexTransaction.value) {
         <div class="form-group mb-3">
             <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
-            <input
-                id="transaction-price"
-                type="number"
-                formControlName="price"
-                class="form-control"
-            />
+            <div class="input-with-suffix">
+                <input
+                    id="transaction-price"
+                    type="number"
+                    formControlName="price"
+                    class="form-control"
+                />
+                <span class="suffix">Ft</span>
+            </div>
             @if (price.invalid && price.touched) {
                 @if (price.hasError('required')) {
                     <div class="form-field-error">
@@ -88,68 +92,168 @@
             }
         </div>
     } @else {
+        <!-- Tranzakció részletei -->
         <div class="detail-inputs">
-            <div class="mb-1">{{ "transaction.detail.title" | translate }}</div>
+            <h4 class="mb-1">{{ 'transaction.detail.title' | translate }}</h4>
             @for (detail of details.controls; track $index) {
-                <div [formGroup]="detail" class="d-flex">
-                    <div class="me-2">
-                        <label for="detail-name">{{ 'transaction.detail.name' | translate }}</label>
-                        <input
-                            id="detail-name-{{ $index }}"
-                            type="text"
-                            formControlName="detailName"
-                            class="form-control"
-                        />
-                        @if (
-                            detail.get('detailName')?.invalid && detail.get('detailName')?.touched
-                        ) {
-                            @if (detail.get('detailName')?.hasError('required')) {
-                                <div class="form-field-error">
-                                    {{ 'transaction.detail.name.required' | translate }}
-                                </div>
+                <div [formGroup]="detail" class="detail-rows">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <label for="detail-name-{{ $index }}">
+                                {{ 'transaction.detail.name' | translate }}
+                            </label>
+                            <input
+                                id="detail-name-{{ $index }}"
+                                type="text"
+                                formControlName="detailName"
+                                class="form-control"
+                            />
+                            @if (
+                                detail.get('detailName')?.invalid &&
+                                detail.get('detailName')?.touched
+                            ) {
+                                @if (detail.get('detailName')?.hasError('required')) {
+                                    <div class="form-field-error">
+                                        {{ 'transaction.detail.name.required' | translate }}
+                                    </div>
+                                }
                             }
-                        }
-                    </div>
-                    <div class="me-2">
-                        <label for="detail-price">{{
-                            'transaction.detail.price' | translate
-                        }}</label>
-                        <input
-                            id="detail-price-{{ $index }}"
-                            type="number"
-                            formControlName="detailPrice"
-                            class="form-control"
-                        />
-                        @if (
-                            detail.get('detailPrice')?.invalid && detail.get('detailPrice')?.touched
-                        ) {
-                            @if (detail.get('detailPrice')?.hasError('required')) {
-                                <div class="form-field-error">
-                                    {{ 'transaction.detail.price.required' | translate }}
-                                </div>
-                            } @else if (detail.get('detailPrice')?.hasError('min')) {
-                                <div class="form-field-error">
-                                    {{ 'transaction.detail.price.min' | translate }}
-                                </div>
-                            }
-                        }
+                        </div>
+                        <div class="ms-auto">
+                            <button
+                                [title]="'transaction.detail.delete_row.tooltip' | translate"
+                                type="button"
+                                class="btn btn-primary-red"
+                                (click)="deleteRow($index)"
+                                [disabled]="canDeleteDetailRow"
+                            >
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="mt-auto">
-                        <button
-                            type="button"
-                            class="btn-primary-red"
-                            (click)="deleteRow($index)"
-                            [disabled]="canDeleteDetailRow"
-                        >
-                            x
-                        </button>
+                    <!-- Ár / unitprice és weight mutatása -->
+                    <div class="form-group mb-3 mt-3">
+                        <div>
+                            <app-switch
+                                theme="on-off"
+                                formControlName="detailIsComplexPriceMode"
+                                id="transaction-is-complex-price-mode"
+                                [labelBefore]="'transaction.detail.simple_price_mode' | translate"
+                                [labelAfter]="'transaction.detail.complex_price_mode' | translate"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Ár blokk -->
+                    <div class="d-flex">
+                        @if (!detail.get('detailIsComplexPriceMode')?.value) {
+                            <div class="me-2">
+                                <label for="detail-price-{{ $index }}">{{
+                                    'transaction.detail.price' | translate
+                                }}</label>
+                                <br />
+                                <div class="input-with-suffix">
+                                    <input
+                                        id="detail-price-{{ $index }}"
+                                        type="number"
+                                        formControlName="detailPrice"
+                                        class="form-control"
+                                    />
+                                    <span class="suffix">Ft</span>
+                                </div>
+
+                                @if (
+                                    detail.get('detailPrice')?.invalid &&
+                                    detail.get('detailPrice')?.touched
+                                ) {
+                                    @if (detail.get('detailPrice')?.hasError('min')) {
+                                        <div class="form-field-error">
+                                            {{ 'transaction.detail.price.min' | translate }}
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        } @else {
+                            <div class="me-2">
+                                <label for="detail-weight-{{ $index }}">{{
+                                    'transaction.detail.weight' | translate
+                                }}</label>
+                                <div class="input-with-suffix">
+                                    <input
+                                        id="detail-weight-{{ $index }}"
+                                        type="number"
+                                        formControlName="detailWeight"
+                                        class="form-control"
+                                    />
+                                    <span class="suffix">kg</span>
+                                </div>
+                                @if (
+                                    detail.get('detailWeight')?.invalid &&
+                                    detail.get('detailWeight')?.touched
+                                ) {
+                                    @if (detail.get('detailWeight')?.hasError('min')) {
+                                        <div class="form-field-error">
+                                            {{ 'transaction.detail.weight.min' | translate }}
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <div class="me-2">
+                                <label for="detail-unitprice-{{ $index }}">{{
+                                    'transaction.detail.unit_price' | translate
+                                }}</label>
+                                <div class="input-with-suffix">
+                                    <input
+                                        id="detail-unitprice-{{ $index }}"
+                                        type="number"
+                                        formControlName="detailUnitPrice"
+                                        class="form-control"
+                                    />
+                                    <span class="suffix">Ft/Kg</span>
+                                </div>
+                                @if (
+                                    detail.get('detailUnitPrice')?.invalid &&
+                                    detail.get('detailUnitPrice')?.touched
+                                ) {
+                                    @if (detail.get('detailUnitPrice')?.hasError('min')) {
+                                        <div class="form-field-error">
+                                            {{ 'transaction.detail.unit_price.min' | translate }}
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <div class="me-2">
+                                <label for="detail-totalprice-{{ $index }}">{{
+                                    'transaction.detail.total_price' | translate
+                                }}</label>
+                                <div class="input-with-suffix">
+                                    @let weight = detail.get('detailWeight');
+                                    @let unitPrice = detail.get('detailUnitPrice');
+                                    <input
+                                        type="number"
+                                        [value]="
+                                            weight && weight.value && unitPrice && unitPrice.value
+                                                ? weight.value * unitPrice.value
+                                                : null
+                                        "
+                                        class="form-control"
+                                        [disabled]="true"
+                                    />
+                                    <span class="suffix">Ft</span>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             }
-            <button type="button" class="btn-primary-green" (click)="addRow()">
-                {{ 'transaction.detail.add-detail' | translate }}
-            </button>
+            <div class="detail-add-row">
+                <button type="button" class="btn btn-primary-green" (click)="addRow()">
+                    <i class="bi bi-database-add"></i>
+                </button>
+            </div>
         </div>
     }
     <button

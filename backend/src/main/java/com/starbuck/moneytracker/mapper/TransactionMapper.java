@@ -32,7 +32,8 @@ public class TransactionMapper {
                         detail.getName(),
                         detail.getPrice(),
                         detail.getWeight(),
-                        detail.getUnitPrice()))
+                        detail.getUnitPrice(),
+                        detail.isComplexPriceMode()))
                 .collect(Collectors.toSet());
 
         TransactionDto dto = new TransactionDto(
@@ -41,7 +42,7 @@ public class TransactionMapper {
                 entity.getPriceSum(),
                 entity.getTransactionDate(),
                 entity.getTransactionType(),
-                entity.getIsComplexTransaction(),
+                entity.isComplexTransaction(),
                 detailDto);
 
         return dto;
@@ -84,6 +85,8 @@ public class TransactionMapper {
         TransactionDetail entity = new TransactionDetail();
         entity.setName(request.name());
         entity.setPrice(request.price());
+        entity.setWeight(request.weight());
+        entity.setUnitPrice(request.unitPrice());
 
         return entity;
     }
