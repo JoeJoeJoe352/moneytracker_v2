@@ -99,7 +99,7 @@ class TransactionServiceIntegrationTest {
 
         assertEquals(1, transactionRepo.count());
         assertEquals(1, transactionDetailRepo.count());
-        assertEquals(new BigDecimal(100.00), saved.getPriceSum());
+        assertEquals(new BigDecimal("100.00"), saved.getPriceSum());
     }
 
     @Test

@@ -10,9 +10,8 @@ public class CostCalculatorDomainService {
 
     /**
      * Kiszámolja egy TransactionDetail költségét.
-     * - Ha weight + unitPrice meg van adva → kiszámolja
+     * - Ha weight + unitPrice meg van adva → kiszámolja. Mivel ezek pozitív számok, ezért Outcome flag-el lehet jelezni, hogy negatív legyen-e a szám
      * - Ha nincs akkor a price-t próbálja meg visszaadni
-     * - Outcome esetén negatív előjel
      * - Minden eredmény scale=2, HALF_UP
      */
     public BigDecimal calculateCost(TransactionDetail detail, boolean isOutcome) {

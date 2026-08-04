@@ -96,8 +96,13 @@ public class TransactionService {
     private void saveDetails(Transaction savedTransaction, List<TransactionDetail> transactionDetails) {
         int countOfDetails = transactionDetails.size();
         for (TransactionDetail detail : transactionDetails) {
-
             detail.setPrice(costCalculator.calculateCost(detail, savedTransaction.isOutcome()));
+
+            if (countOfDetails > 1 && detail.getName() == null) {
+                throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
+            } else if (countOfDetails == 1 && detail.getName() == null) {
+                detail.setName(TransactionDetail.DEFAULT_DETAIL_NAME);
+            }
 
             if (savedTransaction.getTransactionType() == TransactionTypeEnum.INCOME &&
                     detail.getPrice().compareTo(new BigDecimal(0)) != 1) {
@@ -112,11 +117,6 @@ public class TransactionService {
                 throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
             }
 
-            if (countOfDetails > 1 && detail.getName() == null) {
-                throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
-            } else if (countOfDetails == 1 && detail.getName() == null) {
-                detail.setName(TransactionDetail.DEFAULT_DETAIL_NAME);
-            }
             detail.setTransaction(savedTransaction);
 
             this.transactionDetailRepo.save(detail);
