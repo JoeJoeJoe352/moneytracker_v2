@@ -1,5 +1,5 @@
 <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form">
-    <!-- name -->
+    <!-- Név -->
     <div class="form-group mb-3">
         <label for="transaction-name">{{ 'transaction.name' | translate }}</label>
         <input
@@ -22,7 +22,7 @@
         }
     </div>
 
-    <!-- transactionType -->
+    <!-- Tranzakciótípus -->
     <div class="form-group mb-3">
         <label for="transaction-transactionType-bool">{{ 'transaction.type' | translate }}</label>
         <div>
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <!-- date -->
+    <!-- Dátum -->
     <div class="form-group mb-3">
         <label class="d-block" for="transaction-date">{{ 'transaction.date' | translate }}</label>
         <ngxsmk-datepicker
@@ -54,7 +54,7 @@
         }
     </div>
 
-    <!-- showDetails -->
+    <!-- részletek mutatása/elrejtése kapcsoló -->
     <div class="form-group mb-3">
         <div>
             <app-switch
@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    <!-- Price-->
+    <!-- Ár -->
     @if (!isComplexTransaction.value) {
         <div class="form-group mb-3">
             <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
@@ -99,9 +99,9 @@
                 <div [formGroup]="detail" class="detail-rows">
                     <div class="d-flex">
                         <div class="me-2">
-                            <label for="detail-name">{{
-                                'transaction.detail.name' | translate
-                            }}</label>
+                            <label for="detail-name-{{ $index }}">
+                                {{ 'transaction.detail.name' | translate }}
+                            </label>
                             <input
                                 id="detail-name-{{ $index }}"
                                 type="text"
@@ -149,7 +149,7 @@
                     <div class="d-flex">
                         @if (!detail.get('detailIsComplexPriceMode')?.value) {
                             <div class="me-2">
-                                <label for="detail-price">{{
+                                <label for="detail-price-{{ $index }}">{{
                                     'transaction.detail.price' | translate
                                 }}</label>
                                 <br />
@@ -176,7 +176,7 @@
                             </div>
                         } @else {
                             <div class="me-2">
-                                <label for="detail-weight">{{
+                                <label for="detail-weight-{{ $index }}">{{
                                     'transaction.detail.weight' | translate
                                 }}</label>
                                 <div class="input-with-suffix">
@@ -188,10 +188,20 @@
                                     />
                                     <span class="suffix">kg</span>
                                 </div>
+                                @if (
+                                    detail.get('detailWeight')?.invalid &&
+                                    detail.get('detailWeight')?.touched
+                                ) {
+                                    @if (detail.get('detailWeight')?.hasError('min')) {
+                                        <div class="form-field-error">
+                                            {{ 'transaction.detail.weight.min' | translate }}
+                                        </div>
+                                    }
+                                }
                             </div>
 
                             <div class="me-2">
-                                <label for="detail-unitprice">{{
+                                <label for="detail-unitprice-{{ $index }}">{{
                                     'transaction.detail.unit_price' | translate
                                 }}</label>
                                 <div class="input-with-suffix">
@@ -203,17 +213,26 @@
                                     />
                                     <span class="suffix">Ft/Kg</span>
                                 </div>
+                                @if (
+                                    detail.get('detailUnitPrice')?.invalid &&
+                                    detail.get('detailUnitPrice')?.touched
+                                ) {
+                                    @if (detail.get('detailUnitPrice')?.hasError('min')) {
+                                        <div class="form-field-error">
+                                            {{ 'transaction.detail.unit_price.min' | translate }}
+                                        </div>
+                                    }
+                                }
                             </div>
 
                             <div class="me-2">
-                                <label for="detail-unitprice">{{
+                                <label for="detail-totalprice-{{ $index }}">{{
                                     'transaction.detail.total_price' | translate
                                 }}</label>
                                 <div class="input-with-suffix">
                                     @let weight = detail.get('detailWeight');
                                     @let unitPrice = detail.get('detailUnitPrice');
                                     <input
-                                        id="detail-unitprice-{{ $index }}"
                                         type="number"
                                         [value]="
                                             weight && weight.value && unitPrice && unitPrice.value

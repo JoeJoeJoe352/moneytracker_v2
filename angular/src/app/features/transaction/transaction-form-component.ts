@@ -67,7 +67,6 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Tranzakciós form
      */
-
     protected transactionForm: FormGroup;
 
     constructor() {
@@ -87,7 +86,7 @@ export class TransactionFormComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['transaction']) {
             if (this.transaction === null) {
-                // Nincs átadva paraméterül transaction (ngonchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
+                // Nincs átadva paraméterül transaction (ngOnchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
                 return;
             }
             const convertedInputValues = this.transactionService.utils.convertDataToInput(
