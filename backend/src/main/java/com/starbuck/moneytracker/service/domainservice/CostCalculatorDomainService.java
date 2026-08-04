@@ -9,6 +9,8 @@ import com.starbuck.moneytracker.entity.TransactionDetail;
 public class CostCalculatorDomainService {
 
     /**
+     * TODO isOutcome flag félreérthető, mert csak a súly és egységárnál van használva, ezt orvosolni
+     * 
      * Kiszámolja egy TransactionDetail költségét.
      * - Ha weight + unitPrice meg van adva → kiszámolja. Mivel ezek pozitív számok, ezért Outcome flag-el lehet jelezni, hogy negatív legyen-e a szám
      * - Ha nincs akkor a price-t próbálja meg visszaadni
