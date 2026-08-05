@@ -20,14 +20,8 @@ jobs:
           distribution: "zulu"
           cache: maven
 
-      - name: Build with Maven (package)
-        run: mvn -B package --file backend/pom.xml
-
-      - name: Build with Maven (H2 test profile)
-        run: mvn -B clean verify -f backend/pom.xml -Dspring.profiles.active=test
-
-      - name: Run tests with coverage
-        run: mvn -B test -f backend/pom.xml -Dspring.profiles.active=test
+      - name: Build, test and coverage
+        run: mvn -B verify -f backend/pom.xml -Dspring.profiles.active=test
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
