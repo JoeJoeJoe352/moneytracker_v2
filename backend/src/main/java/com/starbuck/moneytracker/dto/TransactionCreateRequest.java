@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -24,6 +25,7 @@ public record TransactionCreateRequest(
     @NotNull(message = "Date is mandatory") 
     LocalDate transactionDate,
     
+    @Valid
     @NotNull(message = "TransactionDetails are mandatory")
     List<TransactionDetailCreateDto> transactionDetails
 ) {}

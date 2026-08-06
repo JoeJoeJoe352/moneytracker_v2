@@ -17,16 +17,15 @@ import com.starbuck.moneytracker.dto.RegisterRequest;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.UserService;
+import com.starbuck.moneytracker.util.CookieUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 @RestController
 public class AuthController {
-
-    // Authentikációs cookie neve
-    public static final String AUTH_COOKIE_NAME = "AUTH_TOKEN";
 
     /**
      * Felhasználó autentikációs szolgáltatás
@@ -36,6 +35,9 @@ public class AuthController {
 
     @Autowired
     private CurrentUserUtil userUtil;
+
+    @Autowired
+    private CookieUtil cookieUtil;
 
     /**
      * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba esetén 400-as választ ad vissza a validációs hibák miatt.
@@ -67,13 +69,7 @@ public class AuthController {
     public ResponseEntity<Map<String,String>> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             String jwtToken = userService.login(loginRequest.username(), loginRequest.password());
-            ResponseCookie cookie = ResponseCookie.from(AUTH_COOKIE_NAME, jwtToken)
-                .httpOnly(true)
-                .secure(true) // csak HTTPS-en keresztül küldhető
-                .path("/") // Az egész oldal a szkópja a sütinek
-                .maxAge(7 * 24 * 60 * 60) // 7 nap
-                .sameSite("Strict") // CSRF védelem
-                .build();
+            ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
             HttpHeaders headers = new HttpHeaders();
             headers.add("Set-Cookie", cookie.toString());
             return new ResponseEntity<Map<String,String>>(Map.of("message", "Login successful"), headers, HttpStatus.OK);
@@ -90,13 +86,7 @@ public class AuthController {
      */
     @PostMapping(path = "/auth/logout")
     public ResponseEntity<Map<String,String>> logoutUser(HttpServletResponse response) {
-        ResponseCookie expiredCookie = ResponseCookie.from(AUTH_COOKIE_NAME, "")
-            .path("/")
-            .httpOnly(true)
-            .secure(true)
-            .maxAge(0)
-            .sameSite("Strict")
-            .build();
+        ResponseCookie expiredCookie = cookieUtil.getJwtSessionDestroyCookie();
 
         response.setHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
         return ResponseEntity.ok(Map.of("message", "Logged out"));
@@ -109,7 +99,7 @@ public class AuthController {
      * @return Boolean
      */
     @PostMapping(path = "/auth/isUsernameExists")
-    public boolean isUsernameExists(@RequestBody Map<String, String> body) {
+    public boolean isUsernameExists(@RequestBody @NotBlank Map<String, String> body) {
         return userService.isUsernameExists(body.get("username"));
     }
 
@@ -120,7 +110,7 @@ public class AuthController {
      * @return Boolean
      */
     @PostMapping(path = "/auth/isEmailExists")
-    public boolean isEmailExists(@RequestBody Map<String, String> body) {
+    public boolean isEmailExists(@RequestBody @NotBlank Map<String, String> body) {
         return userService.isEmailExists(body.get("email"));
     }
 

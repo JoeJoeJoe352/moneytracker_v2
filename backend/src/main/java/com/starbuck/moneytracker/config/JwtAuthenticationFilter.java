@@ -7,12 +7,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.starbuck.moneytracker.controller.AuthController;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.CustomUserDetailService;
 import com.starbuck.moneytracker.service.JwtService;
+import com.starbuck.moneytracker.util.CookieUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -47,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         // Pl.: postmanben a cookies az üres
         if (cookies != null) {
             jwt = Arrays.stream(cookies)
-                .filter(cookie -> AuthController.AUTH_COOKIE_NAME.equals(cookie.getName()))
+                .filter(cookie -> CookieUtil.AUTH_COOKIE_NAME.equals(cookie.getName()))
                 .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);
@@ -62,8 +64,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         String username = null;
         try {
             username = jwtService.extractUsername(jwt);
-        } catch(ExpiredJwtException exception) {
-            // lejárt a token, nem gond, majd bejelentkezik a user újból
+        } catch(ExpiredJwtException |SignatureException | MalformedJwtException exception) {
+            // lejárt, vagy rossz a token, nem gond, majd bejelentkezik a user újból
             filterChain.doFilter(request, response);
             return;
         }

@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:mysql://db:3306/moneytracker
     username: root  # docker-compose.dev.yml-ben nincs megadva username, de alapérték szerint root
-    password: root
+    password: root  # TODO legyen kiszervezve környezeti változóba
 
   jpa:
     hibernate:

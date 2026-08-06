@@ -4,6 +4,8 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Service;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.util.CookieUtil;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -12,6 +14,7 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
+    // TODO environment variable-be átrakni, ne legyen a kódban
     private static final String SECRET_KEY = "aV9hbV9wZXRlcl8yMDI2MDUyMl9tb25leXRyYWNrZXJfYXBwXzE=";
 
     /**
@@ -25,7 +28,8 @@ public class JwtService {
     }
 
     /**
-     * Token generálása a username alapján. A tokenben a username lesz a subject, 1 napos érvényességgel.
+     * Token generálása a username alapján. A tokenben a username lesz a subject, 1
+     * napos érvényességgel.
      * 
      * @param String username
      * @return String A generált token
@@ -34,13 +38,14 @@ public class JwtService {
         return Jwts.builder()
                 .subject(username) // subject mező
                 .issuedAt(new Date()) // mikor generálódott
-                .expiration(new Date(System.currentTimeMillis() + 24 * 1000 * 60 * 60)) // lejárati idő
+                .expiration(new Date(System.currentTimeMillis() + CookieUtil.COOKIE_MAX_LIFETIME_SECONDS))
                 .signWith(getSignInKey()) // aláírás a titkos kulccsal
                 .compact();
     }
 
     /**
-     * Token validitás ellenőrzése: a tokenben lévő username megegyezik-e a userdetails username-jével, és a token nincs-e lejárva
+     * Token validitás ellenőrzése: a tokenben lévő username megegyezik-e a
+     * userdetails username-jével, és a token nincs-e lejárva
      * 
      * @param token
      * @param userDetails
@@ -76,7 +81,8 @@ public class JwtService {
     }
 
     /**
-     * A titkos kulcs dekódolása és SecretKey objektummá alakítása, amit a token aláírásához és ellenőrzéséhez használunk
+     * A titkos kulcs dekódolása és SecretKey objektummá alakítása, amit a token
+     * aláírásához és ellenőrzéséhez használunk
      * 
      * @return SecretKey
      */
@@ -85,4 +91,3 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
-

@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.controller;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Arrays;
@@ -49,7 +50,7 @@ public class TransactionController {
 
         List<TransactionDetail> transactionDetails;
 
-        if (request.transactionDetails().size() > 0) {
+        if (!request.transactionDetails().isEmpty()) {
             transactionDetails = transactionMapper
                     .fromDetailCreateRequestList(request.transactionDetails());
         } else if (request.globalPrice() != null) {
@@ -84,7 +85,7 @@ public class TransactionController {
 
         List<TransactionDetail> updatedDetails;
         
-        if (request.transactionDetails().size() > 0) {
+        if (!request.transactionDetails().isEmpty()) {
             updatedDetails = transactionMapper
                     .fromDetailCreateRequestList(request.transactionDetails());
         } else if (request.globalPrice() != null) {
@@ -107,8 +108,8 @@ public class TransactionController {
      * 
      * @return double
      */
-    @GetMapping(path = "transaction/sum")
-    public double sumAllMoney() {
+    @GetMapping(path = "/transaction/sum")
+    public BigDecimal sumAllMoney() {
         return this.transactionService.sumAllMoney();
     }
 
@@ -117,7 +118,7 @@ public class TransactionController {
      * 
      * @return List<TransactionDto>
      */
-    @GetMapping(path = "transaction/last")
+    @GetMapping(path = "/transaction/last")
     public List<TransactionDto> getLastTransactions() {
         Transaction[] transactions = this.transactionService.getLastTransactions();
         return this.transactionMapper.toDtoList(Arrays.asList(transactions));

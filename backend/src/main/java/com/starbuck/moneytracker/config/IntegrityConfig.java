@@ -16,8 +16,9 @@ import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainServi
 @Configuration
 @EnableScheduling
 public class IntegrityConfig {
+
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
-    private Logger logger = LoggerFactory.getLogger(IntegrityConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(IntegrityConfig.class);
     private TransactionRepository transactionRepository;
 
     public IntegrityConfig(TransactionRepository transactionRepository) {

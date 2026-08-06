@@ -121,11 +121,11 @@ public class TransactionService {
     /**
      * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
      * 
-     * @return double
+     * @return BigDecimal
      */
-    public double sumAllMoney() {
-        Double sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
-        return sum == null ? 0 : sum;
+    public BigDecimal sumAllMoney() {
+        BigDecimal sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
+        return sum == null ? BigDecimal.ZERO : sum;
     }
 
     /**

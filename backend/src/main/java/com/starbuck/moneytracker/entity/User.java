@@ -2,7 +2,7 @@ package com.starbuck.moneytracker.entity;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,7 +16,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Transient;
 
 // todo user soft delete
 @Entity(name = "users")
@@ -46,8 +45,6 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private Set<Transaction> transactions;
-
-    private List<GrantedAuthority> authorities;
 
     public User() {
     }
@@ -121,10 +118,6 @@ public class User implements UserDetails {
         this.uuid = java.util.UUID.randomUUID().toString();
     }
 
-    public void setAuthorities(List<GrantedAuthority> authorities) {
-        this.authorities = authorities;
-    }
-
     public Set<Transaction> getTransactions() {
         return transactions;
     }
@@ -135,7 +128,8 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.authorities;
+        // TODO később legyen authorizáció
+        return Collections.emptyList();
     }
 
     @Override

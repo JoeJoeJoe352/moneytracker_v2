@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public interface TransactionRepository extends
      * @return
      */
     @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.user.id = ?1 AND t.status = 0")
-    Double summarizeTotalMoneyForUser(long userId);
+    BigDecimal summarizeTotalMoneyForUser(long userId);
 
     /**
      * Utolsó X darab tranzakcióval tér vissza (id alapján van csökkenő sorrendbe
