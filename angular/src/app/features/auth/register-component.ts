@@ -34,7 +34,7 @@ export class RegisterComponent {
         this.registerForm = this.fb.nonNullable.group(
             {
                 username: ['', {
-                    validators: [Validators.required, Validators.minLength(5), Validators.maxLength(20)],
+                    validators: [Validators.required, Validators.minLength(3), Validators.maxLength(20)],
                     asyncValidators: [this.uniqueValidator.validateUsername.bind(this.uniqueValidator)],
                     updateOn: 'blur'
                 }],

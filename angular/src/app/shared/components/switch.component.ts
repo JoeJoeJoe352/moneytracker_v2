@@ -42,4 +42,11 @@ export class SwitchComponent {
         this.onChange(value);
         this.onTouched();
     }
+
+    setDisabledState(isDisabled: boolean): void {
+        const togglerCheckbox = document.getElementById('togglerCheckbox') as HTMLInputElement;
+        if (togglerCheckbox) {
+            togglerCheckbox.disabled = isDisabled;
+        }
+    }
 }

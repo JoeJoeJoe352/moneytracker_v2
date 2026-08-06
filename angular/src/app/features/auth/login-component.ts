@@ -61,8 +61,7 @@ export class LoginComponent {
         this.authService.login(username, password).subscribe({
             next: () => {
                 this.isLoading.set(false);
-                this.userDataStore.isLoaded.set(true);
-                this.userDataStore.username.set(username);
+                this.userDataStore.loadUser(username);
                 this.router.navigate(['/']);
                 this.closeModal.emit();
             },

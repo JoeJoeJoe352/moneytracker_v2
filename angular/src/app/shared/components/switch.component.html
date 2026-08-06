@@ -1,6 +1,7 @@
 <label class="switch {{ theme }}">
   <span class="label-text">{{ labelBefore }}</span>
   <input
+    id="togglerCheckbox"
     type="checkbox"
     [checked]="checked"
     (change)="setChecked($event.target.checked)"

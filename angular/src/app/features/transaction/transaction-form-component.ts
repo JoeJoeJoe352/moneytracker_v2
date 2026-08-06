@@ -139,7 +139,7 @@ export class TransactionFormComponent implements OnChanges {
      * Törli a megadott indexű tétel sort
      */
     deleteRow(index: number): void {
-        if (this.canDeleteDetailRow) {
+        if (this.isLastDetailRow) {
             console.error('utolsó sort nem lehet törölni');
             return;
         }
@@ -233,7 +233,10 @@ export class TransactionFormComponent implements OnChanges {
 
     // Getters
 
-    get canDeleteDetailRow() {
+    /**
+     * Utolsó detail sor nem törölhető, ezért a gombot letiltjuk, ha csak 1 sor van
+     */
+    get isLastDetailRow() {
         return this.details.length < 2;
     }
 

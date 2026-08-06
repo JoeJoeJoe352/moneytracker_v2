@@ -17,7 +17,7 @@ interface FilterFormInterface {
 }
 
 @Component({
-    selector: 'app-main-page-component',
+    selector: 'app-transaction-page-component',
     templateUrl: './transactions-page-component.html',
     styleUrl: './transactions-page-component.scss',
     standalone: true,
@@ -181,7 +181,7 @@ export class TransactionsPage implements OnInit {
         }
 
         if (dateInputValue) {
-            params.append('date', dateInputValue.toLocaleDateString());
+            params.append('date', dateInputValue.toISOString().split('T')[0]);
         }
 
         this.transactionService.getTransactionHistory(params).subscribe({

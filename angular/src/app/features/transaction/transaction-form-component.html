@@ -95,7 +95,7 @@
         <!-- Tranzakció részletei -->
         <div class="detail-inputs">
             <h4 class="mb-1">{{ 'transaction.detail.title' | translate }}</h4>
-            @for (detail of details.controls; track $index) {
+            @for (detail of details.controls; track transaction?.id) {
                 <div [formGroup]="detail" class="detail-rows">
                     <div class="d-flex">
                         <div class="me-2">
@@ -125,7 +125,7 @@
                                 type="button"
                                 class="btn btn-primary-red"
                                 (click)="deleteRow($index)"
-                                [disabled]="canDeleteDetailRow"
+                                [disabled]="isLastDetailRow"
                             >
                                 <i class="bi bi-trash"></i>
                             </button>

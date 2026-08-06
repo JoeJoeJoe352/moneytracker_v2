@@ -5,7 +5,7 @@ import { TransactionDataFromBackend } from './interfaces';
 @Component({
     selector: 'app-transaction-list',
     template: `
-        @for (transaction of transactions; track $index) {
+        @for (transaction of transactions; track transaction.id) {
             <app-transaction-card
                 [transaction]="transaction"
                 (click)="editTransaction.emit({ transactionId: transaction.id })"

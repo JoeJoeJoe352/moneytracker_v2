@@ -37,7 +37,7 @@
     "name": "Tranzakció neve",
     "name.required": "A tranzakció nevének megadása kötelező!",
     "name.minlength": "A tranzakció nevének legalább 3 karakter hosszúnak kell lennie!",
-    "name.maxLength": "A tranzakció nevének legfeljebb 50 karakter hosszúnak kell lennie!",
+    "name.maxlength": "A tranzakció nevének legfeljebb 50 karakter hosszúnak kell lennie!",
     "type": "Tranzakció típusa",
     "price": "Összeg",
     "price.required": "Az összeg megadása kötelező!",
@@ -61,7 +61,9 @@
       "delete_row.tooltip": "sor törlése",
       "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek.",
       "weight": "Súly",
+      "weight.min": "A súlynak nagyobbnak kell lennie, mint nulla!",
       "unit_price": "Egységár",
+      "unit_price.min": "Az egységárnak nagyobbnak kell lennie, mint nulla!",
       "simple_price_mode": "Ár megadása",
       "complex_price_mode": "Mennyiség és egységár megadása",
       "total_price": "Teljes ár"
