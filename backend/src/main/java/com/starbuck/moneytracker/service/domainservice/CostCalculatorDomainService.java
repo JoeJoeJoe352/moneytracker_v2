@@ -5,25 +5,25 @@ import java.math.RoundingMode;
 
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 
 public class CostCalculatorDomainService {
 
     /**
-     * TODO isOutcome flag félreérthető, mert csak a súly és egységárnál van használva, ezt orvosolni
-     * 
      * Kiszámolja egy TransactionDetail költségét.
-     * - Ha weight + unitPrice meg van adva → kiszámolja. Mivel ezek pozitív számok, ezért Outcome flag-el lehet jelezni, hogy negatív legyen-e a szám
+     * - Ha weight + unitPrice meg van adva → kiszámolja, majd a tranzakció
+     * típusára (income/outcome) bízza az előjel eldöntését
      * - Ha nincs akkor a price-t próbálja meg visszaadni
      * - Minden eredmény scale=2, HALF_UP
      */
-    public BigDecimal calculateCost(TransactionDetail detail, boolean isOutcome) {
+    public BigDecimal calculateCost(TransactionDetail detail, TransactionTypeEnum type) {
 
         if (detail.getWeight() != null && detail.getUnitPrice() != null) {
             BigDecimal cost = detail.getWeight()
                     .multiply(detail.getUnitPrice())
                     .setScale(2, RoundingMode.HALF_UP);
 
-            return isOutcome ? cost.negate() : cost;
+            return type.applySign(cost);
         }
 
         if (detail.getPrice() != null) {
@@ -40,13 +40,13 @@ public class CostCalculatorDomainService {
     /**
      * Adott tranzakció összes detail-jához kiszámolja az áraikat és össze is adja
      * őket
-     * 
+     *
      * @param transaction
      * @return
      */
     public BigDecimal calculateTransactionCost(Transaction transaction) {
         return transaction.getTransactionDetails().stream()
-                .map((detail) -> this.calculateCost(detail, transaction.isOutcome()))
+                .map((detail) -> this.calculateCost(detail, transaction.getTransactionType()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

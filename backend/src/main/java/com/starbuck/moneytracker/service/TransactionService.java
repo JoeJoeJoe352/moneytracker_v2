@@ -19,7 +19,6 @@ import jakarta.persistence.EntityNotFoundException;
 
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionFilter;
-import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 
 @Service
 public class TransactionService {
@@ -42,7 +41,7 @@ public class TransactionService {
     @Transactional
     public Transaction createTransaction(Transaction transaction, List<TransactionDetail> transactionDetails) {
         BigDecimal sumOfDetailsPrice = transactionDetails.stream()
-                .map((detail) -> costCalculator.calculateCost(detail, transaction.isOutcome()))
+                .map((detail) -> costCalculator.calculateCost(detail, transaction.getTransactionType()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         transaction.setPriceSum(sumOfDetailsPrice);
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
@@ -72,7 +71,7 @@ public class TransactionService {
         transaction.setTransactionType(updatedTransaction.getTransactionType());
 
         BigDecimal sumOfDetailsPrice = updatedDetails.stream()
-                .map((detail) -> costCalculator.calculateCost(detail, updatedTransaction.isOutcome()))
+                .map((detail) -> costCalculator.calculateCost(detail, updatedTransaction.getTransactionType()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         transaction.setPriceSum(sumOfDetailsPrice);
 
@@ -91,7 +90,7 @@ public class TransactionService {
     private void saveDetails(Transaction savedTransaction, List<TransactionDetail> transactionDetails) {
         int countOfDetails = transactionDetails.size();
         for (TransactionDetail detail : transactionDetails) {
-            detail.setPrice(costCalculator.calculateCost(detail, savedTransaction.isOutcome()));
+            detail.setPrice(costCalculator.calculateCost(detail, savedTransaction.getTransactionType()));
 
             if (countOfDetails > 1 && detail.getName() == null) {
                 throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
@@ -99,14 +98,8 @@ public class TransactionService {
                 detail.setName(TransactionDetail.DEFAULT_DETAIL_NAME);
             }
 
-            if (savedTransaction.getTransactionType() == TransactionTypeEnum.INCOME &&
-                    detail.getPrice().compareTo(new BigDecimal(0)) != 1) {
-                throw new IllegalArgumentException("Income transaction, with a negative or zero detail!");
-            }
-            if (savedTransaction.getTransactionType() == TransactionTypeEnum.OUTCOME &&
-                    detail.getPrice().compareTo(new BigDecimal(0)) != -1) {
-                throw new IllegalArgumentException("Expense transaction, with a positive or zero detail!");
-            }
+            savedTransaction.getTransactionType().validateDetailPrice(detail.getPrice());
+
             if ((detail.getWeight() != null && detail.getUnitPrice() == null) ||
                     (detail.getWeight() == null && detail.getUnitPrice() != null)) {
                 throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
