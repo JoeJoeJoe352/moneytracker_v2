@@ -51,11 +51,7 @@ public class AuthController {
         newUser.setUsername(user.username());
         
         newUser.setEmail(user.email());
-        try {
-            userService.createUser(newUser, user.password());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("User registration failed: " + e.getMessage());
-        }
+        userService.createUser(newUser, user.password());
     }
 
     /**

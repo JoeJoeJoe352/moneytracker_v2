@@ -65,11 +65,7 @@ public class TransactionController {
             throw new IllegalArgumentException("No detail in list and price is also null. Error!");
         }
 
-        try {
-            this.transactionService.createTransaction(transaction, transactionDetails);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Transaction create failed: " + e.getMessage());
-        }
+        this.transactionService.createTransaction(transaction, transactionDetails);
     }
 
     /**
