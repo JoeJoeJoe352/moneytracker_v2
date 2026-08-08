@@ -181,7 +181,7 @@ export class TransactionsPage implements OnInit {
         }
 
         if (dateInputValue) {
-            params.append('date', dateInputValue.toISOString().split('T')[0]);
+            params.append('date', dateInputValue.toLocaleDateString('sv-SE'));
         }
 
         this.transactionService.getTransactionHistory(params).subscribe({

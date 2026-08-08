@@ -19,6 +19,7 @@ import jakarta.persistence.EntityNotFoundException;
 
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionFilter;
+import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 
 @Service
 public class TransactionService {
@@ -118,6 +119,26 @@ public class TransactionService {
      */
     public BigDecimal sumAllMoney() {
         BigDecimal sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
+        return sum == null ? BigDecimal.ZERO : sum;
+    }
+
+    /**
+     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
+     * 
+     * @return BigDecimal
+     */
+    public BigDecimal sumAllExpenseForMonth() {
+        BigDecimal sum = this.transactionRepo.summarizeTransactionPricesForMonthAndType(currentUser.getUser().getId(), TransactionTypeEnum.OUTCOME);
+        return sum == null ? BigDecimal.ZERO : sum;
+    }
+
+    /**
+     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi bevétele volt
+     * 
+     * @return BigDecimal
+     */
+    public BigDecimal sumAllIncomeForMonth() {
+        BigDecimal sum = this.transactionRepo.summarizeTransactionPricesForMonthAndType(currentUser.getUser().getId(), TransactionTypeEnum.INCOME);
         return sum == null ? BigDecimal.ZERO : sum;
     }
 

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import com.starbuck.moneytracker.entity.Transaction;
+import com.starbuck.moneytracker.entity.TransactionTypeEnum;
 
 /**
  * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az
@@ -26,6 +27,15 @@ public interface TransactionRepository extends
      */
     @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.user.id = ?1 AND t.status = 0")
     BigDecimal summarizeTotalMoneyForUser(long userId);
+
+    /**
+     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
+     * 
+     * @param userId
+     * @return
+     */
+    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.user.id = ?1 AND t.status = 0 AND YEAR(t.transactionDate) = YEAR(CURDATE()) AND MONTH(t.transactionDate) = MONTH(CURDATE()) AND t.transactionType = ?2")
+    BigDecimal summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
 
     /**
      * Utolsó X darab tranzakcióval tér vissza (id alapján van csökkenő sorrendbe

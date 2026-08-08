@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDto;
 import com.starbuck.moneytracker.entity.Transaction;
@@ -78,8 +79,12 @@ public class TransactionController {
      * @return double
      */
     @GetMapping(path = "/transaction/sum")
-    public BigDecimal sumAllMoney() {
-        return this.transactionService.sumAllMoney();
+    public MoneySumResponseDto sumAllMoney() {
+        return new MoneySumResponseDto(
+            this.transactionService.sumAllMoney(),
+            this.transactionService.sumAllIncomeForMonth(),
+            this.transactionService.sumAllExpenseForMonth().abs()
+        );
     }
 
     /**

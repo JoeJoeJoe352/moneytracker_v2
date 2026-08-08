@@ -39,7 +39,8 @@ export class TransactionUtils {
      * A Tranzakciós form inputból kapott adatokat átalakítja a backend számára megfelelő formába
      */
     convertToBackendData(input: NewTransaction): TransactionDataForBackend {
-        const transactionDateString = input.transactionDate.toISOString().split('T')[0];
+        // sv-SE = YYYY-MM-DD formátumot fog visszaadni, amit megeszik a Java LocalDate
+        const transactionDateString = input.transactionDate.toLocaleDateString('sv-SE');
 
         // átalakítjuk az isIncome mező értékét a backend enum-jára
         const TransactionTypeString = input.isIncome
