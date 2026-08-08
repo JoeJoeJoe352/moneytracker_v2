@@ -1,9 +1,19 @@
-@use "../../shared/variables.scss" as *;
+@use '../../shared/variables.scss' as *;
 
-.green-block {
-    background-color: $moneytracker-green;
-    margin: 15px 0;
+.color-block {
     padding: 15px;
     color: $moneytracker-white;
     border-radius: $border-radius;
+
+    &.green-block {
+        background-color: $moneytracker-green;
+    }
+
+    &.blue-block {
+        background-color: $moneytracker-blue;
+    }
+
+    &.red-block {
+        background-color: $moneytracker-red;
+    }
 }

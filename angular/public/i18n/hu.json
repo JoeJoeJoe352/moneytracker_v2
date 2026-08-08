@@ -1,5 +1,6 @@
 {
   "welcome": {
+    "title": "Üdvözlünk a Moneytrackerben!",
     "welcomeText": "A kiadásaink rendszeres nyomonkövetése segít tudatosabbá válni a mindennapokban. Megmutatja, hol szivárog el a pénz, mely szokások támogatnak, és melyek húznak vissza. Ha látod a valós számokat, könnyebb okos döntéseket hozni: félretenni, tervezni, vagy épp bátran megengedni magadnak valamit. A pénzügyi átláthatóság nem korlátoz, hanem szabadságot ad — pontosan tudod, hol tartasz, és merre szeretnél menni.",
     "benefitsTitle": "Miért érdemes követni a kiadásainkat?",
     "liquidityTitle": "Átláthatóvá válik, mire megy el a pénz — megszűnnek a „hova tűnt ennyi?” pillanatok.",
@@ -24,7 +25,8 @@
   "header": {
     "welcome": "Üdvözlünk",
     "transactions": "Tranzakciók",
-    "logout": "Kijelentkezés"
+    "logout": "Kijelentkezés",
+    "dashboard": "Főoldal"
   },
   "transaction": {
     "create": "Tranzakció létrehozása",
@@ -72,6 +74,8 @@
   "mainpage": {
     "total_balance": "Összes pénz",
     "create_transaction.button": "Tranzakció létrehozása",
-    "no_transaction": "Nincs még felvett tranzakció"
+    "no_transaction": "Nincs még felvett tranzakció",
+    "total_income": "Bevétel ebben a hónapban",
+    "total_expenses": "Kiadás ebben a hónapban"
   }
 }

@@ -7,35 +7,61 @@
         (saved)="saveTransaction($event)"
     />
 }
+<div class="row mt-3">
+    <div class="col-lg-4">
+        <div class="color-block blue-block">
+            <div class="mb-3">
+                <div class="my-2">{{ 'mainpage.total_balance' | translate }}</div>
+                @if (isMoneySumLoading()) {
+                    <div class="spinner-border" role="status"></div>
+                } @else {
+                    <h2>{{ moneySum()?.moneySum | number }} Ft</h2>
+                }
+            </div>
 
-<div class="green-block">
-    <div class="mb-3">
-        <div class="my-2">{{ 'mainpage.total_balance' | translate }}</div>
-        @if (isMoneySumLoading()) {
-            <div class="spinner-border" role="status"></div>
+            <div>
+                <button class="btn btn-green-hollow" (click)="openTransactionModal(null)">
+                    + {{ 'mainpage.create_transaction.button' | translate }}
+                </button>
+            </div>
+        </div>
+
+        <div class="color-block green-block mt-3">
+            <div class="mb-3">
+                <div class="my-2">{{ 'mainpage.total_income' | translate }}</div>
+                @if (isMoneySumLoading()) {
+                    <div class="spinner-border" role="status"></div>
+                } @else {
+                    <h2>{{ moneySum()?.incomeSumThisMonth | number }} Ft</h2>
+                }
+            </div>
+        </div>
+
+        <div class="color-block red-block mt-3">
+            <div class="mb-3">
+                <div class="my-2">{{ 'mainpage.total_expenses' | translate }}</div>
+                @if (isMoneySumLoading()) {
+                    <div class="spinner-border" role="status"></div>
+                } @else {
+                    <h2>{{ moneySum()?.expenseSumThisMonth | number }} Ft</h2>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        @if (isTransactionListLoading()) {
+            <div class="text-center">
+                <div class="spinner-border" role="status"></div>
+            </div>
         } @else {
-            <h2>{{ moneySum() | number }} Ft</h2>
+            @if (transactionListData() !== null && transactionListData().length > 0) {
+                <app-transaction-list
+                    [transactions]="transactionListData()"
+                    (editTransaction)="openTransactionModal($event.transactionId)"
+                />
+            } @else {
+                <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
+            }
         }
     </div>
-
-    <div>
-        <button class="btn btn-green-hollow" (click)="openTransactionModal(null)">
-            {{ 'mainpage.create_transaction.button' | translate }}
-        </button>
-    </div>
 </div>
-
-@if (isTransactionListLoading()) {
-    <div class="text-center">
-        <div class="spinner-border" role="status"></div>
-    </div>
-} @else {
-    @if (transactionListData() !== null && transactionListData().length > 0) {
-        <app-transaction-list
-            [transactions]="transactionListData()"
-            (editTransaction)="openTransactionModal($event.transactionId)"
-        />
-    } @else {
-        <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
-    }
-}

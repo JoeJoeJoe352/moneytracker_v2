@@ -72,3 +72,9 @@ export interface TransactionDetailsDataFromBackend {
     unitPrice: number | null;
     isComplexPriceMode: boolean;
 }
+
+export interface MoneySumInterface {
+    incomeSumThisMonth: number;
+    expenseSumThisMonth: number;
+    moneySum: number;
+}

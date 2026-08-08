@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { NewTransaction, TransactionDataFromBackend } from './interfaces';
+import { MoneySumInterface, NewTransaction, TransactionDataFromBackend } from './interfaces';
 import { TransactionUtils } from './transaction-utils';
 
 @Injectable({
@@ -58,8 +58,8 @@ export class TransactionService {
   /**
    * Utolsó X darab tranzakciót lekéri
    */
-  getMoneySum(): Observable<number> {
-    return this.http.get<number>('/api/transaction/sum')
+  getMoneySum(): Observable<MoneySumInterface> {
+    return this.http.get<MoneySumInterface>('/api/transaction/sum')
   }
 
   /**
