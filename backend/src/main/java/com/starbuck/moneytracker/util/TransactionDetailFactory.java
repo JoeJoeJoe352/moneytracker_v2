@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.util;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
@@ -11,6 +12,7 @@ import com.starbuck.moneytracker.mapper.TransactionMapper;
 
 import jakarta.annotation.Nonnull;
 
+@Component
 public class TransactionDetailFactory {
 
     @Autowired
