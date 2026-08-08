@@ -102,30 +102,4 @@ public class TransactionMapper {
                 .map(this::fromDetailCreateRequest)
                 .collect(Collectors.toList());
     }
-
-    /**
-     * Előállítja a tranzakcióhoz tartozó detail listát a kérésből.
-     * - Ha a kérésben explicit detail lista van, azt alakítja át
-     * - Ha nincs, de van globalPrice, abból egy alapértelmezett detailt hoz létre
-     * - Ha egyik sincs, hibát dob
-     *
-     * @param request
-     * @return
-     */
-    public List<TransactionDetail> resolveDetails(@NonNull TransactionCreateRequest request) {
-        if (!request.transactionDetails().isEmpty()) {
-            return fromDetailCreateRequestList(request.transactionDetails());
-        }
-
-        // default detail létrehozása
-        if (request.globalPrice() != null) {
-            return fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(
-                    request.globalPrice(),
-                    TransactionDetail.DEFAULT_DETAIL_NAME,
-                    null,
-                    null)));
-        }
-
-        throw new IllegalArgumentException("No detail in list and price is also null. Error!");
-    }
 }

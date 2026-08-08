@@ -25,6 +25,7 @@ import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
+import com.starbuck.moneytracker.util.TransactionDetailFactory;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +41,9 @@ public class TransactionController {
     @Autowired
     private TransactionMapper transactionMapper;
 
+    @Autowired
+    private TransactionDetailFactory detailFactory;
+
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
     public void createTransaction(@Valid @RequestBody TransactionCreateRequest request,
@@ -47,7 +51,7 @@ public class TransactionController {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
         transaction.setUser(user);
 
-        List<TransactionDetail> transactionDetails = transactionMapper.resolveDetails(request);
+        List<TransactionDetail> transactionDetails = detailFactory.factoreDetail(request);
 
         this.transactionService.createTransaction(transaction, transactionDetails);
     }
@@ -63,7 +67,7 @@ public class TransactionController {
     public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable Long id) {
         Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
 
-        List<TransactionDetail> updatedDetails = transactionMapper.resolveDetails(request);
+        List<TransactionDetail> updatedDetails = detailFactory.factoreDetail(request);
 
         this.transactionService.updateTransaction(id, transaction, updatedDetails);
     }

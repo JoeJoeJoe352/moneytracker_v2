@@ -38,7 +38,7 @@ public class JwtService {
         return Jwts.builder()
                 .subject(username) // subject mező
                 .issuedAt(new Date()) // mikor generálódott
-                .expiration(new Date(System.currentTimeMillis() + CookieUtil.COOKIE_MAX_LIFETIME_SECONDS))
+                .expiration(new Date(System.currentTimeMillis() + CookieUtil.COOKIE_MAX_LIFETIME_SECONDS * 1000))
                 .signWith(getSignInKey()) // aláírás a titkos kulccsal
                 .compact();
     }
