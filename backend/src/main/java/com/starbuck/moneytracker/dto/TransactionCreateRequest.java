@@ -27,5 +27,7 @@ public record TransactionCreateRequest(
     
     @Valid
     @NotNull(message = "TransactionDetails are mandatory")
-    List<TransactionDetailCreateDto> transactionDetails
+    List<TransactionDetailCreateDto> transactionDetails,
+
+    List<Integer> categories
 ) {}

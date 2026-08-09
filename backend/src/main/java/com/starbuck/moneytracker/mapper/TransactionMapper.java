@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
-import com.starbuck.moneytracker.dto.TransactionDetailDto;
-import com.starbuck.moneytracker.dto.TransactionDto;
+import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
+import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 
@@ -23,20 +23,22 @@ public class TransactionMapper {
      * @param entity
      * @return
      */
-    public TransactionDto toDto(Transaction entity) {
+    public TransactionResponseDto toDto(Transaction entity) {
         if (entity == null)
             return null;
 
-        Set<TransactionDetailDto> detailDto = entity.getTransactionDetails().stream()
-                .map(detail -> new TransactionDetailDto(
+        Set<TransactionDetailResponseDto> detailDto = entity.getTransactionDetails().stream()
+                .map(detail -> new TransactionDetailResponseDto(
                         detail.getName(),
                         detail.getPrice(),
                         detail.getWeight(),
                         detail.getUnitPrice(),
-                        detail.isComplexPriceMode()))
+                        detail.isComplexPriceMode(),
+                        null // TODO ezt megcsinálni
+                ))
                 .collect(Collectors.toSet());
 
-        TransactionDto dto = new TransactionDto(
+        TransactionResponseDto dto = new TransactionResponseDto(
                 entity.getId(),
                 entity.getName(),
                 entity.getPriceSum(),
@@ -54,7 +56,7 @@ public class TransactionMapper {
      * @param entities
      * @return
      */
-    public List<TransactionDto> toDtoList(List<Transaction> entities) {
+    public List<TransactionResponseDto> toDtoList(List<Transaction> entities) {
         return entities.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());

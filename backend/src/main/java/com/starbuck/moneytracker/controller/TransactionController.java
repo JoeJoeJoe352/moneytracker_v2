@@ -19,7 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
-import com.starbuck.moneytracker.dto.TransactionDto;
+import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionFilter;
@@ -93,7 +93,7 @@ public class TransactionController {
      * @return List<TransactionDto>
      */
     @GetMapping(path = "/transaction/last")
-    public List<TransactionDto> getLastTransactions() {
+    public List<TransactionResponseDto> getLastTransactions() {
         Transaction[] transactions = this.transactionService.getLastTransactions();
         return this.transactionMapper.toDtoList(Arrays.asList(transactions));
     }
@@ -105,7 +105,7 @@ public class TransactionController {
      * @return TransactionDto
      */
     @GetMapping(path = "/transaction/{id}")
-    public TransactionDto getTransactionById(@PathVariable Long id) {
+    public TransactionResponseDto getTransactionById(@PathVariable Long id) {
         return this.transactionMapper.toDto(transactionService.getTransactionById(id));
     }
 
@@ -128,7 +128,7 @@ public class TransactionController {
      * @return
      */
     @GetMapping(path = "/transaction/history")
-    public List<TransactionDto> listTransactionHistory(
+    public List<TransactionResponseDto> listTransactionHistory(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) LocalDate date) {
         final TransactionFilter filter = new TransactionFilter(name, date);
