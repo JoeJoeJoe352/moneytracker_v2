@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity(name = "transaction_details")
 public class TransactionDetail {
@@ -50,6 +51,9 @@ public class TransactionDetail {
     @ManyToOne
     @JoinColumn(name = "transaction_id", nullable = false)
     private Transaction transaction;
+
+    @OneToMany
+    
 
     /**
      * Frontenden egyszerű (csak price van megadva), vagy komplex (egységár és

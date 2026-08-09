@@ -19,7 +19,7 @@ import jakarta.persistence.EntityNotFoundException;
 
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionFilter;
-import com.starbuck.moneytracker.entity.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 @Service
 public class TransactionService {

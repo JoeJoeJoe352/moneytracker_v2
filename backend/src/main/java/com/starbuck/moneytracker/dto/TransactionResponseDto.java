@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
-import com.starbuck.moneytracker.entity.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 public record TransactionResponseDto(
     Long id,

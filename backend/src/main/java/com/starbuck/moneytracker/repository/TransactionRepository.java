@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.entity.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 /**
  * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az
