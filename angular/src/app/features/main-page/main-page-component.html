@@ -49,19 +49,11 @@
         </div>
     </div>
     <div class="col-lg-8">
-        @if (isTransactionListLoading()) {
-            <div class="text-center">
-                <div class="spinner-border" role="status"></div>
-            </div>
-        } @else {
-            @if (transactionListData() !== null && transactionListData().length > 0) {
-                <app-transaction-list
-                    [transactions]="transactionListData()"
-                    (editTransaction)="openTransactionModal($event.transactionId)"
-                />
-            } @else {
-                <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
-            }
-        }
+        <app-transaction-list
+            [title]="'mainpage.last_transactions' | translate"
+            [isTransactionListLoading]="isTransactionListLoading()"
+            [transactions]="transactionListData()"
+            (editTransaction)="openTransactionModal($event.transactionId)"
+        />
     </div>
 </div>

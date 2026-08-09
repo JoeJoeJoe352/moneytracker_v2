@@ -51,6 +51,7 @@
     "income": "Bevétel",
     "hide_details": "Tranzakciós összeg megadása",
     "show_details": "Tételek felsorolása",
+
     "detail": {
       "title": "Tranzakció részletei",
       "name": "Tétel neve",
@@ -76,6 +77,18 @@
     "create_transaction.button": "Tranzakció létrehozása",
     "no_transaction": "Nincs még felvett tranzakció",
     "total_income": "Bevétel ebben a hónapban",
-    "total_expenses": "Kiadás ebben a hónapban"
+    "total_expenses": "Kiadás ebben a hónapban",
+    "last_transactions": "Legutóbbi tranzakciók"
+  },
+  "transaction_page": {
+    "title": "Tranzakcióim",
+
+    "filter": {
+      "name": "Tranzakciónév",
+      "date": "Tranzakció dátuma",
+      "date.placeholder": "Válassz egy dátumot",
+      "submit": "Keresés",
+      "clear": "Filterek törlése"
+    }
   }
 }

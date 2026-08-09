@@ -8,20 +8,14 @@
     />
 }
 
-<h1>Transactions</h1>
-
-<div>
-    <button class="btn btn-primary-green" (click)="openTransactionModal(null)">
-        {{ 'mainpage.create_transaction.button' | translate }}
-    </button>
-</div>
+<h1>{{ 'transaction_page.title' | translate }}</h1>
 
 <div class="green-block">
     <!-- filter form -->
     <form [formGroup]="filterForm" (ngSubmit)="loadTransactionHistory()" class="form">
         <!-- Transaction name -->
         <div class="form-group mb-3">
-            <label for="name">Transaction name</label>
+            <label for="name">{{ 'transaction_page.filter.name' | translate }}</label>
             <input
                 id="name"
                 type="text"
@@ -34,12 +28,12 @@
 
         <!-- Transaction date -->
         <div class="form-group mb-3">
-            <label for="date">Transaction date</label>
+            <label for="date">{{ 'transaction_page.filter.date' | translate }}</label>
             <ngxsmk-datepicker
                 id="date"
                 mode="single"
                 formControlName="date"
-                placeholder="Select a date"
+                [placeholder]="'transaction_page.filter.date.placeholder' | translate"
             />
         </div>
 
@@ -48,7 +42,7 @@
             [disabled]="isTransactionListLoading()"
             class="btn btn-green-hollow me-2"
         >
-            Search
+            {{ 'transaction_page.filter.submit' | translate }}
         </button>
 
         <button
@@ -57,22 +51,13 @@
             class="btn btn-green-hollow"
             (click)="clearInputs()"
         >
-            Clear
+            {{ 'transaction_page.filter.clear' | translate }}
         </button>
     </form>
 </div>
 <!-- Transaction list -->
-@if (isTransactionListLoading()) {
-    <div class="text-center">
-        <div class="spinner-border" role="status"></div>
-    </div>
-} @else {
-    @if (transactionListData() !== null && transactionListData().length > 0) {
-        <app-transaction-list
-            [transactions]="transactionListData()"
-            (editTransaction)="openTransactionModal($event.transactionId)"
-        />
-    } @else {
-        <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
-    }
-}
+<app-transaction-list
+    [isTransactionListLoading]="isTransactionDataLoading()"
+    [transactions]="transactionListData()"
+    (editTransaction)="openTransactionModal($event.transactionId)"
+/>

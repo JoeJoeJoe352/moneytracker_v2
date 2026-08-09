@@ -5,8 +5,8 @@ import { DecimalPipe } from '@angular/common';
 
 @Component({
     selector: 'app-transaction-card',
-    templateUrl: './transaction-card.html',
-    styleUrl: './transaction-card.scss',
+    templateUrl: './transaction-card-component.html',
+    styleUrl: './transaction-card-component.scss',
     imports: [DecimalPipe],
 })
 export default class TransactionCardComponent {

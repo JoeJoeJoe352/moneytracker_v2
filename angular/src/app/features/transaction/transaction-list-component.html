@@ -1,0 +1,25 @@
+<div class="transaction_list mb-0 mb-md-3 mt-3 mt-lg-0">
+    @if (isTransactionListLoading) {
+        <div class="text-center">
+            <div class="spinner-border" role="status"></div>
+        </div>
+    } @else {
+        @if (title) {
+            <h2 class="title">
+                {{ title }}
+            </h2>
+        }
+        @if (transactions !== null && transactions.length > 0) {
+            @for (transaction of transactions; track transaction.id) {
+                <div class="transaction_cards">
+                    <app-transaction-card
+                        [transaction]="transaction"
+                        (click)="editTransaction.emit({ transactionId: transaction.id })"
+                    />
+                </div>
+            }
+        } @else {
+            <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
+        }
+    }
+</div>

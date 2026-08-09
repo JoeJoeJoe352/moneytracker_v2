@@ -2,9 +2,6 @@
 
 .transaction-card-wrapper {
     cursor: pointer;
-    border: 1px solid $moneytracker-grey;
-    margin-bottom: 10px;
-    border-radius: $border-radius;
 
     &:hover {
         background-color: #ebebeb;

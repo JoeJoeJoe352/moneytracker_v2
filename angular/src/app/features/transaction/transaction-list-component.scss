@@ -1,0 +1,16 @@
+@use '../../shared/variables.scss' as *;
+
+.transaction_list {
+    border-radius: $border-radius;
+    border: 1px solid $moneytracker-grey;
+
+    h2 {
+        padding: 15px;
+        margin: 0;
+        border-bottom: 1px solid $moneytracker-grey;
+    }
+    
+    .transaction_cards:not(:last-child) {
+        border-bottom: 1px solid $moneytracker-grey;
+    }
+}
