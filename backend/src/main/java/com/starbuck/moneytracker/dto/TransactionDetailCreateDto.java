@@ -1,7 +1,7 @@
 package com.starbuck.moneytracker.dto;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -20,6 +20,6 @@ public record TransactionDetailCreateDto(
 
     BigDecimal unitPrice,
 
-    ArrayList<Integer> categories
+    List<Integer> categories
 ) {
 }

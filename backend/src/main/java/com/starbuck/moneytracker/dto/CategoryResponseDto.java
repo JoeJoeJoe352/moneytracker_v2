@@ -1,7 +1,7 @@
 package com.starbuck.moneytracker.dto;
 
 public record CategoryResponseDto(
-    int id, 
+    Long id, 
     String name
 ) {
     

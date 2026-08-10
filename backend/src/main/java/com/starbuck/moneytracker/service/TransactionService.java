@@ -41,6 +41,7 @@ public class TransactionService {
      */
     @Transactional
     public Transaction createTransaction(Transaction transaction, List<TransactionDetail> transactionDetails) {
+        // TODO transactionDetails az legyen a transactionmodelben átadva
         BigDecimal sumOfDetailsPrice = transactionDetails.stream()
                 .map((detail) -> costCalculator.calculateCost(detail, transaction.getTransactionType()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
