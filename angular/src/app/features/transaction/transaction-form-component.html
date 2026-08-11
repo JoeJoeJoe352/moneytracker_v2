@@ -111,9 +111,15 @@
                             unSelectAllText: 'UnSelect All',
                             itemsShowLimit: 2,
                             allowSearchFilter: true,
+                            noFilteredDataAvailablePlaceholderText:
+                                ('transaction.category.add' | translate) +
+                                ': ' +
+                                categorySearchText(),
                         }"
                         [data]="categoryData()"
                         formControlName="categories"
+                        (onFilterChange)="onCategoryFilterChange($event)"
+                        (click)="onCategoryDropdownClick($event)"
                     />
                 </div>
             </div>

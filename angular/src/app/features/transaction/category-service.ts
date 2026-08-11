@@ -12,7 +12,7 @@ export class CategoryService {
     /**
      * Kategória létrehozása
      */
-    saveTransaction(
+    saveCategory(
         categoryData: CategorySaveRequestInterface,
     ): Observable<CategoryResponseInterface> {
         return this.http.post<CategoryResponseInterface>('/api/category', categoryData);
@@ -21,7 +21,7 @@ export class CategoryService {
     /**
      * Kategóriák listájának lekérdezése
      */
-    listTransactions(): Observable<CategoryResponseInterface[]> {
+    listCategories(): Observable<CategoryResponseInterface[]> {
         return this.http.get<CategoryResponseInterface[]>('/api/category');
     }
 }

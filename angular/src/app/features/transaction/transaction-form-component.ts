@@ -6,6 +6,7 @@ import {
     Input,
     OnChanges,
     Output,
+    signal,
     Signal,
     SimpleChanges,
 } from '@angular/core';
@@ -71,7 +72,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Kategóriák listája a selecthez
      */
-    @Input({ required: true }) categoryList!: CategoryResponseInterface[] | null;
+    @Input({ required: true }) categoryList!: Signal<CategoryResponseInterface[]>;
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
@@ -85,27 +86,54 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakció törlés gombra kattintott a user
      */
     @Output() deleted = new EventEmitter<number>();
+
+    /**
+     * Új kategóriát szeretne a user hozzáadni a listájához
+     */
+    @Output() categoryAdded = new EventEmitter<string>();
+
     /**
      * Tranzakciós form
      */
     protected transactionForm: FormGroup;
 
     /**
+     * A kategória dropdown keresőmezőjébe gépelt szöveg
+     */
+    protected categorySearchText = signal('');
+
+    /**
+     * Kategória hozzáadása folyamatban van-e
+     */
+    protected isAddingCategory = signal(false);
+
+    /**
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
      */
-    categoryData: Signal<DropdownInterface[]> = computed(() =>
-        this.categoryList === null
-            ? []
-            : this.categoryList.map((category) => {
-                  const itemname = !category.isLangKey
-                      ? category.name
-                      : this.translateService.instant(_(category.name));
-                  return {
-                      item_id: category.id,
-                      item_text: itemname,
-                  } as DropdownInterface;
-              }),
-    );
+    categoryData: Signal<DropdownInterface[]> = computed(() => {
+        return this.categoryList().map((category) => {
+            const itemname = !category.isLangKey
+                ? category.name
+                : this.translateService.instant(_(category.name));
+            return {
+                item_id: category.id,
+                item_text: itemname,
+            } as DropdownInterface;
+        });
+    });
+
+    /**
+     * Nincs találat a kategória keresésre, ezért felajánljuk az új kategória létrehozását
+     */
+    protected showAddCategoryButton: Signal<boolean> = computed(() => {
+        const searchText = this.categorySearchText().trim().toLowerCase();
+        if (!searchText) {
+            return false;
+        }
+        return !this.categoryData().some((category) =>
+            category.item_text.toLowerCase().includes(searchText),
+        );
+    });
 
     constructor() {
         this.transactionForm = this.buildForm({
@@ -173,6 +201,32 @@ export class TransactionFormComponent implements OnChanges {
             return;
         }
         this.saved.emit(this.transactionForm.value);
+    }
+
+    /**
+     * A kategória dropdown keresőmezőjének szövege változott
+     */
+    onCategoryFilterChange(filterItem: unknown): void {
+        this.categorySearchText.set(filterItem as string);
+    }
+
+    /**
+     * A kategória dropdown "nincs találat" sorára kattintás lekezelése (ez jelenik meg gombként, ha nincs találat)
+     */
+    onCategoryDropdownClick(event: Event): void {
+        console.log('qweqweqwe')
+        // kattintás esetén csak akkor ad hozzá elemet, hogyha a "nincs ilyen elem" gombra kattint
+        if ((event.target as HTMLElement).closest('.no-filtered-data')) {
+            this.onAddCategory();
+        }
+    }
+
+    onAddCategory() {
+        const name = this.categorySearchText().trim();
+        if (!name || this.isAddingCategory()) {
+            return;
+        }
+        this.categoryAdded.emit(name)
     }
 
     /**

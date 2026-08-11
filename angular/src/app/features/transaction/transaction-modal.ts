@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, Signal } from '@angular/core';
 import { BaseModal } from '../../shared/components/modal/base-modal';
 import { TransactionFormComponent } from './transaction-form-component';
 import {
@@ -18,6 +18,7 @@ import { TranslatePipe } from '@ngx-translate/core';
                 [transaction]="transaction"
                 (deleted)="deleteTransactionRequested.emit($event)"
                 (saved)="saved.emit($event)"
+                (categoryAdded)="categoryAdded.emit($event)"
             />
         </app-base-modal>
     `,
@@ -25,10 +26,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 })
 export class TransactionModalComponent {
     @Input() transaction: TransactionDataFromBackend | null = null;
-    @Input({ required: true }) categories!: CategoryResponseInterface[] | null;
+    @Input({ required: true }) categories!: Signal<CategoryResponseInterface[]>;
     @Input({ required: true }) isTransactionFormDisabled!: boolean;
 
     @Output() closeModal = new EventEmitter<void>();
     @Output() deleteTransactionRequested = new EventEmitter<number>();
     @Output() saved = new EventEmitter<NewTransaction>();
+    @Output() categoryAdded = new EventEmitter<string>();
 }

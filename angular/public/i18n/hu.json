@@ -72,6 +72,9 @@
     "income": "Bevétel",
     "hide_details": "Tranzakciós összeg megadása",
     "show_details": "Tételek felsorolása",
+    "category": {
+      "add": "Kategória hozzáadása"
+    },
 
     "detail": {
       "title": "Tranzakció részletei",

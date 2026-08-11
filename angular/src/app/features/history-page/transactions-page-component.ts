@@ -76,9 +76,9 @@ export class TransactionsPage implements OnInit {
      */
     protected categories = toSignal(
         toObservable(this.selectedTransactionIdTrigger).pipe(
-            switchMap(() => this.categoryService.listTransactions()),
+            switchMap(() => this.categoryService.listCategories()),
         ),
-        { initialValue: null },
+        { initialValue: [] },
     );
 
     /**

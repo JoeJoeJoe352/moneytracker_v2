@@ -1,11 +1,12 @@
 @if (isTransactionModalOpen()) {
     <app-create-transaction-modal
         [transaction]="transactionData()"
-        [categories]="categories()"
+        [categories]="categories"
         [isTransactionFormDisabled]="isTransactionFormDisabled() || isTransactionDataLoading()"
         (closeModal)="closeTransactionModal()"
         (deleteTransactionRequested)="popupDeletionConfirm($event)"
         (saved)="saveTransaction($event)"
+        (categoryAdded)="saveCategory($event)"
     />
 }
 <div class="row mt-3">

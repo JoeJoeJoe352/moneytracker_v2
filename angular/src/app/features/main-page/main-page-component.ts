@@ -20,7 +20,7 @@ import { CategoryService } from '../transaction/category-service';
 export class MainPage {
     private transactionService = inject(TransactionService);
     private transactionActionService = inject(TransactionActionService);
-    private categoryService = inject(CategoryService)
+    private categoryService = inject(CategoryService);
 
     /**
      * Töltődik-e jelenleg a tranzakciós lista
@@ -49,6 +49,14 @@ export class MainPage {
      * Azért számot növelünk és nem boolean érték, mert ha gyorsan, többször hívódik egymás után, akkor kétszer true-ra állítódik az érték és az nem vált ki új letöltés eventet
      */
     protected reloadTransactionMoneyDataTrigger = signal(0);
+    /**
+     * Kategórialistát újra kell-e tölteni
+     */
+    protected reloadCategoryDataTrigger = signal(0);
+    /**
+     * A formban kategória hozzáadása folyamatban van-e?
+     */
+    protected isAddingCategoryInProgress = signal(false); // TODO ezt átadni a modal és többinek
 
     /**
      *  Betöltés alatt van-e a tranzakció
@@ -107,12 +115,10 @@ export class MainPage {
      * Kategóriák listája
      */
     protected categories = toSignal(
-        toObservable(this.selectedTransactionIdTrigger).pipe(
-            switchMap(() =>
-                this.categoryService.listTransactions(),
-            ),
+        toObservable(this.reloadCategoryDataTrigger).pipe(
+            switchMap(() => this.categoryService.listCategories()),
         ),
-        { initialValue: null },
+        { initialValue: [] },
     );
 
     /**
@@ -163,5 +169,23 @@ export class MainPage {
     private refreshAfterSave(): void {
         this.reloadTransactionMoneyDataTrigger.update((value) => value + 1);
         this.closeTransactionModal();
+    }
+
+    /**
+     * Hozzáad egy új kategóriát és újratölti a listát
+     */
+    saveCategory(categoryName: string): void {
+        this.isAddingCategoryInProgress.set(true);
+
+        this.categoryService.saveCategory({ name: categoryName }).subscribe({
+            next: () => {
+                this.reloadCategoryDataTrigger.update((value) => value + 1);
+                this.isAddingCategoryInProgress.set(false);
+            },
+            error: (err) => {
+                console.error('Problem with the category save' + err);
+                this.isAddingCategoryInProgress.set(false);
+            },
+        });
     }
 }

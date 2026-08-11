@@ -29,6 +29,21 @@
     }
 }
 
+// A ng-multiselect-dropdown "nincs találat" sorát kategória-hozzáadó gombbá alakítjuk,
+// mivel a könyvtár nem teszi lehetővé saját tartalom beillesztését ebbe a sorba
+::ng-deep .no-filtered-data {
+    cursor: pointer;
+
+    h5 {
+        color: $moneytracker-green;
+        font-weight: bold;
+    }
+
+    &:hover {
+        background-color: #e4e3e3;
+    }
+}
+
 .input-with-suffix {
     position: relative;
     display: inline-block;
