@@ -27,8 +27,8 @@ public class Category {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @Column(nullable = false)
@@ -43,6 +43,16 @@ public class Category {
 
     @OneToMany(mappedBy = "category")
     private List<TransactionDetailCategory> transactionDetailLinks;
+
+    /**
+     * A mindenki számára elérhető kategóriák nyelvi kulcsként vannak az
+     * adatbázisban, ezeknél nincs user beállítva
+     * 
+     * @return
+     */
+    public boolean isLangKey() {
+        return this.user == null;
+    }
 
     // Autogenerált
 

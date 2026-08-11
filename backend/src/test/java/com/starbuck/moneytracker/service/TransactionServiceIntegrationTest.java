@@ -66,10 +66,6 @@ class TransactionServiceIntegrationTest {
     @MockitoBean
     private CurrentUserUtil currentUser;
 
-    // TODO ez kell? Ha igen, akkor kommentelni miért
-    @PersistenceContext
-    EntityManager em;
-
     private User user = null;
 
     @BeforeAll

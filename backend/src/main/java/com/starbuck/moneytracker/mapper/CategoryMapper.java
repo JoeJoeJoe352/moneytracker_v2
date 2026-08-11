@@ -14,7 +14,9 @@ public class CategoryMapper {
     public CategoryResponseDto toDto(Category category) {
         return new CategoryResponseDto(
                 category.getId(),
-                category.getName());
+                category.getName(),
+                category.isLangKey()
+            );
     }
 
     public List<CategoryResponseDto> toDtoList(List<Category> entities) {

@@ -1,4 +1,25 @@
 {
+  "in_db": {
+    "category": {
+      "food": "Élelmiszer",
+      "household": "Háztartás",
+      "hygiene": "Higiénia",
+      "health": "Egészség",
+      "transport": "Közlekedés",
+      "fuel": "Üzemanyag",
+      "entertainment": "Szórakozás",
+      "clothing": "Ruházat",
+      "electronics": "Elektronika",
+      "home": "Otthon",
+      "pets": "Háziállat",
+      "gifts": "Ajándék",
+      "education": "Oktatás",
+      "sport": "Sport",
+      "subscription": "Előfizetés",
+      "other": "Egyéb"
+    }
+  },
+
   "welcome": {
     "title": "Üdvözlünk a Moneytrackerben!",
     "welcomeText": "A kiadásaink rendszeres nyomonkövetése segít tudatosabbá válni a mindennapokban. Megmutatja, hol szivárog el a pénz, mely szokások támogatnak, és melyek húznak vissza. Ha látod a valós számokat, könnyebb okos döntéseket hozni: félretenni, tervezni, vagy épp bátran megengedni magadnak valamit. A pénzügyi átláthatóság nem korlátoz, hanem szabadságot ad — pontosan tudod, hol tartasz, és merre szeretnél menni.",
