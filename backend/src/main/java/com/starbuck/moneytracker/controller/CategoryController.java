@@ -35,10 +35,11 @@ public class CategoryController {
      */
     @PostMapping(path = "/categories")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createCategory(@Valid @RequestBody CategoryCreateDto categoryData) {
+    public CategoryResponseDto createCategory(@Valid @RequestBody CategoryCreateDto categoryData) {
         var model = new Category();
         model.setName(categoryData.name());
-        categoryService.createCategory(model);
+        var category = categoryService.createCategory(model);
+        return mapper.toDto(category);
     }
 
     /**

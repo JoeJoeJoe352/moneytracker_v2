@@ -14,9 +14,9 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public void createCategory(Category category) {
+    public Category createCategory(Category category) {
         // TODO category egyediséget ellenőrizni előbb
-        this.categoryRepository.save(category);
+        return this.categoryRepository.save(category);
     }
 
     public List<Category> listCategories() {
