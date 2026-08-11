@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Id;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -53,7 +54,7 @@ public class TransactionDetail {
     @JoinColumn(name = "transaction_id", nullable = false)
     private Transaction transaction;
 
-    @OneToMany(mappedBy = "transactionDetail")
+    @OneToMany(mappedBy = "transactionDetail", cascade = CascadeType.REMOVE)
     private List<TransactionDetailCategory> categoryLinks;
 
     /**
@@ -152,5 +153,13 @@ public class TransactionDetail {
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+    }
+
+    public List<TransactionDetailCategory> getCategoryLinks() {
+        return categoryLinks;
+    }
+
+    public void setCategoryLinks(List<TransactionDetailCategory> categoryLinks) {
+        this.categoryLinks = categoryLinks;
     }
 }

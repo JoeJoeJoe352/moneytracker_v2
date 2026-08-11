@@ -33,7 +33,6 @@ public class TransactionDetailFactory {
         }
 
         // default detail létrehozása
-        // TODO globalCategories
         if (request.globalPrice() != null) {
             return mapper.fromDetailCreateRequestList(List.of(new TransactionDetailCreateDto(
                     request.globalPrice(),

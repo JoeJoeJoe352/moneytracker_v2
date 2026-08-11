@@ -33,7 +33,7 @@ public class Category {
 
     @Column(nullable = false)
     @ColumnDefault("0")
-    private GeneralStatusEnum status;
+    private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

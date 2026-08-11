@@ -105,7 +105,7 @@ public class TransactionController {
      */
     @GetMapping(path = "/transaction/{id}")
     public TransactionResponseDto getTransactionById(@PathVariable Long id) {
-        return this.transactionMapper.toDto(transactionService.getTransactionById(id));
+        return this.transactionMapper.toDto(transactionService.getTransactionByIdForActualUser(id));
     }
 
     /**

@@ -181,7 +181,7 @@ class TransactionServiceTest {
                                 updatedTransaction);
 
                 Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-                Mockito.when(transactionRepo.getTransactionById(anyLong(), anyLong()))
+                Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                                 .thenReturn(Optional.of(transactionInDB));
 
                 ArgumentCaptor<Transaction> captorTransaction = ArgumentCaptor.forClass(Transaction.class);
@@ -274,7 +274,7 @@ class TransactionServiceTest {
                 ArgumentCaptor<TransactionDetail> captorDetails = ArgumentCaptor.forClass(TransactionDetail.class);
 
                 Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-                Mockito.when(transactionRepo.getTransactionById(anyLong(), anyLong()))
+                Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                                 .thenReturn(Optional.of(transactionInDB));
 
                 // WHEN

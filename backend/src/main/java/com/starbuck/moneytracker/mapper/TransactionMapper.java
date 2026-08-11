@@ -11,8 +11,10 @@ import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
 import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
+import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 
 @Component
 public class TransactionMapper {
@@ -89,6 +91,17 @@ public class TransactionMapper {
         entity.setPrice(request.price());
         entity.setWeight(request.weight());
         entity.setUnitPrice(request.unitPrice());
+
+        // Kategória dummy objectek létrehozása, összepárosítása a hozzá tartozó detaillal
+        List<TransactionDetailCategory> categories = request.categories().stream().map((category) -> {
+            Category tempCategoryObject = new Category();
+            tempCategoryObject.setId(category);
+            var transactionDetailCategoryObject = new TransactionDetailCategory();
+            transactionDetailCategoryObject.setCategory(tempCategoryObject);
+            return transactionDetailCategoryObject;
+        }).collect(Collectors.toList());
+
+        entity.setCategoryLinks(categories);
 
         return entity;
     }

@@ -20,6 +20,6 @@ public record TransactionDetailCreateDto(
 
     BigDecimal unitPrice,
 
-    List<Integer> categories
+    List<Long> categories
 ) {
 }

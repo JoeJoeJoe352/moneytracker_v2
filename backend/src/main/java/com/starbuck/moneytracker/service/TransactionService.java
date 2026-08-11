@@ -8,7 +8,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
+import com.starbuck.moneytracker.repository.CategoryRepository;
+import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
@@ -18,6 +21,7 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 import jakarta.persistence.EntityNotFoundException;
 
 import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
@@ -29,6 +33,12 @@ public class TransactionService {
 
     @Autowired
     private TransactionDetailRepository transactionDetailRepo;
+
+    @Autowired
+    private TransactionDetailCategoryRepository transactionDetailCategoryRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private CurrentUserUtil currentUser;
@@ -62,7 +72,7 @@ public class TransactionService {
     public void updateTransaction(Long id, Transaction updatedTransaction,
             List<TransactionDetail> updatedDetails) {
         // ellenőrzöm, hogy a tranzakció a useré-e (nem fogja megtalálni, hogyha nem)
-        Transaction transaction = this.getTransactionById(id);
+        Transaction transaction = this.getTransactionByIdForActualUser(id);
 
         if (updatedDetails.isEmpty()) {
             throw new IllegalStateException("Transaction has no details to update.");
@@ -78,7 +88,11 @@ public class TransactionService {
         transaction.setPriceSum(sumOfDetailsPrice);
 
         transactionRepo.save(transaction);
-        // egyszerűbb törölni a detailokat, mint kikeresni a meglévőket és frissíteni
+
+        // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
+        // kikeresni a meglévőket és frissíteni.
+        // Cascade delete miatt ez törli a detailCategory táblában lévők kapcsolat
+        // bejegyzéseket is
         transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
         this.saveDetails(transaction, updatedDetails);
     }
@@ -109,8 +123,24 @@ public class TransactionService {
 
             detail.setTransaction(savedTransaction);
 
-            this.transactionDetailRepo.save(detail);
+            var detailAfterSave = this.transactionDetailRepo.save(detail);
+            this.saveCategory(detailAfterSave, detail.getCategoryLinks());
         }
+    }
+
+    /**
+     * Kapcsolatokat létrehozzuk a detail és a hozzá tartozó kategóriák között
+     * 
+     * @param savedDetail
+     * @param categoryLinkModels
+     */
+    private void saveCategory(TransactionDetail savedDetail, List<TransactionDetailCategory> categoryLinkModels) {
+        categoryLinkModels.forEach((categoryLinkModel) -> {
+            Category categoryRef = new Category();
+            categoryRef.setId(categoryLinkModel.getCategory().getId());
+            TransactionDetailCategory detailCategoryModel = new TransactionDetailCategory(categoryRef, savedDetail);
+            transactionDetailCategoryRepository.save(detailCategoryModel);
+        });
     }
 
     /**
@@ -129,17 +159,20 @@ public class TransactionService {
      * @return BigDecimal
      */
     public BigDecimal sumAllExpenseForMonth() {
-        BigDecimal sum = this.transactionRepo.summarizeTransactionPricesForMonthAndType(currentUser.getUser().getId(), TransactionTypeEnum.OUTCOME);
+        BigDecimal sum = this.transactionRepo.summarizeTransactionPricesForMonthAndType(currentUser.getUser().getId(),
+                TransactionTypeEnum.OUTCOME);
         return sum == null ? BigDecimal.ZERO : sum;
     }
 
     /**
-     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi bevétele volt
+     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi bevétele
+     * volt
      * 
      * @return BigDecimal
      */
     public BigDecimal sumAllIncomeForMonth() {
-        BigDecimal sum = this.transactionRepo.summarizeTransactionPricesForMonthAndType(currentUser.getUser().getId(), TransactionTypeEnum.INCOME);
+        BigDecimal sum = this.transactionRepo.summarizeTransactionPricesForMonthAndType(currentUser.getUser().getId(),
+                TransactionTypeEnum.INCOME);
         return sum == null ? BigDecimal.ZERO : sum;
     }
 
@@ -161,9 +194,9 @@ public class TransactionService {
      * @param transactionId
      * @return
      */
-    public Transaction getTransactionById(Long transactionId) {
+    public Transaction getTransactionByIdForActualUser(Long transactionId) {
         return this.transactionRepo
-                .getTransactionById(transactionId, currentUser.getUser().getId())
+                .getTransactionByIdWithDetails(transactionId, currentUser.getUser().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
     }
 
@@ -191,7 +224,8 @@ public class TransactionService {
      * @param transactionId
      */
     public void deleteTransaction(long transactionId) {
-        Transaction transaction = this.getTransactionById(transactionId);
+        // jogosultságvizsgálat is
+        Transaction transaction = this.getTransactionByIdForActualUser(transactionId);
         this.transactionRepo.delete(transaction);
     }
 }

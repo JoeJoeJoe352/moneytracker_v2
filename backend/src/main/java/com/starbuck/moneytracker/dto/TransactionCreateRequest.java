@@ -29,5 +29,5 @@ public record TransactionCreateRequest(
     @NotNull(message = "TransactionDetails are mandatory")
     List<TransactionDetailCreateDto> transactionDetails,
 
-    List<Integer> globalCategories
+    List<Long> globalCategories
 ) {}

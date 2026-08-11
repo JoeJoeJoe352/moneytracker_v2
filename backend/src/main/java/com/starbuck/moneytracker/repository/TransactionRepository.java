@@ -6,7 +6,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
@@ -57,8 +60,8 @@ public interface TransactionRepository extends
      * @param transactionId
      * @return
      */
-    @Query("SELECT t FROM Transaction t WHERE t.id = ?1 AND t.user.id = ?2 AND t.status = 0")
-    Optional<Transaction> getTransactionById(long transactionId, long userId);
+    @Query("SELECT t FROM Transaction t LEFT JOIN FETCH t.transactionDetails WHERE t.id = ?1 AND t.user.id = ?2 AND t.status = 0")
+    Optional<Transaction> getTransactionByIdWithDetails(long transactionId, long userId);
 
     /**
      * Lekéri az összes tranzakciót a tranzakció részletekkel együtt
@@ -70,4 +73,15 @@ public interface TransactionRepository extends
      */
     @Query("SELECT t FROM Transaction t JOIN FETCH t.transactionDetails td WHERE t.status = 0 ")
     List<Transaction> getAllTransaction();
+
+    /**
+     * Alapból a tranzakciók softdelete-el törlődnek, ez a hard delete-et teszi
+     * lehetővé
+     * 
+     * @param id
+     */
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM transactions WHERE id = :id", nativeQuery = true)
+    void hardDeleteTransaction(@Param("id") Long id);
 }
