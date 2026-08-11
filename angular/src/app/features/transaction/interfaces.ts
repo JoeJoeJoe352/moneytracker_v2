@@ -5,6 +5,7 @@ export interface TransactionInputDefaultValuesWithDetails {
     name: string;
     isIncome: boolean;
     price: null | number;
+    categories: null | number[];
     transactionDate: Date | null;
     details: TransactionDetailsDataFromBackend[];
     isComplexTransaction: boolean;
@@ -12,18 +13,20 @@ export interface TransactionInputDefaultValuesWithDetails {
 
 /**
  * Tranzakciós adatok, ahogy a form kitöltése után lesznek
- * itt már nem lehet null a price, de elküldés után már nem
+ * itt még nem lehet null a price
  */
 export interface NewTransaction {
     name: string;
     isIncome: boolean;
     price: number | null;
     transactionDate: Date;
+    categories: number[] | null;
     details: {
         detailName: string;
         detailPrice: number;
         detailWeight: number;
         detailUnitPrice: number;
+        categories: number[];
     }[];
     isComplexTransaction: boolean;
 }
@@ -33,7 +36,7 @@ export interface NewTransaction {
  */
 export interface TransactionDataForBackend {
     globalPrice: number | null;
-    globalCategories: number[];
+    globalCategories: number[] | null;
     name: string;
     transactionDate: string;
     transactionType: string;
@@ -73,6 +76,7 @@ export interface TransactionDetailsDataFromBackend {
     weight: number | null;
     unitPrice: number | null;
     isComplexPriceMode: boolean;
+    categories: number[];
 }
 
 export interface MoneySumInterface {

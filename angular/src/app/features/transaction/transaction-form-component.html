@@ -70,26 +70,53 @@
     <!-- Ár -->
     @if (!isComplexTransaction.value) {
         <div class="form-group mb-3">
-            <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
-            <div class="input-with-suffix">
-                <input
-                    id="transaction-price"
-                    type="number"
-                    formControlName="price"
-                    class="form-control"
-                />
-                <span class="suffix">Ft</span>
-            </div>
-            @if (price.invalid && price.touched) {
-                @if (price.hasError('required')) {
-                    <div class="form-field-error">
-                        {{ 'transaction.price.required' | translate }}
+            <div class="d-flex">
+                <div class="me-2">
+                    <label for="transaction-price">{{ 'transaction.price' | translate }}</label
+                    ><br />
+                    <div class="input-with-suffix">
+                        <input
+                            id="transaction-price"
+                            type="number"
+                            formControlName="price"
+                            class="form-control"
+                            autocomplete="price"
+                        />
+                        <span class="suffix">Ft</span>
                     </div>
-                }
-                @if (price.hasError('min')) {
-                    <div class="form-field-error">{{ 'transaction.price.min' | translate }}</div>
-                }
-            }
+                    @if (price.invalid && price.touched) {
+                        @if (price.hasError('required')) {
+                            <div class="form-field-error">
+                                {{ 'transaction.price.required' | translate }}
+                            </div>
+                        }
+                        @if (price.hasError('min')) {
+                            <div class="form-field-error">
+                                {{ 'transaction.price.min' | translate }}
+                            </div>
+                        }
+                    }
+                </div>
+                <div>
+                    <label for="transaction-categories">{{
+                        'transaction.categories' | translate
+                    }}</label>
+                    <ng-multiselect-dropdown
+                        [placeholder]="'custom placeholder'"
+                        [settings]="{
+                            singleSelection: false,
+                            idField: 'item_id',
+                            textField: 'item_text',
+                            selectAllText: 'Select All',
+                            unSelectAllText: 'UnSelect All',
+                            itemsShowLimit: 2,
+                            allowSearchFilter: true,
+                        }"
+                        [data]="categoryData()"
+                        formControlName="categories"
+                    />
+                </div>
+            </div>
         </div>
     } @else {
         <!-- Tranzakció részletei -->

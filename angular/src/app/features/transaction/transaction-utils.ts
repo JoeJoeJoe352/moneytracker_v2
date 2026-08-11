@@ -32,6 +32,7 @@ export class TransactionUtils {
             transactionDate: transactionDate,
             isComplexTransaction: transaction.isComplexTransaction,
             details: transactionDetailsFormatted,
+            categories: [] // TODO megcsinálni
         };
     }
 
@@ -55,6 +56,7 @@ export class TransactionUtils {
                   price: this.deNormalizePriceForBackend(detail.detailPrice, input.isIncome),
                   weight: detail.detailWeight,
                   unitPrice: detail.detailUnitPrice,
+                  categories: detail.categories
               }))
             : [];
 
@@ -67,6 +69,7 @@ export class TransactionUtils {
             transactionType: TransactionTypeString,
             transactionDate: transactionDateString,
             transactionDetails: transactionDetailsFormatted,
+            globalCategories: input.categories !== null ? input.categories : null
         };
     }
 

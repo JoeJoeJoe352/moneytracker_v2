@@ -1,10 +1,12 @@
 import {
     Component,
+    computed,
     EventEmitter,
     inject,
     Input,
     OnChanges,
     Output,
+    Signal,
     SimpleChanges,
 } from '@angular/core';
 import {
@@ -25,7 +27,8 @@ import {
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
 } from './interfaces';
-import { TranslatePipe } from '@ngx-translate/core';
+import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 
 /**
  * Detail form elemei
@@ -36,17 +39,30 @@ interface DetailForm {
     detailWeight: FormControl<number | null>;
     detailUnitPrice: FormControl<number | null>;
     detailIsComplexPriceMode: FormControl<boolean>;
+    categories: FormControl<number[]>;
+}
+
+interface DropdownInterface {
+    item_id: number;
+    item_text: string;
 }
 
 @Component({
     selector: 'app-transaction-form-component',
     templateUrl: './transaction-form-component.html',
     styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
-    imports: [ReactiveFormsModule, NgxsmkDatepickerComponent, SwitchComponent, TranslatePipe],
+    imports: [
+        ReactiveFormsModule,
+        NgxsmkDatepickerComponent,
+        SwitchComponent,
+        TranslatePipe,
+        NgMultiSelectDropDownModule,
+    ],
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
+    private translateService = inject(TranslateService);
 
     /**
      * Form disabled-e (pl.: töltődéskor)
@@ -55,7 +71,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Kategóriák listája a selecthez
      */
-    @Input({ required: true }) categories!: CategoryResponseInterface[] | null;
+    @Input({ required: true }) categoryList!: CategoryResponseInterface[] | null;
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
@@ -74,6 +90,23 @@ export class TransactionFormComponent implements OnChanges {
      */
     protected transactionForm: FormGroup;
 
+    /**
+     * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
+     */
+    categoryData: Signal<DropdownInterface[]> = computed(() =>
+        this.categoryList === null
+            ? []
+            : this.categoryList.map((category) => {
+                  const itemname = !category.isLangKey
+                      ? category.name
+                      : this.translateService.instant(_(category.name));
+                  return {
+                      item_id: category.id,
+                      item_text: itemname,
+                  } as DropdownInterface;
+              }),
+    );
+
     constructor() {
         this.transactionForm = this.buildForm({
             name: '',
@@ -82,6 +115,7 @@ export class TransactionFormComponent implements OnChanges {
             price: null,
             transactionDate: null,
             details: [],
+            categories: [],
         });
     }
 
@@ -125,6 +159,7 @@ export class TransactionFormComponent implements OnChanges {
                 validators: [Validators.required, validDate],
             }),
             details: this.fb.array(defaults.details.map((detail) => this.generateNewRow(detail))),
+            categories: this.fb.array(defaults.categories ?? []),
         });
     }
 
@@ -168,6 +203,7 @@ export class TransactionFormComponent implements OnChanges {
         weight: number | null;
         unitPrice: number | null;
         isComplexPriceMode: boolean | null;
+        categories: number[] | null;
     }): FormGroup<DetailForm> {
         const detailGroup = this.fb.group({
             detailName: [params.name, Validators.required],
@@ -175,6 +211,7 @@ export class TransactionFormComponent implements OnChanges {
             detailWeight: [params.weight],
             detailUnitPrice: [params.unitPrice],
             detailIsComplexPriceMode: [params.isComplexPriceMode],
+            categories: [params.categories ?? []],
         }) as FormGroup<DetailForm>;
 
         this.setupDetailReactiveLogic(detailGroup);
@@ -191,6 +228,7 @@ export class TransactionFormComponent implements OnChanges {
             unitPrice: null,
             weight: null,
             isComplexPriceMode: false,
+            categories: [],
         });
     }
 
@@ -251,6 +289,10 @@ export class TransactionFormComponent implements OnChanges {
 
     get price(): FormControl<number | null> {
         return this.transactionForm.get('price') as FormControl<number | null>;
+    }
+
+    get categories(): FormControl<number[]> {
+        return this.transactionForm.get('categories') as FormControl<number[]>;
     }
 
     get transactionDate(): FormControl<Date | null> {

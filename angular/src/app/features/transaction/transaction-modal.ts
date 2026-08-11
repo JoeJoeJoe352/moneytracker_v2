@@ -14,7 +14,7 @@ import { TranslatePipe } from '@ngx-translate/core';
         <app-base-modal [title]="'transaction.create' | translate" (closeModal)="closeModal.emit()">
             <app-transaction-form-component
                 [isTransactionFormDisabled]="isTransactionFormDisabled"
-                [categories]="categories"
+                [categoryList]="categories"
                 [transaction]="transaction"
                 (deleted)="deleteTransactionRequested.emit($event)"
                 (saved)="saved.emit($event)"
