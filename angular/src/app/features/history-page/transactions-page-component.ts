@@ -10,6 +10,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionActionService } from '../transaction/transaction-action-service';
+import { CategoryService } from '../transaction/category-service';
 
 interface FilterFormInterface {
     name: FormControl<string>;
@@ -35,6 +36,7 @@ export class TransactionsPage implements OnInit {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private transactionActionService = inject(TransactionActionService);
+    private categoryService = inject(CategoryService);
 
     /**
      * Töltődik-e jelenleg a tranzakciós lista
@@ -68,6 +70,17 @@ export class TransactionsPage implements OnInit {
         ),
         { initialValue: null },
     );
+
+    /**
+     * Kategóriák listája
+     */
+    protected categories = toSignal(
+        toObservable(this.selectedTransactionIdTrigger).pipe(
+            switchMap(() => this.categoryService.listTransactions()),
+        ),
+        { initialValue: null },
+    );
+
     /**
      *  Betöltés alatt van-e a tranzakció
      */

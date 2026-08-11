@@ -8,6 +8,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { of, switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionActionService } from '../transaction/transaction-action-service';
+import { CategoryService } from '../transaction/category-service';
 
 @Component({
     selector: 'app-main-page-component',
@@ -19,6 +20,7 @@ import { TransactionActionService } from '../transaction/transaction-action-serv
 export class MainPage {
     private transactionService = inject(TransactionService);
     private transactionActionService = inject(TransactionActionService);
+    private categoryService = inject(CategoryService)
 
     /**
      * Töltődik-e jelenleg a tranzakciós lista
@@ -96,6 +98,18 @@ export class MainPage {
         toObservable(this.selectedTransactionIdTrigger).pipe(
             switchMap((id) =>
                 id === null ? of(null) : this.transactionService.getTransactionById(id),
+            ),
+        ),
+        { initialValue: null },
+    );
+
+    /**
+     * Kategóriák listája
+     */
+    protected categories = toSignal(
+        toObservable(this.selectedTransactionIdTrigger).pipe(
+            switchMap(() =>
+                this.categoryService.listTransactions(),
             ),
         ),
         { initialValue: null },

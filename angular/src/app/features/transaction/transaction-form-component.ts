@@ -20,6 +20,7 @@ import { SwitchComponent } from '../../shared/components/switch.component';
 import { validDate } from './valid-date-validator';
 import { TransactionService } from './transaction-service';
 import {
+    CategoryResponseInterface,
     NewTransaction,
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
@@ -51,6 +52,10 @@ export class TransactionFormComponent implements OnChanges {
      * Form disabled-e (pl.: töltődéskor)
      */
     @Input({ required: true }) isTransactionFormDisabled!: boolean;
+    /**
+     * Kategóriák listája a selecthez
+     */
+    @Input({ required: true }) categories!: CategoryResponseInterface[] | null;
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */

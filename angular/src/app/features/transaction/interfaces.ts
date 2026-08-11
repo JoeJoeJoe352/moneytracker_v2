@@ -33,6 +33,7 @@ export interface NewTransaction {
  */
 export interface TransactionDataForBackend {
     globalPrice: number | null;
+    globalCategories: number[];
     name: string;
     transactionDate: string;
     transactionType: string;
@@ -47,6 +48,7 @@ export interface TransactionDetailsDataForBackend {
     price: number | null;
     weight: number | null;
     unitPrice: number | null;
+    categories: number[];
 }
 
 /**
@@ -77,4 +79,14 @@ export interface MoneySumInterface {
     incomeSumThisMonth: number;
     expenseSumThisMonth: number;
     moneySum: number;
+}
+
+export interface CategorySaveRequestInterface {
+    name: string;
+}
+
+export interface CategoryResponseInterface {
+    id: number;
+    name: string;
+    isLangKey: boolean;
 }

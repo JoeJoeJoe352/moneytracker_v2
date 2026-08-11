@@ -33,7 +33,7 @@ public class CategoryController {
      * 
      * @param categoryData
      */
-    @PostMapping(path = "/categories")
+    @PostMapping(path = "/category")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponseDto createCategory(@Valid @RequestBody CategoryCreateDto categoryData) {
         var model = new Category();
@@ -47,7 +47,7 @@ public class CategoryController {
      * 
      * @return
      */
-    @GetMapping(path = "/categories")
+    @GetMapping(path = "/category")
     public List<CategoryResponseDto> getCategories() {
         // TODO keresést beletenni
         var categories = categoryService.listCategories();

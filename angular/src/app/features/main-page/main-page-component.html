@@ -1,6 +1,7 @@
 @if (isTransactionModalOpen()) {
     <app-create-transaction-modal
         [transaction]="transactionData()"
+        [categories]="categories()"
         [isTransactionFormDisabled]="isTransactionFormDisabled() || isTransactionDataLoading()"
         (closeModal)="closeTransactionModal()"
         (deleteTransactionRequested)="popupDeletionConfirm($event)"
