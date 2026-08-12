@@ -158,8 +158,24 @@ export class TransactionFormComponent implements OnChanges {
                 this.transaction,
             );
 
-            // Új form a frissen betöltött adatokkal
-            this.transactionForm = this.buildForm(convertedInputValues);
+            // A meglévő form kontrollokat frissítjük a friss adatokkal, nem hozunk létre új FormGroup-ot,
+            // mert az újra létrehozná a 'categories' kontrollt is, amitől az ng-multiselect-dropdown
+            // (formControlName) hibás CVA implementációja miatt elszállna ("no FormControl instance attached")
+            this.transactionForm.patchValue({
+                name: convertedInputValues.name,
+                isIncome: convertedInputValues.isIncome,
+                isComplexTransaction: convertedInputValues.isComplexTransaction,
+                price: convertedInputValues.price,
+                transactionDate: convertedInputValues.transactionDate,
+                categories: this.mapCategoryIdsToDropdownData(convertedInputValues.categories ?? [])
+            });
+            
+            this.transactionForm.setControl(
+                'details',
+                this.fb.array(
+                    convertedInputValues.details.map((detail) => this.generateNewRow(detail)),
+                ),
+            );
         }
     }
 
@@ -186,13 +202,18 @@ export class TransactionFormComponent implements OnChanges {
             }),
             details: this.fb.array(defaults.details.map((detail) => this.generateNewRow(detail))),
             categories: this.fb.control<DropdownInterface[]>(
-                defaults.categories && defaults.categories.length > 0
-                    ? this.categoryData().filter((category) =>
-                          defaults.categories!.includes(category.item_id),
-                      )
-                    : [],
+                this.mapCategoryIdsToDropdownData(defaults.categories ?? []),
             ),
         });
+    }
+
+    /**
+     * Kategória id-kat alakítja át a dropdown által elvárt {item_id, item_text} formátumra.
+     */
+    private mapCategoryIdsToDropdownData(ids: number[]): DropdownInterface[] {
+        return ids.length > 0
+            ? this.categoryData().filter((category) => ids.includes(category.item_id))
+            : [];
     }
 
     /**
