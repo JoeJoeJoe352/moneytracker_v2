@@ -30,6 +30,7 @@ import {
 } from './interfaces';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { DropdownInterface } from '../../shared/interfaces';
 
 /**
  * Detail form elemei
@@ -41,11 +42,6 @@ interface DetailForm {
     detailUnitPrice: FormControl<number | null>;
     detailIsComplexPriceMode: FormControl<boolean>;
     categories: FormControl<number[]>;
-}
-
-interface DropdownInterface {
-    item_id: number;
-    item_text: string;
 }
 
 @Component({
@@ -120,7 +116,7 @@ export class TransactionFormComponent implements OnChanges {
             return {
                 item_id: category.id,
                 item_text: itemname,
-            } as DropdownInterface;
+            };
         });
     });
 
@@ -189,7 +185,13 @@ export class TransactionFormComponent implements OnChanges {
                 validators: [Validators.required, validDate],
             }),
             details: this.fb.array(defaults.details.map((detail) => this.generateNewRow(detail))),
-            categories: this.fb.array(defaults.categories ?? []),
+            categories: this.fb.control<DropdownInterface[]>(
+                defaults.categories && defaults.categories.length > 0
+                    ? this.categoryData().filter((category) =>
+                          defaults.categories!.includes(category.item_id),
+                      )
+                    : [],
+            ),
         });
     }
 
@@ -354,8 +356,8 @@ export class TransactionFormComponent implements OnChanges {
         return this.transactionForm.get('price') as FormControl<number | null>;
     }
 
-    get categories(): FormControl<number[]> {
-        return this.transactionForm.get('categories') as FormControl<number[]>;
+    get categories(): FormControl<DropdownInterface[]> {
+        return this.transactionForm.get('categories') as FormControl<DropdownInterface[]>;
     }
 
     get transactionDate(): FormControl<Date | null> {

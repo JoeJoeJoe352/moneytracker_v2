@@ -36,10 +36,10 @@ public class TransactionMapper {
                         detail.getWeight(),
                         detail.getUnitPrice(),
                         detail.isComplexPriceMode(),
-                        null // TODO ezt megcsinálni
+                        detail.getCategoryIds()
                 ))
                 .collect(Collectors.toSet());
-
+        
         TransactionResponseDto dto = new TransactionResponseDto(
                 entity.getId(),
                 entity.getName(),

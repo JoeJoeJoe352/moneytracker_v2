@@ -1,7 +1,7 @@
 package com.starbuck.moneytracker.dto;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.List;
 
 public record TransactionDetailResponseDto(
     String name,
@@ -9,7 +9,7 @@ public record TransactionDetailResponseDto(
     BigDecimal weight,
     BigDecimal unitPrice,
     boolean isComplexPriceMode,
-    ArrayList<Integer> categories
+    List<Long> categories
 ) {
     
 }

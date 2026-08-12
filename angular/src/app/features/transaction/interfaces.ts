@@ -1,3 +1,5 @@
+import { DropdownInterface } from "../../shared/interfaces";
+
 /**
  * Tranzakciós adatok, ahogy a form inpujai elvárja kezdőértéknek, plusz a detailok
  */
@@ -20,7 +22,7 @@ export interface NewTransaction {
     isIncome: boolean;
     price: number | null;
     transactionDate: Date;
-    categories: number[] | null;
+    categories: DropdownInterface[];
     details: {
         detailName: string;
         detailPrice: number;

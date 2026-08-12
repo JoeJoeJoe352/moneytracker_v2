@@ -23,6 +23,23 @@ export class MainPage {
     private categoryService = inject(CategoryService);
 
     /**
+     * Újra kell-e tölteni az adatokat
+     * Ha ez változik, akkor újra fogja tölteni a listát
+     * Azért számot növelünk és nem boolean érték, mert ha gyorsan, többször hívódik egymás után,
+     * akkor kétszer true-ra állítódik az érték és az nem vált ki új letöltés eventet
+     */
+    private reloadTransactionListTrigger = signal(0);
+    /**
+     * Kategórialistát újra kell-e tölteni. Minden modal megnyitáskor + új kategória mentéskor
+     */
+    private reloadCategoryDataTrigger = signal(0);
+    /**
+     * Kiválasztott tranzakció azonosítója.
+     * Ha ez változik, akkor le fog futni a tranzakció betöltés is (transactionData)
+     */
+    private selectedTransactionIdTrigger = signal<number | null>(null);
+
+    /**
      * Töltődik-e jelenleg a tranzakciós lista
      */
     protected isTransactionListLoading = signal(true);
@@ -31,11 +48,6 @@ export class MainPage {
      */
     protected isMoneySumLoading = signal(true);
     /**
-     * Kiválasztott tranzakció azonosítója.
-     * Ha ez változik, akkor le fog futni a tranzakció betöltés is (transactionData)
-     */
-    protected selectedTransactionIdTrigger = signal<number | null>(null);
-    /**
      * Tranzakciós form írható-e
      */
     protected isTransactionFormDisabled = signal(false);
@@ -43,16 +55,7 @@ export class MainPage {
      * Tranzakció létrehozó modal bezárása
      */
     protected isTransactionModalOpen = signal(false);
-    /**
-     * Újra kell-e tölteni az adatokat
-     * Ha ez változik, akkor újra fogja tölteni a listát
-     * Azért számot növelünk és nem boolean érték, mert ha gyorsan, többször hívódik egymás után, akkor kétszer true-ra állítódik az érték és az nem vált ki új letöltés eventet
-     */
-    protected reloadTransactionMoneyDataTrigger = signal(0);
-    /**
-     * Kategórialistát újra kell-e tölteni
-     */
-    protected reloadCategoryDataTrigger = signal(0);
+
     /**
      * A formban kategória hozzáadása folyamatban van-e?
      */
@@ -69,7 +72,7 @@ export class MainPage {
      * Tranzakciós lista adatok
      */
     protected transactionListData = toSignal(
-        toObservable(this.reloadTransactionMoneyDataTrigger).pipe(
+        toObservable(this.reloadTransactionListTrigger).pipe(
             tap(() => this.isTransactionListLoading.set(true)),
             switchMap(() =>
                 this.transactionService.getLastTransactions().pipe(
@@ -87,7 +90,7 @@ export class MainPage {
      * Felhasználó összes pénze.
      */
     protected moneySum = toSignal(
-        toObservable(this.reloadTransactionMoneyDataTrigger).pipe(
+        toObservable(this.reloadTransactionListTrigger).pipe(
             tap(() => this.isMoneySumLoading.set(true)),
             switchMap(() =>
                 this.transactionService.getMoneySum().pipe(
@@ -112,12 +115,12 @@ export class MainPage {
     );
 
     /**
-     * Kategóriák listája
+     * Kategóriák listája. Újratöltődik, ha megnyitunk egy új tranzakciót, vagy ha mentünk egy kategóriát
      */
     protected categories = toSignal(
-        toObservable(this.reloadCategoryDataTrigger).pipe(
-            switchMap(() => this.categoryService.listCategories()),
-        ),
+        toObservable(
+            computed(() => [this.reloadCategoryDataTrigger(), this.selectedTransactionIdTrigger()]),
+        ).pipe(switchMap(() => this.categoryService.listCategories())),
         { initialValue: [] },
     );
 
@@ -167,7 +170,7 @@ export class MainPage {
      * Modal adatváltozás lekezelése
      */
     private refreshAfterSave(): void {
-        this.reloadTransactionMoneyDataTrigger.update((value) => value + 1);
+        this.reloadTransactionListTrigger.update((value) => value + 1);
         this.closeTransactionModal();
     }
 

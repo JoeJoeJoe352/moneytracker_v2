@@ -80,12 +80,12 @@ export class TransactionsPage implements OnInit {
     );
 
     /**
-     * Kategóriák listája
+     * Kategóriák listája. Újratöltődik, ha megnyitunk egy új tranzakciót és ha mentünk egy kategóriát
      */
     protected categories = toSignal(
-        toObservable(this.reloadCategoryDataTrigger).pipe(
-            switchMap(() => this.categoryService.listCategories()),
-        ),
+        toObservable(
+            computed(() => [this.reloadCategoryDataTrigger(), this.selectedTransactionIdTrigger()]),
+        ).pipe(switchMap(() => this.categoryService.listCategories())),
         { initialValue: [] },
     );
 
