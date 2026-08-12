@@ -19,6 +19,7 @@ import { TranslatePipe } from '@ngx-translate/core';
                 (deleted)="deleteTransactionRequested.emit($event)"
                 (saved)="saved.emit($event)"
                 (categoryAdded)="categoryAdded.emit($event)"
+                [isCategorySaveInProgress]="isCategorySaveInProgress"
             />
         </app-base-modal>
     `,
@@ -28,6 +29,7 @@ export class TransactionModalComponent {
     @Input() transaction: TransactionDataFromBackend | null = null;
     @Input({ required: true }) categories!: Signal<CategoryResponseInterface[]>;
     @Input({ required: true }) isTransactionFormDisabled!: boolean;
+    @Input({ required: true }) isCategorySaveInProgress!: boolean;
 
     @Output() closeModal = new EventEmitter<void>();
     @Output() deleteTransactionRequested = new EventEmitter<number>();

@@ -56,7 +56,7 @@ export class MainPage {
     /**
      * A formban kategória hozzáadása folyamatban van-e?
      */
-    protected isAddingCategoryInProgress = signal(false); // TODO ezt átadni a modal és többinek
+    protected isAddingCategoryInProgress = signal(false);
 
     /**
      *  Betöltés alatt van-e a tranzakció

@@ -78,6 +78,8 @@ export class TransactionFormComponent implements OnChanges {
      */
     @Input() transaction: TransactionDataFromBackend | null = null;
 
+    @Input({ required: true }) isCategorySaveInProgress!: boolean;
+
     /**
      * Mentés gombra kattintott a user
      */
@@ -209,12 +211,19 @@ export class TransactionFormComponent implements OnChanges {
     onCategoryFilterChange(filterItem: unknown): void {
         this.categorySearchText.set(filterItem as string);
     }
-
+    /**
+     * Találati lista szövege, amikor nincs találat (új elem felvétele)
+     */
+    protected addNewCategoryText = computed(
+        () =>
+            this.translateService.instant('transaction.category.add') +
+            ': ' +
+            this.categorySearchText(),
+    );
     /**
      * A kategória dropdown "nincs találat" sorára kattintás lekezelése (ez jelenik meg gombként, ha nincs találat)
      */
     onCategoryDropdownClick(event: Event): void {
-        console.log('qweqweqwe')
         // kattintás esetén csak akkor ad hozzá elemet, hogyha a "nincs ilyen elem" gombra kattint
         if ((event.target as HTMLElement).closest('.no-filtered-data')) {
             this.onAddCategory();
@@ -226,7 +235,7 @@ export class TransactionFormComponent implements OnChanges {
         if (!name || this.isAddingCategory()) {
             return;
         }
-        this.categoryAdded.emit(name)
+        this.categoryAdded.emit(name);
     }
 
     /**

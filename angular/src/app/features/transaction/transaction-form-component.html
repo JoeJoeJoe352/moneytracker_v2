@@ -111,11 +111,9 @@
                             unSelectAllText: 'UnSelect All',
                             itemsShowLimit: 2,
                             allowSearchFilter: true,
-                            noFilteredDataAvailablePlaceholderText:
-                                ('transaction.category.add' | translate) +
-                                ': ' +
-                                categorySearchText(),
+                            noFilteredDataAvailablePlaceholderText: addNewCategoryText(),
                         }"
+                        [disabled]="isCategorySaveInProgress"
                         [data]="categoryData()"
                         formControlName="categories"
                         (onFilterChange)="onCategoryFilterChange($event)"

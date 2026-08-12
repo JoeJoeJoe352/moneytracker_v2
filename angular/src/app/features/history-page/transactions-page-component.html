@@ -3,6 +3,7 @@
         [isTransactionFormDisabled]="isTransactionFormDisabled()"
         [categories]="categories"
         [transaction]="transactionData()"
+        [isCategorySaveInProgress]="isAddingCategoryInProgress()"
         (closeModal)="closeTransactionModal()"
         (deleteTransactionRequested)="popupDeletionConfirm($event)"
         (saved)="saveTransaction($event)"

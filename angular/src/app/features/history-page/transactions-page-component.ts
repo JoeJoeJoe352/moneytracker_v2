@@ -55,10 +55,18 @@ export class TransactionsPage implements OnInit {
      */
     protected isTransactionFormDisabled = signal(false);
     /**
+     * A formban kategória hozzáadása folyamatban van-e?
+     */
+    protected isAddingCategoryInProgress = signal(false);
+    /**
      * Kiválasztott tranzakció azonosítója.
      * Ha ez változik, akkor le fog futni a tranzakció betöltés is (transactionData)
      */
     protected selectedTransactionIdTrigger = signal<number | null>(null);
+    /**
+     * Kategórialistát újra kell-e tölteni
+     */
+    protected reloadCategoryDataTrigger = signal(0);
     /**
      * Kiválasztott tranzakció adatai
      */
@@ -75,7 +83,7 @@ export class TransactionsPage implements OnInit {
      * Kategóriák listája
      */
     protected categories = toSignal(
-        toObservable(this.selectedTransactionIdTrigger).pipe(
+        toObservable(this.reloadCategoryDataTrigger).pipe(
             switchMap(() => this.categoryService.listCategories()),
         ),
         { initialValue: [] },
@@ -211,6 +219,24 @@ export class TransactionsPage implements OnInit {
             error: (response) => {
                 console.error('unknown error during transaction creation!', response);
                 this.isTransactionListLoading.set(false);
+            },
+        });
+    }
+
+    /**
+     * Hozzáad egy új kategóriát és újratölti a listát
+     */
+    saveCategory(categoryName: string): void {
+        this.isAddingCategoryInProgress.set(true);
+
+        this.categoryService.saveCategory({ name: categoryName }).subscribe({
+            next: () => {
+                this.reloadCategoryDataTrigger.update((value) => value + 1);
+                this.isAddingCategoryInProgress.set(false);
+            },
+            error: (err) => {
+                console.error('Problem with the category save' + err);
+                this.isAddingCategoryInProgress.set(false);
             },
         });
     }
