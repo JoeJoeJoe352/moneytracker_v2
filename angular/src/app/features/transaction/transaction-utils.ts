@@ -58,7 +58,7 @@ export class TransactionUtils {
                   price: this.deNormalizePriceForBackend(detail.detailPrice, input.isIncome),
                   weight: detail.detailWeight,
                   unitPrice: detail.detailUnitPrice,
-                  categories: detail.categories,
+                  categories: detail.categories.map((category) => category.item_id),
               }))
             : [];
 

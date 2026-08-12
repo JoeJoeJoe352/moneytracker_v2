@@ -103,16 +103,7 @@
                     }}</label>
                     <ng-multiselect-dropdown
                         [placeholder]="'custom placeholder'"
-                        [settings]="{
-                            singleSelection: false,
-                            idField: 'item_id',
-                            textField: 'item_text',
-                            selectAllText: 'Select All',
-                            unSelectAllText: 'UnSelect All',
-                            itemsShowLimit: 2,
-                            allowSearchFilter: true,
-                            noFilteredDataAvailablePlaceholderText: addNewCategoryText(),
-                        }"
+                        [settings]="multiselectSettings()"
                         [disabled]="isCategorySaveInProgress"
                         [data]="categoryData()"
                         formControlName="categories"
@@ -149,6 +140,20 @@
                                     </div>
                                 }
                             }
+                        </div>
+                        <div>
+                            <label for="transaction-categories">{{
+                                'transaction.categories' | translate
+                            }}</label>
+                            <ng-multiselect-dropdown
+                                [placeholder]="'custom placeholder'"
+                                [settings]="multiselectSettings()"
+                                [disabled]="isCategorySaveInProgress"
+                                [data]="categoryData()"
+                                formControlName="categories"
+                                (onFilterChange)="onCategoryFilterChange($event)"
+                                (click)="onCategoryDropdownClick($event)"
+                            />
                         </div>
                         <div class="ms-auto">
                             <button

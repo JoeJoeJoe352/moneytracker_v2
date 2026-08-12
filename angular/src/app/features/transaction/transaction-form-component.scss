@@ -44,6 +44,11 @@
     }
 }
 
+::ng-deep .multiselect-dropdown .dropdown-btn {
+    border: 1px solid $moneytracker-form-grey !important;
+    border-radius: $border-radius;
+}
+
 .input-with-suffix {
     position: relative;
     display: inline-block;

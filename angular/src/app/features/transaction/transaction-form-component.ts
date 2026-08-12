@@ -29,7 +29,7 @@ import {
     TransactionInputDefaultValuesWithDetails,
 } from './interfaces';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { DropdownInterface } from '../../shared/interfaces';
 
 /**
@@ -41,7 +41,7 @@ interface DetailForm {
     detailWeight: FormControl<number | null>;
     detailUnitPrice: FormControl<number | null>;
     detailIsComplexPriceMode: FormControl<boolean>;
-    categories: FormControl<number[]>;
+    categories: FormControl<DropdownInterface[]>;
 }
 
 @Component({
@@ -73,7 +73,9 @@ export class TransactionFormComponent implements OnChanges {
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
     @Input() transaction: TransactionDataFromBackend | null = null;
-
+    /**
+     * Kategória mentése folyamatban van-e
+     */
     @Input({ required: true }) isCategorySaveInProgress!: boolean;
 
     /**
@@ -84,11 +86,25 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakció törlés gombra kattintott a user
      */
     @Output() deleted = new EventEmitter<number>();
-
     /**
      * Új kategóriát szeretne a user hozzáadni a listájához
      */
     @Output() categoryAdded = new EventEmitter<string>();
+
+    /**
+     * Multiselect beállításai
+     */
+    protected multiselectSettings: Signal<IDropdownSettings> = computed(() => {
+        return {
+            singleSelection: false,
+            idField: 'item_id',
+            textField: 'item_text',
+            itemsShowLimit: 2,
+            allowSearchFilter: true,
+            noFilteredDataAvailablePlaceholderText: this.addNewCategoryText(),
+            enableCheckAll: false,
+        };
+    });
 
     /**
      * Tranzakciós form
@@ -108,7 +124,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
      */
-    categoryData: Signal<DropdownInterface[]> = computed(() => {
+    protected categoryData: Signal<DropdownInterface[]> = computed(() => {
         return this.categoryList().map((category) => {
             const itemname = !category.isLangKey
                 ? category.name
@@ -167,9 +183,11 @@ export class TransactionFormComponent implements OnChanges {
                 isComplexTransaction: convertedInputValues.isComplexTransaction,
                 price: convertedInputValues.price,
                 transactionDate: convertedInputValues.transactionDate,
-                categories: this.mapCategoryIdsToDropdownData(convertedInputValues.categories ?? [])
+                categories: this.mapCategoryIdsToDropdownData(
+                    convertedInputValues.categories ?? [],
+                ),
             });
-            
+
             this.transactionForm.setControl(
                 'details',
                 this.fb.array(
@@ -297,7 +315,9 @@ export class TransactionFormComponent implements OnChanges {
             detailWeight: [params.weight],
             detailUnitPrice: [params.unitPrice],
             detailIsComplexPriceMode: [params.isComplexPriceMode],
-            categories: [params.categories ?? []],
+            categories: [this.mapCategoryIdsToDropdownData(
+                    params.categories ?? [],
+                )],
         }) as FormGroup<DetailForm>;
 
         this.setupDetailReactiveLogic(detailGroup);

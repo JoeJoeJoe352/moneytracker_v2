@@ -28,7 +28,7 @@ export interface NewTransaction {
         detailPrice: number;
         detailWeight: number;
         detailUnitPrice: number;
-        categories: number[];
+        categories: DropdownInterface[];
     }[];
     isComplexTransaction: boolean;
 }
