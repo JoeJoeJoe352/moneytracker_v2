@@ -1,11 +1,11 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, Signal, signal, WritableSignal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { NewTransaction } from '../transaction/interfaces';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap, tap } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionActionService } from '../transaction/transaction-action-service';
 import { CategoryService } from '../transaction/category-service';
@@ -109,37 +109,21 @@ export class MainPage {
     /**
      * Tranzakciós lista adatok
      */
-    protected transactionListData = toSignal(
-        toObservable(this.reloadTransactionListTrigger).pipe(
-            tap(() => this.isTransactionListLoading.set(true)),
-            switchMap(() =>
-                this.transactionService.getLastTransactions().pipe(
-                    tap(() => {
-                        this.isTransactionListLoading.set(false);
-                    }),
-                ),
-            ),
-        ),
-        {
-            initialValue: [],
-        },
+    protected transactionListData = this.reloadableSignal(
+        this.reloadTransactionListTrigger,
+        () => this.transactionService.getLastTransactions(),
+        [],
+        this.isTransactionListLoading,
     );
 
     /**
      * Felhasználó összes pénze.
      */
-    protected moneySum = toSignal(
-        toObservable(this.reloadTransactionListTrigger).pipe(
-            tap(() => this.isMoneySumLoading.set(true)),
-            switchMap(() =>
-                this.transactionService.getMoneySum().pipe(
-                    tap(() => {
-                        this.isMoneySumLoading.set(false);
-                    }),
-                ),
-            ),
-        ),
-        { initialValue: null },
+    protected moneySum = this.reloadableSignal(
+        this.reloadTransactionListTrigger,
+        () => this.transactionService.getMoneySum(),
+        null,
+        this.isMoneySumLoading,
     );
 
     /**
@@ -158,12 +142,11 @@ export class MainPage {
      * Kategóriák listája. Oldal betöltődésekor beállítódik és Újratöltődik, ha mentünk egy kategóriát
      */
     protected categories = toSignal(
-        toObservable(this.reloadCategoryDataTrigger)
-            .pipe(
-                tap(() => this.isCategoriesLoaded.set(false)),
-                switchMap(() => this.categoryService.listCategories()),
-            )
-            .pipe(tap(() => this.isCategoriesLoaded.set(true))),
+        toObservable(this.reloadCategoryDataTrigger).pipe(
+            tap(() => this.isCategoriesLoaded.set(false)),
+            switchMap(() => this.categoryService.listCategories()),
+            tap(() => this.isCategoriesLoaded.set(true)),
+        ),
         { initialValue: [] },
     );
 
@@ -208,6 +191,24 @@ export class MainPage {
             transactionData?.id ?? null,
             this.isTransactionFormDisabled,
             () => this.refreshAfterSave(),
+        );
+    }
+
+    /**
+     * Egy trigger jelre újratölti az adatot, és a betöltés alatt/után beállítja a megadott loading jelzőt.
+     */
+    private reloadableSignal<T>(
+        trigger: Signal<unknown>,
+        load: () => Observable<T>,
+        initialValue: T,
+        loading: WritableSignal<boolean>,
+    ): Signal<T> {
+        return toSignal(
+            toObservable(trigger).pipe(
+                tap(() => loading.set(true)),
+                switchMap(() => load().pipe(tap(() => loading.set(false)))),
+            ),
+            { initialValue },
         );
     }
 
