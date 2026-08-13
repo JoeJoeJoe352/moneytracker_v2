@@ -1,16 +1,13 @@
-import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
-import { NewTransaction, TransactionDataFromBackend } from '../transaction/interfaces';
+import { TransactionDataFromBackend } from '../transaction/interfaces';
 import { TransactionService } from '../transaction/transaction-service';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap, tap } from 'rxjs';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { TransactionActionService } from '../transaction/transaction-action-service';
-import { CategoryService } from '../transaction/category-service';
+import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 
 interface FilterFormInterface {
     name: FormControl<string>;
@@ -29,55 +26,27 @@ interface FilterFormInterface {
         NgxsmkDatepickerComponent,
         TranslatePipe,
     ],
+    providers: [TransactionModalStateService],
 })
 export class TransactionsPage implements OnInit {
     private transactionService = inject(TransactionService);
     private fb = inject(FormBuilder);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
-    private transactionActionService = inject(TransactionActionService);
-    private categoryService = inject(CategoryService);
+    protected modal = inject(TransactionModalStateService);
 
     /**
      * Töltődik-e jelenleg a tranzakciós lista
      */
     protected isTransactionListLoading = signal(true);
     /**
-     * Tranzakció létrehozó modal bezárása
-     */
-    protected isTransactionModalOpen = signal(false);
-    /**
      * Tranzakciós lista
      */
     protected transactionListData = signal<TransactionDataFromBackend[]>([]);
     /**
-     * Form disabled-e
-     */
-    protected isTransactionFormDisabled = signal(false);
-    /**
-     * A formban kategória hozzáadása folyamatban van-e?
-     */
-    protected isAddingCategoryInProgress = signal(false);
-    /**
-     * Kiválasztott tranzakció azonosítója.
-     * Ha ez változik, akkor le fog futni a tranzakció betöltés is (transactionData)
-     */
-    protected selectedTransactionIdTrigger = signal<number | null>(null);
-    /**
-     * Kategórialistát újra kell-e tölteni
-     */
-    protected reloadCategoryDataTrigger = signal(0);
-
-    protected isCategoriesLoaded = signal(false);
-    protected isModalDataInitializing = signal(false);
-    /**
      * Form definiciója
      */
     protected filterForm!: FormGroup<FilterFormInterface>;
-    /**
-     * Volt-e modal felnyitására kérés?
-     */
-    protected isModalOpenRequested = signal(false);
 
     constructor() {
         const nameDefaultValue = this.getQueryParam<string>('name') ?? '';
@@ -87,70 +56,10 @@ export class TransactionsPage implements OnInit {
             name: [nameDefaultValue],
             date: this.fb.control<Date | null>(dateDefaultValue),
         });
-        effect(() => {
-            // Ha most nyitjuk fel a modalt, akkor lehet még nincs betöltve minden függősége, akkor a modal komponens fog egy loading ikont kirakni
-            // azért itt nyitom fel a modalt, mert lehetőség van beállítani a modal töltöttségi állapotát
-            if (this.isModalOpenRequested() && !this.isTransactionModalOpen()) {
-                this.isTransactionModalOpen.set(true);
-                if (!this.areAllModalDependenciesLoaded()) {
-                    this.isModalDataInitializing.set(true);
-                } else {
-                    this.isModalDataInitializing.set(false); // ez lehet nem kell ide, de jobb a biztonság
-                }
-            } else {
-                // Ha már fel van nyitva a modal, akkor ha betöltődött az adat, akkor levesszük a loadert
-                if (this.areAllModalDependenciesLoaded()) {
-                    this.isModalDataInitializing.set(false);
-                }
-            }
-        });
+
+        // Mentés/törlés után újratöltjük a listát
+        this.modal.changed.subscribe(() => this.loadTransactionHistory());
     }
-
-    /**
-     * Kiválasztott tranzakció adatai
-     */
-    protected transactionData = toSignal(
-        toObservable(this.selectedTransactionIdTrigger).pipe(
-            switchMap((id) =>
-                id === null ? of(null) : this.transactionService.getTransactionById(id),
-            ),
-        ),
-        { initialValue: null },
-    );
-
-    /**
-     * Kategóriák listája. Újratöltődik, ha megnyitunk egy új tranzakciót és ha mentünk egy kategóriát
-     */
-    protected categories = toSignal(
-        toObservable(this.reloadCategoryDataTrigger)
-            .pipe(
-                tap(() => this.isCategoriesLoaded.set(false)),
-                switchMap(() => this.categoryService.listCategories()),
-            )
-            .pipe(tap(() => this.isCategoriesLoaded.set(true))),
-        { initialValue: [] },
-    );
-
-    /**
-     *  Betöltés alatt van-e a tranzakció
-     */
-    protected isTransactionDataLoaded = computed(
-        () => this.selectedTransactionIdTrigger() !== null && this.transactionData() !== null,
-    );
-
-    /**
-     * Modal megnyitásához szükséges dolgok le vannak-e töltve (kategória lista + tranzakciós adatok)
-     */
-    protected isModalDependencyLoaded = computed(
-        () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
-    );
-
-    /**
-     * Modal megnyitásához szükséges dolgok le vannak-e töltve (kategória lista + tranzakciós adatok)
-     */
-    protected areAllModalDependenciesLoaded = computed(
-        () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
-    );
 
     ngOnInit(): void {
         this.loadTransactionHistory();
@@ -168,32 +77,6 @@ export class TransactionsPage implements OnInit {
     }
 
     /**
-     * Tranzakció létrehozó modal bezárása, ha változott az adat
-     */
-    protected refreshAfterSave(): void {
-        this.loadTransactionHistory();
-        this.closeTransactionModal();
-    }
-
-    /**
-     * Tranzakció betöltése szerkesztéshez
-     */
-    protected openTransactionModal(id: number | null): void {
-        this.selectedTransactionIdTrigger.set(id);
-        this.isModalOpenRequested.set(true);
-        // modal felnyitása a constructor effect-ben van, ha minden api hívás lefutott
-    }
-
-    /**
-     * Tranzakció létrehozó modal becsukása
-     */
-    protected closeTransactionModal(): void {
-        this.selectedTransactionIdTrigger.set(null);
-        this.isTransactionModalOpen.set(false);
-        this.isModalOpenRequested.set(false);
-    }
-
-    /**
      * keresési adatok resetelése
      */
     protected clearInputs(): void {
@@ -203,32 +86,6 @@ export class TransactionsPage implements OnInit {
             queryParams: {},
         });
         this.loadTransactionHistory();
-    }
-
-    /**
-     * Tranzakció törlése a főoldalon
-     */
-    protected popupDeletionConfirm(transactionId: number): void {
-        if (this.transactionActionService.confirmDeletion()) {
-            this.transactionActionService.deleteTransaction(
-                transactionId,
-                this.isTransactionFormDisabled,
-                () => this.refreshAfterSave(),
-            );
-        }
-    }
-
-    /**
-     * Elmenti egy tranzakció adatait
-     */
-    protected saveTransaction(payload: NewTransaction): void {
-        const transactionData = this.transactionData();
-        this.transactionActionService.saveTransaction(
-            payload,
-            transactionData?.id ?? null,
-            this.isTransactionFormDisabled,
-            () => this.refreshAfterSave(),
-        );
     }
 
     /**
@@ -263,24 +120,6 @@ export class TransactionsPage implements OnInit {
             error: (response) => {
                 console.error('unknown error during transaction creation!', response);
                 this.isTransactionListLoading.set(false);
-            },
-        });
-    }
-
-    /**
-     * Hozzáad egy új kategóriát és újratölti a listát
-     */
-    saveCategory(categoryName: string): void {
-        this.isAddingCategoryInProgress.set(true);
-
-        this.categoryService.saveCategory({ name: categoryName }).subscribe({
-            next: () => {
-                this.reloadCategoryDataTrigger.update((value) => value + 1);
-                this.isAddingCategoryInProgress.set(false);
-            },
-            error: (err) => {
-                console.error('Problem with the category save' + err);
-                this.isAddingCategoryInProgress.set(false);
             },
         });
     }
