@@ -4,6 +4,7 @@
         [categories]="categories"
         [transaction]="transactionData()"
         [isCategorySaveInProgress]="isAddingCategoryInProgress()"
+        [isDataInitializing]="isModalDataInitializing"
         (closeModal)="closeTransactionModal()"
         (deleteTransactionRequested)="popupDeletionConfirm($event)"
         (saved)="saveTransaction($event)"
@@ -59,7 +60,7 @@
 </div>
 <!-- Transaction list -->
 <app-transaction-list
-    [isTransactionListLoading]="isTransactionDataLoading()"
+    [isTransactionListLoading]="isTransactionListLoading()"
     [transactions]="transactionListData()"
     (editTransaction)="openTransactionModal($event.transactionId)"
 />

@@ -2,8 +2,9 @@
     <app-create-transaction-modal
         [transaction]="transactionData()"
         [categories]="categories"
-        [isTransactionFormDisabled]="isTransactionFormDisabled() || isTransactionDataLoading()"
+        [isTransactionFormDisabled]="isTransactionFormDisabled()"
         [isCategorySaveInProgress]="isAddingCategoryInProgress()"
+        [isDataInitializing]="isModalDataInitializing"
         (closeModal)="closeTransactionModal()"
         (deleteTransactionRequested)="popupDeletionConfirm($event)"
         (saved)="saveTransaction($event)"

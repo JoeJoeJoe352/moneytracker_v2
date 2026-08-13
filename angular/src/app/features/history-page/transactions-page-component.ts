@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { NewTransaction, TransactionDataFromBackend } from '../transaction/interfaces';
@@ -7,7 +7,7 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angul
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
+import { of, switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionActionService } from '../transaction/transaction-action-service';
 import { CategoryService } from '../transaction/category-service';
@@ -67,6 +67,31 @@ export class TransactionsPage implements OnInit {
      * Kategórialistát újra kell-e tölteni
      */
     protected reloadCategoryDataTrigger = signal(0);
+
+    protected isCategoriesLoaded = signal(false);
+    protected isModalDataInitializing = signal(false);
+    /**
+     * Form definiciója
+     */
+    protected filterForm!: FormGroup<FilterFormInterface>;
+
+    constructor() {
+        const nameDefaultValue = this.getQueryParam<string>('name') ?? '';
+        const dateDefaultValue = this.getQueryParam<Date>('date', (v) => new Date(v));
+
+        this.filterForm = this.fb.nonNullable.group({
+            name: [nameDefaultValue],
+            date: this.fb.control<Date | null>(dateDefaultValue),
+        });
+        effect(() => {
+            if (this.isTransactionModalOpen() && this.isModalDependencyLoaded()) {
+                this.isModalDataInitializing.set(false);
+            } else if (this.isTransactionModalOpen() && !this.isModalDependencyLoaded()) {
+                this.isModalDataInitializing.set(true);
+            }
+        });
+    }
+
     /**
      * Kiválasztott tranzakció adatai
      */
@@ -83,32 +108,28 @@ export class TransactionsPage implements OnInit {
      * Kategóriák listája. Újratöltődik, ha megnyitunk egy új tranzakciót és ha mentünk egy kategóriát
      */
     protected categories = toSignal(
-        toObservable(
-            computed(() => [this.reloadCategoryDataTrigger(), this.selectedTransactionIdTrigger()]),
-        ).pipe(switchMap(() => this.categoryService.listCategories())),
+        toObservable(this.reloadCategoryDataTrigger)
+            .pipe(
+                tap(() => this.isCategoriesLoaded.set(false)),
+                switchMap(() => this.categoryService.listCategories()),
+            )
+            .pipe(tap(() => this.isCategoriesLoaded.set(true))),
         { initialValue: [] },
     );
 
     /**
      *  Betöltés alatt van-e a tranzakció
      */
-    protected isTransactionDataLoading = computed(
-        () => this.selectedTransactionIdTrigger() !== null && this.transactionData() === null,
+    protected isTransactionDataLoaded = computed(
+        () => this.selectedTransactionIdTrigger() !== null && this.transactionData() !== null,
     );
+
     /**
-     * Form definiciója
+     * Modal megnyitásához szükséges dolgok le vannak-e töltve (kategória lista + tranzakciós adatok)
      */
-    protected filterForm!: FormGroup<FilterFormInterface>;
-
-    constructor() {
-        const nameDefaultValue = this.getQueryParam<string>('name') ?? '';
-        const dateDefaultValue = this.getQueryParam<Date>('date', (v) => new Date(v));
-
-        this.filterForm = this.fb.nonNullable.group({
-            name: [nameDefaultValue],
-            date: this.fb.control<Date | null>(dateDefaultValue),
-        });
-    }
+    protected isModalDependencyLoaded = computed(
+        () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
+    );
 
     ngOnInit(): void {
         this.loadTransactionHistory();

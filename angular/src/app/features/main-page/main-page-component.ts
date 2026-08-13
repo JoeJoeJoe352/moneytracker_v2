@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { NewTransaction } from '../transaction/interfaces';
@@ -60,12 +60,31 @@ export class MainPage {
      * A formban kategória hozzáadása folyamatban van-e?
      */
     protected isAddingCategoryInProgress = signal(false);
+    protected isCategoriesLoaded = signal(false);
+    protected isModalDataInitializing = signal(false);
+
+    constructor() {
+        effect(() => {
+            if (this.isTransactionModalOpen() && this.isModalDependencyLoaded()) {
+                this.isModalDataInitializing.set(false);
+            } else if (this.isTransactionModalOpen() && !this.isModalDependencyLoaded()) {
+                this.isModalDataInitializing.set(true);
+            }
+        });
+    }
 
     /**
-     *  Betöltés alatt van-e a tranzakció
+     * Betöltés alatt van-e a tranzakció
      */
-    protected isTransactionDataLoading = computed(
-        () => this.selectedTransactionIdTrigger() !== null && this.transactionData() === null,
+    protected isTransactionDataLoaded = computed(
+        () => this.selectedTransactionIdTrigger() !== null && this.transactionData() !== null,
+    );
+
+    /**
+     * Modal megnyitásához szükséges dolgok le vannak-e töltve (kategória lista + tranzakciós adatok)
+     */
+    protected isModalDependencyLoaded = computed(
+        () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
     );
 
     /**
@@ -115,12 +134,15 @@ export class MainPage {
     );
 
     /**
-     * Kategóriák listája. Újratöltődik, ha megnyitunk egy új tranzakciót, vagy ha mentünk egy kategóriát
+     * Kategóriák listája. Oldal betöltődésekor beállítódik és Újratöltődik, ha mentünk egy kategóriát
      */
     protected categories = toSignal(
-        toObservable(
-            computed(() => [this.reloadCategoryDataTrigger(), this.selectedTransactionIdTrigger()]),
-        ).pipe(switchMap(() => this.categoryService.listCategories())),
+        toObservable(this.reloadCategoryDataTrigger)
+            .pipe(
+                tap(() => this.isCategoriesLoaded.set(false)),
+                switchMap(() => this.categoryService.listCategories()),
+            )
+            .pipe(tap(() => this.isCategoriesLoaded.set(true))),
         { initialValue: [] },
     );
 

@@ -12,15 +12,21 @@ import { TranslatePipe } from '@ngx-translate/core';
     selector: 'app-create-transaction-modal',
     template: `
         <app-base-modal [title]="'transaction.create' | translate" (closeModal)="closeModal.emit()">
-            <app-transaction-form-component
-                [isTransactionFormDisabled]="isTransactionFormDisabled"
-                [categoryList]="categories"
-                [transaction]="transaction"
-                (deleted)="deleteTransactionRequested.emit($event)"
-                (saved)="saved.emit($event)"
-                (categoryAdded)="categoryAdded.emit($event)"
-                [isCategorySaveInProgress]="isCategorySaveInProgress"
-            />
+            @if (isDataInitializing()) {
+                <div class="text-center">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+            } @else {
+                <app-transaction-form-component
+                    [isTransactionFormDisabled]="isTransactionFormDisabled"
+                    [categoryList]="categories"
+                    [transaction]="transaction"
+                    (deleted)="deleteTransactionRequested.emit($event)"
+                    (saved)="saved.emit($event)"
+                    (categoryAdded)="categoryAdded.emit($event)"
+                    [isCategorySaveInProgress]="isCategorySaveInProgress"
+                />
+            }
         </app-base-modal>
     `,
     imports: [BaseModal, TransactionFormComponent, TranslatePipe],
@@ -30,6 +36,7 @@ export class TransactionModalComponent {
     @Input({ required: true }) categories!: Signal<CategoryResponseInterface[]>;
     @Input({ required: true }) isTransactionFormDisabled!: boolean;
     @Input({ required: true }) isCategorySaveInProgress!: boolean;
+    @Input({ required: true }) isDataInitializing!: Signal<boolean>;
 
     @Output() closeModal = new EventEmitter<void>();
     @Output() deleteTransactionRequested = new EventEmitter<number>();
