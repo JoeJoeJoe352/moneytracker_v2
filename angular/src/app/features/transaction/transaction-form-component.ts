@@ -92,34 +92,15 @@ export class TransactionFormComponent implements OnChanges {
     @Output() categoryAdded = new EventEmitter<string>();
 
     /**
-     * Multiselect beállításai
-     */
-    protected multiselectSettings: Signal<IDropdownSettings> = computed(() => {
-        return {
-            singleSelection: false,
-            idField: 'item_id',
-            textField: 'item_text',
-            itemsShowLimit: 2,
-            allowSearchFilter: true,
-            noFilteredDataAvailablePlaceholderText: this.addNewCategoryText(),
-            enableCheckAll: false,
-        };
-    });
-
-    /**
      * Tranzakciós form
      */
     protected transactionForm: FormGroup;
 
     /**
      * A kategória dropdown keresőmezőjébe gépelt szöveg
+     * todo üres stringre állítani, ha user hozzáad elemet
      */
     protected categorySearchText = signal('');
-
-    /**
-     * Kategória hozzáadása folyamatban van-e
-     */
-    protected isAddingCategory = signal(false);
 
     /**
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
@@ -134,19 +115,6 @@ export class TransactionFormComponent implements OnChanges {
                 item_text: itemname,
             };
         });
-    });
-
-    /**
-     * Nincs találat a kategória keresésre, ezért felajánljuk az új kategória létrehozását
-     */
-    protected showAddCategoryButton: Signal<boolean> = computed(() => {
-        const searchText = this.categorySearchText().trim().toLowerCase();
-        if (!searchText) {
-            return false;
-        }
-        return !this.categoryData().some((category) =>
-            category.item_text.toLowerCase().includes(searchText),
-        );
     });
 
     constructor() {
@@ -176,7 +144,7 @@ export class TransactionFormComponent implements OnChanges {
 
             // A meglévő form kontrollokat frissítjük a friss adatokkal, nem hozunk létre új FormGroup-ot,
             // mert az újra létrehozná a 'categories' kontrollt is, amitől az ng-multiselect-dropdown
-            // (formControlName) hibás CVA implementációja miatt elszállna ("no FormControl instance attached")
+            // "no FormControl instance attached" hibát dobna
             this.transactionForm.patchValue({
                 name: convertedInputValues.name,
                 isIncome: convertedInputValues.isIncome,
@@ -253,30 +221,34 @@ export class TransactionFormComponent implements OnChanges {
         this.categorySearchText.set(filterItem as string);
     }
     /**
-     * Találati lista szövege, amikor nincs találat (új elem felvétele)
+     * MultiselectSettings beállításai
      */
-    protected addNewCategoryText = computed(
-        () =>
-            this.translateService.instant('transaction.category.add') +
-            ': ' +
-            this.categorySearchText(),
-    );
+    protected multiselectSettings: Signal<IDropdownSettings> = computed(() => {
+        return {
+            singleSelection: false,
+            idField: 'item_id',
+            textField: 'item_text',
+            itemsShowLimit: 2,
+            allowSearchFilter: true,
+            noFilteredDataAvailablePlaceholderText: this.translateService.instant(
+                'transaction.category.add',
+            ),
+            enableCheckAll: false,
+        };
+    });
+
     /**
      * A kategória dropdown "nincs találat" sorára kattintás lekezelése (ez jelenik meg gombként, ha nincs találat)
      */
     onCategoryDropdownClick(event: Event): void {
         // kattintás esetén csak akkor ad hozzá elemet, hogyha a "nincs ilyen elem" gombra kattint
         if ((event.target as HTMLElement).closest('.no-filtered-data')) {
-            this.onAddCategory();
+            const name = this.categorySearchText().trim();
+            if (!name || this.isCategorySaveInProgress) {
+                return;
+            }
+            this.categoryAdded.emit(name);
         }
-    }
-
-    onAddCategory() {
-        const name = this.categorySearchText().trim();
-        if (!name || this.isAddingCategory()) {
-            return;
-        }
-        this.categoryAdded.emit(name);
     }
 
     /**
@@ -315,9 +287,7 @@ export class TransactionFormComponent implements OnChanges {
             detailWeight: [params.weight],
             detailUnitPrice: [params.unitPrice],
             detailIsComplexPriceMode: [params.isComplexPriceMode],
-            categories: [this.mapCategoryIdsToDropdownData(
-                    params.categories ?? [],
-                )],
+            categories: [this.mapCategoryIdsToDropdownData(params.categories ?? [])],
         }) as FormGroup<DetailForm>;
 
         this.setupDetailReactiveLogic(detailGroup);

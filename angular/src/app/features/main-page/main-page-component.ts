@@ -23,10 +23,9 @@ export class MainPage {
     private categoryService = inject(CategoryService);
 
     /**
-     * Újra kell-e tölteni az adatokat
-     * Ha ez változik, akkor újra fogja tölteni a listát
-     * Azért számot növelünk és nem boolean érték, mert ha gyorsan, többször hívódik egymás után,
-     * akkor kétszer true-ra állítódik az érték és az nem vált ki új letöltés eventet
+     * Újra kell-e tölteni az adatokat? Ha ez változik, akkor újra fogja tölteni a listát.
+     * Azért számot növelünk és nem boolean értéket, mert ha gyorsan hívódik egymás után,
+     * akkor többször true-ra állítódik az érték és az nem vált ki új letöltés eventet
      */
     private reloadTransactionListTrigger = signal(0);
     /**
@@ -60,15 +59,35 @@ export class MainPage {
      * A formban kategória hozzáadása folyamatban van-e?
      */
     protected isAddingCategoryInProgress = signal(false);
+    /**
+     * Kategória lista betöltődött-e már?
+     */
     protected isCategoriesLoaded = signal(false);
+    /**
+     * Tranzakciós modal függőségi adatai be vannak-e már töltve?
+     */
     protected isModalDataInitializing = signal(false);
+    /**
+     * Volt-e modal felnyitására kérés?
+     */
+    protected isModalOpenRequested = signal(false);
 
     constructor() {
         effect(() => {
-            if (this.isTransactionModalOpen() && this.isModalDependencyLoaded()) {
-                this.isModalDataInitializing.set(false);
-            } else if (this.isTransactionModalOpen() && !this.isModalDependencyLoaded()) {
-                this.isModalDataInitializing.set(true);
+            // Ha most nyitjuk fel a modalt, akkor lehet még nincs betöltve minden függősége, akkor a modal komponens fog egy loading ikont kirakni
+            // azért itt nyitom fel a modalt, mert lehetőség van beállítani a modal töltöttségi állapotát
+            if (this.isModalOpenRequested() && !this.isTransactionModalOpen()) {
+                this.isTransactionModalOpen.set(true);
+                if (!this.areAllModalDependenciesLoaded()) {
+                    this.isModalDataInitializing.set(true);
+                } else {
+                    this.isModalDataInitializing.set(false); // ez lehet nem kell ide, de jobb a biztonság
+                }
+            } else {
+                // Ha már fel van nyitva a modal, akkor ha betöltődött az adat, akkor levesszük a loadert
+                if (this.areAllModalDependenciesLoaded()) {
+                    this.isModalDataInitializing.set(false);
+                }
             }
         });
     }
@@ -83,7 +102,7 @@ export class MainPage {
     /**
      * Modal megnyitásához szükséges dolgok le vannak-e töltve (kategória lista + tranzakciós adatok)
      */
-    protected isModalDependencyLoaded = computed(
+    protected areAllModalDependenciesLoaded = computed(
         () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
     );
 
@@ -105,6 +124,7 @@ export class MainPage {
             initialValue: [],
         },
     );
+
     /**
      * Felhasználó összes pénze.
      */
@@ -121,6 +141,7 @@ export class MainPage {
         ),
         { initialValue: null },
     );
+
     /**
      * Kiválasztott tranzakció adatai
      */
@@ -151,7 +172,8 @@ export class MainPage {
      */
     protected openTransactionModal(id: number | null): void {
         this.selectedTransactionIdTrigger.set(id);
-        this.isTransactionModalOpen.set(true);
+        this.isModalOpenRequested.set(true);
+        // modal felnyitása a constructor effect-ben van, ha minden api hívás lefutott
     }
 
     /**
@@ -160,6 +182,7 @@ export class MainPage {
     protected closeTransactionModal(): void {
         this.selectedTransactionIdTrigger.set(null);
         this.isTransactionModalOpen.set(false);
+        this.isModalOpenRequested.set(false);
     }
 
     /**

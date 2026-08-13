@@ -74,6 +74,10 @@ export class TransactionsPage implements OnInit {
      * Form definiciója
      */
     protected filterForm!: FormGroup<FilterFormInterface>;
+    /**
+     * Volt-e modal felnyitására kérés?
+     */
+    protected isModalOpenRequested = signal(false);
 
     constructor() {
         const nameDefaultValue = this.getQueryParam<string>('name') ?? '';
@@ -84,10 +88,20 @@ export class TransactionsPage implements OnInit {
             date: this.fb.control<Date | null>(dateDefaultValue),
         });
         effect(() => {
-            if (this.isTransactionModalOpen() && this.isModalDependencyLoaded()) {
-                this.isModalDataInitializing.set(false);
-            } else if (this.isTransactionModalOpen() && !this.isModalDependencyLoaded()) {
-                this.isModalDataInitializing.set(true);
+            // Ha most nyitjuk fel a modalt, akkor lehet még nincs betöltve minden függősége, akkor a modal komponens fog egy loading ikont kirakni
+            // azért itt nyitom fel a modalt, mert lehetőség van beállítani a modal töltöttségi állapotát
+            if (this.isModalOpenRequested() && !this.isTransactionModalOpen()) {
+                this.isTransactionModalOpen.set(true);
+                if (!this.areAllModalDependenciesLoaded()) {
+                    this.isModalDataInitializing.set(true);
+                } else {
+                    this.isModalDataInitializing.set(false); // ez lehet nem kell ide, de jobb a biztonság
+                }
+            } else {
+                // Ha már fel van nyitva a modal, akkor ha betöltődött az adat, akkor levesszük a loadert
+                if (this.areAllModalDependenciesLoaded()) {
+                    this.isModalDataInitializing.set(false);
+                }
             }
         });
     }
@@ -131,6 +145,13 @@ export class TransactionsPage implements OnInit {
         () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
     );
 
+    /**
+     * Modal megnyitásához szükséges dolgok le vannak-e töltve (kategória lista + tranzakciós adatok)
+     */
+    protected areAllModalDependenciesLoaded = computed(
+        () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
+    );
+
     ngOnInit(): void {
         this.loadTransactionHistory();
     }
@@ -159,7 +180,8 @@ export class TransactionsPage implements OnInit {
      */
     protected openTransactionModal(id: number | null): void {
         this.selectedTransactionIdTrigger.set(id);
-        this.isTransactionModalOpen.set(true);
+        this.isModalOpenRequested.set(true);
+        // modal felnyitása a constructor effect-ben van, ha minden api hívás lefutott
     }
 
     /**
@@ -168,6 +190,7 @@ export class TransactionsPage implements OnInit {
     protected closeTransactionModal(): void {
         this.selectedTransactionIdTrigger.set(null);
         this.isTransactionModalOpen.set(false);
+        this.isModalOpenRequested.set(false);
     }
 
     /**
