@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
-import com.starbuck.moneytracker.entity.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 public class CostCalculatorDomainService {
 

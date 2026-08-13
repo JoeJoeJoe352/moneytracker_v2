@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -9,13 +10,16 @@ import com.starbuck.moneytracker.validation.TransactionDetailAttributeCoexist;
 @TransactionDetailAttributeCoexist
 public record TransactionDetailCreateDto(
 
-        BigDecimal price,
+    BigDecimal price,
 
-        // Ez lehet null, ha simple tranzakcióról van szó. Todo ez nem fogja meg az egy
-        // karakteres nevet
-        @Length(min = 3, max = 50, message = "Name must be between 3 and 50 characters") String name,
+    // Ez lehet null, ha simple tranzakcióról van szó. Todo ez nem fogja meg az egy
+    // karakteres nevet
+    @Length(min = 3, max = 50, message = "Name must be between 3 and 50 characters") String name,
 
-        BigDecimal weight,
+    BigDecimal weight,
 
-        BigDecimal unitPrice) {
+    BigDecimal unitPrice,
+
+    List<Long> categories
+) {
 }

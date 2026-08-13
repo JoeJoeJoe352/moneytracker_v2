@@ -38,7 +38,8 @@ public class TransactionDetailFactory {
                     request.globalPrice(),
                     TransactionDetail.DEFAULT_DETAIL_NAME,
                     null,
-                    null)));
+                    null,
+                    request.globalCategories())));
         }
 
         throw new IllegalArgumentException("No detail in list and price is also null. Error!");

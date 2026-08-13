@@ -1,15 +1,13 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
-import { NewTransaction, TransactionDataFromBackend } from '../transaction/interfaces';
+import { TransactionDataFromBackend } from '../transaction/interfaces';
 import { TransactionService } from '../transaction/transaction-service';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
 import { TranslatePipe } from '@ngx-translate/core';
-import { of, switchMap } from 'rxjs';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { TransactionActionService } from '../transaction/transaction-action-service';
+import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 
 interface FilterFormInterface {
     name: FormControl<string>;
@@ -28,52 +26,23 @@ interface FilterFormInterface {
         NgxsmkDatepickerComponent,
         TranslatePipe,
     ],
+    providers: [TransactionModalStateService],
 })
 export class TransactionsPage implements OnInit {
     private transactionService = inject(TransactionService);
     private fb = inject(FormBuilder);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
-    private transactionActionService = inject(TransactionActionService);
+    protected modal = inject(TransactionModalStateService);
 
     /**
      * Töltődik-e jelenleg a tranzakciós lista
      */
     protected isTransactionListLoading = signal(true);
     /**
-     * Tranzakció létrehozó modal bezárása
-     */
-    protected isTransactionModalOpen = signal(false);
-    /**
      * Tranzakciós lista
      */
     protected transactionListData = signal<TransactionDataFromBackend[]>([]);
-    /**
-     * Form disabled-e
-     */
-    protected isTransactionFormDisabled = signal(false);
-    /**
-     * Kiválasztott tranzakció azonosítója.
-     * Ha ez változik, akkor le fog futni a tranzakció betöltés is (transactionData)
-     */
-    protected selectedTransactionIdTrigger = signal<number | null>(null);
-    /**
-     * Kiválasztott tranzakció adatai
-     */
-    protected transactionData = toSignal(
-        toObservable(this.selectedTransactionIdTrigger).pipe(
-            switchMap((id) =>
-                id === null ? of(null) : this.transactionService.getTransactionById(id),
-            ),
-        ),
-        { initialValue: null },
-    );
-    /**
-     *  Betöltés alatt van-e a tranzakció
-     */
-    protected isTransactionDataLoading = computed(
-        () => this.selectedTransactionIdTrigger() !== null && this.transactionData() === null,
-    );
     /**
      * Form definiciója
      */
@@ -87,6 +56,9 @@ export class TransactionsPage implements OnInit {
             name: [nameDefaultValue],
             date: this.fb.control<Date | null>(dateDefaultValue),
         });
+
+        // Mentés/törlés után újratöltjük a listát
+        this.modal.changed.subscribe(() => this.loadTransactionHistory());
     }
 
     ngOnInit(): void {
@@ -105,30 +77,6 @@ export class TransactionsPage implements OnInit {
     }
 
     /**
-     * Tranzakció létrehozó modal bezárása, ha változott az adat
-     */
-    protected refreshAfterSave(): void {
-        this.loadTransactionHistory();
-        this.closeTransactionModal();
-    }
-
-    /**
-     * Tranzakció betöltése szerkesztéshez
-     */
-    protected openTransactionModal(id: number | null): void {
-        this.selectedTransactionIdTrigger.set(id);
-        this.isTransactionModalOpen.set(true);
-    }
-
-    /**
-     * Tranzakció létrehozó modal becsukása
-     */
-    protected closeTransactionModal(): void {
-        this.selectedTransactionIdTrigger.set(null);
-        this.isTransactionModalOpen.set(false);
-    }
-
-    /**
      * keresési adatok resetelése
      */
     protected clearInputs(): void {
@@ -138,32 +86,6 @@ export class TransactionsPage implements OnInit {
             queryParams: {},
         });
         this.loadTransactionHistory();
-    }
-
-    /**
-     * Tranzakció törlése a főoldalon
-     */
-    protected popupDeletionConfirm(transactionId: number): void {
-        if (this.transactionActionService.confirmDeletion()) {
-            this.transactionActionService.deleteTransaction(
-                transactionId,
-                this.isTransactionFormDisabled,
-                () => this.refreshAfterSave(),
-            );
-        }
-    }
-
-    /**
-     * Elmenti egy tranzakció adatait
-     */
-    protected saveTransaction(payload: NewTransaction): void {
-        const transactionData = this.transactionData();
-        this.transactionActionService.saveTransaction(
-            payload,
-            transactionData?.id ?? null,
-            this.isTransactionFormDisabled,
-            () => this.refreshAfterSave(),
-        );
     }
 
     /**

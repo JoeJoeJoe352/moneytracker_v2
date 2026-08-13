@@ -1,3 +1,5 @@
+import { DropdownInterface } from "../../shared/interfaces";
+
 /**
  * Tranzakciós adatok, ahogy a form inpujai elvárja kezdőértéknek, plusz a detailok
  */
@@ -5,6 +7,7 @@ export interface TransactionInputDefaultValuesWithDetails {
     name: string;
     isIncome: boolean;
     price: null | number;
+    categories: null | number[];
     transactionDate: Date | null;
     details: TransactionDetailsDataFromBackend[];
     isComplexTransaction: boolean;
@@ -12,18 +15,20 @@ export interface TransactionInputDefaultValuesWithDetails {
 
 /**
  * Tranzakciós adatok, ahogy a form kitöltése után lesznek
- * itt már nem lehet null a price, de elküldés után már nem
+ * itt még nem lehet null a price
  */
 export interface NewTransaction {
     name: string;
     isIncome: boolean;
     price: number | null;
     transactionDate: Date;
+    categories: DropdownInterface[];
     details: {
         detailName: string;
         detailPrice: number;
         detailWeight: number;
         detailUnitPrice: number;
+        categories: DropdownInterface[];
     }[];
     isComplexTransaction: boolean;
 }
@@ -33,6 +38,7 @@ export interface NewTransaction {
  */
 export interface TransactionDataForBackend {
     globalPrice: number | null;
+    globalCategories: number[] | null;
     name: string;
     transactionDate: string;
     transactionType: string;
@@ -47,6 +53,7 @@ export interface TransactionDetailsDataForBackend {
     price: number | null;
     weight: number | null;
     unitPrice: number | null;
+    categories: number[];
 }
 
 /**
@@ -71,10 +78,21 @@ export interface TransactionDetailsDataFromBackend {
     weight: number | null;
     unitPrice: number | null;
     isComplexPriceMode: boolean;
+    categories: number[];
 }
 
 export interface MoneySumInterface {
     incomeSumThisMonth: number;
     expenseSumThisMonth: number;
     moneySum: number;
+}
+
+export interface CategorySaveRequestInterface {
+    name: string;
+}
+
+export interface CategoryResponseInterface {
+    id: number;
+    name: string;
+    isLangKey: boolean;
 }

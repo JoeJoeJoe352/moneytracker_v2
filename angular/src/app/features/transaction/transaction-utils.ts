@@ -32,6 +32,9 @@ export class TransactionUtils {
             transactionDate: transactionDate,
             isComplexTransaction: transaction.isComplexTransaction,
             details: transactionDetailsFormatted,
+            categories: transaction.isComplexTransaction
+                ? []
+                : transaction.transactionDetails[0].categories,
         };
     }
 
@@ -55,6 +58,7 @@ export class TransactionUtils {
                   price: this.deNormalizePriceForBackend(detail.detailPrice, input.isIncome),
                   weight: detail.detailWeight,
                   unitPrice: detail.detailUnitPrice,
+                  categories: detail.categories.map((category) => category.item_id),
               }))
             : [];
 
@@ -67,6 +71,7 @@ export class TransactionUtils {
             transactionType: TransactionTypeString,
             transactionDate: transactionDateString,
             transactionDetails: transactionDetailsFormatted,
+            globalCategories: input.categories.map((category) => category.item_id),
         };
     }
 

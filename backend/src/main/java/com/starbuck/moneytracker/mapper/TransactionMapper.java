@@ -9,10 +9,12 @@ import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
-import com.starbuck.moneytracker.dto.TransactionDetailDto;
-import com.starbuck.moneytracker.dto.TransactionDto;
+import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
+import com.starbuck.moneytracker.dto.TransactionResponseDto;
+import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 
 @Component
 public class TransactionMapper {
@@ -23,20 +25,22 @@ public class TransactionMapper {
      * @param entity
      * @return
      */
-    public TransactionDto toDto(Transaction entity) {
+    public TransactionResponseDto toDto(Transaction entity) {
         if (entity == null)
             return null;
 
-        Set<TransactionDetailDto> detailDto = entity.getTransactionDetails().stream()
-                .map(detail -> new TransactionDetailDto(
+        Set<TransactionDetailResponseDto> detailDto = entity.getTransactionDetails().stream()
+                .map(detail -> new TransactionDetailResponseDto(
                         detail.getName(),
                         detail.getPrice(),
                         detail.getWeight(),
                         detail.getUnitPrice(),
-                        detail.isComplexPriceMode()))
+                        detail.isComplexPriceMode(),
+                        detail.getCategoryIds()
+                ))
                 .collect(Collectors.toSet());
-
-        TransactionDto dto = new TransactionDto(
+        
+        TransactionResponseDto dto = new TransactionResponseDto(
                 entity.getId(),
                 entity.getName(),
                 entity.getPriceSum(),
@@ -54,7 +58,7 @@ public class TransactionMapper {
      * @param entities
      * @return
      */
-    public List<TransactionDto> toDtoList(List<Transaction> entities) {
+    public List<TransactionResponseDto> toDtoList(List<Transaction> entities) {
         return entities.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
@@ -87,6 +91,17 @@ public class TransactionMapper {
         entity.setPrice(request.price());
         entity.setWeight(request.weight());
         entity.setUnitPrice(request.unitPrice());
+
+        // Kategória dummy objectek létrehozása, összepárosítása a hozzá tartozó detaillal
+        List<TransactionDetailCategory> categories = request.categories().stream().map((category) -> {
+            Category tempCategoryObject = new Category();
+            tempCategoryObject.setId(category);
+            var transactionDetailCategoryObject = new TransactionDetailCategory();
+            transactionDetailCategoryObject.setCategory(tempCategoryObject);
+            return transactionDetailCategoryObject;
+        }).collect(Collectors.toList());
+
+        entity.setCategoryLinks(categories);
 
         return entity;
     }

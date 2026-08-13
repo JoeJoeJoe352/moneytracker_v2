@@ -11,6 +11,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -49,7 +51,7 @@ public class Transaction {
     private BigDecimal priceSum;
 
     @Column(nullable = false)
-    @ColumnDefault("0") // todo legyen enum
+    @ColumnDefault("0") // TODO legyen GeneralStatusEnum
     private int status;
 
     @CreationTimestamp

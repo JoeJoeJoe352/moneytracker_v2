@@ -1,4 +1,4 @@
-package com.starbuck.moneytracker.entity;
+package com.starbuck.moneytracker.entity.enum_entites;
 
 import java.math.BigDecimal;
 

@@ -1,10 +1,14 @@
-@if (isTransactionModalOpen()) {
+@if (modal.isTransactionModalOpen()) {
     <app-create-transaction-modal
-        [isTransactionFormDisabled]="isTransactionFormDisabled()"
-        [transaction]="transactionData()"
-        (closeModal)="closeTransactionModal()"
-        (deleteTransactionRequested)="popupDeletionConfirm($event)"
-        (saved)="saveTransaction($event)"
+        [isTransactionFormDisabled]="modal.isTransactionFormDisabled()"
+        [categories]="modal.categories"
+        [transaction]="modal.transactionData()"
+        [isCategorySaveInProgress]="modal.isAddingCategoryInProgress()"
+        [isDataInitializing]="modal.isModalDataInitializing"
+        (closeModal)="modal.close()"
+        (deleteTransactionRequested)="modal.confirmDeletion($event)"
+        (saved)="modal.save($event)"
+        (categoryAdded)="modal.saveCategory($event)"
     />
 }
 
@@ -57,7 +61,7 @@
 </div>
 <!-- Transaction list -->
 <app-transaction-list
-    [isTransactionListLoading]="isTransactionDataLoading()"
+    [isTransactionListLoading]="isTransactionListLoading()"
     [transactions]="transactionListData()"
-    (editTransaction)="openTransactionModal($event.transactionId)"
+    (editTransaction)="modal.open($event.transactionId)"
 />
