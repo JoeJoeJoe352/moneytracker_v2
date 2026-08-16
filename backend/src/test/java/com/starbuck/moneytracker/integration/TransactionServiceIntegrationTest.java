@@ -1,4 +1,4 @@
-package com.starbuck.moneytracker.service;
+package com.starbuck.moneytracker.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,6 +31,7 @@ import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 @SpringBootTest

@@ -1,4 +1,4 @@
-package com.starbuck.moneytracker.service.domainservice;
+package com.starbuck.moneytracker.unit.service.domainservice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 
 class CostCalculatorDomainServiceTest {
 
