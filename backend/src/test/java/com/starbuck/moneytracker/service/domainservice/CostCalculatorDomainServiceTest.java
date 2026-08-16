@@ -68,8 +68,8 @@ class CostCalculatorDomainServiceTest {
 
             assertThrowsExactly(IllegalArgumentException.class,
                     () -> service.calculateTransactionCost(transaction));
-
         }
+
         @Test
         @DisplayName("Price nem lehet negatív szám, hogyha income a tranzakció típusa")
         void priceNegativeWhenIncome_throws() {
@@ -79,7 +79,15 @@ class CostCalculatorDomainServiceTest {
 
             assertThrowsExactly(IllegalArgumentException.class,
                     () -> service.calculateTransactionCost(transaction));
+        }
 
+        @Test
+        @DisplayName("Detail tömbben legalább egy elemnek mindig lennie kell")
+        void emptyDetailArray_throws() {
+            var transaction = new Transaction("bevásárlás", null, TransactionTypeEnum.INCOME, null);
+
+            assertThrowsExactly(IllegalArgumentException.class,
+                    () -> service.calculateTransactionCost(transaction));
         }
     }
 
@@ -154,15 +162,6 @@ class CostCalculatorDomainServiceTest {
             var result = service.calculateTransactionCost(transaction);
 
             assertEquals(new BigDecimal("-1300.00"), result);
-        }
-
-        @Test
-        @DisplayName("üres detail lista esetén nulla a végösszeg")
-        void emptyDetails_resultsInZero() {
-            var transaction = new Transaction("üres", null, TransactionTypeEnum.INCOME, null);
-            transaction.setTransactionDetails(Set.of());
-
-            assertEquals(BigDecimal.ZERO, service.calculateTransactionCost(transaction));
         }
     }
 }

@@ -61,6 +61,11 @@ public class CostCalculatorDomainService {
      * @return
      */
     public BigDecimal calculateTransactionCost(Transaction transaction) {
+        if (transaction.getTransactionDetails() == null || transaction.getTransactionDetails().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Details cannot be empty or null: " + transaction.getId());
+        }
+
         return transaction.getTransactionDetails().stream()
                 .map((detail) -> this.calculateCost(detail, transaction.getTransactionType()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
