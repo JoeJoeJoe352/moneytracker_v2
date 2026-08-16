@@ -38,6 +38,13 @@ public class CostCalculatorDomainService {
         if (detail.getPrice() != null) {
             // Db-ben két tizedesjegyre lesz szűkítve, de ha nem volt még mentve, akkor
             // jobb, ha forceoljuk a két tizedesjegyet
+            if (type.equals(TransactionTypeEnum.OUTCOME) && detail.getPrice().compareTo(BigDecimal.ZERO) > 0 ||
+                    type.equals(TransactionTypeEnum.INCOME) && detail.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException(
+                        "Price sign and transaction type doesn't match: "
+                                + detail.getPrice() + ", " + type);
+            }
+
             return detail.getPrice().setScale(2, RoundingMode.HALF_UP);
         }
 
