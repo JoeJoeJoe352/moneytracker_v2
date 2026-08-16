@@ -39,7 +39,6 @@ import com.starbuck.moneytracker.util.CurrentUserUtil;
 // csak így használható a beforeall, mert egyébként statikusan futna és nem
 // elérhető az injektált dolgok
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 class TransactionServiceIntegrationTest {
 
     @Autowired
