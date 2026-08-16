@@ -36,6 +36,9 @@ export class TransactionModalComponent {
     @Input({ required: true }) categories!: Signal<CategoryResponseInterface[]>;
     @Input({ required: true }) isTransactionFormDisabled!: boolean;
     @Input({ required: true }) isCategorySaveInProgress!: boolean;
+    /**
+     * Töltődnek-e a formhoz szükséges adatok. Addig megjelenik a modal, csak töltőikon lesz
+     */
     @Input({ required: true }) isDataInitializing!: Signal<boolean>;
 
     @Output() closeModal = new EventEmitter<void>();

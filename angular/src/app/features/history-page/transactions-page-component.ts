@@ -14,6 +14,11 @@ interface FilterFormInterface {
     date: FormControl<Date | null>;
 }
 
+interface FilterData {
+    name: string;
+    date: Date | null;
+}
+
 @Component({
     selector: 'app-transaction-page-component',
     templateUrl: './transactions-page-component.html',
@@ -49,13 +54,8 @@ export class TransactionsPage implements OnInit {
     protected filterForm!: FormGroup<FilterFormInterface>;
 
     constructor() {
-        const nameDefaultValue = this.getQueryParam<string>('name') ?? '';
-        const dateDefaultValue = this.getQueryParam<Date>('date', (v) => new Date(v));
-
-        this.filterForm = this.fb.nonNullable.group({
-            name: [nameDefaultValue],
-            date: this.fb.control<Date | null>(dateDefaultValue),
-        });
+        const defaultData = this.getInitialDataFromQueryParams();
+        this.buildForm(defaultData);
 
         // Mentés/törlés után újratöltjük a listát
         this.modal.changed.subscribe(() => this.loadTransactionHistory());
@@ -66,9 +66,29 @@ export class TransactionsPage implements OnInit {
     }
 
     /**
+     * Query paraméterekből kiszedi a szűrőfeltételeket, amik be vannak állítva
+     */
+    private getInitialDataFromQueryParams(): FilterData {
+        return {
+            name: this.getQueryParam<string>('name') ?? '',
+            date: this.getQueryParam<Date>('date', (v) => new Date(v)),
+        };
+    }
+
+    /**
+     * Filter formot létrehozza és beállítja az alapadatait
+     */
+    private buildForm(defaultData: FilterData): void {
+        this.filterForm = this.fb.nonNullable.group({
+            name: [defaultData.name],
+            date: this.fb.control<Date | null>(defaultData.date),
+        });
+    }
+
+    /**
      * Queryből lekéri a megfelelő kulcsú értéket
      * @param   key         kulcs, amit le akarunk kérni
-     * @param   transform   az érték utólagos átalakítása
+     * @param   transform   az érték transformációja, ha nem stringben szeretnénk (opcionális)
      * @returns T
      */
     private getQueryParam<T>(key: string, transform?: (queryValue: string) => T): T | null {
@@ -81,10 +101,12 @@ export class TransactionsPage implements OnInit {
      */
     protected clearInputs(): void {
         this.filterForm.reset();
-        // query paraméterek kiszedése = egy navigáció ugyanarra az url-re, csak queryk nélkül
+
+        // query paraméterek kiszedése => egy navigáció ugyanarra az url-re, csak queryk nélkül
         this.router.navigate([], {
             queryParams: {},
         });
+
         this.loadTransactionHistory();
     }
 
@@ -94,17 +116,7 @@ export class TransactionsPage implements OnInit {
     loadTransactionHistory(): void {
         this.isTransactionListLoading.set(true);
 
-        const params = new URLSearchParams({});
-        const nameInputValue = this.filterForm.get(['name'])!.value.trim() as string;
-        const dateInputValue = this.filterForm.get(['date'])!.value as Date | null;
-
-        if (nameInputValue.trim()) {
-            params.append('name', nameInputValue);
-        }
-
-        if (dateInputValue) {
-            params.append('date', dateInputValue.toLocaleDateString('sv-SE'));
-        }
+        const params = this.getValuesFromFilterInputs();
 
         this.transactionService.getTransactionHistory(params).subscribe({
             next: (response) => {
@@ -122,5 +134,24 @@ export class TransactionsPage implements OnInit {
                 this.isTransactionListLoading.set(false);
             },
         });
+    }
+
+    /**
+     * A filter inputok értékei alapján létrehoz egy URLSearchParams objektumot
+     */
+    private getValuesFromFilterInputs(): URLSearchParams {
+        const params = new URLSearchParams({});
+        const nameInputValue = this.filterForm.get(['name'])!.value.trim() as string;
+        const dateInputValue = this.filterForm.get(['date'])!.value as Date | null;
+
+        if (nameInputValue) {
+            params.append('name', nameInputValue);
+        }
+
+        if (dateInputValue) {
+            params.append('date', dateInputValue.toLocaleDateString('sv-SE'));
+        }
+
+        return params;
     }
 }

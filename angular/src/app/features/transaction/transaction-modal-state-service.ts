@@ -56,11 +56,31 @@ export class TransactionModalStateService {
      * Tranzakciós modal függőségi adatai be vannak-e már töltve?
      */
     public isModalDataInitializing = signal(false);
-
     /**
      * Mentés/törlés után emittál, hogy a hívó oldal újratölthesse a saját listáját
      */
     public changed = new Subject<void>();
+
+    constructor() {
+        // todo átnézni, lehet-e egyszerűsíteni
+        effect(() => {
+            // Ha felnyitjuk a modalt, akkor lehet még nincs betöltve minden függősége. Ekkor a modal komponens fog egy loading ikont kirakni
+            // azért itt nyitom fel a modalt, mert lehetőség van beállítani a modal töltöttségi állapotát
+            if (this.isModalOpenRequested() && !this.isTransactionModalOpen()) {
+                this.isTransactionModalOpen.set(true);
+                if (!this.areAllModalDependenciesLoaded()) {
+                    this.isModalDataInitializing.set(true);
+                } else {
+                    this.isModalDataInitializing.set(false); // ez lehet nem kell ide, de jobb a biztonság
+                }
+            } else {
+                // Ha már fel van nyitva a modal, akkor ha betöltődött az adat, akkor levesszük a loadert
+                if (this.areAllModalDependenciesLoaded()) {
+                    this.isModalDataInitializing.set(false);
+                }
+            }
+        });
+    }
 
     /**
      * Kiválasztott tranzakció adatai
@@ -102,24 +122,12 @@ export class TransactionModalStateService {
         () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
     );
 
-    constructor() {
-        effect(() => {
-            // Ha most nyitjuk fel a modalt, akkor lehet még nincs betöltve minden függősége, akkor a modal komponens fog egy loading ikont kirakni
-            // azért itt nyitom fel a modalt, mert lehetőség van beállítani a modal töltöttségi állapotát
-            if (this.isModalOpenRequested() && !this.isTransactionModalOpen()) {
-                this.isTransactionModalOpen.set(true);
-                if (!this.areAllModalDependenciesLoaded()) {
-                    this.isModalDataInitializing.set(true);
-                } else {
-                    this.isModalDataInitializing.set(false); // ez lehet nem kell ide, de jobb a biztonság
-                }
-            } else {
-                // Ha már fel van nyitva a modal, akkor ha betöltődött az adat, akkor levesszük a loadert
-                if (this.areAllModalDependenciesLoaded()) {
-                    this.isModalDataInitializing.set(false);
-                }
-            }
-        });
+    /**
+     * Műveletek, amik minden olyan művelet után le kell futtatni, ami tranzakciólista módosulásával járhat (Pl.: új tranzakció felvétele, módosítása, törlése)
+     */
+    private afterChange(): void {
+        this.close();
+        this.changed.next();
     }
 
     /**
@@ -184,13 +192,5 @@ export class TransactionModalStateService {
                 this.isAddingCategoryInProgress.set(false);
             },
         });
-    }
-
-    /**
-     * Műveletek, amik minden olyan művelet után le kell futtatni, ami tranzakciólista módosulásával járhat (Pl.: új tranzakció felvétele, módosítása, törlése)
-     */
-    private afterChange(): void {
-        this.close();
-        this.changed.next();
     }
 }

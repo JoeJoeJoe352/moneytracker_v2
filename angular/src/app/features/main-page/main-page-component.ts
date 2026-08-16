@@ -67,6 +67,12 @@ export class MainPage {
      * Egy trigger jelre újratölti az adatot, és a betöltés alatt/után beállítja a megadott loading jelzőt.
      * A transactionListData és moneySum azonos szerkezetű (trigger -> loading true -> lekérés -> loading false)
      * betöltési logikáját fogja össze, hogy ne kelljen kétszer leírni.
+     *
+     * @param trigger           Adatok betöltését triggerelő signal
+     * @param load              Adatok betöltését végző függvény
+     * @param initialValue      Betöltés előtti kezdőértéke az adattagnak
+     * @param loading           Betöltést jelző flag
+     * @returns
      */
     private reloadableSignal<T>(
         trigger: Signal<unknown>,

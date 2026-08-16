@@ -42,7 +42,7 @@ export class TransactionUtils {
      * A Tranzakciós form inputból kapott adatokat átalakítja a backend számára megfelelő formába
      */
     convertToBackendData(input: NewTransaction): TransactionDataForBackend {
-        // sv-SE = YYYY-MM-DD formátumot fog visszaadni, amit megeszik a Java LocalDate
+        // sv-SE => YYYY-MM-DD formátumot fog visszaadni, amit elfogad a Java LocalDate típusa
         const transactionDateString = input.transactionDate.toLocaleDateString('sv-SE');
 
         // átalakítjuk az isIncome mező értékét a backend enum-jára
@@ -80,7 +80,7 @@ export class TransactionUtils {
      * Frontenden a kavarodások elkerülése végett a price inputokba mindig csak pozitív értékeket fogunk tenni.
      */
     private normalizePriceForFrontend(denormalizedPrice: number, condition: boolean): number {
-        // Azért nem csak sima abszolút érték, mert az eltüntethet potenciális hibát
+        // Azért nem csak sima abszolút érték, mert az elfedhet potenciális hibákat
         return condition ? denormalizedPrice : denormalizedPrice * -1;
     }
 
@@ -89,7 +89,7 @@ export class TransactionUtils {
      * Szükség esetén visszaalakítjuk a price számot negatívvá, mert backend előjelesen tárolja a kiadást
      */
     private deNormalizePriceForBackend(normalizedPrice: number, condition: boolean): number {
-        // Azért nem csak sima abszolút érték, mert az eltüntethet potenciális hibát
+        // Azért nem csak sima abszolút érték, mert az elfedhet potenciális hibákat
         return condition ? normalizedPrice : normalizedPrice * -1;
     }
 }
