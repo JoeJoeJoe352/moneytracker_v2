@@ -124,7 +124,9 @@ public class TransactionService {
             detail.setTransaction(savedTransaction);
 
             var detailAfterSave = this.transactionDetailRepo.save(detail);
-            this.saveCategory(detailAfterSave, detail.getCategoryLinks());
+            if (detail.getCategoryLinks() != null) {
+                this.saveCategory(detailAfterSave, detail.getCategoryLinks());
+            }
         }
     }
 
