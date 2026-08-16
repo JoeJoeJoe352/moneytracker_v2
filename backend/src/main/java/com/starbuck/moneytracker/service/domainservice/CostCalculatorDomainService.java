@@ -11,12 +11,21 @@ public class CostCalculatorDomainService {
 
     /**
      * Kiszámolja egy TransactionDetail költségét.
-     * - Ha weight + unitPrice meg van adva → kiszámolja, majd a tranzakció
-     * típusára (income/outcome) bízza az előjel eldöntését
+     * - Ha weight + unitPrice meg van adva → kiszámolja, majd a tranzakció típusára
+     * (income/outcome) bízza az előjel eldöntését
+     * 
      * - Ha nincs akkor a price-t próbálja meg visszaadni
      * - Minden eredmény scale=2, HALF_UP
      */
     public BigDecimal calculateCost(TransactionDetail detail, TransactionTypeEnum type) {
+
+        if (detail == null) {
+            throw new IllegalArgumentException("detail cannot be null");
+        }
+
+        if (type == null) {
+            throw new IllegalArgumentException("type cannot be null");
+        }
 
         if (detail.getWeight() != null && detail.getUnitPrice() != null) {
             BigDecimal cost = detail.getWeight()
@@ -32,7 +41,7 @@ public class CostCalculatorDomainService {
             return detail.getPrice().setScale(2, RoundingMode.HALF_UP);
         }
 
-        throw new IllegalStateException(
+        throw new IllegalArgumentException(
                 "Price is null and weight or unitPrice is not defined for TransactionDetail with ID: "
                         + detail.getId());
     }
