@@ -2,15 +2,17 @@ package com.starbuck.moneytracker.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -36,9 +38,6 @@ public class TransactionService {
 
     @Autowired
     private TransactionDetailCategoryRepository transactionDetailCategoryRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
 
     @Autowired
     private CurrentUserUtil currentUser;
@@ -104,28 +103,35 @@ public class TransactionService {
      * @param transactionDetails
      */
     private void saveDetails(Transaction savedTransaction, List<TransactionDetail> transactionDetails) {
-        int countOfDetails = transactionDetails.size();
-        for (TransactionDetail detail : transactionDetails) {
-            detail.setPrice(costCalculator.calculateCost(detail, savedTransaction.getTransactionType()));
+        if (savedTransaction.getTransactionType() == null) {
+            throw new IllegalArgumentException("transactiontype not set");
+        }
 
-            if (countOfDetails > 1 && detail.getName() == null) {
+        TransactionTypeEnum transactionType = savedTransaction.getTransactionType();
+        boolean hasMultipleDetail = transactionDetails.size() > 1;
+        boolean hasSingleDetail = transactionDetails.size() == 1;
+
+        for (TransactionDetail detail : transactionDetails) {
+            boolean isWeightAndUnitPriceExistingDifferently = (detail.getWeight() != null
+                    ^ detail.getUnitPrice() != null);// ^ => XOR operátor
+
+            if (isWeightAndUnitPriceExistingDifferently) {
+                throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
+            }
+            if (hasMultipleDetail && detail.getName() == null) {
                 throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
-            } else if (countOfDetails == 1 && detail.getName() == null) {
+            } else if (hasSingleDetail && detail.getName() == null) {
                 detail.setName(TransactionDetail.DEFAULT_DETAIL_NAME);
             }
 
-            savedTransaction.getTransactionType().validateDetailPrice(detail.getPrice());
-
-            if ((detail.getWeight() != null && detail.getUnitPrice() == null) ||
-                    (detail.getWeight() == null && detail.getUnitPrice() != null)) {
-                throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
-            }
+            detail.setPrice(costCalculator.calculateCost(detail, transactionType));
+            transactionType.validateDetailPrice(detail.getPrice());
 
             detail.setTransaction(savedTransaction);
 
             var detailAfterSave = this.transactionDetailRepo.save(detail);
             if (detail.getCategoryLinks() != null) {
-                this.saveCategory(detailAfterSave, detail.getCategoryLinks());
+                this.saveCategoryDetailEntries(detailAfterSave, detail.getCategoryLinks());
             }
         }
     }
@@ -136,11 +142,13 @@ public class TransactionService {
      * @param savedDetail
      * @param categoryLinkModels
      */
-    private void saveCategory(TransactionDetail savedDetail, List<TransactionDetailCategory> categoryLinkModels) {
+    private void saveCategoryDetailEntries(TransactionDetail savedDetail,
+            List<TransactionDetailCategory> categoryLinkModels) {
         categoryLinkModels.forEach((categoryLinkModel) -> {
-            Category categoryRef = new Category();
-            categoryRef.setId(categoryLinkModel.getCategory().getId());
-            TransactionDetailCategory detailCategoryModel = new TransactionDetailCategory(categoryRef, savedDetail);
+            Category categoryDummyObject = new Category();
+            categoryDummyObject.setId(categoryLinkModel.getCategory().getId());
+            TransactionDetailCategory detailCategoryModel = new TransactionDetailCategory(categoryDummyObject,
+                    savedDetail);
             transactionDetailCategoryRepository.save(detailCategoryModel);
         });
     }
@@ -161,9 +169,7 @@ public class TransactionService {
      * @return BigDecimal
      */
     public BigDecimal sumAllExpenseForMonth() {
-        BigDecimal sum = this.transactionRepo.summarizeTransactionPricesForMonthAndType(currentUser.getUser().getId(),
-                TransactionTypeEnum.OUTCOME);
-        return sum == null ? BigDecimal.ZERO : sum;
+        return this.summarizeForMonth(TransactionTypeEnum.OUTCOME);
     }
 
     /**
@@ -173,20 +179,20 @@ public class TransactionService {
      * @return BigDecimal
      */
     public BigDecimal sumAllIncomeForMonth() {
-        BigDecimal sum = this.transactionRepo.summarizeTransactionPricesForMonthAndType(currentUser.getUser().getId(),
-                TransactionTypeEnum.INCOME);
-        return sum == null ? BigDecimal.ZERO : sum;
+        return this.summarizeForMonth(TransactionTypeEnum.INCOME);
     }
 
     /**
-     * Visszatér az utolsó x darab tranzakció objektummal
+     * Összegzi a user adott típusú tranzakcióit a hónapra
      * 
-     * @return Transaction[]
+     * @param type
+     * @return
      */
-    public Transaction[] getLastTransactions() {
-        int lastTransactionLimit = 5;
-        return this.transactionRepo.getLastTransactionsForUserWithLimit(currentUser.getUser().getId(),
-                lastTransactionLimit);
+    private BigDecimal summarizeForMonth(TransactionTypeEnum type) {
+        Long userId = currentUser.getUser().getId();
+
+        return Optional.ofNullable(
+                transactionRepo.summarizeTransactionPricesForMonthAndType(userId, type)).orElse(BigDecimal.ZERO);
     }
 
     /**
@@ -203,19 +209,44 @@ public class TransactionService {
     }
 
     /**
-     * Listázza valamilyen feltételek alapján a tranzakciókat
+     * Visszatér az utolsó x darab tranzakció objektummal
+     * 
+     * @return List<Transaction>
+     */
+    public List<Transaction> getLastTransactions() {
+        return this.getHistory(null, 5);
+    }
+
+    /**
+     * Visszatér a tranzakciók oldal adataival
+     * 
+     * @param filter
+     * @return
+     */
+    public List<Transaction> getHistoryPageData(TransactionFilter filter) {
+        return this.getHistory(filter, 30);
+    }
+
+    /**
+     * Listázza a kapott feltételek alapján a tranzakciókat, adott user számára
      * 
      * @param TransactionFilter filter
      * @return
      */
-    public List<Transaction> getHistory(TransactionFilter filter) {
+    private List<Transaction> getHistory(TransactionFilter filter, int limit) {
         Long userId = currentUser.getUser().getId();
-        var spec = Specification
-                .where(TransactionSpecifications.hasName(filter.name()))
-                .and(TransactionSpecifications.hasDate(filter.dateString()))
-                .and(TransactionSpecifications.hasUserId(userId));
+        Specification<Transaction> spec = null;
 
-        return this.transactionRepo.findAll(spec);
+        if (filter != null) {
+            spec = Specification
+                    .where(TransactionSpecifications.hasName(filter.name()))
+                    .and(TransactionSpecifications.hasDate(filter.dateString()));
+        }
+
+        Sort sort = Sort.by("createdAt").descending();
+        HistoryQueryHelperDto dto = new HistoryQueryHelperDto(limit, sort, spec);
+
+        return this.transactionRepo.findAllForUser(userId, dto);
     }
 
     /**

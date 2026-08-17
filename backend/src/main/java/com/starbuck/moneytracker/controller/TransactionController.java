@@ -93,8 +93,8 @@ public class TransactionController {
      */
     @GetMapping(path = "/transaction/last")
     public List<TransactionResponseDto> getLastTransactions() {
-        Transaction[] transactions = this.transactionService.getLastTransactions();
-        return this.transactionMapper.toDtoList(Arrays.asList(transactions));
+        List<Transaction> transactions = this.transactionService.getLastTransactions();
+        return this.transactionMapper.toDtoList(transactions);
     }
 
     /**
@@ -131,7 +131,7 @@ public class TransactionController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) LocalDate date) {
         final TransactionFilter filter = new TransactionFilter(name, date);
-        List<Transaction> transactions = this.transactionService.getHistory(filter);
+        List<Transaction> transactions = this.transactionService.getHistoryPageData(filter);
         return this.transactionMapper.toDtoList(transactions);
     }
 }
