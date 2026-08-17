@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.unit.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -21,15 +22,22 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.entity.TransactionDetailCategory;
+import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.testutils.AssertUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -39,6 +47,9 @@ class TransactionServiceTest {
 
     @Mock
     private TransactionDetailRepository transactionDetailRepo;
+
+    @Mock
+    private TransactionDetailCategoryRepository transactionDetailCategoryRepository;
 
     @Mock
     private CurrentUserUtil currentUser;
@@ -56,7 +67,7 @@ class TransactionServiceTest {
     void createTransactionSaveMock() {
         // ha a save meghívódik, akkor visszaadja a paraméterben kapott tranzakciót +
         // szimuláljuk egy id beírását
-        Mockito.when(transactionRepo.save(any(Transaction.class))).thenAnswer(invocation -> {
+        Mockito.lenient().when(transactionRepo.save(any(Transaction.class))).thenAnswer(invocation -> {
             Transaction invocatedTransaction = invocation.getArgument(0);
             if (invocatedTransaction.getId() == null) {
                 invocatedTransaction.setId(1L);
@@ -297,5 +308,317 @@ class TransactionServiceTest {
                 new BigDecimal("0.7"),
                 new BigDecimal("300"),
                 transaction);
+    }
+
+    /**
+     * Ha a detailhez kategória kapcsolat is meg van adva, azt is elmenti a
+     * createTransaction
+     */
+    @Test
+    void createTransaction_savesCategoryLinksForDetail() {
+        // GIVEN
+        Transaction transaction = new Transaction("categorizedTransaction", LocalDate.now(),
+                TransactionTypeEnum.INCOME, null);
+
+        Category category = new Category();
+        category.setId(5L);
+
+        TransactionDetail detail = new TransactionDetail("detailWithCategory", new BigDecimal(100));
+        TransactionDetailCategory categoryLink = new TransactionDetailCategory(category, detail);
+        detail.setCategoryLinks(List.of(categoryLink));
+
+        // WHEN
+        transactionService.createTransaction(transaction, List.of(detail));
+
+        // THEN
+        ArgumentCaptor<TransactionDetailCategory> captor = ArgumentCaptor.forClass(TransactionDetailCategory.class);
+        Mockito.verify(transactionDetailCategoryRepository).save(captor.capture());
+        assertEquals(5L, captor.getValue().getCategory().getId());
+    }
+
+    /**
+     * Income tranzakciónál negatív/nulla összegű detail hibát dob
+     */
+    @Test
+    void createTransaction_throwsWhenIncomeDetailPriceNotPositive() {
+        Transaction transaction = new Transaction("invalidIncome", LocalDate.now(), TransactionTypeEnum.INCOME,
+                null);
+        TransactionDetail detail = new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(-50));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.createTransaction(transaction, List.of(detail));
+        });
+    }
+
+    /**
+     * Outcome tranzakciónál pozitív/nulla összegű detail hibát dob
+     */
+    @Test
+    void createTransaction_throwsWhenOutcomeDetailPriceNotNegative() {
+        Transaction transaction = new Transaction("invalidOutcome", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+                null);
+        TransactionDetail detail = new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(50));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.createTransaction(transaction, List.of(detail));
+        });
+    }
+
+    /**
+     * Ha se weight, se unitPrice, vagy csak az egyik van megadva, hibát dob
+     */
+    @Test
+    void createTransaction_throwsWhenOnlyWeightIsSetWithoutUnitPrice() {
+        Transaction transaction = new Transaction("invalidWeighted", LocalDate.now(), TransactionTypeEnum.INCOME,
+                null);
+        TransactionDetail detail = new TransactionDetail();
+        detail.setName("badDetail");
+        detail.setPrice(new BigDecimal(100));
+        detail.setWeight(new BigDecimal("0.5"));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.createTransaction(transaction, List.of(detail));
+        });
+    }
+
+    /**
+     * Frissítéskor hibát dob, ha nincs egy detail sem megadva
+     */
+    @Test
+    void updateTransaction_throwsWhenNoDetailsProvided() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(100), 0);
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
+                .thenReturn(Optional.of(transactionInDB));
+
+        assertThrows(IllegalStateException.class, () -> {
+            transactionService.updateTransaction(1l, transactionInDB, List.of());
+        });
+    }
+
+    /**
+     * Ha a tranzakció nem található (más useré, vagy nem létezik), hibát dob
+     */
+    @Test
+    void updateTransaction_throwsWhenTransactionNotFoundForUser() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Transaction updatedTransaction = new Transaction(1l, "updated", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(100), 0);
+        TransactionDetail updatedDetail = new TransactionDetail("detail", new BigDecimal(100));
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transactionService.updateTransaction(1l, updatedTransaction, List.of(updatedDetail));
+        });
+    }
+
+    /**
+     * Összegzi a user összes pénzét
+     */
+    @Test
+    void sumAllMoney_returnsSumFromRepository() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.summarizeTotalMoneyForUser(1l)).thenReturn(new BigDecimal("1234.56"));
+
+        BigDecimal result = transactionService.sumAllMoney();
+
+        assertEquals(new BigDecimal("1234.56"), result);
+    }
+
+    /**
+     * Ha még nincs egy tranzakciója sem a usernek, nullát ad vissza null helyett
+     */
+    @Test
+    void sumAllMoney_returnsZeroWhenRepositoryReturnsNull() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.summarizeTotalMoneyForUser(1l)).thenReturn(null);
+
+        BigDecimal result = transactionService.sumAllMoney();
+
+        assertEquals(BigDecimal.ZERO, result);
+    }
+
+    /**
+     * Kiszámolja a havi kiadás összegét
+     */
+    @Test
+    void sumAllExpenseForMonth_returnsSumForOutcomeType() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.summarizeTransactionPricesForMonthAndType(1l, TransactionTypeEnum.OUTCOME))
+                .thenReturn(new BigDecimal("-300.00"));
+
+        BigDecimal result = transactionService.sumAllExpenseForMonth();
+
+        assertEquals(new BigDecimal("-300.00"), result);
+    }
+
+    /**
+     * Ha nincs kiadás a hónapban, nullát ad vissza null helyett
+     */
+    @Test
+    void sumAllExpenseForMonth_returnsZeroWhenRepositoryReturnsNull() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.summarizeTransactionPricesForMonthAndType(1l, TransactionTypeEnum.OUTCOME))
+                .thenReturn(null);
+
+        BigDecimal result = transactionService.sumAllExpenseForMonth();
+
+        assertEquals(BigDecimal.ZERO, result);
+    }
+
+    /**
+     * Kiszámolja a havi bevétel összegét
+     */
+    @Test
+    void sumAllIncomeForMonth_returnsSumForIncomeType() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.summarizeTransactionPricesForMonthAndType(1l, TransactionTypeEnum.INCOME))
+                .thenReturn(new BigDecimal("500.00"));
+
+        BigDecimal result = transactionService.sumAllIncomeForMonth();
+
+        assertEquals(new BigDecimal("500.00"), result);
+    }
+
+    /**
+     * Ha nincs bevétel a hónapban, nullát ad vissza null helyett
+     */
+    @Test
+    void sumAllIncomeForMonth_returnsZeroWhenRepositoryReturnsNull() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.summarizeTransactionPricesForMonthAndType(1l, TransactionTypeEnum.INCOME))
+                .thenReturn(null);
+
+        BigDecimal result = transactionService.sumAllIncomeForMonth();
+
+        assertEquals(BigDecimal.ZERO, result);
+    }
+
+    /**
+     * Visszaadja az adott id-jú tranzakciót, ha a userhez tartozik
+     */
+    @Test
+    void getTransactionByIdForActualUser_returnsTransactionWhenFound() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(100), 0);
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(1l, 1l))
+                .thenReturn(Optional.of(transactionInDB));
+
+        Transaction result = transactionService.getTransactionByIdForActualUser(1l);
+
+        assertEquals(transactionInDB, result);
+    }
+
+    /**
+     * Hibát dob, ha nem található a tranzakció a userhez
+     */
+    @Test
+    void getTransactionByIdForActualUser_throwsWhenNotFound() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(1l, 1l))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transactionService.getTransactionByIdForActualUser(1l);
+        });
+    }
+
+    /**
+     * Az utolsó 5 tranzakciót kéri le, szűrés nélkül
+     */
+    @Test
+    void getLastTransactions_queriesWithLimitOfFiveAndNoFilter() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(100), 0);
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelperDto.class)))
+                .thenReturn(List.of(transactionInDB));
+
+        List<Transaction> result = transactionService.getLastTransactions();
+
+        ArgumentCaptor<HistoryQueryHelperDto> captor = ArgumentCaptor.forClass(HistoryQueryHelperDto.class);
+        Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
+
+        assertEquals(List.of(transactionInDB), result);
+        assertEquals(5, captor.getValue().limit());
+    }
+
+    /**
+     * A tranzakciók oldalhoz 30-as limittel és a kapott szűréssel kéri le az
+     * adatokat
+     */
+    @Test
+    void getHistoryPageData_queriesWithLimitOfThirtyAndGivenFilter() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(100), 0);
+        TransactionFilter filter = new TransactionFilter("teszt", null);
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelperDto.class)))
+                .thenReturn(List.of(transactionInDB));
+
+        List<Transaction> result = transactionService.getHistoryPageData(filter);
+
+        ArgumentCaptor<HistoryQueryHelperDto> captor = ArgumentCaptor.forClass(HistoryQueryHelperDto.class);
+        Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
+
+        assertEquals(List.of(transactionInDB), result);
+        assertEquals(30, captor.getValue().limit());
+    }
+
+    /**
+     * Törlésnél ellenőrzi a jogosultságot és törli a tranzakciót
+     */
+    @Test
+    void deleteTransaction_deletesTransactionAfterOwnershipCheck() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(100), 0);
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(1l, 1l))
+                .thenReturn(Optional.of(transactionInDB));
+
+        transactionService.deleteTransaction(1l);
+
+        Mockito.verify(transactionRepo).delete(transactionInDB);
+    }
+
+    /**
+     * Törlésnél hibát dob, ha a tranzakció nem található/nem a userhez tartozik
+     */
+    @Test
+    void deleteTransaction_throwsWhenTransactionNotFound() {
+        User userInDB = new User(1l, "alma", "pass", "email");
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(1l, 1l))
+                .thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transactionService.deleteTransaction(1l);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
     }
 }
