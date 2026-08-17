@@ -235,30 +235,32 @@ public class TransactionService {
      */
     private List<Transaction> getHistory(TransactionFilter filter, int limit) {
         Long userId = currentUser.getUser().getId();
-        Specification<Transaction> spec = null;
+        
+        Sort sort = Sort.by("createdAt").descending();
 
+        Specification<Transaction> filterConditions = null;
         if (filter != null) {
-            spec = Specification
+            filterConditions = Specification
                     .where(TransactionSpecifications.hasName(filter.name()))
                     .and(TransactionSpecifications.hasDate(filter.dateString()));
         }
 
-        Sort sort = Sort.by("createdAt").descending();
-        HistoryQueryHelperDto dto = new HistoryQueryHelperDto(limit, sort, spec);
+        HistoryQueryHelperDto dto = new HistoryQueryHelperDto(limit, sort, filterConditions);
 
         return this.transactionRepo.findAllForUser(userId, dto);
     }
 
     /**
-     * Törli a tranzakciót (soft delete)
-     * JPA-ban szűrve van, hogy törölt-e és olyankor nem adja vissza (entity-ben van
-     * beállítva)
+     * Törli a tranzakciót (soft delete). 
      * 
      * @param transactionId
      */
     public void deleteTransaction(long transactionId) {
-        // jogosultságvizsgálat is
-        Transaction transaction = this.getTransactionByIdForActualUser(transactionId);
+        // getTransactionByIdForActualUser itt nem használható, mert feleslegesen tölti be a detailokat és ez törléskor bizonyos esetekben problémát okoz
+        Long userId = currentUser.getUser().getId();
+        Transaction transaction = this.transactionRepo.findById(transactionId)
+                .filter(t -> t.getUser().getId().equals(userId))
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
         this.transactionRepo.delete(transaction);
     }
 }
