@@ -115,19 +115,18 @@ public class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("createCategory - Engedi felvenni ugyanazt a nevű kategóriát, ha másik usernél van csak")
+    @DisplayName("createCategory - Nem engedi felvenni ugyanazt a kategóriát, ha már van közösben olyan nevű")
     void testCreateCategoryCategoryExistsAnotherUser_throws() {
         // Given
         var savedCategoryCommon = categoryRepository.save(new Category("tesztCategory", null));
 
         var category = new Category();
         category.setName("tesztCategory");
-        var savedCategory = categoryService.createCategory(category);
 
-        assertEquals("tesztCategory", savedCategory.getName());
+        assertThrows(NonUniqueObjectException.class, () -> {
+            categoryService.createCategory(category);
+        });
 
-        // then
-        categoryRepository.delete(savedCategory);
         categoryRepository.delete(savedCategoryCommon);
     }
 
