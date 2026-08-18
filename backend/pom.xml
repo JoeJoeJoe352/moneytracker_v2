@@ -74,6 +74,12 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- End2End tesztekhez -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-restclient</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- Jpa az entity és db kezeléshez -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
