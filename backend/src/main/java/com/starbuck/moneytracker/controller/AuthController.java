@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.starbuck.moneytracker.dto.IsEmailExistsDto;
+import com.starbuck.moneytracker.dto.IsUsernameExistsDto;
 import com.starbuck.moneytracker.dto.LoginRequest;
 import com.starbuck.moneytracker.dto.RegisterRequest;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
@@ -22,7 +24,6 @@ import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 
 @RestController
 public class AuthController {
@@ -40,7 +41,8 @@ public class AuthController {
     private CookieUtil cookieUtil;
 
     /**
-     * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba esetén 400-as választ ad vissza a validációs hibák miatt.
+     * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba
+     * esetén 400-as választ ad vissza a validációs hibák miatt.
      * 
      * @param RegisterRequest user
      */
@@ -49,7 +51,7 @@ public class AuthController {
     public void authRegisterUser(@Valid @RequestBody RegisterRequest user) {
         User newUser = new User();
         newUser.setUsername(user.username());
-        
+
         newUser.setEmail(user.email());
         userService.createUser(newUser, user.password());
     }
@@ -59,33 +61,32 @@ public class AuthController {
      * 
      * @param username
      * @param password
-     * @return ['message': 'Login successful'] + JWT token egy HttpOnly cookie-ban
+     * @return üres body + JWT token egy HttpOnly cookie-ban
      */
     @PostMapping(path = "/auth/login")
-    public ResponseEntity<Map<String,String>> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             String jwtToken = userService.login(loginRequest.username(), loginRequest.password());
             ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
             HttpHeaders headers = new HttpHeaders();
             headers.add("Set-Cookie", cookie.toString());
-            return new ResponseEntity<Map<String,String>>(Map.of("message", "Login successful"), headers, HttpStatus.OK);
+            return ResponseEntity.ok().headers(headers).build();
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<Map<String,String>>(Map.of("message", "Invalid username or password"), HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     /**
      * Felhasználó kiejlentkeztetése (jwt token törlése a böngészőből)
      * 
-     * @param HttpServletResponse response
-     * @return ['message': 'Logged out'] + JWT token egy lejárt HttpOnly cookie-ban, ami a böngészőből törli a sütit
+     * @return ResponseEntity üres body, de tartalmaz headerben egy expiration cookie-t
      */
     @PostMapping(path = "/auth/logout")
-    public ResponseEntity<Map<String,String>> logoutUser(HttpServletResponse response) {
+    public ResponseEntity<Void> logoutUser() {
         ResponseCookie expiredCookie = cookieUtil.getJwtSessionDestroyCookie();
-
-        response.setHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
-        return ResponseEntity.ok(Map.of("message", "Logged out"));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Set-Cookie", expiredCookie.toString());
+        return ResponseEntity.ok().headers(headers).build();
     }
 
     /**
@@ -95,8 +96,8 @@ public class AuthController {
      * @return Boolean
      */
     @PostMapping(path = "/auth/isUsernameExists")
-    public boolean isUsernameExists(@RequestBody @NotBlank Map<String, String> body) {
-        return userService.isUsernameExists(body.get("username"));
+    public boolean isUsernameExists(@RequestBody IsUsernameExistsDto dto) {
+        return userService.isUsernameExists(dto.username());
     }
 
     /**
@@ -106,14 +107,16 @@ public class AuthController {
      * @return Boolean
      */
     @PostMapping(path = "/auth/isEmailExists")
-    public boolean isEmailExists(@RequestBody @NotBlank Map<String, String> body) {
-        return userService.isEmailExists(body.get("email"));
+    public boolean isEmailExists(@RequestBody IsEmailExistsDto dto) {
+        return userService.isEmailExists(dto.email());
     }
 
     /**
-     * User alapadatokkal tér vissza. Gyakorlatilag a bejelentkezés tényét dönti el
-     * Ha be van loginolva a user, akkor visszaadja az adatokat, egyébként el sem éri ezt a végpontot
-     * Így pl.: frontend újrabetöltéskor azonnal le tudja ellenőrizni a frontend, hogy be vagyunk-e jelentkezve
+     * User alapadatokkal tér vissza, a bejelentkezés tényét dönti el.
+     * Ha be van loginolva a user, akkor visszaadja az adatokat, egyébként el sem
+     * éri ezt a végpontot
+     * Így pl.: frontend újrabetöltéskor azonnal le tudja ellenőrizni a frontend,
+     * hogy be vagyunk-e jelentkezve
      * 
      * @return
      */

@@ -68,14 +68,4 @@ public class UserService {
     public Boolean isEmailExists(String email) {
         return userRepository.existsByEmail(email);
     }
-
-    /**
-     * Usernév alapján megszerzi a teljes user modellt
-     * 
-     * @param username
-     * @return
-     */
-    public User getUserFromName(String username) {
-        return this.userRepository.findByUsername(username);
-    }
 }

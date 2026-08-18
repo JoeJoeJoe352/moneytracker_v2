@@ -1,4 +1,4 @@
-package com.starbuck.moneytracker.service;
+package com.starbuck.moneytracker.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -25,6 +24,7 @@ import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
+import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
@@ -32,17 +32,16 @@ import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.EntityNotFoundException;
 
 @SpringBootTest
 @ActiveProfiles("test")
 // csak így használható a beforeall, mert egyébként statikusan futna és nem
 // elérhető az injektált dolgok
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 class TransactionServiceIntegrationTest {
 
     @Autowired
@@ -241,6 +240,202 @@ class TransactionServiceIntegrationTest {
         // rollback miatt nincs egy sem a db-ben
         assertEquals(0, transactionRepo.count());
         assertEquals(0, transactionDetailRepo.count());
+    }
+
+    /**
+     * A user aktív tranzakcióinak összegét adja vissza
+     */
+    @Test
+    void sumAllMoney_returnsSumOfActiveTransactions() {
+        // GIVEN
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        Transaction income = this.persistSimpleTransaction("income", TransactionTypeEnum.INCOME,
+                new BigDecimal(500), LocalDate.now());
+        Transaction expense = this.persistSimpleTransaction("expense", TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-200), LocalDate.now());
+
+        // WHEN
+        BigDecimal result = transactionService.sumAllMoney();
+
+        // THEN
+        assertEquals(new BigDecimal("300.00"), result);
+
+        this.deleteData(income);
+        this.deleteData(expense);
+    }
+
+    /**
+     * Ha nincs egy tranzakciója sem a usernek, nullát ad vissza
+     */
+    @Test
+    void sumAllMoney_returnsZeroWhenNoTransactions() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        BigDecimal result = transactionService.sumAllMoney();
+
+        assertEquals(BigDecimal.ZERO, result);
+    }
+
+    /**
+     * A jelenlegi hónap kiadásainak összegét adja vissza, a más hónapbelieket
+     * és a bevételeket figyelmen kívül hagyva
+     */
+    @Test
+    void sumAllExpenseForMonth_returnsOnlyCurrentMonthExpenses() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth", TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-150), LocalDate.now());
+        Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth", TransactionTypeEnum.INCOME,
+                new BigDecimal(150), LocalDate.now());
+        Transaction expenseLastYear = this.persistSimpleTransaction("expenseLastYear", TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-999), LocalDate.now().minusYears(1));
+
+        BigDecimal result = transactionService.sumAllExpenseForMonth();
+
+        assertEquals(new BigDecimal("-150.00"), result);
+
+        this.deleteData(expenseThisMonth);
+        this.deleteData(incomeThisMonth);
+        this.deleteData(expenseLastYear);
+    }
+
+    /**
+     * A jelenlegi hónap bevételeinek összegét adja vissza, a más hónapbelieket
+     * és a kiadásokat figyelmen kívül hagyva
+     */
+    @Test
+    void sumAllIncomeForMonth_returnsOnlyCurrentMonthIncome() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth", TransactionTypeEnum.INCOME,
+                new BigDecimal(250), LocalDate.now());
+        Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth", TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-250), LocalDate.now());
+        Transaction incomeLastYear = this.persistSimpleTransaction("incomeLastYear", TransactionTypeEnum.INCOME,
+                new BigDecimal(999), LocalDate.now().minusYears(1));
+
+        BigDecimal result = transactionService.sumAllIncomeForMonth();
+
+        assertEquals(new BigDecimal("250.00"), result);
+
+        this.deleteData(incomeThisMonth);
+        this.deleteData(expenseThisMonth);
+        this.deleteData(incomeLastYear);
+    }
+
+    /**
+     * Visszaadja a tranzakciót a részleteivel együtt, ha a useré
+     */
+    @Test
+    void getTransactionByIdForActualUser_returnsTransactionWithDetails() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        Transaction transaction = this.persistSimpleTransaction("lookup", TransactionTypeEnum.INCOME,
+                new BigDecimal(100), LocalDate.now());
+
+        Transaction result = transactionService.getTransactionByIdForActualUser(transaction.getId());
+
+        assertEquals(transaction.getId(), result.getId());
+        assertEquals(1, result.getTransactionDetails().size());
+
+        this.deleteData(transaction);
+    }
+
+    /**
+     * Hibát dob, ha a tranzakció nem létezik
+     */
+    @Test
+    void getTransactionByIdForActualUser_throwsWhenNotFound() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transactionService.getTransactionByIdForActualUser(-1L);
+        });
+    }
+
+    /**
+     * Legfeljebb az utolsó 5 tranzakciót adja vissza, id szerint csökkenő
+     * sorrendben
+     */
+    @Test
+    void getLastTransactions_returnsAtMostFiveNewestTransactions() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        List<Transaction> created = new java.util.ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            created.add(this.persistSimpleTransaction("last" + i, TransactionTypeEnum.INCOME, new BigDecimal(10),
+                    LocalDate.now()));
+        }
+
+        List<Transaction> result = transactionService.getLastTransactions();
+
+        assertEquals(5, result.size());
+
+        created.forEach(this::deleteData);
+    }
+
+    /**
+     * A history oldalon a szűrésnek megfelelő tranzakciókat adja vissza
+     */
+    @Test
+    void getHistoryPageData_filtersTransactionsByName() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        var now = LocalDate.now();
+
+        Transaction matching = this.persistSimpleTransaction("groceries shopping", TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-10), now);
+        Transaction nonMatching = this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME,
+                new BigDecimal(1000), now);
+
+        List<Transaction> result = transactionService.getHistoryPageData(new TransactionFilter("groceries", now));
+
+        assertEquals(1, result.size());
+        assertEquals(matching.getId(), result.get(0).getId());
+
+        this.deleteData(matching);
+        this.deleteData(nonMatching);
+    }
+
+    /**
+     * Törléskor a tranzakció soft delete-tel törlődik, így a normál
+     * lekérdezésekben már nem jelenik meg
+     */
+    @Test
+    void deleteTransaction_softDeletesTransactionForOwner() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        Transaction transaction = this.persistSimpleTransaction("toDelete", TransactionTypeEnum.INCOME,
+                new BigDecimal(100), LocalDate.now());
+
+        transactionService.deleteTransaction(transaction.getId());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transactionService.getTransactionByIdForActualUser(transaction.getId());
+        });
+        assertEquals(0, transactionRepo.count());
+
+        this.deleteData(transaction);
+    }
+
+    /**
+     * Segédfüggvény: egyszerű, egy detailos tranzakció létrehozásához és
+     * elmentéséhez
+     */
+    private Transaction persistSimpleTransaction(String name, TransactionTypeEnum type, BigDecimal price,
+            LocalDate date) {
+        Transaction transaction = new Transaction();
+        transaction.setName(name);
+        transaction.setTransactionType(type);
+        transaction.setTransactionDate(date);
+        transaction.setUser(this.user);
+
+        TransactionDetail detail = new TransactionDetail();
+        detail.setPrice(price);
+
+        return transactionService.createTransaction(transaction, List.of(detail));
     }
 
     private void deleteData(Transaction transaction) {

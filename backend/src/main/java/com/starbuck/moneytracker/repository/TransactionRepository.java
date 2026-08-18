@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,8 +13,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 /**
  * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az
@@ -21,6 +25,25 @@ import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 public interface TransactionRepository extends
         JpaRepository<Transaction, Long>,
         JpaSpecificationExecutor<Transaction> {
+
+    /**
+     * User számára kilistázza a tranzakcióit
+     * 
+     * @param userId
+     * @param specifications
+     * @return
+     */
+    default List<Transaction> findAllForUser(Long userId, HistoryQueryHelperDto specifications) {
+        Specification<Transaction> finalSpec = Specification
+                .where(TransactionSpecifications.hasUserId(userId));
+
+        if (specifications.spec() != null) {
+            finalSpec = finalSpec.and(specifications.spec());
+        }
+
+        return findAll(finalSpec, PageRequest.of(0, specifications.limit(), specifications.sort())).getContent();
+    }
+
     /**
      * Visszatér a user összes pénzével.
      * Lehet null, hogyha még nincs neki tranzakciója
@@ -67,7 +90,7 @@ public interface TransactionRepository extends
      * Lekéri az összes tranzakciót a tranzakció részletekkel együtt
      * JOIN FETCH, mert alapból lazy a tranzakció részletek betöltése, így a
      * tranzakció részletek nem lennének elérhetőek
-     * todo ha sok az elem, akkor gond lehet a sok lekérésből (elfogy a mem)
+     * TODO ha sok az elem, akkor gond lehet a sok lekérésből (elfogy a mem)
      * 
      * @return
      */
