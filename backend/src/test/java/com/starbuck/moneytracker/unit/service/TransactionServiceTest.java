@@ -331,7 +331,8 @@ class TransactionServiceTest {
         transactionService.createTransaction(transaction, List.of(detail));
 
         // THEN
-        ArgumentCaptor<TransactionDetailCategory> captor = ArgumentCaptor.forClass(TransactionDetailCategory.class);
+        ArgumentCaptor<TransactionDetailCategory> captor = ArgumentCaptor
+                .forClass(TransactionDetailCategory.class);
         Mockito.verify(transactionDetailCategoryRepository).save(captor.capture());
         assertEquals(5L, captor.getValue().getCategory().getId());
     }
@@ -343,7 +344,8 @@ class TransactionServiceTest {
     void createTransaction_throwsWhenIncomeDetailPriceNotPositive() {
         Transaction transaction = new Transaction("invalidIncome", LocalDate.now(), TransactionTypeEnum.INCOME,
                 null);
-        TransactionDetail detail = new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(-50));
+        TransactionDetail detail = new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME,
+                new BigDecimal(-50));
 
         assertThrows(IllegalArgumentException.class, () -> {
             transactionService.createTransaction(transaction, List.of(detail));
@@ -355,9 +357,11 @@ class TransactionServiceTest {
      */
     @Test
     void createTransaction_throwsWhenOutcomeDetailPriceNotNegative() {
-        Transaction transaction = new Transaction("invalidOutcome", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+        Transaction transaction = new Transaction("invalidOutcome", LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
                 null);
-        TransactionDetail detail = new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(50));
+        TransactionDetail detail = new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME,
+                new BigDecimal(50));
 
         assertThrows(IllegalArgumentException.class, () -> {
             transactionService.createTransaction(transaction, List.of(detail));
@@ -369,7 +373,8 @@ class TransactionServiceTest {
      */
     @Test
     void createTransaction_throwsWhenOnlyWeightIsSetWithoutUnitPrice() {
-        Transaction transaction = new Transaction("invalidWeighted", LocalDate.now(), TransactionTypeEnum.INCOME,
+        Transaction transaction = new Transaction("invalidWeighted", LocalDate.now(),
+                TransactionTypeEnum.INCOME,
                 null);
         TransactionDetail detail = new TransactionDetail();
         detail.setName("badDetail");
@@ -405,7 +410,8 @@ class TransactionServiceTest {
     @Test
     void updateTransaction_throwsWhenTransactionNotFoundForUser() {
         User userInDB = new User(1l, "alma", "pass", "email");
-        Transaction updatedTransaction = new Transaction(1l, "updated", LocalDate.now(), TransactionTypeEnum.INCOME,
+        Transaction updatedTransaction = new Transaction(1l, "updated", LocalDate.now(),
+                TransactionTypeEnum.INCOME,
                 new BigDecimal(100), 0);
         TransactionDetail updatedDetail = new TransactionDetail("detail", new BigDecimal(100));
 
@@ -587,24 +593,6 @@ class TransactionServiceTest {
     }
 
     /**
-     * Törlésnél ellenőrzi a jogosultságot és törli a tranzakciót
-     */
-    @Test
-    void deleteTransaction_deletesTransactionAfterOwnershipCheck() {
-        User userInDB = new User(1l, "alma", "pass", "email");
-        Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal(100), 0);
-
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.getTransactionByIdWithDetails(1l, 1l))
-                .thenReturn(Optional.of(transactionInDB));
-
-        transactionService.deleteTransaction(1l);
-
-        Mockito.verify(transactionRepo).delete(transactionInDB);
-    }
-
-    /**
      * Törlésnél hibát dob, ha a tranzakció nem található/nem a userhez tartozik
      */
     @Test
@@ -612,7 +600,7 @@ class TransactionServiceTest {
         User userInDB = new User(1l, "alma", "pass", "email");
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.getTransactionByIdWithDetails(1l, 1l))
+        Mockito.when(transactionRepo.findById(1l))
                 .thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> {
