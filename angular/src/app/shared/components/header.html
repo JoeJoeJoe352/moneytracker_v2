@@ -11,22 +11,6 @@
                     The Moneytracker
                 </div>
             </a>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" routerLink="/">{{"header.dashboard" | translate}}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" routerLink="/welcome">{{"header.welcome" | translate}}</a>
-                    </li>
-                    @if (userData.isUserLogged()) {
-                        <li class="nav-item">
-                            <a class="nav-link" routerLink="/transactions">{{"header.transactions" | translate}}</a>
-                        </li>
-                    }
-                </ul>
-            </div>
-
             <button class="navbar-toggler" type="button" (click)="toggleMenu()">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -35,6 +19,25 @@
                 id="navbarSupportedContent"
                 [class.show]="menuOpen"
             >
+                <ul class="navbar-nav">
+                    @for (linkItem of publicLinkList; track $index) {
+                        <li class="nav-item">
+                            <a class="nav-link" [routerLink]="linkItem.url">{{
+                                linkItem.langKey | translate
+                            }}</a>
+                        </li>
+                    }
+
+                    @if (userData.isUserLogged()) {
+                        @for (linkItem of authenticatedLinkList; track $index) {
+                            <li class="nav-item">
+                                <a class="nav-link" [routerLink]="linkItem.url">{{
+                                    linkItem.langKey | translate
+                                }}</a>
+                            </li>
+                        }
+                    }
+                </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     @if (userData.isUserLogged()) {
                         <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
