@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.starbuck.moneytracker.dto.IsEmailExistsDto;
 import com.starbuck.moneytracker.dto.IsUsernameExistsDto;
 import com.starbuck.moneytracker.dto.LoginRequest;
-import com.starbuck.moneytracker.dto.RegisterRequest;
+import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.UserService;
@@ -41,11 +41,11 @@ public class AuthController {
      * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba
      * esetén 400-as választ ad vissza a validációs hibák miatt.
      * 
-     * @param RegisterRequest user
+     * @param RegisterRequestDto user
      */
     @PostMapping(path = "/auth/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void authRegisterUser(@Valid @RequestBody RegisterRequest user) {
+    public void authRegisterUser(@Valid @RequestBody RegisterRequestDto user) {
         User newUser = new User();
         newUser.setUsername(user.username());
 

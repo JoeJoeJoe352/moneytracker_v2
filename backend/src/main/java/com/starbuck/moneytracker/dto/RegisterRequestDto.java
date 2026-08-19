@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotBlank;
  * Felhasználó adatátviteli objektum.
  */
 @PasswordMatches
-public record RegisterRequest(
+public record RegisterRequestDto(
     /**
      * Felhasználónév
      */

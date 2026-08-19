@@ -26,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.starbuck.moneytracker.dto.LoginRequest;
-import com.starbuck.moneytracker.dto.RegisterRequest;
+import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
@@ -64,7 +64,7 @@ class TransactionCreateE2ETest {
      */
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequest registerRequest = new RegisterRequest("e2eCreateUser", "password123", "password123",
+        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eCreateUser", "password123", "password123",
                 "e2ecreate@email.com");
         ResponseEntity<Void> registerResponse = restTemplate.postForEntity("/auth/register", registerRequest,
                 Void.class);

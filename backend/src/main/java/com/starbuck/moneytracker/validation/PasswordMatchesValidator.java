@@ -1,14 +1,14 @@
 package com.starbuck.moneytracker.validation;
 
-import com.starbuck.moneytracker.dto.RegisterRequest;
+import com.starbuck.moneytracker.dto.RegisterRequestDto;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, RegisterRequest>{
+public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, RegisterRequestDto>{
 
     @Override
-    public boolean isValid(RegisterRequest dto, ConstraintValidatorContext context) {
+    public boolean isValid(RegisterRequestDto dto, ConstraintValidatorContext context) {
         if (dto.password() != null && dto.passwordAgain() != null && dto.password().equals(dto.passwordAgain())) {
             return true;
         }

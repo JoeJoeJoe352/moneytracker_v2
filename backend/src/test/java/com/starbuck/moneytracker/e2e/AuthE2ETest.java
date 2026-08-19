@@ -27,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.starbuck.moneytracker.dto.LoginRequest;
-import com.starbuck.moneytracker.dto.RegisterRequest;
+import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
@@ -63,7 +63,7 @@ class AuthE2ETest {
      */
     private ResponseEntity<Void> register(String username, String password, String email) {
         createdUsernames.add(username);
-        RegisterRequest request = new RegisterRequest(username, password, password, email);
+        RegisterRequestDto request = new RegisterRequestDto(username, password, password, email);
         return restTemplate.postForEntity("/auth/register", request, Void.class);
     }
 
@@ -113,7 +113,7 @@ class AuthE2ETest {
     @Test
     void register_returnsBadRequestWhenPasswordsDoNotMatch() {
         createdUsernames.add("e2eMismatchUser");
-        RegisterRequest request = new RegisterRequest("e2eMismatchUser", "password123", "differentPassword",
+        RegisterRequestDto request = new RegisterRequestDto("e2eMismatchUser", "password123", "differentPassword",
                 "e2emismatch@email.com");
 
         ResponseEntity<Void> response = restTemplate.postForEntity("/auth/register", request, Void.class);
@@ -131,7 +131,7 @@ class AuthE2ETest {
     void register_returnsBadRequestWhenUsernameAlreadyTaken() {
         register("e2eDuplicateUser", "password123", "first@email.com");
 
-        RegisterRequest duplicateRequest = new RegisterRequest("e2eDuplicateUser", "password123", "password123",
+        RegisterRequestDto duplicateRequest = new RegisterRequestDto("e2eDuplicateUser", "password123", "password123",
                 "second@email.com");
         ResponseEntity<Void> response = restTemplate.postForEntity("/auth/register", duplicateRequest, Void.class);
 
