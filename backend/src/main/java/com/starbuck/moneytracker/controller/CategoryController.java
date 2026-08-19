@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.dto.CategoryCreateDto;
 import com.starbuck.moneytracker.dto.CategoryResponseDto;
-import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.mapper.CategoryMapper;
 import com.starbuck.moneytracker.service.CategoryService;
 

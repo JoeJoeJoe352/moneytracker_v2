@@ -1,7 +1,5 @@
 package com.starbuck.moneytracker.controller;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,7 +20,6 @@ import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.util.CookieUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
