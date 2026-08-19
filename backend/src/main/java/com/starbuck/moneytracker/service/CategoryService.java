@@ -6,7 +6,9 @@ import org.hibernate.NonUniqueObjectException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
+import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
@@ -22,22 +24,24 @@ public class CategoryService {
     /**
      * Létrehoz egy új kategóriát a user számára
      * 
-     * @param category
+     * @param command
      * @return
      */
-    public Category createCategory(Category category) {
-        if (category == null || category.getName() == null) {
+    public Category createCategory(CategoryCreateCommand command) {
+        if (command == null) {
             throw new IllegalArgumentException("Category is null");
         }
 
-        if (this.categoryRepository.isUserHaveThisCategoryName(category.getName(), currentUser.getUser().getId())) {
+        User user = currentUser.getUser();
+
+        if (this.categoryRepository.isUserHaveThisCategoryName(command.getName(), user.getId())) {
             throw new NonUniqueObjectException("Category with this name already exists for the user", null,
-                    category.getName());
+                    command.getName());
         }
 
-        category.setUser(currentUser.getUser());
+        Category categoryModel = new Category(command.getName(), user);
 
-        return this.categoryRepository.save(category);
+        return this.categoryRepository.save(categoryModel);
     }
 
     /**

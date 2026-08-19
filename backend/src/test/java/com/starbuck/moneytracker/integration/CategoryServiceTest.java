@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.CategoryRepository;
@@ -74,20 +75,10 @@ public class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("createCategory - Hiányzó név esetén exception")
-    void testCreateCategoryMissingData_throws() {
-        var category = new Category();
-        assertThrows(IllegalArgumentException.class, () -> {
-            categoryService.createCategory(category);
-        });
-    }
-
-    @Test
     @DisplayName("createCategory - Sikeres létrehozás")
     void testCreateCategory_success() {
-        var category = new Category();
-        category.setName("tesztCategory");
-        var savedCategory = categoryService.createCategory(category);
+        var categoryCommand = new CategoryCreateCommand("tesztCategory");
+        var savedCategory = categoryService.createCategory(categoryCommand);
 
         assertEquals("tesztCategory", savedCategory.getName());
         assertEquals(this.user.getUsername(), savedCategory.getUser().getUsername());
@@ -99,15 +90,14 @@ public class CategoryServiceTest {
     @DisplayName("createCategory - Nem unique kategória a usernél")
     void testCreateCategoryUserHasCategoryWithSameName_throws() {
         // Given
-        var category = new Category();
-        category.setName("tesztCategory");
-        var savedCategory = categoryService.createCategory(category);
+        var categoryCommand = new CategoryCreateCommand("tesztCategory");
+        var savedCategory = categoryService.createCategory(categoryCommand);
 
         assertEquals("tesztCategory", savedCategory.getName());
 
         // when
         assertThrows(NonUniqueObjectException.class, () -> {
-            categoryService.createCategory(category);
+            categoryService.createCategory(categoryCommand);
         });
 
         // then
@@ -118,15 +108,17 @@ public class CategoryServiceTest {
     @DisplayName("createCategory - Nem engedi felvenni ugyanazt a kategóriát, ha már van közösben olyan nevű")
     void testCreateCategoryCategoryExistsAnotherUser_throws() {
         // Given
+        // közvetlenül repo-ba mentjük, mert a service-ben muszáj lenne usernek lennie
         var savedCategoryCommon = categoryRepository.save(new Category("tesztCategory", null));
 
-        var category = new Category();
-        category.setName("tesztCategory");
+        var categoryCommand = new CategoryCreateCommand("tesztCategory");
 
+        // WHEN
         assertThrows(NonUniqueObjectException.class, () -> {
-            categoryService.createCategory(category);
+            categoryService.createCategory(categoryCommand);
         });
 
+        // THEN
         categoryRepository.delete(savedCategoryCommon);
     }
 
@@ -137,9 +129,9 @@ public class CategoryServiceTest {
         User user = new User("testuser2", "password2", "teszt2@email.com");
         var savedUser2 = userService.createUser(user, "password2");
 
-        var ownCategory = new Category();
-        ownCategory.setName("ownCategory");
-        var savedCategoryOwn = categoryService.createCategory(ownCategory);
+        var categoryCommand = new CategoryCreateCommand("ownCategory");
+
+        var savedCategoryOwn = categoryService.createCategory(categoryCommand);
 
         var savedCategoryNotOwned = categoryRepository.save(new Category("AnotherUserCategory", savedUser2));
 
