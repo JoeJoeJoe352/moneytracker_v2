@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.dto.IsEmailExistsDto;
 import com.starbuck.moneytracker.dto.IsUsernameExistsDto;
 import com.starbuck.moneytracker.dto.LoginRequest;
@@ -46,11 +47,9 @@ public class AuthController {
     @PostMapping(path = "/auth/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void authRegisterUser(@Valid @RequestBody RegisterRequestDto user) {
-        User newUser = new User();
-        newUser.setUsername(user.username());
 
-        newUser.setEmail(user.email());
-        userService.createUser(newUser, user.password());
+        UserCreateCommand command = new UserCreateCommand(user.username(), user.email(), user.password());
+        userService.createUser(command);
     }
 
     /**

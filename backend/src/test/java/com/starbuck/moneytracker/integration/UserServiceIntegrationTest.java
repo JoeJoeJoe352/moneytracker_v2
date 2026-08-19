@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.service.JwtService;
@@ -38,9 +39,8 @@ class UserServiceIntegrationTest {
      */
     @Test
     void createUser_persistsEncodedPasswordAndUuid() {
-        User user = new User("integrationUser", null, "integration@email.com");
-
-        User saved = userService.createUser(user, "password");
+        UserCreateCommand command = new UserCreateCommand("integrationUser", "integration@email.com", "teszt");
+        User saved = userService.createUser(command);
 
         assertNotNull(saved.getId());
         assertNotNull(saved.getUuid());
@@ -55,12 +55,14 @@ class UserServiceIntegrationTest {
      */
     @Test
     void createUser_throwsWhenEmailAlreadyExists() {
-        User existing = userService.createUser(new User("emailOwner", null, "duplicate@email.com"), "password");
+        UserCreateCommand command = new UserCreateCommand("emailOwner", "duplicate@email.com", "teszt");
 
-        User newUser = new User("brandNewUsername", null, "duplicate@email.com");
+        User existing = userService.createUser(command);
 
+        UserCreateCommand anotherUserCommand = new UserCreateCommand("brandNewUsername", "duplicate@email.com",
+                "teszt");
         assertThrows(IllegalArgumentException.class, () -> {
-            userService.createUser(newUser, "password");
+            userService.createUser(anotherUserCommand);
         });
 
         assertFalse(userRepository.existsByUsername("brandNewUsername"));
@@ -74,13 +76,12 @@ class UserServiceIntegrationTest {
      */
     @Test
     void createUser_throwsWhenUsernameAlreadyExists() {
-        User existing = userService.createUser(new User("duplicateUsername", null, "usernameOwner@email.com"),
-                "password");
+        UserCreateCommand command = new UserCreateCommand("duplicateUsername", "usernameOwner@email.com", "teszt");
+        User existing = userService.createUser(command);
 
-        User newUser = new User("duplicateUsername", null, "brandnew@email.com");
-
+        UserCreateCommand newUserCommand = new UserCreateCommand("duplicateUsername", "brandnew@email.com", "teszt");
         assertThrows(IllegalArgumentException.class, () -> {
-            userService.createUser(newUser, "password");
+            userService.createUser(newUserCommand);
         });
 
         assertFalse(userRepository.existsByEmail("brandnew@email.com"));
@@ -94,7 +95,8 @@ class UserServiceIntegrationTest {
      */
     @Test
     void login_returnsValidTokenForCorrectCredentials() {
-        User saved = userService.createUser(new User("loginUser", null, "login@email.com"), "password");
+        UserCreateCommand command = new UserCreateCommand("loginUser", "login@email.com", "password");
+        User saved = userService.createUser(command);
 
         String token = userService.login("loginUser", "password");
 
@@ -110,7 +112,8 @@ class UserServiceIntegrationTest {
      */
     @Test
     void login_throwsForWrongPassword() {
-        User saved = userService.createUser(new User("wrongPassUser", null, "wrongpass@email.com"), "password");
+        UserCreateCommand command = new UserCreateCommand("wrongPassUser", "wrongpass@email.com", "password");
+        User saved = userService.createUser(command);
 
         assertThrows(IllegalArgumentException.class, () -> {
             userService.login("wrongPassUser", "notThePassword");
@@ -136,8 +139,9 @@ class UserServiceIntegrationTest {
     void isUsernameExists_reflectsPersistedState() {
         assertFalse(userService.isUsernameExists("notYetRegisteredUsername"));
 
-        User saved = userService.createUser(new User("notYetRegisteredUsername", null, "checkusername@email.com"),
+        UserCreateCommand command = new UserCreateCommand("notYetRegisteredUsername", "checkusername@email.com",
                 "password");
+        User saved = userService.createUser(command);
 
         assertTrue(userService.isUsernameExists("notYetRegisteredUsername"));
 
@@ -151,8 +155,9 @@ class UserServiceIntegrationTest {
     void isEmailExists_reflectsPersistedState() {
         assertFalse(userService.isEmailExists("notyetregistered@email.com"));
 
-        User saved = userService.createUser(new User("checkEmailUser", null, "notyetregistered@email.com"),
+        UserCreateCommand command = new UserCreateCommand("checkEmailUser", "notyetregistered@email.com",
                 "password");
+        User saved = userService.createUser(command);
 
         assertTrue(userService.isEmailExists("notyetregistered@email.com"));
 

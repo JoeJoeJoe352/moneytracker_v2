@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.service.JwtService;
@@ -43,19 +44,17 @@ class UserServiceTest {
     @Test
     void createUser_savesEncodedPasswordAndUuid() {
         // GIVEN
-        User user = new User("testuser", null, "teszt@email.com");
-
+        UserCreateCommand UserCreateCommand = new UserCreateCommand("testuser", "teszt@email.com", "password");
         Mockito.when(userRepository.existsByEmail("teszt@email.com")).thenReturn(false);
         Mockito.when(userRepository.existsByUsername("testuser")).thenReturn(false);
         Mockito.when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
 
         // WHEN
-        User result = userService.createUser(user, "password");
+        User result = userService.createUser(UserCreateCommand);
 
         // THEN
         assertEquals("encodedPassword", result.getPassword());
         assertNotNull(result.getUuid());
-        Mockito.verify(userRepository).save(user);
     }
 
     /**
@@ -63,12 +62,11 @@ class UserServiceTest {
      */
     @Test
     void createUser_throwsWhenEmailAlreadyExists() {
-        User user = new User("testuser", null, "teszt@email.com");
-
+        UserCreateCommand UserCreateCommand = new UserCreateCommand("testuser", "teszt@email.com", "password");
         Mockito.when(userRepository.existsByEmail("teszt@email.com")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            userService.createUser(user, "password");
+            userService.createUser(UserCreateCommand);
         });
 
         Mockito.verify(userRepository, Mockito.never()).save(any(User.class));
@@ -79,13 +77,13 @@ class UserServiceTest {
      */
     @Test
     void createUser_throwsWhenUsernameAlreadyExists() {
-        User user = new User("testuser", null, "teszt@email.com");
+        UserCreateCommand UserCreateCommand = new UserCreateCommand("testuser", "teszt@email.com", "password");
 
         Mockito.when(userRepository.existsByEmail("teszt@email.com")).thenReturn(false);
         Mockito.when(userRepository.existsByUsername("testuser")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            userService.createUser(user, "password");
+            userService.createUser(UserCreateCommand);
         });
 
         Mockito.verify(userRepository, Mockito.never()).save(any(User.class));

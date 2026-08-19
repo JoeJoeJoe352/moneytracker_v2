@@ -69,7 +69,7 @@ class TransactionE2ETest {
 
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eTxUser", "password123", "password123",
+        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eTxUser", "password123",
                 "e2etx@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 

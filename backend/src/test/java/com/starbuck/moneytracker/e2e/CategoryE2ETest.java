@@ -63,7 +63,7 @@ class CategoryE2ETest {
 
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eCategoryUser", "password123", "password123",
+        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eCategoryUser", "password123",
                 "e2ecategory@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 

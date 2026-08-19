@@ -3,40 +3,45 @@ package com.starbuck.moneytracker.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 
 @Service
 public class UserService {
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtService jwtService;
-    
+
     /**
-     * Felhasználó létrehozása a megadott adatokkal. Username és email cím egyediség ellenőrzés
+     * Felhasználó létrehozása a megadott adatokkal. Username és email cím egyediség
+     * ellenőrzés
      * 
      * @param User user
      * @return User
      */
-    public User createUser(User user, String password) {
-        if (userRepository.existsByEmail(user.getEmail()) || userRepository.existsByUsername(user.getUsername())) {
+    public User createUser(UserCreateCommand command) {
+        if (userRepository.existsByEmail(command.getEmail()) || userRepository.existsByUsername(command.getUsername())) {
             throw new IllegalArgumentException("Username or email already exists");
         }
 
-        user.setPassword(passwordEncoder.encode(password));
+        User user = new User(command.getUsername(), passwordEncoder.encode(command.getPassword()), command.getEmail());
         user.setUuid();
         userRepository.save(user);
+        
         return user;
     }
 
     /**
-     * Felhasználó bejelentkezése. Siker esetén visszaadja a felhasználó adatait, hiba esetén IllegalArgumentException-t dob.
+     * Felhasználó bejelentkezése. Siker esetén visszaadja a felhasználó adatait,
+     * hiba esetén IllegalArgumentException-t dob.
      * 
      * @param loginRequest
      * @return User

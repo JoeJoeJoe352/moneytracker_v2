@@ -2,14 +2,12 @@ package com.starbuck.moneytracker.dto;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.starbuck.moneytracker.validation.PasswordMatches;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 /**
  * Felhasználó adatátviteli objektum.
  */
-@PasswordMatches
 public record RegisterRequestDto(
     /**
      * Felhasználónév
@@ -24,12 +22,6 @@ public record RegisterRequestDto(
     @NotBlank(message = "Password is mandatory")
     @Length(min = 6, max = 100, message = "Password must be between 6 and 100 characters") // többi validáció frontenden lesz
     String password,
-
-    /**
-     * Felhasználó jelszava újból, az egyezés vizsgálatához
-     */
-    @NotBlank(message = "Password confirmation is mandatory")
-    String passwordAgain,
 
     /**
      * Felhasználó email címe

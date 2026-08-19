@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
+import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.CategoryRepository;
@@ -52,8 +53,8 @@ public class CategoryServiceTest {
 
     @BeforeAll
     void beforeAll() {
-        User user = new User("testuser", "password", "teszt@email.com");
-        this.user = userService.createUser(user, "password");
+        UserCreateCommand user = new UserCreateCommand("testuser", "teszt@email.com", "password");
+        this.user = userService.createUser(user);
     }
 
     @AfterAll
@@ -126,8 +127,8 @@ public class CategoryServiceTest {
     @DisplayName("ListCategories - Kilistázza a user összes saját és a közös kategóriákat")
     void testListCategories() {
         // given
-        User user = new User("testuser2", "password2", "teszt2@email.com");
-        var savedUser2 = userService.createUser(user, "password2");
+        UserCreateCommand user = new UserCreateCommand("testuser2", "teszt2@email.com", "password2");
+        var savedUser2 = userService.createUser(user);
 
         var categoryCommand = new CategoryCreateCommand("ownCategory");
 
