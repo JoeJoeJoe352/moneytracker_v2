@@ -15,4 +15,8 @@
     <Match>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
+    <!-- domain objecteknél jön elő, amikor constructorba hibát dobunk. Ez a figyelmeztetés nem vonatkozik a modern Java-ra  -->
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    </Match>
 </FindBugsFilter>
