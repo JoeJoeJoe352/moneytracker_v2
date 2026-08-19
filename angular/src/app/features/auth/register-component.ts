@@ -62,7 +62,7 @@ export class RegisterComponent {
         this.isLoading.set(true)
         this.backendErrorMsg.set('')
 
-        this.authService.register(this.username.value, this.email.value, this.password.value, this.passwordAgain.value).subscribe({
+        this.authService.register(this.username.value, this.email.value, this.password.value).subscribe({
             next: () => {
                 this.isLoading.set(false);
                 this.closeModal.emit()
