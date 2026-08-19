@@ -20,29 +20,18 @@
                 [class.show]="menuOpen"
             >
                 <ul class="navbar-nav">
-                    @for (linkItem of publicLinkList; track $index) {
-                        <li class="nav-item">
-                            <a class="nav-link" [routerLink]="linkItem.url">{{
-                                linkItem.langKey | translate
-                            }}</a>
-                        </li>
-                    }
+                    <app-header-link-list [linkList]="publicLinkList" />
 
                     @if (userData.isUserLogged()) {
-                        @for (linkItem of authenticatedLinkList; track $index) {
-                            <li class="nav-item">
-                                <a class="nav-link" [routerLink]="linkItem.url">{{
-                                    linkItem.langKey | translate
-                                }}</a>
-                            </li>
-                        }
+                        <app-header-link-list [linkList]="authenticatedLinkList" />
                     }
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     @if (userData.isUserLogged()) {
                         <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
-                        <a class="nav-link active" (click)="logout()">{{"header.logout" | translate}}</a>
+                        <a class="nav-link" (click)="logout()">{{"header.logout" | translate}}</a>
                     }
+                    <!-- TODO ide jöhet a login és signup gomb, else ágban -->
                 </ul>
             </div>
         </div>

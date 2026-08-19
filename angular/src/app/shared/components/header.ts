@@ -3,17 +3,14 @@ import { AuthService } from '../../features/auth/auth-service';
 import { Router, RouterLink } from '@angular/router';
 import { UserDataStore } from '../services/user-data-store';
 import { TranslatePipe } from '@ngx-translate/core';
-
-interface LinkInterface {
-    url: string;
-    langKey: string;
-}
+import { LinkInterface } from '../interfaces';
+import { HeaderLinkListComponent } from './header-link-list-component';
 
 @Component({
     selector: 'app-header',
     templateUrl: 'header.html',
     styleUrl: './header.scss',
-    imports: [RouterLink, TranslatePipe],
+    imports: [RouterLink, TranslatePipe, HeaderLinkListComponent],
 })
 export class Header {
     private authService = inject(AuthService);
@@ -25,11 +22,17 @@ export class Header {
      */
     protected menuOpen = false;
 
+    /**
+     * Publikusan elérhető linkek listája a fejlécben
+     */
     protected publicLinkList: LinkInterface[] = [
         { url: '/', langKey: 'header.dashboard' },
         { url: '/welcome', langKey: 'header.welcome' },
     ];
 
+    /**
+     * Belépés után elérhető linkek listája a fejlécben
+     */
     protected authenticatedLinkList: LinkInterface[] = [
         {url: "/transactions", langKey: "header.transactions"}
     ];
