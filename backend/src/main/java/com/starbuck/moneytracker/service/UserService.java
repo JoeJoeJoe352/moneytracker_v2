@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
+import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 
@@ -46,12 +47,12 @@ public class UserService {
      * @param loginRequest
      * @return User
      */
-    public String login(String username, String password) {
-        User user = this.userRepository.findByUsername(username);
-        if (user == null || !this.passwordEncoder.matches(password, user.getPassword())) {
+    public String login(UserLoginCommand command) {
+        User user = this.userRepository.findByUsername(command.getUsername());
+        if (user == null || !this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Invalid username or password");
         }
-        return this.jwtService.generateToken(username);
+        return this.jwtService.generateToken(command.getUsername());
     }
 
     /**

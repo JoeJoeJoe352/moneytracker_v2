@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
+import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.service.JwtService;
@@ -100,7 +101,9 @@ class UserServiceTest {
         Mockito.when(passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
         Mockito.when(jwtService.generateToken("testuser")).thenReturn("generatedToken");
 
-        String token = userService.login("testuser", "password");
+        UserLoginCommand command = new UserLoginCommand("testuser", "password");
+
+        String token = userService.login(command);
 
         assertEquals("generatedToken", token);
     }
@@ -112,8 +115,10 @@ class UserServiceTest {
     void login_throwsWhenUsernameNotFound() {
         Mockito.when(userRepository.findByUsername("missing")).thenReturn(null);
 
+        UserLoginCommand command = new UserLoginCommand("missing", "password");
+
         assertThrows(IllegalArgumentException.class, () -> {
-            userService.login("missing", "password");
+            userService.login(command);
         });
 
         Mockito.verify(jwtService, Mockito.never()).generateToken(anyString());
@@ -129,8 +134,9 @@ class UserServiceTest {
         Mockito.when(userRepository.findByUsername("testuser")).thenReturn(userInDB);
         Mockito.when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
+        UserLoginCommand command = new UserLoginCommand("testuser", "wrongPassword");
         assertThrows(IllegalArgumentException.class, () -> {
-            userService.login("testuser", "wrongPassword");
+            userService.login(command);
         });
 
         Mockito.verify(jwtService, Mockito.never()).generateToken(anyString());

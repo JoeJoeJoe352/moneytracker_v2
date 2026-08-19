@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
+import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.service.JwtService;
@@ -95,10 +96,11 @@ class UserServiceIntegrationTest {
      */
     @Test
     void login_returnsValidTokenForCorrectCredentials() {
-        UserCreateCommand command = new UserCreateCommand("loginUser", "login@email.com", "password");
-        User saved = userService.createUser(command);
+        UserCreateCommand createCommand = new UserCreateCommand("loginUser", "login@email.com", "password");
+        User saved = userService.createUser(createCommand);
 
-        String token = userService.login("loginUser", "password");
+        UserLoginCommand loginCommand = new UserLoginCommand("loginUser", "password");
+        String token = userService.login(loginCommand);
 
         assertNotNull(token);
         assertEquals("loginUser", jwtService.extractUsername(token));
@@ -115,8 +117,9 @@ class UserServiceIntegrationTest {
         UserCreateCommand command = new UserCreateCommand("wrongPassUser", "wrongpass@email.com", "password");
         User saved = userService.createUser(command);
 
+        UserLoginCommand loginCommand = new UserLoginCommand("wrongPassUser", "notThePassword");
         assertThrows(IllegalArgumentException.class, () -> {
-            userService.login("wrongPassUser", "notThePassword");
+            userService.login(loginCommand);
         });
 
         userRepository.delete(saved);
@@ -127,8 +130,9 @@ class UserServiceIntegrationTest {
      */
     @Test
     void login_throwsForUnknownUsername() {
+        UserLoginCommand loginCommand = new UserLoginCommand("nonExistentUser", "password");
         assertThrows(IllegalArgumentException.class, () -> {
-            userService.login("nonExistentUser", "password");
+            userService.login(loginCommand);
         });
     }
 

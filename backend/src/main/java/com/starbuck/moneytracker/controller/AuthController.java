@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
+import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.dto.IsEmailExistsDto;
 import com.starbuck.moneytracker.dto.IsUsernameExistsDto;
 import com.starbuck.moneytracker.dto.LoginRequest;
@@ -47,7 +48,6 @@ public class AuthController {
     @PostMapping(path = "/auth/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void authRegisterUser(@Valid @RequestBody RegisterRequestDto user) {
-
         UserCreateCommand command = new UserCreateCommand(user.username(), user.email(), user.password());
         userService.createUser(command);
     }
@@ -61,8 +61,10 @@ public class AuthController {
      */
     @PostMapping(path = "/auth/login")
     public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+        UserLoginCommand command = new UserLoginCommand(loginRequest.username(), loginRequest.password());
+
         try {
-            String jwtToken = userService.login(loginRequest.username(), loginRequest.password());
+            String jwtToken = userService.login(command);
             ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
             HttpHeaders headers = new HttpHeaders();
             headers.add("Set-Cookie", cookie.toString());
