@@ -48,11 +48,7 @@ public class TransactionDetailSaveCommand {
         if (price == null) {
             throw new IllegalArgumentException("Price cannot be null");
         }
-        if ((transactionType == TransactionTypeEnum.INCOME && price.compareTo(BigDecimal.ZERO) < 1) ||
-                (transactionType == TransactionTypeEnum.OUTCOME && price.compareTo(BigDecimal.ZERO) > -1)) {
-            throw new IllegalArgumentException("Price and type doesn't match. Type: " + transactionType.toString()
-                    + ", price: " + price.toString());
-        }
+        transactionType.validateDetailPrice(price);
 
         this.setName(name);
         this.name = name;
