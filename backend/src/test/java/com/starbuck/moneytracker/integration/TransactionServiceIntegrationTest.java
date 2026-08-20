@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
@@ -20,6 +19,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import com.starbuck.moneytracker.commands.TransactionCreateCommand;
+import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
@@ -85,24 +87,19 @@ class TransactionServiceIntegrationTest {
     @Test
     void createTransaction_persistsAllEntities() {
         // GIVEN
-        Transaction transaction = new Transaction();
-        transaction.setName("Test");
-        transaction.setTransactionType(TransactionTypeEnum.INCOME);
-        transaction.setTransactionDate(LocalDate.of(2026, 6, 8));
-        transaction.setUser(this.user);
-
-        TransactionDetail transactionDetail = new TransactionDetail();
-        transactionDetail.setPrice(new BigDecimal(100.00));
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
 
         Category category = new Category("tesztkategória", this.user);
         categoryRepo.save(category);
 
-        TransactionDetailCategory categoryJunctionEntry = new TransactionDetailCategory(category, transactionDetail);
-        transactionDetail.setCategoryLinks(List.of(categoryJunctionEntry));
-        List<TransactionDetail> transactionDetails = Arrays.asList(transactionDetail);
+        TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
+                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), List.of(category.getId()),
+                TransactionTypeEnum.INCOME);
+        TransactionCreateCommand command = new TransactionCreateCommand("Test", null, LocalDate.of(2026, 6, 8),
+                TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
 
         // WHEN
-        Transaction saved = transactionService.createTransaction(transaction, transactionDetails);
+        Transaction saved = transactionService.createTransaction(command);
 
         // THEN
         assertNotNull(saved.getId());
@@ -120,7 +117,7 @@ class TransactionServiceIntegrationTest {
         assertEquals(1, detailCategoryRepo.count());
         assertEquals(new BigDecimal("100.00"), saved.getPriceSum());
 
-        this.deleteData(transaction);
+        this.deleteData(saved);
     }
 
     @Test
@@ -128,59 +125,36 @@ class TransactionServiceIntegrationTest {
         // GIVEN
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
 
-        Transaction transaction = new Transaction();
-        transaction.setName("Test");
-        transaction.setTransactionType(TransactionTypeEnum.INCOME);
-        transaction.setTransactionDate(LocalDate.of(2026, 6, 8));
-        transaction.setUser(this.user);
-
-        TransactionDetail transactionDetail = new TransactionDetail();
-        transactionDetail.setPrice(new BigDecimal(100.00));
-
         Category category1 = new Category("tesztKategória", this.user);
         categoryRepo.save(category1);
 
-        TransactionDetailCategory categoryJunctionEntry = new TransactionDetailCategory(category1, transactionDetail);
-        transactionDetail.setCategoryLinks(List.of(categoryJunctionEntry));
-        List<TransactionDetail> transactionDetails = Arrays.asList(transactionDetail);
+        TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
+                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), List.of(category1.getId()),
+                TransactionTypeEnum.INCOME);
+        TransactionCreateCommand createCommand = new TransactionCreateCommand("Test", null,
+                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
 
         // Van DB-ben elem mostmár
-        transactionService.createTransaction(transaction, transactionDetails);
+        Transaction createdTransaction = transactionService.createTransaction(createCommand);
 
         // Update elemek létrehozása
-        Transaction updateTransaction = new Transaction();
-        updateTransaction.setName("Update test");
-        updateTransaction.setTransactionType(TransactionTypeEnum.OUTCOME);
-        updateTransaction.setTransactionDate(LocalDate.of(2026, 7, 8));
-        updateTransaction.setUser(this.user);
-
         Category category2 = new Category("updateKategória", this.user);
         categoryRepo.save(category2);
 
         // Detail 1 beállításai - 1 kategóriája van
-        TransactionDetail updateTransactionDetail1 = new TransactionDetail();
-        updateTransactionDetail1.setPrice(new BigDecimal("-200.00"));
-        updateTransactionDetail1.setName("update1");
-        TransactionDetailCategory updateCategoryJunctionEntry = new TransactionDetailCategory(category2,
-                updateTransactionDetail1);
-        updateTransactionDetail1.setCategoryLinks(List.of(updateCategoryJunctionEntry));
+        TransactionDetailSaveCommand updateDetailCommand1 = new TransactionDetailSaveCommand("update1",
+                new BigDecimal("-200.00"), List.of(category2.getId()), TransactionTypeEnum.OUTCOME);
 
         // Detail2 beállításai - 2 kategória beállítva
-        TransactionDetail updateTransactionDetail2 = new TransactionDetail();
-        updateTransactionDetail2.setWeight(new BigDecimal("0.5"));
-        updateTransactionDetail2.setUnitPrice(new BigDecimal("600.00"));
-        updateTransactionDetail2.setName("update2");
-        TransactionDetailCategory updateCategoryJunctionEntry2_1 = new TransactionDetailCategory(category2,
-                updateTransactionDetail2);
-        TransactionDetailCategory updateCategoryJunctionEntry2_2 = new TransactionDetailCategory(category1,
-                updateTransactionDetail2);
-        updateTransactionDetail2
-                .setCategoryLinks(List.of(updateCategoryJunctionEntry2_1, updateCategoryJunctionEntry2_2));
+        TransactionDetailSaveCommand updateDetailCommand2 = new TransactionDetailSaveCommand("update2",
+                new BigDecimal("0.5"), new BigDecimal("600.00"), List.of(category2.getId(), category1.getId()));
 
-        List<TransactionDetail> updateTransactionDetails = Arrays.asList(updateTransactionDetail1,
-                updateTransactionDetail2);
+        TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("Update test", null,
+                LocalDate.of(2026, 7, 8), TransactionTypeEnum.OUTCOME,
+                List.of(updateDetailCommand1, updateDetailCommand2), List.of());
+
         // WHEN
-        transactionService.updateTransaction(transaction.getId(), updateTransaction, updateTransactionDetails);
+        transactionService.updateTransaction(createdTransaction.getId(), updateCommand);
 
         // THEN
         // Elemszámok validálása
@@ -221,20 +195,16 @@ class TransactionServiceIntegrationTest {
 
     @Test
     void createTransaction_throwsExceptionAndRollsBack() {
-        Transaction transaction = new Transaction();
-        transaction.setName("hibásteszt");
-        transaction.setTransactionType(TransactionTypeEnum.INCOME);
-        transaction.setTransactionDate(LocalDate.of(2026, 6, 8));
-        transaction.setUser(this.user);
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
 
-        TransactionDetail transactionDetail = new TransactionDetail();
-        transactionDetail.setPrice(new BigDecimal(100));
         // emiatt nem fogja tudni elmenteni a detailst és rollback az egész
-        transactionDetail.setName("hosszunev0".repeat(26));
-        List<TransactionDetail> transactionDetails = Arrays.asList(transactionDetail);
+        TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
+                "hosszunev0".repeat(26), new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
+        TransactionCreateCommand command = new TransactionCreateCommand("hibásteszt", null,
+                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
 
         assertThrows(DataIntegrityViolationException.class, () -> {
-            transactionService.createTransaction(transaction, transactionDetails);
+            transactionService.createTransaction(command);
         });
 
         // rollback miatt nincs egy sem a db-ben
@@ -426,16 +396,12 @@ class TransactionServiceIntegrationTest {
      */
     private Transaction persistSimpleTransaction(String name, TransactionTypeEnum type, BigDecimal price,
             LocalDate date) {
-        Transaction transaction = new Transaction();
-        transaction.setName(name);
-        transaction.setTransactionType(type);
-        transaction.setTransactionDate(date);
-        transaction.setUser(this.user);
+        TransactionDetailSaveCommand detail = new TransactionDetailSaveCommand(
+                TransactionDetail.DEFAULT_DETAIL_NAME, price, List.of(), type);
+        TransactionCreateCommand command = new TransactionCreateCommand(name, null, date, type, List.of(detail),
+                List.of());
 
-        TransactionDetail detail = new TransactionDetail();
-        detail.setPrice(price);
-
-        return transactionService.createTransaction(transaction, List.of(detail));
+        return transactionService.createTransaction(command);
     }
 
     private void deleteData(Transaction transaction) {

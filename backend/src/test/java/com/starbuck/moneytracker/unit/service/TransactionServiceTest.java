@@ -7,10 +7,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,9 +20,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionCreateCommand;
+import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
-import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
@@ -37,6 +36,7 @@ import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.testutils.AssertUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.TransactionDetailFactory;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -54,6 +54,9 @@ class TransactionServiceTest {
 
     @Mock
     private CurrentUserUtil currentUser;
+
+    @Mock
+    private TransactionDetailFactory detailFactory;
 
     @InjectMocks
     private TransactionService transactionService;
@@ -83,17 +86,15 @@ class TransactionServiceTest {
     @Test
     void createTransaction_savesTransactionAndDetail() {
         // GIVEN - előkészületek
-        TransactionSaveCommand command = new TransactionSaveCommand("simpleTransaction", LocalDate.now(),
-                TransactionTypeEnum.INCOME);
-        TransactionDetail detail = new TransactionDetail();
-        detail.setPrice(new BigDecimal(100));
-
-        List<TransactionDetail> transactionDetailList = Arrays.asList(detail);
+        TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
+                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
+        TransactionCreateCommand command = new TransactionCreateCommand("simpleTransaction", null, LocalDate.now(),
+                TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
         // WHEN - függvény meghívása
-        Transaction result = transactionService.createTransaction(command, transactionDetailList);
+        Transaction result = transactionService.createTransaction(command);
 
         // THEN
         // Az elmentett detail példányt csak így tudjuk megszerezni
@@ -101,7 +102,6 @@ class TransactionServiceTest {
 
         assertUtil.assertTransaction(result, "simpleTransaction", LocalDate.now(), new BigDecimal("100.00"),
                 TransactionTypeEnum.INCOME);
-        // csak egy, név nélküli tranzakció van, ezért default nevet kap
         assertUtil.assertDetail(captor.getValue(), TransactionDetail.DEFAULT_DETAIL_NAME,
                 new BigDecimal("100.00"), null,
                 null,
@@ -114,18 +114,17 @@ class TransactionServiceTest {
     @Test
     void createTransaction_savesTransactionAndMultipleDetail() {
         // GIVEN
-        TransactionSaveCommand command = new TransactionSaveCommand("multipleDetailedTransaction",
-                LocalDate.now(),
-                TransactionTypeEnum.INCOME);
-        TransactionDetail detail = new TransactionDetail("detail1", new BigDecimal(100));
-        TransactionDetail detail2 = new TransactionDetail("detail2", new BigDecimal(200));
-
-        List<TransactionDetail> transactionDetails = Arrays.asList(detail, detail2);
+        TransactionDetailSaveCommand detail = new TransactionDetailSaveCommand("detail1", new BigDecimal(100),
+                List.of(), TransactionTypeEnum.INCOME);
+        TransactionDetailSaveCommand detail2 = new TransactionDetailSaveCommand("detail2", new BigDecimal(200),
+                List.of(), TransactionTypeEnum.INCOME);
+        TransactionCreateCommand command = new TransactionCreateCommand("multipleDetailedTransaction", null,
+                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail, detail2), List.of());
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
         // WHEN
-        Transaction result = transactionService.createTransaction(command, transactionDetails);
+        Transaction result = transactionService.createTransaction(command);
 
         // THEN
         // tranzakció és a két detail is el lett mentve
@@ -142,28 +141,37 @@ class TransactionServiceTest {
     }
 
     /**
-     * Teszteli, hogy hibát dob-e a kód, ha több tranzakciót akarunk elmenteni, de
-     * nincs név megadva
+     * Ha nincs egy detail sem megadva, alapértelmezett nevű detailt hoz létre
+     * a tranzakció összegével
      */
     @Test
-    void createTransaction_savesTransactionAndMultipleDetailWithoutName() {
-        TransactionSaveCommand command = new TransactionSaveCommand(
-                "savesTransactionAndMultipleDetailWithoutName", LocalDate.now(),
+    void createTransaction_withNoDetails_createsDefaultDetail() {
+        TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction", null,
+                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of());
+
+        Mockito.when(detailFactory.createDefauldDetail(BigDecimal.ZERO))
+                .thenReturn(new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, BigDecimal.ZERO));
+
+        ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
+
+        Transaction result = transactionService.createTransaction(command);
+
+        assertUtil.assertTransaction(result, "noDetailTransaction", LocalDate.now(), BigDecimal.ZERO,
                 TransactionTypeEnum.INCOME);
-        TransactionDetail detail = new TransactionDetail();
-        detail.setPrice(new BigDecimal(100));
-        TransactionDetail detail2 = new TransactionDetail();
-        detail2.setPrice(new BigDecimal(200));
-        detail2.setName("detail2");
 
-        List<TransactionDetail> transactionDetails = Arrays.asList(detail, detail2);
+        Mockito.verify(transactionDetailRepo).save(captor.capture());
+        assertEquals(TransactionDetail.DEFAULT_DETAIL_NAME, captor.getValue().getName());
+        assertEquals(result, captor.getValue().getTransaction());
+    }
 
-        // hiba, mert több tranzakciót akarunk elmenteni, de nincs név megadva legalább
-        // az egyiknél
+    /**
+     * Ha egy detail neve üres, a command létrehozásakor hibát dob
+     */
+    @Test
+    void createTransaction_throwsWhenDetailHasNoName() {
         assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.createTransaction(command, transactionDetails);
+            new TransactionDetailSaveCommand("", new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
         });
-
     }
 
     /**
@@ -178,23 +186,16 @@ class TransactionServiceTest {
                 new BigDecimal(100), 0);
         TransactionDetail detailInDB = new TransactionDetail(1l, "detail1", new BigDecimal(100), null, null,
                 transactionInDB);
-        transactionInDB.setTransactionDetails(Set.of(detailInDB));
+        transactionInDB.setTransactionDetails(List.of(detailInDB));
 
         // Ezek lesznek azok, amikkel módosítjuk az adatokat
-        TransactionSaveCommand createCommand = new TransactionSaveCommand(
-                "created", LocalDate.of(2024, 1, 1),
-                TransactionTypeEnum.INCOME);
-        var createTransaction = transactionService.createTransaction(createCommand, List.of());
-
-        TransactionSaveCommand updateCommand = new TransactionSaveCommand(
-                "updated", LocalDate.of(2023, 1, 1),
-                TransactionTypeEnum.OUTCOME);
-        TransactionDetail updatedDetail = new TransactionDetail(1l, "updatedDetail", new BigDecimal(-200), null,
-                null,
-                createTransaction);
-        TransactionDetail updatedDetail2 = new TransactionDetail(2l, "updatedDetail2", new BigDecimal(-300),
-                null, null,
-                createTransaction);
+        TransactionDetailSaveCommand updatedDetailCommand = new TransactionDetailSaveCommand("updatedDetail",
+                new BigDecimal(-200), List.of(), TransactionTypeEnum.OUTCOME);
+        TransactionDetailSaveCommand updatedDetailCommand2 = new TransactionDetailSaveCommand("updatedDetail2",
+                new BigDecimal(-300), List.of(), TransactionTypeEnum.OUTCOME);
+        TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("updated", null,
+                LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME,
+                List.of(updatedDetailCommand, updatedDetailCommand2), List.of());
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
@@ -204,7 +205,7 @@ class TransactionServiceTest {
         ArgumentCaptor<TransactionDetail> captorDetail = ArgumentCaptor.forClass(TransactionDetail.class);
 
         // WHEN
-        transactionService.updateTransaction(1l, updateCommand, List.of(updatedDetail, updatedDetail2));
+        transactionService.updateTransaction(1l, updateCommand);
 
         // THEN - az új beállított értékeket menti el
         Mockito.verify(transactionRepo).save(captorTransaction.capture());
@@ -214,7 +215,7 @@ class TransactionServiceTest {
                 TransactionTypeEnum.OUTCOME);
 
         // törli az eddigi detailokat és elmenti az újakat
-        Mockito.verify(transactionDetailRepo).deleteAll(Set.of(detailInDB));
+        Mockito.verify(transactionDetailRepo).deleteAll(List.of(detailInDB));
         Mockito.verify(transactionDetailRepo, times(2)).save(captorDetail.capture());
 
         var details = captorDetail.getAllValues();
@@ -230,19 +231,18 @@ class TransactionServiceTest {
     @Test
     void testCreateTransactionWithWeightAndUnitPrice() {
         // GIVEN
-        TransactionSaveCommand createCommand = new TransactionSaveCommand(
-                "multipleDetailedTransactionWithWeightAndUnitPrice", LocalDate.now(),
-                TransactionTypeEnum.INCOME);
-        var createTransaction = transactionService.createTransaction(createCommand, List.of());
-        TransactionDetail detail1 = new TransactionDetail("WeightesDetail", new BigDecimal("0.5"),
-                new BigDecimal("300"));
-        TransactionDetail detail2 = new TransactionDetail("Simadetail", new BigDecimal("200"));
-        List<TransactionDetail> transactionDetails = Arrays.asList(detail1, detail2);
+        TransactionDetailSaveCommand detail1 = new TransactionDetailSaveCommand("WeightesDetail",
+                new BigDecimal("0.5"), new BigDecimal("300"), List.of());
+        TransactionDetailSaveCommand detail2 = new TransactionDetailSaveCommand("Simadetail", new BigDecimal("200"),
+                List.of(), TransactionTypeEnum.INCOME);
+        TransactionCreateCommand createCommand = new TransactionCreateCommand(
+                "multipleDetailedTransactionWithWeightAndUnitPrice", null, LocalDate.now(),
+                TransactionTypeEnum.INCOME, List.of(detail1, detail2), List.of());
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
         // WHEN
-        var result = transactionService.createTransaction(createCommand, transactionDetails);
+        var result = transactionService.createTransaction(createCommand);
 
         // THEN
         // Tranzakció elmentve és helyesek az adatai
@@ -256,8 +256,7 @@ class TransactionServiceTest {
         var details = captor.getAllValues();
 
         assertUtil.assertDetail(details.get(0), "WeightesDetail", new BigDecimal("150.00"),
-                new BigDecimal("0.5"),
-                new BigDecimal("300"),
+                null, null,
                 result);
         assertUtil.assertDetail(details.get(1), "Simadetail", new BigDecimal("200.00"), null, null, result);
     }
@@ -276,16 +275,17 @@ class TransactionServiceTest {
         TransactionDetail detail1inDb = new TransactionDetail("WeightesDetail1", new BigDecimal("0.5"),
                 new BigDecimal(300));
         TransactionDetail detail2inDb = new TransactionDetail("Simadetail1", new BigDecimal(200));
-        transactionInDB.setTransactionDetails(Set.of(detail1inDb, detail2inDb));
+        transactionInDB.setTransactionDetails(List.of(detail1inDb, detail2inDb));
 
         // updatelő dolgok
-        Transaction updatedTransaction = new Transaction(1l, "updated", LocalDate.of(2023, 1, 1),
-                TransactionTypeEnum.OUTCOME,
-                new BigDecimal(100), 0);
         // weightesből sima priceos, priceosból weightes tranzakciót csinálunk
-        TransactionDetail updatedDetail = new TransactionDetail("simadetail1", new BigDecimal(-200));
-        TransactionDetail updatedDetail2 = new TransactionDetail("weightresDetail2", new BigDecimal("0.7"),
-                new BigDecimal(300));
+        TransactionDetailSaveCommand updatedDetail = new TransactionDetailSaveCommand("simadetail1",
+                new BigDecimal(-200), List.of(), TransactionTypeEnum.OUTCOME);
+        TransactionDetailSaveCommand updatedDetail2 = new TransactionDetailSaveCommand("weightresDetail2",
+                new BigDecimal("0.7"), new BigDecimal(300), List.of());
+        TransactionUpdateCommand updatedTransaction = new TransactionUpdateCommand("updated", null,
+                LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME, List.of(updatedDetail, updatedDetail2),
+                List.of());
 
         ArgumentCaptor<Transaction> captorTransaction = ArgumentCaptor.forClass(Transaction.class);
         ArgumentCaptor<TransactionDetail> captorDetails = ArgumentCaptor.forClass(TransactionDetail.class);
@@ -295,7 +295,7 @@ class TransactionServiceTest {
                 .thenReturn(Optional.of(transactionInDB));
 
         // WHEN
-        transactionService.updateTransaction(1l, updatedTransaction, List.of(updatedDetail, updatedDetail2));
+        transactionService.updateTransaction(1l, updatedTransaction);
 
         // THEN
         // Tranzakció elmentve és helyesek az adatai
@@ -310,8 +310,7 @@ class TransactionServiceTest {
         assertUtil.assertDetail(details.get(0), "simadetail1", new BigDecimal("-200.00"), null, null,
                 transaction);
         assertUtil.assertDetail(details.get(1), "weightresDetail2", new BigDecimal("-210.00"),
-                new BigDecimal("0.7"),
-                new BigDecimal("300"),
+                null, null,
                 transaction);
     }
 
@@ -322,18 +321,13 @@ class TransactionServiceTest {
     @Test
     void createTransaction_savesCategoryLinksForDetail() {
         // GIVEN
-        Transaction transaction = new Transaction("categorizedTransaction", LocalDate.now(),
-                TransactionTypeEnum.INCOME, null);
-
-        Category category = new Category();
-        category.setId(5L);
-
-        TransactionDetail detail = new TransactionDetail("detailWithCategory", new BigDecimal(100));
-        TransactionDetailCategory categoryLink = new TransactionDetailCategory(category, detail);
-        detail.setCategoryLinks(List.of(categoryLink));
+        TransactionDetailSaveCommand detail = new TransactionDetailSaveCommand("detailWithCategory",
+                new BigDecimal(100), List.of(5L), TransactionTypeEnum.INCOME);
+        TransactionCreateCommand command = new TransactionCreateCommand("categorizedTransaction", null,
+                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail), List.of());
 
         // WHEN
-        transactionService.createTransaction(transaction, List.of(detail));
+        transactionService.createTransaction(command);
 
         // THEN
         ArgumentCaptor<TransactionDetailCategory> captor = ArgumentCaptor
@@ -347,13 +341,9 @@ class TransactionServiceTest {
      */
     @Test
     void createTransaction_throwsWhenIncomeDetailPriceNotPositive() {
-        Transaction transaction = new Transaction("invalidIncome", LocalDate.now(), TransactionTypeEnum.INCOME,
-                null);
-        TransactionDetail detail = new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME,
-                new BigDecimal(-50));
-
         assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.createTransaction(transaction, List.of(detail));
+            new TransactionDetailSaveCommand(TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(-50),
+                    List.of(), TransactionTypeEnum.INCOME);
         });
     }
 
@@ -362,50 +352,31 @@ class TransactionServiceTest {
      */
     @Test
     void createTransaction_throwsWhenOutcomeDetailPriceNotNegative() {
-        Transaction transaction = new Transaction("invalidOutcome", LocalDate.now(),
-                TransactionTypeEnum.OUTCOME,
-                null);
-        TransactionDetail detail = new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME,
-                new BigDecimal(50));
-
         assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.createTransaction(transaction, List.of(detail));
+            new TransactionDetailSaveCommand(TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(50),
+                    List.of(), TransactionTypeEnum.OUTCOME);
         });
     }
 
     /**
-     * Ha se weight, se unitPrice, vagy csak az egyik van megadva, hibát dob
+     * Ha se weight, se unitPrice nincs megadva, hibát dob
      */
     @Test
     void createTransaction_throwsWhenOnlyWeightIsSetWithoutUnitPrice() {
-        Transaction transaction = new Transaction("invalidWeighted", LocalDate.now(),
-                TransactionTypeEnum.INCOME,
-                null);
-        TransactionDetail detail = new TransactionDetail();
-        detail.setName("badDetail");
-        detail.setPrice(new BigDecimal(100));
-        detail.setWeight(new BigDecimal("0.5"));
-
         assertThrows(IllegalArgumentException.class, () -> {
-            transactionService.createTransaction(transaction, List.of(detail));
+            new TransactionDetailSaveCommand("badDetail", new BigDecimal("0.5"), null, List.of());
         });
     }
 
     /**
-     * Frissítéskor hibát dob, ha nincs egy detail sem megadva
+     * Frissítéskor hibát dob a command létrehozásakor, ha nincs egy detail sem
+     * megadva
      */
     @Test
     void updateTransaction_throwsWhenNoDetailsProvided() {
-        User userInDB = new User(1l, "alma", "pass", "email");
-        Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal(100), 0);
-
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
-                .thenReturn(Optional.of(transactionInDB));
-
-        assertThrows(IllegalStateException.class, () -> {
-            transactionService.updateTransaction(1l, transactionInDB, List.of());
+        assertThrows(IllegalArgumentException.class, () -> {
+            new TransactionUpdateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME, List.of(),
+                    List.of());
         });
     }
 
@@ -415,17 +386,17 @@ class TransactionServiceTest {
     @Test
     void updateTransaction_throwsWhenTransactionNotFoundForUser() {
         User userInDB = new User(1l, "alma", "pass", "email");
-        Transaction updatedTransaction = new Transaction(1l, "updated", LocalDate.now(),
-                TransactionTypeEnum.INCOME,
-                new BigDecimal(100), 0);
-        TransactionDetail updatedDetail = new TransactionDetail("detail", new BigDecimal(100));
+        TransactionDetailSaveCommand updatedDetail = new TransactionDetailSaveCommand("detail", new BigDecimal(100),
+                List.of(), TransactionTypeEnum.INCOME);
+        TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("updated", null, LocalDate.now(),
+                TransactionTypeEnum.INCOME, List.of(updatedDetail), List.of());
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                 .thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> {
-            transactionService.updateTransaction(1l, updatedTransaction, List.of(updatedDetail));
+            transactionService.updateTransaction(1l, updateCommand);
         });
     }
 

@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
@@ -46,7 +46,7 @@ class TransactionMapperTest {
         TransactionDetail detail = new TransactionDetail(1L, TransactionDetail.DEFAULT_DETAIL_NAME,
                 new BigDecimal("100.00"), null, null, transaction);
         detail.setCategoryLinks(List.of());
-        transaction.setTransactionDetails(Set.of(detail));
+        transaction.setTransactionDetails(List.of(detail));
 
         TransactionResponseDto dto = mapper.toDto(transaction);
 
@@ -78,7 +78,7 @@ class TransactionMapperTest {
         TransactionDetail detail = new TransactionDetail(1L, "meat", new BigDecimal("-150.00"),
                 new BigDecimal("0.5"), new BigDecimal("300"), transaction);
         detail.setCategoryLinks(List.of());
-        transaction.setTransactionDetails(Set.of(detail));
+        transaction.setTransactionDetails(List.of(detail));
 
         TransactionResponseDto dto = mapper.toDto(transaction);
 
@@ -108,7 +108,7 @@ class TransactionMapperTest {
         detail1.setCategoryLinks(List.of(categoryLink));
         detail2.setCategoryLinks(List.of());
 
-        transaction.setTransactionDetails(Set.of(detail1, detail2));
+        transaction.setTransactionDetails(List.of(detail1, detail2));
 
         TransactionResponseDto dto = mapper.toDto(transaction);
 
@@ -138,14 +138,14 @@ class TransactionMapperTest {
         TransactionDetail detail1 = new TransactionDetail(1L, TransactionDetail.DEFAULT_DETAIL_NAME,
                 new BigDecimal("10.00"), null, null, transaction1);
         detail1.setCategoryLinks(List.of());
-        transaction1.setTransactionDetails(Set.of(detail1));
+        transaction1.setTransactionDetails(List.of(detail1));
 
         Transaction transaction2 = new Transaction(2L, "second", LocalDate.now(), TransactionTypeEnum.OUTCOME,
                 new BigDecimal("-20.00"), 0);
         TransactionDetail detail2 = new TransactionDetail(2L, TransactionDetail.DEFAULT_DETAIL_NAME,
                 new BigDecimal("-20.00"), null, null, transaction2);
         detail2.setCategoryLinks(List.of());
-        transaction2.setTransactionDetails(Set.of(detail2));
+        transaction2.setTransactionDetails(List.of(detail2));
 
         List<TransactionResponseDto> dtos = mapper.toDtoList(List.of(transaction1, transaction2));
 
@@ -174,7 +174,7 @@ class TransactionMapperTest {
      * Minden detail create dto-t átalakít a listában
      */
     @Test
-    void fromDetailCreateRequestList_mapsEachRequest() {
+    void fromDetailCreateRequest_mapsEachRequest() {
         TransactionDetailCreateDto request1 = new TransactionDetailCreateDto(new BigDecimal("10.00"), "d1",
                 null,
                 null, List.of());
@@ -182,7 +182,8 @@ class TransactionMapperTest {
                 null,
                 null, List.of());
 
-        List<TransactionDetail> result = mapper.fromDetailCreateRequestList(List.of(request1, request2));
+        List<TransactionDetailSaveCommand> result = mapper.fromDetailCreateRequest(
+                List.of(request1, request2), TransactionTypeEnum.INCOME);
 
         assertEquals(2, result.size());
         assertEquals("d1", result.get(0).getName());
@@ -193,7 +194,7 @@ class TransactionMapperTest {
      * Üres listára üres listával tér vissza
      */
     @Test
-    void fromDetailCreateRequestList_returnsEmptyListForEmptyInput() {
-        assertTrue(mapper.fromDetailCreateRequestList(List.of()).isEmpty());
+    void fromDetailCreateRequest_returnsEmptyListForEmptyInput() {
+        assertTrue(mapper.fromDetailCreateRequest(List.of(), TransactionTypeEnum.INCOME).isEmpty());
     }
 }

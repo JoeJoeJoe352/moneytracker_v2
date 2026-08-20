@@ -4,15 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.math.BigDecimal;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.commands.TransactionCreateCommand;
+import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 
@@ -36,59 +37,52 @@ class CostCalculatorDomainServiceTest {
 
         @Test
         void nullType_throws() {
-            var detail = new TransactionDetail("teszt", new BigDecimal("1000"));
+            var detail = new TransactionDetailSaveCommand("teszt", new BigDecimal("1000"), List.of(),
+                    TransactionTypeEnum.INCOME);
             assertThrowsExactly(IllegalArgumentException.class, () -> service.calculateCost(detail, null));
-        }
-
-        @Test
-        void emptyDetail_throws() {
-            assertThrowsExactly(IllegalArgumentException.class,
-                    () -> service.calculateCost(new TransactionDetail(), TransactionTypeEnum.INCOME));
-        }
-
-        @Test
-        void weightWithoutUnitPriceAndPrice_throws() {
-            var detail = new TransactionDetail("teszt", new BigDecimal("5"), null);
-            assertThrowsExactly(IllegalArgumentException.class,
-                    () -> service.calculateCost(detail, TransactionTypeEnum.INCOME));
-        }
-
-        @Test
-        void unitPriceWithoutWeightAndPrice_throws() {
-            var detail = new TransactionDetail("teszt", null, new BigDecimal("5"));
-            assertThrowsExactly(IllegalArgumentException.class,
-                    () -> service.calculateCost(detail, TransactionTypeEnum.INCOME));
         }
 
         @Test
         @DisplayName("Price nem lehet pozitív szám, hogyha outcome a tranzakció típusa")
         void pricePositiveWhenOutcome_throws() {
-            var transaction = new Transaction("bevásárlás", null, TransactionTypeEnum.OUTCOME, null);
-            var detail = new TransactionDetail("tej", new BigDecimal("300"));
-            transaction.setTransactionDetails(Set.of(detail));
-
             assertThrowsExactly(IllegalArgumentException.class,
-                    () -> service.calculateTransactionCost(transaction));
+                    () -> new TransactionDetailSaveCommand("tej", new BigDecimal("300"), List.of(),
+                            TransactionTypeEnum.OUTCOME));
         }
 
         @Test
         @DisplayName("Price nem lehet negatív szám, hogyha income a tranzakció típusa")
         void priceNegativeWhenIncome_throws() {
-            var transaction = new Transaction("bevásárlás", null, TransactionTypeEnum.INCOME, null);
-            var detail = new TransactionDetail("Fizetés", new BigDecimal("-300"));
-            transaction.setTransactionDetails(Set.of(detail));
-
             assertThrowsExactly(IllegalArgumentException.class,
-                    () -> service.calculateTransactionCost(transaction));
+                    () -> new TransactionDetailSaveCommand("Fizetés", new BigDecimal("-300"), List.of(),
+                            TransactionTypeEnum.INCOME));
         }
 
         @Test
-        @DisplayName("Detail tömbben legalább egy elemnek mindig lennie kell")
-        void emptyDetailArray_throws() {
-            var transaction = new Transaction("bevásárlás", null, TransactionTypeEnum.INCOME, null);
-
+        void simpleModeWithNullPrice_throws() {
             assertThrowsExactly(IllegalArgumentException.class,
-                    () -> service.calculateTransactionCost(transaction));
+                    () -> new TransactionDetailSaveCommand("teszt", null, List.of(), TransactionTypeEnum.INCOME));
+        }
+
+        @Test
+        void complexModeWithNullUnitPrice_throws() {
+            assertThrowsExactly(IllegalArgumentException.class,
+                    () -> new TransactionDetailSaveCommand("teszt", new BigDecimal("5"), null, List.of()));
+        }
+
+        @Test
+        void complexModeWithNullWeight_throws() {
+            assertThrowsExactly(IllegalArgumentException.class,
+                    () -> new TransactionDetailSaveCommand("teszt", null, new BigDecimal("5"), List.of()));
+        }
+
+        @Test
+        @DisplayName("Üres detail listára nullát ad vissza")
+        void emptyDetailArray_returnsZero() {
+            var transaction = new TransactionCreateCommand("bevásárlás", null, LocalDate.now(),
+                    TransactionTypeEnum.INCOME, List.of(), List.of());
+
+            assertEquals(BigDecimal.ZERO, service.calculateTransactionCost(transaction));
         }
     }
 
@@ -99,8 +93,8 @@ class CostCalculatorDomainServiceTest {
         @Test
         @DisplayName("weight és unitPrice megléte esetén nem a price-t adja vissza")
         void priceHasSmallerPriorityThanWeightAndUnitPrice() {
-            var detail = new TransactionDetail("teszt", new BigDecimal("5"), new BigDecimal("1000"));
-            detail.setPrice(new BigDecimal("100"));
+            var detail = new TransactionDetailSaveCommand("teszt", new BigDecimal("5"), new BigDecimal("1000"),
+                    List.of());
 
             assertEquals(new BigDecimal("5000.00"), service.calculateCost(detail, TransactionTypeEnum.INCOME));
             assertEquals(new BigDecimal("-5000.00"), service.calculateCost(detail, TransactionTypeEnum.OUTCOME));
@@ -109,20 +103,13 @@ class CostCalculatorDomainServiceTest {
         @Test
         @DisplayName("HALF_UP kerekítés 2 tizedesjegyre")
         void roundsHalfUpToTwoDecimals() {
-            var roundsUp = new TransactionDetail("roundsUp", new BigDecimal("3"), new BigDecimal("0.005"));
+            var roundsUp = new TransactionDetailSaveCommand("roundsUp", new BigDecimal("3"), new BigDecimal("0.005"),
+                    List.of());
             assertEquals(new BigDecimal("0.02"), service.calculateCost(roundsUp, TransactionTypeEnum.INCOME));
 
-            var roundsDown = new TransactionDetail("roundsDown", new BigDecimal("1"), new BigDecimal("0.004"));
+            var roundsDown = new TransactionDetailSaveCommand("roundsDown", new BigDecimal("1"),
+                    new BigDecimal("0.004"), List.of());
             assertEquals(new BigDecimal("0.00"), service.calculateCost(roundsDown, TransactionTypeEnum.INCOME));
-        }
-
-        @Test
-        @DisplayName("nulla weight vagy unitPrice esetén nulla a költség, előjeltől függetlenül")
-        void zeroWeightOrUnitPrice_resultsInZero() {
-            var detail = new TransactionDetail("zero", BigDecimal.ZERO, new BigDecimal("100"));
-
-            assertEquals(new BigDecimal("0.00"), service.calculateCost(detail, TransactionTypeEnum.INCOME));
-            assertEquals(new BigDecimal("0.00"), service.calculateCost(detail, TransactionTypeEnum.OUTCOME));
         }
     }
 
@@ -133,18 +120,21 @@ class CostCalculatorDomainServiceTest {
         @Test
         @DisplayName("price mód esetén a tranzakció típusa nem módosítja az előjelet, mert az már a price-ban tárolva van")
         void priceIsUsedAsIs_regardlessOfTransactionType() {
-            var detail = new TransactionDetail("price", new BigDecimal("1000"));
+            var detail = new TransactionDetailSaveCommand("price", new BigDecimal("1000"), List.of(),
+                    TransactionTypeEnum.INCOME);
 
             assertEquals(new BigDecimal("1000.00"), service.calculateCost(detail, TransactionTypeEnum.INCOME));
 
-            var negativeDetail = new TransactionDetail("negativePrice", new BigDecimal("-500"));
+            var negativeDetail = new TransactionDetailSaveCommand("negativePrice", new BigDecimal("-500"),
+                    List.of(), TransactionTypeEnum.OUTCOME);
             assertEquals(new BigDecimal("-500.00"), service.calculateCost(negativeDetail, TransactionTypeEnum.OUTCOME));
         }
 
         @Test
         @DisplayName("price mód esetén is 2 tizedesjegyre kerekít")
         void roundsPriceToTwoDecimals() {
-            var detail = new TransactionDetail("price", new BigDecimal("1000.005"));
+            var detail = new TransactionDetailSaveCommand("price", new BigDecimal("1000.005"), List.of(),
+                    TransactionTypeEnum.INCOME);
             assertEquals(new BigDecimal("1000.01"), service.calculateCost(detail, TransactionTypeEnum.INCOME));
         }
     }
@@ -155,10 +145,12 @@ class CostCalculatorDomainServiceTest {
         @Test
         @DisplayName("összeadja a tranzakció összes tételének költségét")
         void sumsAllDetailCosts() {
-            var transaction = new Transaction("bevásárlás", null, TransactionTypeEnum.OUTCOME, null);
-            var detail1 = new TransactionDetail("kenyér", new BigDecimal("2"), new BigDecimal("500"));
-            var detail2 = new TransactionDetail("tej", new BigDecimal("-300"));
-            transaction.setTransactionDetails(Set.of(detail1, detail2));
+            var detail1 = new TransactionDetailSaveCommand("kenyér", new BigDecimal("2"), new BigDecimal("500"),
+                    List.of());
+            var detail2 = new TransactionDetailSaveCommand("tej", new BigDecimal("-300"), List.of(),
+                    TransactionTypeEnum.OUTCOME);
+            var transaction = new TransactionCreateCommand("bevásárlás", null, LocalDate.now(),
+                    TransactionTypeEnum.OUTCOME, List.of(detail1, detail2), List.of());
 
             var result = service.calculateTransactionCost(transaction);
 
