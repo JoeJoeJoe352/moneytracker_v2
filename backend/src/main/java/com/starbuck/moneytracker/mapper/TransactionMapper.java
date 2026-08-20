@@ -7,14 +7,15 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
+import com.starbuck.moneytracker.commands.TransactionCreateCommand;
+import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
 import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
-import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.entity.TransactionDetail;
-import com.starbuck.moneytracker.entity.TransactionDetailCategory;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 @Component
 public class TransactionMapper {
@@ -36,10 +37,9 @@ public class TransactionMapper {
                         detail.getWeight(),
                         detail.getUnitPrice(),
                         detail.isComplexPriceMode(),
-                        detail.getCategoryIds()
-                ))
+                        detail.getCategoryIds()))
                 .collect(Collectors.toSet());
-        
+
         TransactionResponseDto dto = new TransactionResponseDto(
                 entity.getId(),
                 entity.getName(),
@@ -65,56 +65,92 @@ public class TransactionMapper {
     }
 
     /**
-     * Átalakít egy DTO-t egy tranzakcióra
+     * Átalakít egy tranzakció DTO-t egy tranzakció létrehozó commandra
      * 
      * @param request
      * @return
      */
-    public Transaction fromTransactionCreateRequest(@NonNull TransactionCreateRequest request) {
-        Transaction entity = new Transaction();
-        entity.setName(request.name());
-        entity.setTransactionDate(request.transactionDate());
-        entity.setTransactionType(request.transactionType());
+    public TransactionCreateCommand fromTransactionCreateRequest(@NonNull TransactionCreateRequest request) {
+        List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(request.transactionDetails(),
+                request.transactionType());
 
-        return entity;
+        TransactionCreateCommand command = new TransactionCreateCommand(
+                request.name(),
+                request.globalPrice(),
+                request.transactionDate(),
+                request.transactionType(),
+                detailCommands,
+                request.globalCategories());
+
+        return command;
     }
 
     /**
-     * Átalakít egy DTO-t egy Detail-é
+     * Átalakít egy tranzakció DTO-t egy tranzakció frissítő commandra
      * 
      * @param request
      * @return
      */
-    public TransactionDetail fromDetailCreateRequest(@NonNull TransactionDetailCreateDto request) {
-        TransactionDetail entity = new TransactionDetail();
-        entity.setName(request.name());
-        entity.setPrice(request.price());
-        entity.setWeight(request.weight());
-        entity.setUnitPrice(request.unitPrice());
+    public TransactionUpdateCommand fromTransactionUpdateRequest(@NonNull TransactionCreateRequest request) {
+        List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(request.transactionDetails(),
+                request.transactionType());
 
-        // Kategória dummy objectek létrehozása, összepárosítása a hozzá tartozó detaillal
-        List<TransactionDetailCategory> categories = request.categories().stream().map((category) -> {
-            Category tempCategoryObject = new Category();
-            tempCategoryObject.setId(category);
-            var transactionDetailCategoryObject = new TransactionDetailCategory();
-            transactionDetailCategoryObject.setCategory(tempCategoryObject);
-            return transactionDetailCategoryObject;
+        TransactionUpdateCommand command = new TransactionUpdateCommand(
+                request.name(),
+                request.globalPrice(),
+                request.transactionDate(),
+                request.transactionType(),
+                detailCommands,
+                request.globalCategories());
+
+        return command;
+    }
+
+    /**
+     * Detail Dto-ból Detail létrehozó commandot állít elő
+     * 
+     * @param detailDtos
+     * @param type
+     * @return
+     */
+    public List<TransactionDetailSaveCommand> fromDetailCreateRequest(
+            @NonNull List<TransactionDetailCreateDto> detailDtos, TransactionTypeEnum type) {
+        return detailDtos.stream().map((detail) -> {
+            if (detail.unitPrice() != null || detail.weight() != null) {
+                return new TransactionDetailSaveCommand(
+                        detail.name(),
+                        detail.weight(),
+                        detail.unitPrice(),
+                        detail.categories());
+            } else {
+                return new TransactionDetailSaveCommand(
+                        detail.name(),
+                        detail.price(),
+                        detail.categories(),
+                        type);
+            }
+
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Db-ből származó entitást átalakít egy update command-á (az szigorúbb
+     * szabályozású, kötelező a detail lista)
+     * 
+     * @param t
+     * @return
+     */
+    public TransactionUpdateCommand entityToCommand(Transaction t) {
+        List<TransactionDetailSaveCommand> details = t.getTransactionDetails().stream().map((detail) -> {
+            if (detail.getWeight() != null || detail.getUnitPrice() != null) {
+                return new TransactionDetailSaveCommand(detail.getName(), detail.getWeight(), detail.getUnitPrice(),
+                        detail.getCategoryIds());
+            }
+            return new TransactionDetailSaveCommand(detail.getName(), detail.getPrice(), List.of(),
+                    t.getTransactionType());
         }).collect(Collectors.toList());
 
-        entity.setCategoryLinks(categories);
-
-        return entity;
-    }
-
-    /**
-     * Átalakítja a kapott DTO-kat detail-ekké
-     *
-     * @param requests
-     * @return
-     */
-    public List<TransactionDetail> fromDetailCreateRequestList(@NonNull List<TransactionDetailCreateDto> requests) {
-        return requests.stream()
-                .map(this::fromDetailCreateRequest)
-                .collect(Collectors.toList());
+        return new TransactionUpdateCommand(t.getName(), t.getPriceSum(), t.getTransactionDate(),
+                t.getTransactionType(), details, List.of());
     }
 }

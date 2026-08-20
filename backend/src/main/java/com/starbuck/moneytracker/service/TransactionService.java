@@ -10,6 +10,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.starbuck.moneytracker.commands.TransactionCreateCommand;
+import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
@@ -18,6 +21,7 @@ import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.TransactionDetailFactory;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -42,6 +46,9 @@ public class TransactionService {
     @Autowired
     private CurrentUserUtil currentUser;
 
+    @Autowired
+    private TransactionDetailFactory detailFactory;
+
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
     /**
@@ -49,14 +56,20 @@ public class TransactionService {
      * Ha hiba van, magától rollbackel a spring
      */
     @Transactional
-    public Transaction createTransaction(Transaction transaction, List<TransactionDetail> transactionDetails) {
-        // TODO transactionDetails az legyen a transactionmodelben átadva
-        BigDecimal sumOfDetailsPrice = transactionDetails.stream()
-                .map((detail) -> costCalculator.calculateCost(detail, transaction.getTransactionType()))
+    public Transaction createTransaction(TransactionCreateCommand createCommand) {
+        BigDecimal sumOfDetailsPrice = createCommand.getDetailCommands().stream()
+                .map((detail) -> costCalculator.calculateCost(detail, createCommand.getTransactionType()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        transaction.setPriceSum(sumOfDetailsPrice);
+
+        Transaction transaction = new Transaction(
+                createCommand.getTransactionName(),
+                createCommand.getTransactionDate(),
+                createCommand.getTransactionType(),
+                sumOfDetailsPrice,
+                currentUser.getUser());
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
-        this.saveDetails(savedTransactionModel, transactionDetails);
+
+        this.saveDetails(savedTransactionModel, createCommand.getDetailCommands());
         return savedTransactionModel;
     }
 
@@ -65,35 +78,29 @@ public class TransactionService {
      * Akkor használatos, ha a csak egy tranzakciótétel van
      * 
      * @param id
-     * @param updatedTransaction
+     * @param updateCommand
      */
     @Transactional
-    public void updateTransaction(Long id, Transaction updatedTransaction,
-            List<TransactionDetail> updatedDetails) {
+    public void updateTransaction(Long id, TransactionUpdateCommand updateCommand) {
         // ellenőrzöm, hogy a tranzakció a useré-e (nem fogja megtalálni, hogyha nem)
         Transaction transaction = this.getTransactionByIdForActualUser(id);
 
-        if (updatedDetails.isEmpty()) {
-            throw new IllegalStateException("Transaction has no details to update.");
-        }
-
-        transaction.setName(updatedTransaction.getName());
-        transaction.setTransactionDate(updatedTransaction.getTransactionDate());
-        transaction.setTransactionType(updatedTransaction.getTransactionType());
-
-        BigDecimal sumOfDetailsPrice = updatedDetails.stream()
-                .map((detail) -> costCalculator.calculateCost(detail, updatedTransaction.getTransactionType()))
+        BigDecimal sumOfDetailsPrice = updateCommand.getDetailCommands().stream()
+                .map((detail) -> costCalculator.calculateCost(detail, updateCommand.getTransactionType()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        transaction.setPriceSum(sumOfDetailsPrice);
 
+        transaction.setName(updateCommand.getTransactionName());
+        transaction.setTransactionDate(updateCommand.getTransactionDate());
+        transaction.setTransactionType(updateCommand.getTransactionType());
+        transaction.setPriceSum(sumOfDetailsPrice);
         transactionRepo.save(transaction);
 
         // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
         // kikeresni a meglévőket és frissíteni.
         // Cascade delete miatt ez törli a detailCategory táblában lévők kapcsolat
-        // bejegyzéseket is
+        // bejegyzéseket is TODO ez legyen direktben törlés inkább, ne cascade delete
         transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
-        this.saveDetails(transaction, updatedDetails);
+        this.saveDetails(transaction, updateCommand.getDetailCommands());
     }
 
     /**
@@ -102,36 +109,25 @@ public class TransactionService {
      * @param savedTransaction
      * @param transactionDetails
      */
-    private void saveDetails(Transaction savedTransaction, List<TransactionDetail> transactionDetails) {
-        if (savedTransaction.getTransactionType() == null) {
-            throw new IllegalArgumentException("transactiontype not set");
+    private void saveDetails(Transaction savedTransaction, List<TransactionDetailSaveCommand> createCommands) {
+        TransactionTypeEnum transactionType = savedTransaction.getTransactionType();
+
+        if (createCommands.size() == 0) {
+            TransactionDetail defaultDetail = detailFactory.createDefauldDetail(savedTransaction.getPriceSum());
+            defaultDetail.setTransaction(savedTransaction);
+            this.transactionDetailRepo.save(defaultDetail);
+            return;
         }
 
-        TransactionTypeEnum transactionType = savedTransaction.getTransactionType();
-        boolean hasMultipleDetail = transactionDetails.size() > 1;
-        boolean hasSingleDetail = transactionDetails.size() == 1;
-
-        for (TransactionDetail detail : transactionDetails) {
-            boolean isWeightAndUnitPriceExistingDifferently = (detail.getWeight() != null
-                    ^ detail.getUnitPrice() != null);// ^ => XOR operátor
-
-            if (isWeightAndUnitPriceExistingDifferently) {
-                throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
-            }
-            if (hasMultipleDetail && detail.getName() == null) {
-                throw new IllegalArgumentException("TransactionDetail name must be provided for multiple details.");
-            } else if (hasSingleDetail && detail.getName() == null) {
-                detail.setName(TransactionDetail.DEFAULT_DETAIL_NAME);
-            }
-
-            detail.setPrice(costCalculator.calculateCost(detail, transactionType));
-            transactionType.validateDetailPrice(detail.getPrice());
-
+        for (TransactionDetailSaveCommand detailCommand : createCommands) {
+            TransactionDetail detail = new TransactionDetail();
+            detail.setName(detailCommand.getName());
+            detail.setPrice(costCalculator.calculateCost(detailCommand, transactionType));
             detail.setTransaction(savedTransaction);
-
             var detailAfterSave = this.transactionDetailRepo.save(detail);
-            if (detail.getCategoryLinks() != null) {
-                this.saveCategoryDetailEntries(detailAfterSave, detail.getCategoryLinks());
+
+            if (detailCommand.getCategories() != null) {
+                this.saveCategoryDetailEntries(detailAfterSave, detailCommand.getCategories());
             }
         }
     }
@@ -143,10 +139,10 @@ public class TransactionService {
      * @param categoryLinkModels
      */
     private void saveCategoryDetailEntries(TransactionDetail savedDetail,
-            List<TransactionDetailCategory> categoryLinkModels) {
-        categoryLinkModels.forEach((categoryLinkModel) -> {
+            List<Long> categoryIds) {
+        categoryIds.forEach((id) -> {
             Category categoryDummyObject = new Category();
-            categoryDummyObject.setId(categoryLinkModel.getCategory().getId());
+            categoryDummyObject.setId(id);
             TransactionDetailCategory detailCategoryModel = new TransactionDetailCategory(categoryDummyObject,
                     savedDetail);
             transactionDetailCategoryRepository.save(detailCategoryModel);
@@ -235,7 +231,7 @@ public class TransactionService {
      */
     private List<Transaction> getHistory(TransactionFilter filter, int limit) {
         Long userId = currentUser.getUser().getId();
-        
+
         Sort sort = Sort.by("createdAt").descending();
 
         Specification<Transaction> filterConditions = null;
@@ -251,12 +247,13 @@ public class TransactionService {
     }
 
     /**
-     * Törli a tranzakciót (soft delete). 
+     * Törli a tranzakciót (soft delete).
      * 
      * @param transactionId
      */
     public void deleteTransaction(long transactionId) {
-        // getTransactionByIdForActualUser itt nem használható, mert feleslegesen tölti be a detailokat és ez törléskor bizonyos esetekben problémát okoz
+        // getTransactionByIdForActualUser itt nem használható, mert feleslegesen tölti
+        // be a detailokat és ez törléskor bizonyos esetekben problémát okoz
         Long userId = currentUser.getUser().getId();
         Transaction transaction = this.transactionRepo.findById(transactionId)
                 .filter(t -> t.getUser().getId().equals(userId))
