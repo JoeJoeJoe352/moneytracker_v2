@@ -101,7 +101,7 @@ class TransactionE2ETest {
      * végponton keresztül, és visszaadja az adatbázisban kapott id-jét
      */
     private Long createTransactionViaApi(String name, TransactionTypeEnum type, BigDecimal price, LocalDate date) {
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(price, null, null, null, List.of());
+        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(price, "teszt", null, null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest(name, null, type, date, List.of(detail),
                 List.of());
 
@@ -127,7 +127,7 @@ class TransactionE2ETest {
         Long id = createTransactionViaApi("Original", TransactionTypeEnum.INCOME, new BigDecimal("100.00"),
                 LocalDate.now());
 
-        TransactionDetailCreateDto updatedDetail = new TransactionDetailCreateDto(new BigDecimal("-50.00"), null,
+        TransactionDetailCreateDto updatedDetail = new TransactionDetailCreateDto(new BigDecimal("-50.00"), "teszt",
                 null, null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Updated", null,
                 TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 1, 1), List.of(updatedDetail), List.of());
@@ -151,7 +151,7 @@ class TransactionE2ETest {
      */
     @Test
     void updateTransaction_returnsNotFoundForNonexistentId() {
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("10.00"), null, null,
+        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("10.00"), "teszt", null,
                 null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Doesn't matter", null,
                 TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of());

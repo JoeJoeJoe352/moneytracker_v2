@@ -9,6 +9,7 @@ services:
     volumes:
       - ./backend:/app
       - ~/.m2:/root/.m2
+      - backend_target:/app/target
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/moneytracker?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
@@ -55,3 +56,4 @@ networks:
 
 volumes:
   mysql_data:
+  backend_target:

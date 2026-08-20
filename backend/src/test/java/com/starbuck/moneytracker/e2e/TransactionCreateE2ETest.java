@@ -105,7 +105,7 @@ class TransactionCreateE2ETest {
     @Test
     void createTransaction_persistsAndIsRetrievableThroughTheApi() {
         // GIVEN
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("100.00"), null, null,
+        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("100.00"), "teszt", null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("E2E groceries", null,
                 TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of());
