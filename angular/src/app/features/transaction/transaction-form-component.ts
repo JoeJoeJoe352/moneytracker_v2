@@ -228,7 +228,7 @@ export class TransactionFormComponent implements OnChanges {
             singleSelection: false,
             idField: 'item_id',
             textField: 'item_text',
-            itemsShowLimit: 2,
+            itemsShowLimit: 3,
             allowSearchFilter: true,
             noFilteredDataAvailablePlaceholderText: this.translateService.instant(
                 'transaction.category.add',

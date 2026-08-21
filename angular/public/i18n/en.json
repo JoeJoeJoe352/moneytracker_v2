@@ -1,0 +1,143 @@
+{
+  "in_db": {
+    "category": {
+      "food": "Food",
+      "household": "Household",
+      "hygiene": "Hygiene",
+      "health": "Health",
+      "transport": "Transport",
+      "fuel": "Fuel",
+      "entertainment": "Entertainment",
+      "clothing": "Clothing",
+      "electronics": "Electronics",
+      "home": "Home",
+      "pets": "Pets",
+      "gifts": "Gifts",
+      "education": "Education",
+      "sport": "Sport",
+      "subscription": "Subscription",
+      "other": "Other"
+    }
+  },
+
+  "welcome": {
+    "title": "Welcome to Moneytracker!",
+    "welcomeText": "Regularly tracking our expenses helps us become more mindful in everyday life. It shows where the money leaks away, which habits support us, and which hold us back. When you see the real numbers, it's easier to make smart decisions: saving, planning, or confidently allowing yourself something. Financial transparency doesn't limit you — it gives you freedom, since you know exactly where you stand and where you want to go.",
+    "benefitsTitle": "Why is it worth tracking our expenses?",
+    "liquidityTitle": "It becomes clear where the money goes — no more \"where did it all go?\" moments.",
+    "easier": "It's easier to spot unnecessary spending — you notice the hidden money-draining habits.",
+    "decisions": "You make more mindful decisions — planning based on real data instead of gut feeling.",
+    "financial-stress": "Financial stress decreases — fewer surprises, more control.",
+    "faster": "You can save faster — you see where you can optimize smartly.",
+    "security": "It gives security and freedom — you know exactly whether you can afford something.",
+    "goals": "It helps you reach long-term goals — housing, travel, savings, whatever matters.",
+    "register": "Register or log in to continue!",
+    "register.title": "Register",
+    "login.title": "Log in"
+  },
+  "login": {
+    "title": "Log in",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Log in",
+    "username.required-error": "Username is required!",
+    "password.required-error": "Password is required!"
+  },
+  "register": {
+    "username": "Username",
+    "username.required-error": "Username is required!",
+    "username.minlength-error": "Username must be at least 5 characters long!",
+    "username.maxlength-error": "Username must be at most 20 characters long!",
+    "username.taken-error": "Username is already taken!",
+    "email": "Email",
+    "email.required-error": "Email is required!",
+    "email.pattern-error": "Please enter a valid email address!",
+    "email.taken-error": "Email is already taken!",
+    "password": "Password",
+    "password.required-error": "Password is required!",
+    "password.minlength-error": "Password must be at least 6 characters long!",
+    "password_again": "Confirm password",
+    "password_again.required-error": "Password confirmation is required!",
+    "password_again.minlength-error": "Password confirmation must be at least 6 characters long!",
+    "password_again.mismatch-error": "Passwords do not match!",
+    "submit": "Register"
+  },
+  "header": {
+    "welcome": "Welcome",
+    "transactions": "Transactions",
+    "logout": "Log out",
+    "dashboard": "Dashboard"
+  },
+  "footer": {
+    "home": "Home"
+  },
+  "transaction": {
+    "create": "Create transaction",
+    "update": "Update transaction",
+    "delete": "Delete transaction",
+    "delete.confirm": "Are you sure you want to delete this transaction?",
+    "delete.error": "An error occurred while deleting the transaction!",
+    "update.error": "An error occurred while updating the transaction!",
+    "create.error": "An error occurred while creating the transaction!",
+    "name": "Transaction name",
+    "name.required": "Transaction name is required!",
+    "name.minlength": "Transaction name must be at least 3 characters long!",
+    "name.maxlength": "Transaction name must be at most 50 characters long!",
+    "type": "Transaction type",
+    "price": "Amount",
+    "price.required": "Amount is required!",
+    "price.min": "Amount must be greater than zero!",
+    "date": "Date",
+    "date.placeholder": "Enter a date!",
+    "date.required": "Date is required!",
+    "date.invalid": "Date is invalid!",
+    "expense": "Expense",
+    "income": "Income",
+    "hide_details": "Enter transaction amount",
+    "show_details": "List items",
+    "categories": "Categories",
+    "categories.add": "Add categories",
+    "category": {
+      "add": "Click here to add a new category!"
+    },
+
+    "detail": {
+      "title": "Transaction details",
+      "name": "Item name",
+      "name.required": "Name is required",
+      "price": "Item price",
+      "price.required": "Price is required",
+      "price.min": "Must be a number greater than 0",
+      "add-detail": "Add item",
+      "delete.last-one-error": "The last item cannot be deleted",
+      "delete_row.tooltip": "Delete item",
+      "toggle.confirm": "Are you sure you want to toggle the switch? Existing items will be deleted.",
+      "weight": "Weight",
+      "weight.min": "Weight must be greater than zero!",
+      "unit_price": "Unit price",
+      "unit_price.min": "Unit price must be greater than zero!",
+      "simple_price_mode": "Enter price",
+      "complex_price_mode": "Enter quantity and unit price",
+      "total_price": "Total price"
+    }
+  },
+  "mainpage": {
+    "total_balance": "Total balance",
+    "create_transaction.button": "Create transaction",
+    "no_transaction": "No transactions yet",
+    "total_income": "Income this month",
+    "total_expenses": "Expenses this month",
+    "last_transactions": "Latest transactions"
+  },
+  "transaction_page": {
+    "title": "My transactions",
+
+    "filter": {
+      "name": "Transaction name",
+      "date": "Transaction date",
+      "date.placeholder": "Select a date",
+      "submit": "Search",
+      "clear": "Clear filters"
+    }
+  }
+}

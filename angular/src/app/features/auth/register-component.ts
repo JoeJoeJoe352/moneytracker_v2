@@ -4,12 +4,13 @@ import { AuthService } from "./auth-service";
 import { NgClass } from "@angular/common";
 import { passwordMismatchValidator } from "./password-match.directive";
 import { UniqueNameAndEmailDirective } from "./unique-username.directive.";
+import { TranslatePipe } from "@ngx-translate/core";
 
 const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 @Component({
     selector: "app-register-component",
     templateUrl: "./register-component.html",
-    imports: [ReactiveFormsModule, NgClass],
+    imports: [ReactiveFormsModule, NgClass, TranslatePipe],
     styleUrls: ["../../shared/components/form-style.scss"],
 })
 export class RegisterComponent {
