@@ -25,6 +25,9 @@ public abstract class TransactionSaveCommand {
     public TransactionSaveCommand(String name, BigDecimal globalPrice, LocalDate date, TransactionTypeEnum type,
             List<TransactionDetailSaveCommand> detailCommands, List<Long> categories) {
 
+        if (detailCommands.size() == 0 && globalPrice == null) {
+            throw new IllegalArgumentException("Global Price must be set when there is no detail");
+        }
         if (globalPrice != null) {
             type.validateDetailPrice(globalPrice);
         }

@@ -146,22 +146,24 @@ class TransactionServiceTest {
      */
     @Test
     void createTransaction_withNoDetails_createsDefaultDetail() {
-        TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction", null,
+        TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction", new BigDecimal("300.00"),
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of());
 
-        Mockito.when(detailFactory.createDefaultDetail(BigDecimal.ZERO))
-                .thenReturn(new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, BigDecimal.ZERO));
+        Mockito.when(detailFactory.createDefaultDetail(new BigDecimal("300.00")))
+                .thenReturn(new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("300.00")));
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
         Transaction result = transactionService.createTransaction(command);
 
-        assertUtil.assertTransaction(result, "noDetailTransaction", LocalDate.now(), BigDecimal.ZERO,
+        assertUtil.assertTransaction(result, "noDetailTransaction", LocalDate.now(), new BigDecimal("300.00"),
                 TransactionTypeEnum.INCOME);
 
         Mockito.verify(transactionDetailRepo).save(captor.capture());
-        assertEquals(TransactionDetail.DEFAULT_DETAIL_NAME, captor.getValue().getName());
-        assertEquals(result, captor.getValue().getTransaction());
+        var detail = captor.getValue();
+        assertEquals(TransactionDetail.DEFAULT_DETAIL_NAME, detail.getName());
+        assertEquals(result, detail.getTransaction());
+        assertEquals(new BigDecimal("300.00"), detail.getPrice());
     }
 
     /**
@@ -256,7 +258,7 @@ class TransactionServiceTest {
         var details = captor.getAllValues();
 
         assertUtil.assertDetail(details.get(0), "WeightesDetail", new BigDecimal("150.00"),
-                null, null,
+                new BigDecimal("0.5"), new BigDecimal("300"),
                 result);
         assertUtil.assertDetail(details.get(1), "Simadetail", new BigDecimal("200.00"), null, null, result);
     }
@@ -282,7 +284,7 @@ class TransactionServiceTest {
         TransactionDetailSaveCommand updatedDetail = new TransactionDetailSaveCommand("simadetail1",
                 new BigDecimal(-200), List.of(), TransactionTypeEnum.OUTCOME);
         TransactionDetailSaveCommand updatedDetail2 = new TransactionDetailSaveCommand("weightresDetail2",
-                new BigDecimal("0.7"), new BigDecimal(300), List.of());
+                new BigDecimal("0.7"), new BigDecimal("300"), List.of());
         TransactionUpdateCommand updatedTransaction = new TransactionUpdateCommand("updated", null,
                 LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME, List.of(updatedDetail, updatedDetail2),
                 List.of());
@@ -310,7 +312,7 @@ class TransactionServiceTest {
         assertUtil.assertDetail(details.get(0), "simadetail1", new BigDecimal("-200.00"), null, null,
                 transaction);
         assertUtil.assertDetail(details.get(1), "weightresDetail2", new BigDecimal("-210.00"),
-                null, null,
+                new BigDecimal("0.7"), new BigDecimal("300"),
                 transaction);
     }
 
