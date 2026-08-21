@@ -21,15 +21,27 @@ class TransactionUpdateCommandTest {
     @Test
     void nullDetailList_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionUpdateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionUpdateCommand("teszt", null, LocalDate.now(),
+                        TransactionTypeEnum.INCOME,
                         null, List.of()));
     }
 
     @Test
-    void emptyDetailList_throws() {
+    void noGlobalPriceAndNoDetails_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionUpdateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionUpdateCommand("teszt", null, LocalDate.now(),
+                        TransactionTypeEnum.INCOME,
                         List.of(), List.of()));
+    }
+
+    @Test
+    void globalPriceAndDetails_throws() {
+        assertThrowsExactly(IllegalArgumentException.class,
+                () -> new TransactionUpdateCommand("teszt", new BigDecimal("300"), LocalDate.now(),
+                        TransactionTypeEnum.INCOME,
+                        List.of(new TransactionDetailSaveCommand("teszt", new BigDecimal("400"),
+                                List.of(), TransactionTypeEnum.INCOME)),
+                        List.of()));
     }
 
     /**
@@ -39,7 +51,8 @@ class TransactionUpdateCommandTest {
     @Test
     void blankName_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionUpdateCommand("", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionUpdateCommand("", null, LocalDate.now(),
+                        TransactionTypeEnum.INCOME,
                         List.of(detail), List.of()));
     }
 
@@ -47,11 +60,11 @@ class TransactionUpdateCommandTest {
     void validInput_assignsAllFields() {
         LocalDate date = LocalDate.of(2026, 5, 20);
 
-        var command = new TransactionUpdateCommand("updated", new BigDecimal("250"), date,
+        var command = new TransactionUpdateCommand("updated", null, date,
                 TransactionTypeEnum.OUTCOME, List.of(detail), List.of(3L));
 
         assertEquals("updated", command.getTransactionName());
-        assertEquals(new BigDecimal("250"), command.getGlobalPrice());
+        assertEquals(null, command.getGlobalPrice());
         assertEquals(date, command.getTransactionDate());
         assertEquals(TransactionTypeEnum.OUTCOME, command.getTransactionType());
         assertEquals(List.of(detail), command.getDetailCommands());

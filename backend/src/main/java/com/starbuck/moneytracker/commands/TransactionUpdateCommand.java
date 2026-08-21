@@ -20,9 +20,6 @@ public class TransactionUpdateCommand extends TransactionSaveCommand {
     public TransactionUpdateCommand(String name, BigDecimal globalPrice, LocalDate date, TransactionTypeEnum type,
             List<TransactionDetailSaveCommand> detailCommands, List<Long> categories) {
         super(name, globalPrice, date, type, detailCommands, categories);
-        if (detailCommands == null || detailCommands.size() == 0) {
-            throw new IllegalArgumentException("Transaction detail list cannot be null at update");
-        }
     }
 
 }

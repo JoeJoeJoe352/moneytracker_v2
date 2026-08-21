@@ -21,7 +21,7 @@ class TransactionCreateCommandTest {
 
     @Test
     void isATransactionSaveCommand() {
-        var command = new TransactionCreateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+        var command = new TransactionCreateCommand("teszt", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
                 List.of(), List.of());
 
         assertTrue(command instanceof TransactionSaveCommand);

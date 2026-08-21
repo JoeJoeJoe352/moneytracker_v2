@@ -160,7 +160,7 @@ class TransactionMapperTest {
      */
     @Test
     void fromTransactionCreateRequest_mapsBasicFields() {
-        TransactionCreateRequest request = new TransactionCreateRequest("groceries", new BigDecimal("50.00"),
+        TransactionCreateRequest request = new TransactionCreateRequest("groceries", new BigDecimal("-50.00"),
                 TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 3, 1), List.of(), List.of());
 
         TransactionSaveCommand result = mapper.fromTransactionCreateRequest(request);

@@ -25,10 +25,20 @@ public abstract class TransactionSaveCommand {
     public TransactionSaveCommand(String name, BigDecimal globalPrice, LocalDate date, TransactionTypeEnum type,
             List<TransactionDetailSaveCommand> detailCommands, List<Long> categories) {
 
-        if (detailCommands.size() == 0 && globalPrice == null) {
-            throw new IllegalArgumentException("Global Price must be set when there is no detail");
+        if (detailCommands == null) {
+            throw new IllegalArgumentException("Detailcommands cannot be null (use empty List instead)");
         }
-        if (globalPrice != null) {
+        if (detailCommands.size() == 0 && globalPrice == null) {
+            // Ha nincs detail, akkor a globalPrice-ból tudjuk csak kiszedni az árat
+            throw new IllegalArgumentException("Global Price must be set when there is no detail");
+        } else if (detailCommands.size() > 0 && globalPrice != null) {
+            // Ilyenkor a detailből olvassuk ki az árat, csak zaj, ha elküldjük a
+            // globalPrice-t is
+            throw new IllegalArgumentException("Global Price must not be set when there is detail");
+        }
+        if (type == null) {
+            throw new IllegalArgumentException("Transaction type cannot be null");
+        } else if (globalPrice != null) {
             type.validateDetailPrice(globalPrice);
         }
         if (name == null || name.isBlank()) {
@@ -36,9 +46,6 @@ public abstract class TransactionSaveCommand {
         }
         if (date == null) {
             throw new IllegalArgumentException("Transaction date cannot be null");
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("Transaction type cannot be null");
         }
 
         this.globalPrice = globalPrice;

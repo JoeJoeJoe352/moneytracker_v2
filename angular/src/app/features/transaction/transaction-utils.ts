@@ -66,7 +66,7 @@ export class TransactionUtils {
 
         return {
             globalPrice:
-                input.price !== null
+                input.price !== null && !input.isComplexTransaction
                     ? this.deNormalizePriceForBackend(input.price, input.isIncome)
                     : null,
             name: input.name,

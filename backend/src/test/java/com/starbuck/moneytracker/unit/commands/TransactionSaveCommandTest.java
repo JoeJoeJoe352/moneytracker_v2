@@ -1,9 +1,7 @@
 package com.starbuck.moneytracker.unit.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,29 +23,41 @@ class TransactionSaveCommandTest {
     @Test
     void nullName_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand(null, null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionCreateCommand(null, new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
                         List.of(), List.of()));
     }
 
     @Test
     void blankName_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand("   ", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionCreateCommand("   ", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
                         List.of(), List.of()));
     }
 
     @Test
     void nullDate_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand("teszt", null, null, TransactionTypeEnum.INCOME,
+                () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), null, TransactionTypeEnum.INCOME,
                         List.of(), List.of()));
     }
 
     @Test
     void nullType_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand("teszt", null, LocalDate.now(), null,
+                () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), LocalDate.now(), null,
                         List.of(), List.of()));
+    }
+    @Test
+    void noGlobalPriceAndNoDetails_throws() {
+        assertThrowsExactly(IllegalArgumentException.class,
+                () -> new TransactionCreateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                        List.of(), List.of()));
+    }
+    @Test
+    void globalPriceAndDetails_throws() {
+        assertThrowsExactly(IllegalArgumentException.class,
+                () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
+                        List.of(new TransactionDetailSaveCommand("teszt", new BigDecimal("400"), List.of(), TransactionTypeEnum.INCOME)), List.of()));
     }
 
     @Test
@@ -56,24 +66,14 @@ class TransactionSaveCommandTest {
                 List.of(), TransactionTypeEnum.INCOME);
         LocalDate date = LocalDate.of(2026, 3, 1);
 
-        var command = new TransactionCreateCommand("teszt", new BigDecimal("500"), date,
+        var command = new TransactionCreateCommand("teszt", null, date,
                 TransactionTypeEnum.INCOME, List.of(detail), List.of(1L, 2L));
 
         assertEquals("teszt", command.getTransactionName());
-        assertEquals(new BigDecimal("500"), command.getGlobalPrice());
+        assertEquals(null, command.getGlobalPrice());
         assertEquals(date, command.getTransactionDate());
         assertEquals(TransactionTypeEnum.INCOME, command.getTransactionType());
         assertEquals(List.of(detail), command.getDetailCommands());
         assertEquals(List.of(1L, 2L), command.getCategories());
-    }
-
-    @Test
-    void nullGlobalPriceAndEmptyLists_areAccepted() {
-        var command = new TransactionCreateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
-                List.of(), List.of());
-
-        assertNull(command.getGlobalPrice());
-        assertTrue(command.getDetailCommands().isEmpty());
-        assertTrue(command.getCategories().isEmpty());
     }
 }

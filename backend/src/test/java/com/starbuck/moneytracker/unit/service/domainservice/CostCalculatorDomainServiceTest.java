@@ -79,10 +79,10 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void emptyDetailArray_returnsZero() {
-        var transaction = new TransactionCreateCommand("bevásárlás", null, LocalDate.now(),
+        var transaction = new TransactionCreateCommand("bevásárlás", new BigDecimal("300.00"), LocalDate.now(),
                 TransactionTypeEnum.INCOME, List.of(), List.of());
 
-        assertEquals(BigDecimal.ZERO, service.calculateTransactionCost(transaction));
+        assertEquals(new BigDecimal("300.00"), service.calculateTransactionCost(transaction));
     }
 
     /**
