@@ -1,0 +1,143 @@
+{
+  "in_db": {
+    "category": {
+      "food": "Lebensmittel",
+      "household": "Haushalt",
+      "hygiene": "Hygiene",
+      "health": "Gesundheit",
+      "transport": "Verkehr",
+      "fuel": "Kraftstoff",
+      "entertainment": "Unterhaltung",
+      "clothing": "Kleidung",
+      "electronics": "Elektronik",
+      "home": "Zuhause",
+      "pets": "Haustiere",
+      "gifts": "Geschenke",
+      "education": "Bildung",
+      "sport": "Sport",
+      "subscription": "Abonnement",
+      "other": "Sonstiges"
+    }
+  },
+
+  "welcome": {
+    "title": "Willkommen bei Moneytracker!",
+    "welcomeText": "Die regelmäßige Verfolgung unserer Ausgaben hilft uns, im Alltag bewusster zu handeln. Sie zeigt, wo das Geld versickert, welche Gewohnheiten uns unterstützen und welche uns zurückhalten. Wenn du die echten Zahlen siehst, fällt es leichter, kluge Entscheidungen zu treffen: sparen, planen oder dir mutig etwas gönnen. Finanzielle Transparenz schränkt nicht ein, sondern schenkt Freiheit — du weißt genau, wo du stehst und wohin du willst.",
+    "benefitsTitle": "Warum lohnt es sich, unsere Ausgaben zu verfolgen?",
+    "liquidityTitle": "Es wird transparent, wohin das Geld geht — keine „Wo ist das Geld nur hin?“-Momente mehr.",
+    "easier": "Es ist leichter, unnötige Ausgaben zu erkennen — du bemerkst versteckte Geldfresser-Gewohnheiten.",
+    "decisions": "Du triffst bewusstere Entscheidungen — geplant anhand echter Daten statt aus dem Bauch heraus.",
+    "financial-stress": "Finanzieller Stress nimmt ab — weniger Überraschungen, mehr Kontrolle.",
+    "faster": "Du kannst schneller sparen — du siehst, wo du klug optimieren kannst.",
+    "security": "Es gibt dir Sicherheit und Freiheit — du weißt genau, ob du dir etwas leisten kannst.",
+    "goals": "Es hilft dir, langfristige Ziele zu erreichen — Wohnung, Reisen, Rücklage, was auch immer wichtig ist.",
+    "register": "Registriere dich oder melde dich an, um fortzufahren!",
+    "register.title": "Registrierung",
+    "login.title": "Anmeldung"
+  },
+  "login": {
+    "title": "Anmeldung",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "submit": "Anmelden",
+    "username.required-error": "Der Benutzername ist erforderlich!",
+    "password.required-error": "Das Passwort ist erforderlich!"
+  },
+  "register": {
+    "username": "Benutzername",
+    "username.required-error": "Der Benutzername ist erforderlich!",
+    "username.minlength-error": "Der Benutzername muss mindestens 5 Zeichen lang sein!",
+    "username.maxlength-error": "Der Benutzername darf höchstens 20 Zeichen lang sein!",
+    "username.taken-error": "Der Benutzername ist bereits vergeben!",
+    "email": "E-Mail",
+    "email.required-error": "Die E-Mail-Adresse ist erforderlich!",
+    "email.pattern-error": "Bitte gib eine gültige E-Mail-Adresse ein!",
+    "email.taken-error": "Die E-Mail-Adresse ist bereits vergeben!",
+    "password": "Passwort",
+    "password.required-error": "Das Passwort ist erforderlich!",
+    "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",
+    "password_again": "Passwort bestätigen",
+    "password_again.required-error": "Die Passwortbestätigung ist erforderlich!",
+    "password_again.minlength-error": "Die Passwortbestätigung muss mindestens 6 Zeichen lang sein!",
+    "password_again.mismatch-error": "Die Passwörter stimmen nicht überein!",
+    "submit": "Registrieren"
+  },
+  "header": {
+    "welcome": "Willkommen",
+    "transactions": "Transaktionen",
+    "logout": "Abmelden",
+    "dashboard": "Startseite"
+  },
+  "footer": {
+    "home": "Startseite"
+  },
+  "transaction": {
+    "create": "Transaktion erstellen",
+    "update": "Transaktion bearbeiten",
+    "delete": "Transaktion löschen",
+    "delete.confirm": "Möchtest du die Transaktion wirklich löschen?",
+    "delete.error": "Beim Löschen der Transaktion ist ein Fehler aufgetreten!",
+    "update.error": "Beim Bearbeiten der Transaktion ist ein Fehler aufgetreten!",
+    "create.error": "Beim Erstellen der Transaktion ist ein Fehler aufgetreten!",
+    "name": "Transaktionsname",
+    "name.required": "Der Transaktionsname ist erforderlich!",
+    "name.minlength": "Der Transaktionsname muss mindestens 3 Zeichen lang sein!",
+    "name.maxlength": "Der Transaktionsname darf höchstens 50 Zeichen lang sein!",
+    "type": "Transaktionstyp",
+    "price": "Betrag",
+    "price.required": "Der Betrag ist erforderlich!",
+    "price.min": "Der Betrag muss größer als null sein!",
+    "date": "Datum",
+    "date.placeholder": "Datum angeben!",
+    "date.required": "Das Datum ist erforderlich!",
+    "date.invalid": "Das Datum ist ungültig!",
+    "expense": "Ausgabe",
+    "income": "Einnahme",
+    "hide_details": "Transaktionsbetrag angeben",
+    "show_details": "Posten auflisten",
+    "categories": "Kategorien",
+    "categories.add": "Kategorien hinzufügen",
+    "category": {
+      "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!"
+    },
+
+    "detail": {
+      "title": "Transaktionsdetails",
+      "name": "Postenname",
+      "name.required": "Name ist erforderlich",
+      "price": "Postenpreis",
+      "price.required": "Der Preis ist erforderlich",
+      "price.min": "Muss eine Zahl größer als 0 sein",
+      "add-detail": "Posten hinzufügen",
+      "delete.last-one-error": "Der letzte Posten kann nicht gelöscht werden",
+      "delete_row.tooltip": "Posten löschen",
+      "toggle.confirm": "Möchtest du den Schalter wirklich umstellen? Bestehende Posten werden dabei gelöscht.",
+      "weight": "Gewicht",
+      "weight.min": "Das Gewicht muss größer als null sein!",
+      "unit_price": "Einzelpreis",
+      "unit_price.min": "Der Einzelpreis muss größer als null sein!",
+      "simple_price_mode": "Preis angeben",
+      "complex_price_mode": "Menge und Einzelpreis angeben",
+      "total_price": "Gesamtpreis"
+    }
+  },
+  "mainpage": {
+    "total_balance": "Gesamtguthaben",
+    "create_transaction.button": "Transaktion erstellen",
+    "no_transaction": "Noch keine Transaktion erfasst",
+    "total_income": "Einnahmen in diesem Monat",
+    "total_expenses": "Ausgaben in diesem Monat",
+    "last_transactions": "Letzte Transaktionen"
+  },
+  "transaction_page": {
+    "title": "Meine Transaktionen",
+
+    "filter": {
+      "name": "Transaktionsname",
+      "date": "Transaktionsdatum",
+      "date.placeholder": "Datum auswählen",
+      "submit": "Suchen",
+      "clear": "Filter zurücksetzen"
+    }
+  }
+}

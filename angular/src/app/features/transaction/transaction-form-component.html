@@ -42,7 +42,7 @@
             id="transaction-date"
             mode="single"
             formControlName="transactionDate"
-            placeholder="Select a date"
+            [placeholder]="'transaction.date.placeholder' | translate"
         />
         @if (transactionDate.invalid && transactionDate.touched) {
             @if (transactionDate.hasError('required')) {
@@ -97,12 +97,12 @@
                         }
                     }
                 </div>
-                <div>
+                <div class="w-100">
                     <label for="transaction-categories">{{
                         'transaction.categories' | translate
                     }}</label>
                     <ng-multiselect-dropdown
-                        [placeholder]="'custom placeholder'"
+                        [placeholder]="'transaction.categories.add' | translate"
                         [settings]="multiselectSettings()"
                         [disabled]="isCategorySaveInProgress"
                         [data]="categoryData()"
@@ -142,12 +142,12 @@
                                 }
                             }
                         </div>
-                        <div>
+                        <div class="w-100">
                             <label for="transaction-categories">{{
                                 'transaction.categories' | translate
                             }}</label>
                             <ng-multiselect-dropdown
-                                [placeholder]="'custom placeholder'"
+                                [placeholder]="'transaction.categories.add' | translate"
                                 [settings]="multiselectSettings()"
                                 [disabled]="isCategorySaveInProgress"
                                 [data]="categoryData()"
@@ -156,17 +156,6 @@
                                 (click)="onCategoryDropdownClick($event)"
                                 (onDropDownClose)="categorySearchText.set('')"
                             />
-                        </div>
-                        <div class="ms-auto">
-                            <button
-                                [title]="'transaction.detail.delete_row.tooltip' | translate"
-                                type="button"
-                                class="btn btn-primary-red"
-                                (click)="deleteRow($index)"
-                                [disabled]="isLastDetailRow"
-                            >
-                                <i class="bi bi-trash"></i>
-                            </button>
                         </div>
                     </div>
 
@@ -284,6 +273,18 @@
                                 </div>
                             </div>
                         }
+                    </div>
+                    <div class="text-center mt-3">
+                        <button
+                            [title]="'transaction.detail.delete_row.tooltip' | translate"
+                            type="button"
+                            class="btn btn-primary-red"
+                            (click)="deleteRow($index)"
+                            [disabled]="isLastDetailRow"
+                        >
+                            {{ 'transaction.detail.delete_row.tooltip' | translate }}
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
                 </div>
             }

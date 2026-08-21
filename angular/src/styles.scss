@@ -34,6 +34,13 @@ ngxsmk-datepicker, .ngxsmk-popover-container, .ngxsmk-backdrop {
   --datepicker-shadow-md: 0 !important;
 }
 
+.ngxsmk-input-group:hover,
+.ngxsmk-input-group:focus-within {
+  border-color: var(--datepicker-border-color) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 // kis javítás a datepickeren, tablet nézetben a clear és close gombokon el volt csúszva a szöveg
 .ngxsmk-footer{
   button {

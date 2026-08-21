@@ -43,11 +43,33 @@
     "username.required-error": "A felhasználónév megadása kötelező!",
     "password.required-error": "A jelszó megadása kötelező!"
   },
+  "register": {
+    "username": "Felhasználónév",
+    "username.required-error": "A felhasználónév megadása kötelező!",
+    "username.minlength-error": "A felhasználónévnek legalább 5 karakter hosszúnak kell lennie!",
+    "username.maxlength-error": "A felhasználónévnek legfeljebb 20 karakter hosszúnak kell lennie!",
+    "username.taken-error": "A felhasználónév már foglalt!",
+    "email": "Email",
+    "email.required-error": "Az email megadása kötelező!",
+    "email.pattern-error": "Adj meg egy érvényes email címet!",
+    "email.taken-error": "Az email cím már foglalt!",
+    "password": "Jelszó",
+    "password.required-error": "A jelszó megadása kötelező!",
+    "password.minlength-error": "A jelszónak legalább 6 karakter hosszúnak kell lennie!",
+    "password_again": "Jelszó megerősítése",
+    "password_again.required-error": "A jelszó megerősítése kötelező!",
+    "password_again.minlength-error": "A jelszó megerősítésének legalább 6 karakter hosszúnak kell lennie!",
+    "password_again.mismatch-error": "A jelszavak nem egyeznek!",
+    "submit": "Regisztráció"
+  },
   "header": {
     "welcome": "Üdvözlünk",
     "transactions": "Tranzakciók",
     "logout": "Kijelentkezés",
     "dashboard": "Főoldal"
+  },
+  "footer": {
+    "home": "Főoldal"
   },
   "transaction": {
     "create": "Tranzakció létrehozása",
@@ -66,6 +88,7 @@
     "price.required": "Az összeg megadása kötelező!",
     "price.min": "Az összegnek nagyobbnak kell lennie, mint nulla!",
     "date": "Dátum",
+    "date.placeholder": "Adj meg dátumot!",
     "date.required": "A dátum megadása kötelező!",
     "date.invalid": "A dátum érvénytelen!",
     "expense": "Kiadás",
@@ -73,8 +96,9 @@
     "hide_details": "Tranzakciós összeg megadása",
     "show_details": "Tételek felsorolása",
     "categories": "Kategóriák",
+    "categories.add": "Kategóriák hozzáadása",
     "category": {
-      "add": "Kategória hozzáadása"
+      "add": "Új kategória hozzáadásához kattints ide!"
     },
 
     "detail": {
@@ -86,7 +110,7 @@
       "price.min": "Az 0-nál nagyobb számnak kell lennie",
       "add-detail": "Tétel hozzáadása",
       "delete.last-one-error": "Utolsó tétel nem törölhető",
-      "delete_row.tooltip": "sor törlése",
+      "delete_row.tooltip": "Tétel törlése",
       "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek.",
       "weight": "Súly",
       "weight.min": "A súlynak nagyobbnak kell lennie, mint nulla!",

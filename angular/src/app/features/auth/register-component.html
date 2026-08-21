@@ -2,7 +2,7 @@
     
     <!-- username-->
     <div class="form-group mb-3">
-        <label for="reg-username">Username</label>
+        <label for="reg-username">{{ 'register.username' | translate }}</label>
         <input
             id="reg-username"
             type="text"
@@ -14,23 +14,23 @@
         />
         @if (username.invalid && username.touched) {
             @if (username.hasError('required')) {
-                <div class="form-field-error">Username is required.</div>
+                <div class="form-field-error">{{ 'register.username.required-error' | translate }}</div>
             }
             @if (username.hasError('minlength')) {
-                <div class="form-field-error">Username must be at least 5 characters long.</div>
+                <div class="form-field-error">{{ 'register.username.minlength-error' | translate }}</div>
             }
             @if (username.hasError('maxlength')) {
-                <div class="form-field-error">Username must be at most 20 characters long.</div>
+                <div class="form-field-error">{{ 'register.username.maxlength-error' | translate }}</div>
             }
             @if (username.hasError('usernameTaken')) {
-                <div class="form-field-error">Username already used.</div>
+                <div class="form-field-error">{{ 'register.username.taken-error' | translate }}</div>
             }
         }
     </div>
 
     <!-- email-->
     <div class="form-group mb-3">
-        <label for="reg-email">Email</label>
+        <label for="reg-email">{{ 'register.email' | translate }}</label>
         <input
             id="reg-email"
             type="email"
@@ -42,20 +42,20 @@
         />
         @if (email.invalid && (email.touched)) {
             @if (email.hasError('required')) {
-                <div class="form-field-error">Email is required.</div>
+                <div class="form-field-error">{{ 'register.email.required-error' | translate }}</div>
             }
             @if (email.hasError('pattern')) {
-                <div class="form-field-error">Please enter a valid email address.</div>
+                <div class="form-field-error">{{ 'register.email.pattern-error' | translate }}</div>
             }
             @if (email.hasError('emailTaken')) {
-                <div class="form-field-error">Email already used.</div>
+                <div class="form-field-error">{{ 'register.email.taken-error' | translate }}</div>
             }
         }
     </div>
     
     <!-- password-->
     <div class="form-group mb-3">
-        <label for="reg-password">Password</label>
+        <label for="reg-password">{{ 'register.password' | translate }}</label>
         <input
             id="reg-password"
             type="password"
@@ -67,17 +67,17 @@
         />
         @if (password.invalid && (password.dirty || password.touched)) {
             @if (password.hasError('required')) {
-                <div class="form-field-error">Password is required.</div>
+                <div class="form-field-error">{{ 'register.password.required-error' | translate }}</div>
             }
             @if (password.hasError('minlength')) {
-                <div class="form-field-error">Password must be at least 6 characters long.</div>
+                <div class="form-field-error">{{ 'register.password.minlength-error' | translate }}</div>
             }
         }
     </div>
 
     <!-- confirm password-->
     <div class="form-group mb-3">
-        <label for="reg-password-again">Confirm Password</label>
+        <label for="reg-password-again">{{ 'register.password_again' | translate }}</label>
         <input
             id="reg-password-again"
             type="password"
@@ -89,20 +89,20 @@
         />
         @if (passwordAgain.invalid && (passwordAgain.dirty || passwordAgain.touched)) {
             @if (passwordAgain.hasError('required')) {
-                <div class="form-field-error">Password confirmation is required.</div>
+                <div class="form-field-error">{{ 'register.password_again.required-error' | translate }}</div>
             }
             @if (passwordAgain.hasError('minlength')) {
-                <div class="form-field-error">Password confirmation must be at least 6 characters long.</div>
+                <div class="form-field-error">{{ 'register.password_again.minlength-error' | translate }}</div>
             }
         }
 
         @if (passwordAgain.touched && hasPasswordMismatchError) {
-            <div class="form-field-error">Passwords do not match.</div>
+            <div class="form-field-error">{{ 'register.password_again.mismatch-error' | translate }}</div>
         }
     </div>
 
     <button type="submit" [disabled]="registerForm.invalid || isLoading()" class="btn btn-primary-green">
-        Register
+        {{ 'register.submit' | translate }}
     </button>
 
     @if (backendErrorMsg() !== '') {
