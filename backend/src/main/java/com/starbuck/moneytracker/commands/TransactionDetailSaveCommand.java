@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.types.WeightedPrice;
 
 /**
- * Tranzakció detail mentéshez való command osztály, kiszűri a hibás adatvariánsokat
+ * Tranzakció detail mentéshez való command osztály, kiszűri a hibás
+ * adatvariánsokat
  */
 public class TransactionDetailSaveCommand {
 
@@ -16,23 +18,18 @@ public class TransactionDetailSaveCommand {
     String name;
     /**
      * Tétel ára
-     * Lehet null, ha súly és egységárat adunk meg
+     * Lehet null, ha súlyozott árat adunk meg
      */
     BigDecimal price;
-    /**
-     * Tétel súlya
-     * Lehet null, ha árat adunk meg
-     */
-    BigDecimal weight;
-    /**
-     * Tétel egységára
-     * Lehet null, ha árat adunk meg
-     */
-    BigDecimal unitPrice;
     /**
      * Tétel kategória azonosítói
      */
     List<Long> categories;
+    /**
+     * Súlyból és egységárból számolt ár
+     * lehet null, ha árat adunk meg
+     */
+    WeightedPrice weightedPrice;
 
     /**
      * Ha egyszerű áras a detail
@@ -66,17 +63,9 @@ public class TransactionDetailSaveCommand {
      */
     public TransactionDetailSaveCommand(String name, BigDecimal weight, BigDecimal unitPrice,
             List<Long> categories) {
-// TODO weightedprice legyen BigDecimal weight, BigDecimal unitPrice helyett
-        if (weight == null || unitPrice == null) {
-            throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
-        }
-        if (weight.compareTo(BigDecimal.ZERO) < 1 || unitPrice.compareTo(BigDecimal.ZERO) < 1) {
-            throw new IllegalArgumentException("Weight and unitprice must be a positive number");
-        }
 
         this.setName(name);
-        this.weight = weight;
-        this.unitPrice = unitPrice;
+        this.weightedPrice = new WeightedPrice(weight, unitPrice);
         this.categories = categories;
     }
 
@@ -86,7 +75,7 @@ public class TransactionDetailSaveCommand {
      * @return
      */
     public boolean isComplexPriceMode() {
-        return this.weight != null && this.unitPrice != null;
+        return this.weightedPrice != null;
     }
 
     /**
@@ -110,11 +99,11 @@ public class TransactionDetailSaveCommand {
     }
 
     public BigDecimal getWeight() {
-        return weight;
+        return this.weightedPrice == null ? null : this.weightedPrice.getWeight();
     }
 
     public BigDecimal getUnitPrice() {
-        return unitPrice;
+        return this.weightedPrice == null ? null : this.weightedPrice.getUnitPrice();
     }
 
     public List<Long> getCategories() {
