@@ -55,16 +55,18 @@ export class TransactionUtils {
         const transactionDetailsFormatted = shouldSendDetails
             ? input.details.map((detail) => ({
                   name: detail.detailName,
-                  price: this.deNormalizePriceForBackend(detail.detailPrice, input.isIncome),
-                  weight: detail.detailWeight,
-                  unitPrice: detail.detailUnitPrice,
+                  price: detail.detailIsComplexPriceMode
+                      ? null
+                      : this.deNormalizePriceForBackend(detail.detailPrice, input.isIncome),
+                  weight: detail.detailIsComplexPriceMode ? detail.detailWeight : null,
+                  unitPrice: detail.detailIsComplexPriceMode ? detail.detailUnitPrice : null,
                   categories: detail.categories.map((category) => category.item_id),
               }))
             : [];
 
         return {
             globalPrice:
-                input.price !== null
+                input.price !== null && !input.isComplexTransaction
                     ? this.deNormalizePriceForBackend(input.price, input.isIncome)
                     : null,
             name: input.name,

@@ -3,7 +3,7 @@ package com.starbuck.moneytracker.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
@@ -61,7 +61,7 @@ public class Transaction {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "transaction")
-    private Set<TransactionDetail> transactionDetails;
+    private List<TransactionDetail> transactionDetails;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -128,6 +128,15 @@ public class Transaction {
         this.priceSum = priceSum;
     }
 
+    public Transaction(String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
+            BigDecimal priceSum, User user) {
+        this.name = name;
+        this.transactionDate = transactionDate;
+        this.transactionType = transactionType;
+        this.priceSum = priceSum;
+        this.user = user;
+    }
+
     public Long getId() {
         return id;
     }
@@ -176,11 +185,11 @@ public class Transaction {
         this.updatedAt = updatedAt;
     }
 
-    public Set<TransactionDetail> getTransactionDetails() {
+    public List<TransactionDetail> getTransactionDetails() {
         return transactionDetails;
     }
 
-    public void setTransactionDetails(Set<TransactionDetail> transactionDetails) {
+    public void setTransactionDetails(List<TransactionDetail> transactionDetails) {
         this.transactionDetails = transactionDetails;
     }
 

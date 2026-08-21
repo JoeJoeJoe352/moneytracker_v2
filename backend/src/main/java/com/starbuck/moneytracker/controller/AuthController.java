@@ -1,7 +1,5 @@
 package com.starbuck.moneytracker.controller;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,17 +10,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.starbuck.moneytracker.commands.UserCreateCommand;
+import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.dto.IsEmailExistsDto;
 import com.starbuck.moneytracker.dto.IsUsernameExistsDto;
 import com.starbuck.moneytracker.dto.LoginRequest;
-import com.starbuck.moneytracker.dto.RegisterRequest;
+import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.util.CookieUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -44,16 +43,13 @@ public class AuthController {
      * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba
      * esetén 400-as választ ad vissza a validációs hibák miatt.
      * 
-     * @param RegisterRequest user
+     * @param RegisterRequestDto user
      */
     @PostMapping(path = "/auth/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void authRegisterUser(@Valid @RequestBody RegisterRequest user) {
-        User newUser = new User();
-        newUser.setUsername(user.username());
-
-        newUser.setEmail(user.email());
-        userService.createUser(newUser, user.password());
+    public void authRegisterUser(@Valid @RequestBody RegisterRequestDto user) {
+        UserCreateCommand command = new UserCreateCommand(user.username(), user.email(), user.password());
+        userService.createUser(command);
     }
 
     /**
@@ -65,8 +61,10 @@ public class AuthController {
      */
     @PostMapping(path = "/auth/login")
     public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+        UserLoginCommand command = new UserLoginCommand(loginRequest.username(), loginRequest.password());
+
         try {
-            String jwtToken = userService.login(loginRequest.username(), loginRequest.password());
+            String jwtToken = userService.login(command);
             ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
             HttpHeaders headers = new HttpHeaders();
             headers.add("Set-Cookie", cookie.toString());

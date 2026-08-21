@@ -33,7 +33,7 @@ import org.springframework.test.context.ActiveProfiles;
 import com.starbuck.moneytracker.dto.CategoryCreateDto;
 import com.starbuck.moneytracker.dto.CategoryResponseDto;
 import com.starbuck.moneytracker.dto.LoginRequest;
-import com.starbuck.moneytracker.dto.RegisterRequest;
+import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.CategoryRepository;
@@ -63,7 +63,7 @@ class CategoryE2ETest {
 
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequest registerRequest = new RegisterRequest("e2eCategoryUser", "password123", "password123",
+        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eCategoryUser", "password123",
                 "e2ecategory@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 

@@ -1,4 +1,4 @@
-import { DropdownInterface } from "../../shared/interfaces";
+import { DropdownInterface } from '../../shared/interfaces';
 
 /**
  * Tranzakciós adatok, ahogy a form inpujai elvárja kezdőértéknek, plusz a detailok
@@ -29,6 +29,7 @@ export interface NewTransaction {
         detailWeight: number;
         detailUnitPrice: number;
         categories: DropdownInterface[];
+        detailIsComplexPriceMode: boolean;
     }[];
     isComplexTransaction: boolean;
 }

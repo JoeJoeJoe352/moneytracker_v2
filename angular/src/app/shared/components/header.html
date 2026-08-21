@@ -20,16 +20,16 @@
                 [class.show]="menuOpen"
             >
                 <ul class="navbar-nav">
-                    <app-header-link-list [linkList]="publicLinkList" />
+                    <app-header-link-list [linkList]="publicLinkList" class="d-flex" />
 
                     @if (userData.isUserLogged()) {
-                        <app-header-link-list [linkList]="authenticatedLinkList" />
+                        <app-header-link-list [linkList]="authenticatedLinkList" class="d-flex" />
                     }
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     @if (userData.isUserLogged()) {
                         <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
-                        <a class="nav-link" (click)="logout()">{{"header.logout" | translate}}</a>
+                        <a class="nav-link" (click)="logout()">{{ 'header.logout' | translate }}</a>
                     }
                     <!-- TODO ide jöhet a login és signup gomb, else ágban -->
                 </ul>

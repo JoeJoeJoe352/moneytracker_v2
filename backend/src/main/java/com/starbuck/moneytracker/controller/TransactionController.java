@@ -2,7 +2,6 @@ package com.starbuck.moneytracker.controller;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Arrays;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import com.starbuck.moneytracker.commands.TransactionCreateCommand;
+import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
-import com.starbuck.moneytracker.util.TransactionDetailFactory;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,19 +40,13 @@ public class TransactionController {
     @Autowired
     private TransactionMapper transactionMapper;
 
-    @Autowired
-    private TransactionDetailFactory detailFactory;
-
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
     public void createTransaction(@Valid @RequestBody TransactionCreateRequest request,
             @AuthenticationPrincipal @NonNull User user) {
-        Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
-        transaction.setUser(user);
+        TransactionCreateCommand transaction = transactionMapper.fromTransactionCreateRequest(request);
 
-        List<TransactionDetail> transactionDetails = detailFactory.factoreDetail(request);
-
-        this.transactionService.createTransaction(transaction, transactionDetails);
+        this.transactionService.createTransaction(transaction);
     }
 
     /**
@@ -65,11 +58,9 @@ public class TransactionController {
     @PutMapping(path = "/transaction/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable Long id) {
-        Transaction transaction = transactionMapper.fromTransactionCreateRequest(request);
+        TransactionUpdateCommand transaction = transactionMapper.fromTransactionUpdateRequest(request);
 
-        List<TransactionDetail> updatedDetails = detailFactory.factoreDetail(request);
-
-        this.transactionService.updateTransaction(id, transaction, updatedDetails);
+        this.transactionService.updateTransaction(id, transaction);
     }
 
     /**
@@ -80,10 +71,9 @@ public class TransactionController {
     @GetMapping(path = "/transaction/sum")
     public MoneySumResponseDto sumAllMoney() {
         return new MoneySumResponseDto(
-            this.transactionService.sumAllMoney(),
-            this.transactionService.sumAllIncomeForMonth(),
-            this.transactionService.sumAllExpenseForMonth().abs()
-        );
+                this.transactionService.sumAllMoney(),
+                this.transactionService.sumAllIncomeForMonth(),
+                this.transactionService.sumAllExpenseForMonth().abs());
     }
 
     /**
