@@ -1,7 +1,9 @@
 package com.starbuck.moneytracker.e2e;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -74,7 +76,8 @@ class TransactionE2ETest {
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
         LoginRequest loginRequest = new LoginRequest("e2eTxUser", "password123");
-        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login", HttpMethod.POST,
+        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login",
+                HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
                 });
         String setCookieHeader = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
@@ -101,7 +104,8 @@ class TransactionE2ETest {
      * végponton keresztül, és visszaadja az adatbázisban kapott id-jét
      */
     private Long createTransactionViaApi(String name, TransactionTypeEnum type, BigDecimal price, LocalDate date) {
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(price, "teszt", null, null, List.of());
+        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(price, "teszt", null, null,
+                List.of());
         TransactionCreateRequest request = new TransactionCreateRequest(name, null, type, date, List.of(detail),
                 List.of());
 
@@ -127,10 +131,14 @@ class TransactionE2ETest {
         Long id = createTransactionViaApi("Original", TransactionTypeEnum.INCOME, new BigDecimal("100.00"),
                 LocalDate.now());
 
-        TransactionDetailCreateDto updatedDetail = new TransactionDetailCreateDto(new BigDecimal("-50.00"), "teszt",
+        // mostantól két detail lesz, amik közül az egyik komplex
+        TransactionDetailCreateDto updatedDetail = new TransactionDetailCreateDto(null, "detail1",
+                new BigDecimal("0.75"), new BigDecimal("200"), List.of());
+        TransactionDetailCreateDto updatedDetail2 = new TransactionDetailCreateDto(new BigDecimal("-200"), "detail2",
                 null, null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Updated", null,
-                TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 1, 1), List.of(updatedDetail), List.of());
+                TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 1, 1), List.of(updatedDetail, updatedDetail2),
+                List.of());
 
         ResponseEntity<Void> updateResponse = restTemplate.exchange("/transaction/" + id, HttpMethod.PUT,
                 new HttpEntity<>(updateRequest, headers), Void.class);
@@ -140,10 +148,27 @@ class TransactionE2ETest {
         ResponseEntity<TransactionResponseDto> getResponse = restTemplate.exchange("/transaction/" + id,
                 HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto.class);
 
-        assertEquals("Updated", getResponse.getBody().name());
-        assertEquals(TransactionTypeEnum.OUTCOME, getResponse.getBody().transactionType());
-        assertEquals(LocalDate.of(2026, 1, 1), getResponse.getBody().transactionDate());
-        assertEquals(new BigDecimal("-50.00"), getResponse.getBody().priceSum());
+        TransactionResponseDto transactionDto = getResponse.getBody();
+        assertEquals("Updated", transactionDto.name());
+        assertEquals(TransactionTypeEnum.OUTCOME, transactionDto.transactionType());
+        assertEquals(LocalDate.of(2026, 1, 1), transactionDto.transactionDate());
+        assertEquals(new BigDecimal("-350.00"), transactionDto.priceSum());
+
+        assertEquals(2, transactionDto.transactionDetails().size());
+        var detailUpdate1 = transactionDto.transactionDetails().get(0);
+        assertEquals("detail1", detailUpdate1.name());
+        assertEquals(new BigDecimal("-150.00"), detailUpdate1.price());
+        assertEquals(new BigDecimal("0.75"), detailUpdate1.weight());
+        assertEquals(new BigDecimal("200.00"), detailUpdate1.unitPrice());
+        assertTrue(detailUpdate1.isComplexPriceMode());
+
+        var detailUpdate2 = transactionDto.transactionDetails().get(1);
+        assertEquals("detail2", detailUpdate2.name());
+        assertEquals(new BigDecimal("-200.00"), detailUpdate2.price());
+        assertEquals(null, detailUpdate2.weight());
+        assertEquals(null, detailUpdate2.unitPrice());
+        assertFalse(detailUpdate2.isComplexPriceMode());
+
     }
 
     /**
@@ -151,7 +176,8 @@ class TransactionE2ETest {
      */
     @Test
     void updateTransaction_returnsNotFoundForNonexistentId() {
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("10.00"), "teszt", null,
+        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("10.00"), "teszt",
+                null,
                 null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Doesn't matter", null,
                 TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of());
@@ -170,8 +196,10 @@ class TransactionE2ETest {
      */
     @Test
     void sumAllMoney_returnsAggregatedSumsForUser() {
-        createTransactionViaApi("Salary", TransactionTypeEnum.INCOME, new BigDecimal("1000.00"), LocalDate.now());
-        createTransactionViaApi("Rent", TransactionTypeEnum.OUTCOME, new BigDecimal("-400.00"), LocalDate.now());
+        createTransactionViaApi("Salary", TransactionTypeEnum.INCOME, new BigDecimal("1000.00"),
+                LocalDate.now());
+        createTransactionViaApi("Rent", TransactionTypeEnum.OUTCOME, new BigDecimal("-400.00"),
+                LocalDate.now());
 
         ResponseEntity<MoneySumResponseDto> response = restTemplate.exchange("/transaction/sum", HttpMethod.GET,
                 new HttpEntity<>(headers), MoneySumResponseDto.class);

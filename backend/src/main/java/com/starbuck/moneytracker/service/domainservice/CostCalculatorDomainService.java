@@ -46,8 +46,9 @@ public class CostCalculatorDomainService {
      * őket
      */
     public BigDecimal calculateTransactionCost(TransactionSaveCommand command) {
+        BigDecimal defaultPrice = command.getDetailCommands().isEmpty() ? command.getGlobalPrice() : BigDecimal.ZERO;
         return command.getDetailCommands().stream()
                 .map((detail) -> this.calculateCost(detail, command.getTransactionType()))
-                .reduce(command.getGlobalPrice(), BigDecimal::add);
+                .reduce(defaultPrice, BigDecimal::add);
     }
 }

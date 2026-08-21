@@ -70,7 +70,8 @@ public class TransactionMapper {
      * @return
      */
     public TransactionCreateCommand fromTransactionCreateRequest(@NonNull TransactionCreateRequest request) {
-        List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(request.transactionDetails(),
+        List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(
+                request.transactionDetails(),
                 request.transactionType());
 
         TransactionCreateCommand command = new TransactionCreateCommand(
@@ -91,7 +92,8 @@ public class TransactionMapper {
      * @return
      */
     public TransactionUpdateCommand fromTransactionUpdateRequest(@NonNull TransactionCreateRequest request) {
-        List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(request.transactionDetails(),
+        List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(
+                request.transactionDetails(),
                 request.transactionType());
 
         TransactionUpdateCommand command = new TransactionUpdateCommand(
@@ -115,6 +117,9 @@ public class TransactionMapper {
     public List<TransactionDetailSaveCommand> fromDetailCreateRequest(
             @NonNull List<TransactionDetailCreateDto> detailDtos, TransactionTypeEnum type) {
         return detailDtos.stream().map((detail) -> {
+            System.out.println(
+                    detail.name() + ": up: " + detail.unitPrice() + ", weight: " + detail.weight());
+
             if (detail.unitPrice() != null || detail.weight() != null) {
                 return new TransactionDetailSaveCommand(
                         detail.name(),
@@ -142,7 +147,8 @@ public class TransactionMapper {
     public TransactionUpdateCommand entityToCommand(Transaction t) {
         List<TransactionDetailSaveCommand> details = t.getTransactionDetails().stream().map((detail) -> {
             if (detail.getWeight() != null || detail.getUnitPrice() != null) {
-                return new TransactionDetailSaveCommand(detail.getName(), detail.getWeight(), detail.getUnitPrice(),
+                return new TransactionDetailSaveCommand(detail.getName(), detail.getWeight(),
+                        detail.getUnitPrice(),
                         detail.getCategoryIds());
             }
             return new TransactionDetailSaveCommand(detail.getName(), detail.getPrice(), List.of(),
