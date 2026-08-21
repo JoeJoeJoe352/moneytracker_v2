@@ -1,7 +1,6 @@
 package com.starbuck.moneytracker.mapper;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.NonNull;
@@ -30,7 +29,7 @@ public class TransactionMapper {
         if (entity == null)
             return null;
 
-        Set<TransactionDetailResponseDto> detailDto = entity.getTransactionDetails().stream()
+        List<TransactionDetailResponseDto> detailDto = entity.getTransactionDetails().stream()
                 .map(detail -> new TransactionDetailResponseDto(
                         detail.getName(),
                         detail.getPrice(),
@@ -38,7 +37,7 @@ public class TransactionMapper {
                         detail.getUnitPrice(),
                         detail.isComplexPriceMode(),
                         detail.getCategoryIds()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
         TransactionResponseDto dto = new TransactionResponseDto(
                 entity.getId(),

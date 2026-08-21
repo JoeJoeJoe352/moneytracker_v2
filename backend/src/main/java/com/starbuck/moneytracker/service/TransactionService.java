@@ -57,15 +57,11 @@ public class TransactionService {
      */
     @Transactional
     public Transaction createTransaction(TransactionCreateCommand createCommand) {
-        BigDecimal sumOfDetailsPrice = createCommand.getDetailCommands().stream()
-                .map((detail) -> costCalculator.calculateCost(detail, createCommand.getTransactionType()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         Transaction transaction = new Transaction(
                 createCommand.getTransactionName(),
                 createCommand.getTransactionDate(),
                 createCommand.getTransactionType(),
-                sumOfDetailsPrice,
+                costCalculator.calculateTransactionCost(createCommand),
                 currentUser.getUser());
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
 
@@ -84,15 +80,10 @@ public class TransactionService {
     public void updateTransaction(Long id, TransactionUpdateCommand updateCommand) {
         // ellenőrzöm, hogy a tranzakció a useré-e (nem fogja megtalálni, hogyha nem)
         Transaction transaction = this.getTransactionByIdForActualUser(id);
-
-        BigDecimal sumOfDetailsPrice = updateCommand.getDetailCommands().stream()
-                .map((detail) -> costCalculator.calculateCost(detail, updateCommand.getTransactionType()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         transaction.setName(updateCommand.getTransactionName());
         transaction.setTransactionDate(updateCommand.getTransactionDate());
         transaction.setTransactionType(updateCommand.getTransactionType());
-        transaction.setPriceSum(sumOfDetailsPrice);
+        transaction.setPriceSum(costCalculator.calculateTransactionCost(updateCommand));
         transactionRepo.save(transaction);
 
         // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
@@ -113,7 +104,7 @@ public class TransactionService {
         TransactionTypeEnum transactionType = savedTransaction.getTransactionType();
 
         if (createCommands.size() == 0) {
-            TransactionDetail defaultDetail = detailFactory.createDefauldDetail(savedTransaction.getPriceSum());
+            TransactionDetail defaultDetail = detailFactory.createDefaultDetail(savedTransaction.getPriceSum());
             defaultDetail.setTransaction(savedTransaction);
             this.transactionDetailRepo.save(defaultDetail);
             return;
@@ -124,6 +115,8 @@ public class TransactionService {
             detail.setName(detailCommand.getName());
             detail.setPrice(costCalculator.calculateCost(detailCommand, transactionType));
             detail.setTransaction(savedTransaction);
+            detail.setWeight(detailCommand.getWeight());
+            detail.setUnitPrice(detailCommand.getUnitPrice());
             var detailAfterSave = this.transactionDetailRepo.save(detail);
 
             if (detailCommand.getCategories() != null) {

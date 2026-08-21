@@ -48,6 +48,6 @@ public class CostCalculatorDomainService {
     public BigDecimal calculateTransactionCost(TransactionSaveCommand command) {
         return command.getDetailCommands().stream()
                 .map((detail) -> this.calculateCost(detail, command.getTransactionType()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(command.getGlobalPrice(), BigDecimal::add);
     }
 }

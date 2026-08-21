@@ -2,7 +2,7 @@ package com.starbuck.moneytracker.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
@@ -13,6 +13,6 @@ public record TransactionResponseDto(
     LocalDate transactionDate,
     TransactionTypeEnum transactionType,
     boolean isComplexTransaction,
-    Set<TransactionDetailResponseDto> transactionDetails
+    List<TransactionDetailResponseDto> transactionDetails
 ) {
 }

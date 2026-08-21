@@ -25,6 +25,9 @@ public abstract class TransactionSaveCommand {
     public TransactionSaveCommand(String name, BigDecimal globalPrice, LocalDate date, TransactionTypeEnum type,
             List<TransactionDetailSaveCommand> detailCommands, List<Long> categories) {
 
+        if (globalPrice != null) {
+            type.validateDetailPrice(globalPrice);
+        }
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Transaction name cannot be empty");
         }

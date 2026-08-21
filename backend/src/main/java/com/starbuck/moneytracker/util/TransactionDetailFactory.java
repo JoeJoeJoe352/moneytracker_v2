@@ -20,7 +20,7 @@ public class TransactionDetailFactory {
      * @param price
      * @return
      */
-    public TransactionDetail createDefauldDetail(BigDecimal price) {
+    public TransactionDetail createDefaultDetail(BigDecimal price) {
         return new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, price);
     }
 }

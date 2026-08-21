@@ -66,7 +66,7 @@ public class TransactionDetailSaveCommand {
      */
     public TransactionDetailSaveCommand(String name, BigDecimal weight, BigDecimal unitPrice,
             List<Long> categories) {
-
+// TODO weightedprice legyen BigDecimal weight, BigDecimal unitPrice helyett
         if (weight == null || unitPrice == null) {
             throw new IllegalArgumentException("Weight and unitprice both required, when one of them is set");
         }

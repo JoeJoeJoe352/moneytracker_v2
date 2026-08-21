@@ -149,7 +149,7 @@ class TransactionServiceTest {
         TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction", null,
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of());
 
-        Mockito.when(detailFactory.createDefauldDetail(BigDecimal.ZERO))
+        Mockito.when(detailFactory.createDefaultDetail(BigDecimal.ZERO))
                 .thenReturn(new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, BigDecimal.ZERO));
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
