@@ -19,7 +19,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @param userId
      * @return
      */
-    @Query("SELECT COUNT(c) > 0 FROM Category c WHERE c.name = ?1 AND (c.user.id = ?2 OR (c.user.id IS NULL AND c.lang = ?2)) AND c.status = 0")
+    @Query("SELECT COUNT(c) > 0 FROM Category c WHERE c.name = ?1 AND (c.user.id = ?2 OR (c.user.id IS NULL AND c.lang = ?3)) AND c.status = 0")
     boolean isUserHaveThisCategoryName(String name, long userId, LangEnum lang);
 
     /**
