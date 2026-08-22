@@ -1,0 +1,17 @@
+INSERT INTO category (name, lang) VALUES
+('Élelmiszer', 'HU'),
+('Háztartás', 'HU'),
+('Higiénia', 'HU'),
+('Egészség', 'HU'),
+('Közlekedés', 'HU'),
+('Üzemanyag', 'HU'),
+('Szórakozás', 'HU'),
+('Ruházat', 'HU'),
+('Elektronika', 'HU'),
+('Otthon', 'HU'),
+('Háziállat', 'HU'),
+('Ajándék', 'HU'),
+('Oktatás', 'HU'),
+('Sport', 'HU'),
+('Előfizetés', 'HU'),
+('Egyéb', 'HU');

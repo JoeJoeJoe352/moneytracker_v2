@@ -36,6 +36,7 @@ import com.starbuck.moneytracker.dto.LoginRequest;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 
@@ -106,7 +107,7 @@ class CategoryE2ETest {
         CategoryResponseDto body = response.getBody();
         assertNotNull(body.id());
         assertEquals("Groceries", body.name());
-        assertFalse(body.isLangKey());
+        assertFalse(body.isDefaultCategory());
         createdCategoryIds.add(body.id());
 
         Category savedCategory = categoryRepository.findById(body.id()).orElseThrow();
@@ -159,7 +160,7 @@ class CategoryE2ETest {
                 new HttpEntity<>(ownRequest, headers), CategoryResponseDto.class);
         createdCategoryIds.add(ownResponse.getBody().id());
 
-        Category commonCategory = categoryRepository.save(new Category("CommonCategory", null));
+        Category commonCategory = categoryRepository.save(new Category("CommonCategory", null, LangEnum.HU));
         createdCategoryIds.add(commonCategory.getId());
 
         ResponseEntity<CategoryResponseDto[]> response = restTemplate.exchange("/category", HttpMethod.GET,
@@ -168,8 +169,8 @@ class CategoryE2ETest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<CategoryResponseDto> categories = List.of(response.getBody());
 
-        assertTrue(categories.stream().anyMatch(c -> c.name().equals("OwnCategory") && !c.isLangKey()));
-        assertTrue(categories.stream().anyMatch(c -> c.name().equals("CommonCategory") && c.isLangKey()));
+        assertTrue(categories.stream().anyMatch(c -> c.name().equals("OwnCategory") && !c.isDefaultCategory()));
+        assertTrue(categories.stream().anyMatch(c -> c.name().equals("CommonCategory") && c.isDefaultCategory()));
     }
 
     /**
@@ -181,7 +182,7 @@ class CategoryE2ETest {
         otherUser.setUuid();
         otherUser = userRepository.save(otherUser);
 
-        Category otherUsersCategory = categoryRepository.save(new Category("OtherUsersCategory", otherUser));
+        Category otherUsersCategory = categoryRepository.save(new Category("OtherUsersCategory", otherUser, LangEnum.HU));
 
         try {
             ResponseEntity<CategoryResponseDto[]> response = restTemplate.exchange("/category", HttpMethod.GET,

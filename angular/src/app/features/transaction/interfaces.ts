@@ -108,5 +108,5 @@ export interface CategorySaveRequestInterface {
 export interface CategoryResponseInterface {
     id: number;
     name: string;
-    isLangKey: boolean;
+    isDefaultCategory: boolean;
 }

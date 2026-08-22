@@ -29,7 +29,7 @@ import {
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
 } from './interfaces';
-import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { DropdownInterface } from '../../shared/interfaces';
 import { TransactionDetailRowComponent } from './transaction-detail-row-component';
@@ -98,12 +98,9 @@ export class TransactionFormComponent implements OnChanges {
      */
     protected categoryData: Signal<DropdownInterface[]> = computed(() => {
         return this.categoryList().map((category) => {
-            const itemname = !category.isLangKey
-                ? category.name
-                : this.translateService.instant(_(category.name));
             return {
                 item_id: category.id,
-                item_text: itemname,
+                item_text: category.name,
             };
         });
     });

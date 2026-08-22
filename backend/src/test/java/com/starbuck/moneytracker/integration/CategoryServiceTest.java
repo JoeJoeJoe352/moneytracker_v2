@@ -23,6 +23,7 @@ import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.service.CategoryService;
@@ -110,7 +111,7 @@ public class CategoryServiceTest {
     void testCreateCategoryCategoryExistsAnotherUser_throws() {
         // Given
         // közvetlenül repo-ba mentjük, mert a service-ben muszáj lenne usernek lennie
-        var savedCategoryCommon = categoryRepository.save(new Category("tesztCategory", null));
+        var savedCategoryCommon = categoryRepository.save(new Category("tesztCategory", null, LangEnum.HU));
 
         var categoryCommand = new CategoryCreateCommand("tesztCategory");
 
@@ -134,9 +135,9 @@ public class CategoryServiceTest {
 
         var savedCategoryOwn = categoryService.createCategory(categoryCommand);
 
-        var savedCategoryNotOwned = categoryRepository.save(new Category("AnotherUserCategory", savedUser2));
+        var savedCategoryNotOwned = categoryRepository.save(new Category("AnotherUserCategory", savedUser2, LangEnum.HU));
 
-        var savedCategoryCommon = categoryRepository.save(new Category("commonCategory", null));
+        var savedCategoryCommon = categoryRepository.save(new Category("commonCategory", null, LangEnum.HU));
 
         // when
         List<Category> categories = categoryService.listCategories();
