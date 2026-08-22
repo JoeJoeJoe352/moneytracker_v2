@@ -28,4 +28,13 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      */
     @Query("SELECT c FROM Category c WHERE (c.user.id = ?1 OR c.user.id IS NULL) AND c.status = 0")
     List<Category> findAllForUser(long userId);
+
+    /**
+     * Kilistázza a user saját kategóriáit és a közös kategóriákat (null used_id)
+     * 
+     * @param userId
+     * @return
+     */
+    @Query("SELECT c FROM Category c WHERE (c.user.id = ?2 OR c.user.id IS NULL) AND c.status = 0 AND c.id in (?1)")
+    List<Category> findAllById(List<Long> ids,long userId);
 }

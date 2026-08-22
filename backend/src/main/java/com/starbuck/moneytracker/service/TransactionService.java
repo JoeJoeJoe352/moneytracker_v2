@@ -16,6 +16,7 @@ import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
+import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -41,6 +42,9 @@ public class TransactionService {
     private TransactionDetailRepository transactionDetailRepo;
 
     @Autowired
+    private CategoryRepository categoryRepo;
+
+    @Autowired
     private TransactionDetailCategoryRepository transactionDetailCategoryRepository;
 
     @Autowired
@@ -53,7 +57,6 @@ public class TransactionService {
 
     /**
      * Tranzakció létrehozása
-     * Ha hiba van, magától rollbackel a spring
      */
     @Transactional
     public Transaction createTransaction(TransactionCreateCommand createCommand) {
@@ -71,7 +74,6 @@ public class TransactionService {
 
     /**
      * Frissíti a user adott id-jú tranzakcióját.
-     * Akkor használatos, ha a csak egy tranzakciótétel van
      * 
      * @param id
      * @param updateCommand
@@ -104,6 +106,8 @@ public class TransactionService {
         TransactionTypeEnum transactionType = savedTransaction.getTransactionType();
 
         if (createCommands.size() == 0) {
+            // Minden tranzakciónak lennie kell legalább 1 detailnak TODO biztos kell
+            // lennie?
             TransactionDetail defaultDetail = detailFactory.createDefaultDetail(savedTransaction.getPriceSum());
             defaultDetail.setTransaction(savedTransaction);
             this.transactionDetailRepo.save(defaultDetail);
@@ -111,12 +115,12 @@ public class TransactionService {
         }
 
         for (TransactionDetailSaveCommand detailCommand : createCommands) {
-            TransactionDetail detail = new TransactionDetail();
-            detail.setName(detailCommand.getName());
-            detail.setPrice(costCalculator.calculateCost(detailCommand, transactionType));
-            detail.setTransaction(savedTransaction);
-            detail.setWeight(detailCommand.getWeight());
-            detail.setUnitPrice(detailCommand.getUnitPrice());
+            TransactionDetail detail = new TransactionDetail(
+                    detailCommand.getName(),
+                    costCalculator.calculateCost(detailCommand, transactionType),
+                    detailCommand.getWeight(),
+                    detailCommand.getUnitPrice(),
+                    savedTransaction);
             var detailAfterSave = this.transactionDetailRepo.save(detail);
 
             if (detailCommand.getCategories() != null) {
@@ -133,6 +137,11 @@ public class TransactionService {
      */
     private void saveCategoryDetailEntries(TransactionDetail savedDetail,
             List<Long> categoryIds) {
+        var foundCategories = categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
+        boolean isAllCategoryAvailableForUser = foundCategories.size() == categoryIds.size();
+        if (!isAllCategoryAvailableForUser) {
+            throw new IllegalArgumentException("Input contain id not belongs to the user");
+        }
         categoryIds.forEach((id) -> {
             Category categoryDummyObject = new Category();
             categoryDummyObject.setId(id);
@@ -245,8 +254,8 @@ public class TransactionService {
      * @param transactionId
      */
     public void deleteTransaction(long transactionId) {
-        // getTransactionByIdForActualUser itt nem használható, mert feleslegesen tölti
-        // be a detailokat és ez törléskor bizonyos esetekben problémát okoz
+        // getTransactionByIdForActualUser itt nem használható, mert itt feleslegesen
+        // töltené be a detailokat és ez törléskor bizonyos esetekben problémát okoz
         Long userId = currentUser.getUser().getId();
         Transaction transaction = this.transactionRepo.findById(transactionId)
                 .filter(t -> t.getUser().getId().equals(userId))

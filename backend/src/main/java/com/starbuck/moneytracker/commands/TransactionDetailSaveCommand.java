@@ -39,8 +39,8 @@ public class TransactionDetailSaveCommand {
      * @param categories
      * @param transactionType
      */
-    public TransactionDetailSaveCommand(String name, BigDecimal price,
-            List<Long> categories, TransactionTypeEnum transactionType) {
+    public TransactionDetailSaveCommand(String name, BigDecimal price, List<Long> categories,
+            TransactionTypeEnum transactionType) {
 
         if (price == null) {
             throw new IllegalArgumentException("Price cannot be null");
@@ -61,9 +61,7 @@ public class TransactionDetailSaveCommand {
      * @param unitPrice
      * @param categories
      */
-    public TransactionDetailSaveCommand(String name, BigDecimal weight, BigDecimal unitPrice,
-            List<Long> categories) {
-
+    public TransactionDetailSaveCommand(String name, BigDecimal weight, BigDecimal unitPrice, List<Long> categories) {
         this.setName(name);
         this.weightedPrice = new WeightedPrice(weight, unitPrice);
         this.categories = categories;

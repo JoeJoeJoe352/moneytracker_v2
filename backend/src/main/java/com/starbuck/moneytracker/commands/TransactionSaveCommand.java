@@ -2,6 +2,7 @@ package com.starbuck.moneytracker.commands;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
@@ -46,6 +47,11 @@ public abstract class TransactionSaveCommand {
         }
         if (date == null) {
             throw new IllegalArgumentException("Transaction date cannot be null");
+        }
+
+        var set = new HashSet<Long>(categories);
+        if (categories.size() != set.size()) {
+            throw new IllegalArgumentException("Duplicated categoryId found!");
         }
 
         this.globalPrice = globalPrice;

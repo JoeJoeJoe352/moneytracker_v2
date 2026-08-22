@@ -92,6 +92,15 @@ public class TransactionDetail {
         this.transaction = transaction;
     }
 
+    public TransactionDetail(String name, BigDecimal price, BigDecimal weight, BigDecimal unitPrice,
+            Transaction transaction) {
+        this.name = name;
+        this.price = price;
+        this.weight = weight;
+        this.unitPrice = unitPrice;
+        this.transaction = transaction;
+    }
+
     public TransactionDetail(String name, BigDecimal price) {
         this.name = name;
         this.price = price;

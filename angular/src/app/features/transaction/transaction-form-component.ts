@@ -24,6 +24,7 @@ import { validDate } from './valid-date-validator';
 import { TransactionService } from './transaction-service';
 import {
     CategoryResponseInterface,
+    DetailForm,
     NewTransaction,
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
@@ -31,18 +32,7 @@ import {
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { DropdownInterface } from '../../shared/interfaces';
-
-/**
- * Detail form elemei
- */
-interface DetailForm {
-    detailName: FormControl<string>;
-    detailPrice: FormControl<number | null>;
-    detailWeight: FormControl<number | null>;
-    detailUnitPrice: FormControl<number | null>;
-    detailIsComplexPriceMode: FormControl<boolean>;
-    categories: FormControl<DropdownInterface[]>;
-}
+import { TransactionDetailRowComponent } from './transaction-detail-row-component';
 
 @Component({
     selector: 'app-transaction-form-component',
@@ -54,6 +44,7 @@ interface DetailForm {
         SwitchComponent,
         TranslatePipe,
         NgMultiSelectDropDownModule,
+        TransactionDetailRowComponent,
     ],
 })
 export class TransactionFormComponent implements OnChanges {

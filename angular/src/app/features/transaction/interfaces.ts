@@ -1,4 +1,17 @@
+import { FormControl } from '@angular/forms';
 import { DropdownInterface } from '../../shared/interfaces';
+
+/**
+ * Detail form elemei
+ */
+export interface DetailForm {
+    detailName: FormControl<string>;
+    detailPrice: FormControl<number | null>;
+    detailWeight: FormControl<number | null>;
+    detailUnitPrice: FormControl<number | null>;
+    detailIsComplexPriceMode: FormControl<boolean>;
+    categories: FormControl<DropdownInterface[]>;
+}
 
 /**
  * Tranzakciós adatok, ahogy a form inpujai elvárja kezdőértéknek, plusz a detailok
