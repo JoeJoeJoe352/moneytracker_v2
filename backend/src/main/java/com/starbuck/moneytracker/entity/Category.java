@@ -8,9 +8,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,6 +29,10 @@ public class Category {
 
     @Column(nullable = false)
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LangEnum lang;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "user_id", nullable = true)
@@ -50,7 +57,7 @@ public class Category {
      * 
      * @return
      */
-    public boolean isLangKey() {
+    public boolean isDefaultCategory() {
         return this.user == null;
     }
 
@@ -59,9 +66,17 @@ public class Category {
     public Category() {
     }
 
-    public Category(String name, User user) {
+    public Category(long id, String name, User user, LangEnum lang) {
+        this.id = id;
         this.name = name;
         this.user = user;
+        this.lang = lang;
+    }
+
+    public Category(String name, User user, LangEnum lang) {
+        this.name = name;
+        this.user = user;
+        this.lang = lang;
     }
 
     public Long getId() {
@@ -111,4 +126,13 @@ public class Category {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public LangEnum getLang() {
+        return lang;
+    }
+
+    public void setLang(LangEnum lang) {
+        this.lang = lang;
+    }
+
 }

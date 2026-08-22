@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
@@ -20,6 +21,8 @@ public class CategoryService {
 
     @Autowired
     CurrentUserUtil currentUser;
+
+    public static final String HU_LANG = "hu";
 
     /**
      * Létrehoz egy új kategóriát a user számára
@@ -34,12 +37,16 @@ public class CategoryService {
 
         User user = currentUser.getUser();
 
-        if (this.categoryRepository.isUserHaveThisCategoryName(command.getName(), user.getId())) {
+        if (this.categoryRepository.isUserHaveThisCategoryName(command.getName(), user.getId(), LangEnum.HU)) {
             throw new NonUniqueObjectException("Category with this name already exists for the user", null,
                     command.getName());
         }
 
-        Category categoryModel = new Category(command.getName(), user);
+        Category categoryModel = new Category(
+                command.getName(),
+                user,
+                LangEnum.HU // TODO ez dinamikussá tenni később
+        );
 
         return this.categoryRepository.save(categoryModel);
     }
@@ -50,6 +57,9 @@ public class CategoryService {
      * @return
      */
     public List<Category> listCategories() {
-        return categoryRepository.findAllForUser(currentUser.getUser().getId());
+        return categoryRepository.findAllForUser(
+                currentUser.getUser().getId(),
+                LangEnum.HU // TODO ezt majd dinamikussá tenni
+        );
     }
 }

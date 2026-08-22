@@ -28,6 +28,7 @@ import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
@@ -89,7 +90,7 @@ class TransactionServiceIntegrationTest {
         // GIVEN
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
 
-        Category category = new Category("tesztkategória", this.user);
+        Category category = new Category("tesztkategória", this.user, LangEnum.HU);
         categoryRepo.save(category);
 
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
@@ -125,7 +126,7 @@ class TransactionServiceIntegrationTest {
         // GIVEN
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
 
-        Category category1 = new Category("tesztKategória", this.user);
+        Category category1 = new Category("tesztKategória", this.user, LangEnum.HU);
         categoryRepo.save(category1);
 
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
@@ -138,7 +139,7 @@ class TransactionServiceIntegrationTest {
         Transaction createdTransaction = transactionService.createTransaction(createCommand);
 
         // Update elemek létrehozása
-        Category category2 = new Category("updateKategória", this.user);
+        Category category2 = new Category("updateKategória", this.user, LangEnum.HU);
         categoryRepo.save(category2);
 
         // Detail 1 beállításai - 1 kategóriája van

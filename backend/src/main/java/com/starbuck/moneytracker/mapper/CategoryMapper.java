@@ -15,7 +15,7 @@ public class CategoryMapper {
         return new CategoryResponseDto(
                 category.getId(),
                 category.getName(),
-                category.isLangKey()
+                category.isDefaultCategory()
             );
     }
 

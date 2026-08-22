@@ -24,12 +24,15 @@ import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -61,6 +64,9 @@ class TransactionServiceTest {
     @InjectMocks
     private TransactionService transactionService;
 
+    @Mock
+    private CategoryRepository categoryRepo;
+
     private AssertUtil assertUtil;
 
     TransactionServiceTest() {
@@ -87,8 +93,10 @@ class TransactionServiceTest {
     void createTransaction_savesTransactionAndDetail() {
         // GIVEN - előkészületek
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
-                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
-        TransactionCreateCommand command = new TransactionCreateCommand("simpleTransaction", null, LocalDate.now(),
+                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(100), List.of(),
+                TransactionTypeEnum.INCOME);
+        TransactionCreateCommand command = new TransactionCreateCommand("simpleTransaction", null,
+                LocalDate.now(),
                 TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
@@ -146,11 +154,13 @@ class TransactionServiceTest {
      */
     @Test
     void createTransaction_withNoDetails_createsDefaultDetail() {
-        TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction", new BigDecimal("300.00"),
+        TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction",
+                new BigDecimal("300.00"),
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of());
 
         Mockito.when(detailFactory.createDefaultDetail(new BigDecimal("300.00")))
-                .thenReturn(new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("300.00")));
+                .thenReturn(new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME,
+                        new BigDecimal("300.00")));
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
@@ -172,7 +182,8 @@ class TransactionServiceTest {
     @Test
     void createTransaction_throwsWhenDetailHasNoName() {
         assertThrows(IllegalArgumentException.class, () -> {
-            new TransactionDetailSaveCommand("", new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
+            new TransactionDetailSaveCommand("", new BigDecimal(100), List.of(),
+                    TransactionTypeEnum.INCOME);
         });
     }
 
@@ -235,7 +246,8 @@ class TransactionServiceTest {
         // GIVEN
         TransactionDetailSaveCommand detail1 = new TransactionDetailSaveCommand("WeightesDetail",
                 new BigDecimal("0.5"), new BigDecimal("300"), List.of());
-        TransactionDetailSaveCommand detail2 = new TransactionDetailSaveCommand("Simadetail", new BigDecimal("200"),
+        TransactionDetailSaveCommand detail2 = new TransactionDetailSaveCommand("Simadetail",
+                new BigDecimal("200"),
                 List.of(), TransactionTypeEnum.INCOME);
         TransactionCreateCommand createCommand = new TransactionCreateCommand(
                 "multipleDetailedTransactionWithWeightAndUnitPrice", null, LocalDate.now(),
@@ -286,7 +298,8 @@ class TransactionServiceTest {
         TransactionDetailSaveCommand updatedDetail2 = new TransactionDetailSaveCommand("weightresDetail2",
                 new BigDecimal("0.7"), new BigDecimal("300"), List.of());
         TransactionUpdateCommand updatedTransaction = new TransactionUpdateCommand("updated", null,
-                LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME, List.of(updatedDetail, updatedDetail2),
+                LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME,
+                List.of(updatedDetail, updatedDetail2),
                 List.of());
 
         ArgumentCaptor<Transaction> captorTransaction = ArgumentCaptor.forClass(Transaction.class);
@@ -327,6 +340,11 @@ class TransactionServiceTest {
                 new BigDecimal(100), List.of(5L), TransactionTypeEnum.INCOME);
         TransactionCreateCommand command = new TransactionCreateCommand("categorizedTransaction", null,
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail), List.of());
+        User userInDB = new User(1l, "alma", "pass", "email");
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+
+        Mockito.when(categoryRepo.findAllById(List.of(5L), 1L))
+                .thenReturn(List.of(new Category(5L, "teszt", userInDB, LangEnum.HU)));
 
         // WHEN
         transactionService.createTransaction(command);
@@ -377,7 +395,8 @@ class TransactionServiceTest {
     @Test
     void updateTransaction_throwsWhenNoDetailsProvided() {
         assertThrows(IllegalArgumentException.class, () -> {
-            new TransactionUpdateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME, List.of(),
+            new TransactionUpdateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                    List.of(),
                     List.of());
         });
     }
@@ -388,7 +407,8 @@ class TransactionServiceTest {
     @Test
     void updateTransaction_throwsWhenTransactionNotFoundForUser() {
         User userInDB = new User(1l, "alma", "pass", "email");
-        TransactionDetailSaveCommand updatedDetail = new TransactionDetailSaveCommand("detail", new BigDecimal(100),
+        TransactionDetailSaveCommand updatedDetail = new TransactionDetailSaveCommand("detail",
+                new BigDecimal(100),
                 List.of(), TransactionTypeEnum.INCOME);
         TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("updated", null, LocalDate.now(),
                 TransactionTypeEnum.INCOME, List.of(updatedDetail), List.of());
