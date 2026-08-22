@@ -9,7 +9,7 @@ import { DetailForm } from './interfaces';
 @Component({
     selector: 'app-transaction-detail-row-component',
     templateUrl: './transaction-detail-row-component.html',
-    styleUrls: ['./transaction-detail-row-component.scss'],
+    styleUrls: ['/transaction-detail-row-component.scss'],
     imports: [ReactiveFormsModule, TranslatePipe, NgMultiSelectDropDownModule, SwitchComponent],
 })
 export class TransactionDetailRowComponent {
