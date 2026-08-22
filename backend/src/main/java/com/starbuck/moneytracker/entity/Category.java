@@ -66,6 +66,13 @@ public class Category {
     public Category() {
     }
 
+    public Category(long id, String name, User user, LangEnum lang) {
+        this.id = id;
+        this.name = name;
+        this.user = user;
+        this.lang = lang;
+    }
+
     public Category(String name, User user, LangEnum lang) {
         this.name = name;
         this.user = user;

@@ -12,7 +12,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     /**
      * Megnézi, hogy a usernek van-e már ilyen néven kategóriája (saját, vagy közös)
-     * TODO a nyelvi kulcsok miatt fel lehet venni ugyanazzal a névvel egy közös meg egy saját kategóriát (elvileg, mert a frontend nem engedi)
+     * TODO a nyelvi kulcsok miatt fel lehet venni ugyanazzal a névvel egy közös meg
+     * egy saját kategóriát (elvileg, mert a frontend nem engedi)
      * 
      * @param name
      * @param userId
@@ -37,5 +38,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @return
      */
     @Query("SELECT c FROM Category c WHERE (c.user.id = ?2 OR c.user.id IS NULL) AND c.status = 0 AND c.id in (?1)")
-    List<Category> findAllById(List<Long> ids,long userId);
+    List<Category> findAllById(List<Long> ids, long userId);
 }

@@ -123,7 +123,7 @@ public class TransactionService {
                     savedTransaction);
             var detailAfterSave = this.transactionDetailRepo.save(detail);
 
-            if (detailCommand.getCategories() != null) {
+            if (detailCommand.getCategories() != null && !detailCommand.getCategories().isEmpty()) {
                 this.saveCategoryDetailEntries(detailAfterSave, detailCommand.getCategories());
             }
         }
