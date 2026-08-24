@@ -19,6 +19,7 @@ import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
+import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionFilter;
@@ -94,8 +95,8 @@ public class TransactionController {
      * @return TransactionDto
      */
     @GetMapping(path = "/transaction/{id}")
-    public TransactionResponseDto getTransactionById(@PathVariable Long id) {
-        return this.transactionMapper.toDto(transactionService.getTransactionByIdForActualUser(id));
+    public TransactionEditResponseDto getTransactionById(@PathVariable Long id) {
+        return this.transactionMapper.toEditDto(transactionService.getTransactionByIdForActualUser(id));
     }
 
     /**

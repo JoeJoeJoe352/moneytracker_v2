@@ -1,5 +1,5 @@
-import { Component, computed, Input } from '@angular/core';
-import { TransactionDataFromBackend } from './interfaces';
+import { Component, computed, Input, Signal } from '@angular/core';
+import { TransactionListElementData } from './interfaces';
 import { TransactionTypeEnum } from './transaction-type-enum';
 import { DecimalPipe } from '@angular/common';
 
@@ -13,12 +13,29 @@ export default class TransactionCardComponent {
     /**
      * Megjelenítendő tranzakció adatai
      */
-    @Input({ required: true }) transaction!: TransactionDataFromBackend;
+    @Input({ required: true }) transaction!: TransactionListElementData;
 
     /**
      * Tranzakció típusa bevétel-e
      */
-    protected isIncome = computed(
+    protected isIncome: Signal<boolean> = computed(
         () => this.transaction.transactionType == TransactionTypeEnum.INCOME,
     );
+
+    /**
+     * Tranzakció kategóriák listája
+     */
+    protected categoryList: Signal<Set<string>> = computed(() => {
+        const categories: string[] = this.transaction.transactionDetails.flatMap(
+            (detail) => detail.categories,
+        );
+        return new Set(categories);
+    });
+
+    /**
+     * Kategóriák listája felsorolva, vesszővel elválasztva
+     */
+    protected categoriesAsString: Signal<string> = computed(() => {
+        return Array.from(this.categoryList()).join(', ');
+    });
 }

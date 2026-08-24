@@ -109,7 +109,7 @@ public class TransactionService {
 
         if (createCommand.getDetailCommands().size() == 0) {
             TransactionDetailSaveCommand defaultDetail = detailFactory.createDefaultDetailSaveCommand(
-                    savedTransaction.getPriceSum(), createCommand.getCategories(), savedTransaction.getTransactionType()());
+                    savedTransaction.getPriceSum(), createCommand.getCategories(), savedTransaction.getTransactionType());
             details.add(defaultDetail);
         } else {
             details.addAll(createCommand.getDetailCommands());

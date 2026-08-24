@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MoneySumInterface, NewTransaction, TransactionDataFromBackend } from './interfaces';
+import { MoneySumInterface, NewTransaction, TransactionDataFromBackend, TransactionListElementData } from './interfaces';
 import { TransactionUtils } from './transaction-utils';
 
 @Injectable({
@@ -32,8 +32,8 @@ export class TransactionService {
   /**
    * Utolsó X darab tranzakciót lekéri
    */
-  getLastTransactions(): Observable<TransactionDataFromBackend[]> {
-    return this.http.get<TransactionDataFromBackend[]>('/api/transaction/last')
+  getLastTransactions(): Observable<TransactionListElementData[]> {
+    return this.http.get<TransactionListElementData[]>('/api/transaction/last')
   }
 
   /**
@@ -49,10 +49,10 @@ export class TransactionService {
    * @param params 
    * @returns 
    */
-  getTransactionHistory(params: URLSearchParams): Observable<TransactionDataFromBackend[]> {
+  getTransactionHistory(params: URLSearchParams): Observable<TransactionListElementData[]> {
     const paramString = params.toString()
 
-    return this.http.get<TransactionDataFromBackend[]>('/api/transaction/history?' + paramString)
+    return this.http.get<TransactionListElementData[]>('/api/transaction/history?' + paramString)
   }
 
   /**

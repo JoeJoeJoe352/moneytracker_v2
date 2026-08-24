@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import TransactionCardComponent from './transaction-card-component';
-import { TransactionDataFromBackend } from './interfaces';
+import { TransactionListElementData } from './interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -14,16 +14,14 @@ export default class TransactionListComponent {
      * Lista címe
      */
     @Input() title = null as string | null;
-
     /**
      * Töltődik-e a lista jelenleg?
      */
     @Input({ required: true }) isTransactionListLoading!: boolean;
-
     /**
      * Megjelenítendő tranzakciók listája
      */
-    @Input({ required: true }) transactions!: TransactionDataFromBackend[];
+    @Input({ required: true }) transactions!: TransactionListElementData[];
 
     /**
      * Ha user módosítani szeretne egy tranzakciót

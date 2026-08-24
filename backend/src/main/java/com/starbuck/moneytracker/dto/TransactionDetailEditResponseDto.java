@@ -3,13 +3,13 @@ package com.starbuck.moneytracker.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
-public record TransactionDetailResponseDto(
+public record TransactionDetailEditResponseDto(
     String name,
     BigDecimal price,
     BigDecimal weight,
     BigDecimal unitPrice,
     boolean isComplexPriceMode,
-    List<String> categories
+    List<Long> categories
 ) {
     
 }

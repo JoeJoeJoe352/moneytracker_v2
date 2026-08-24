@@ -11,7 +11,9 @@ import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
+import com.starbuck.moneytracker.dto.TransactionDetailEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
+import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
@@ -30,16 +32,55 @@ public class TransactionMapper {
             return null;
 
         List<TransactionDetailResponseDto> detailDto = entity.getTransactionDetails().stream()
-                .map(detail -> new TransactionDetailResponseDto(
-                        detail.getName(),
-                        detail.getPrice(),
-                        detail.getWeight(),
-                        detail.getUnitPrice(),
-                        detail.isComplexPriceMode(),
-                        detail.getCategoryIds()))
+                .map(detail -> {
+                    List<String> categoryNames = detail.getCategoryLinks().stream()
+                            .map(link -> link.getCategory().getName())
+                            .collect(Collectors.toList());
+                    return new TransactionDetailResponseDto(
+                            detail.getName(),
+                            detail.getPrice(),
+                            detail.getWeight(),
+                            detail.getUnitPrice(),
+                            detail.isComplexPriceMode(),
+                            categoryNames);
+                })
                 .collect(Collectors.toList());
 
         TransactionResponseDto dto = new TransactionResponseDto(
+                entity.getId(),
+                entity.getName(),
+                entity.getPriceSum(),
+                entity.getTransactionDate(),
+                entity.getTransactionType(),
+                entity.isComplexTransaction(),
+                detailDto);
+
+        return dto;
+    }
+
+    /**
+     * Tranzakció adatok szekresztő felületekhez
+     * 
+     * @param entity
+     * @return
+     */
+    public TransactionEditResponseDto toEditDto(Transaction entity) {
+        if (entity == null)
+            return null;
+
+        List<TransactionDetailEditResponseDto> detailDto = entity.getTransactionDetails().stream()
+                .map(detail -> {
+                    return new TransactionDetailEditResponseDto(
+                            detail.getName(),
+                            detail.getPrice(),
+                            detail.getWeight(),
+                            detail.getUnitPrice(),
+                            detail.isComplexPriceMode(),
+                            detail.getCategoryIds());
+                })
+                .collect(Collectors.toList());
+
+        TransactionEditResponseDto dto = new TransactionEditResponseDto(
                 entity.getId(),
                 entity.getName(),
                 entity.getPriceSum(),
