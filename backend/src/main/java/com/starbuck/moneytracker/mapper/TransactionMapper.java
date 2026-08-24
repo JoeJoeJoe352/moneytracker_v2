@@ -158,9 +158,6 @@ public class TransactionMapper {
     public List<TransactionDetailSaveCommand> fromDetailCreateRequest(
             @NonNull List<TransactionDetailCreateDto> detailDtos, TransactionTypeEnum type) {
         return detailDtos.stream().map((detail) -> {
-            System.out.println(
-                    detail.name() + ": up: " + detail.unitPrice() + ", weight: " + detail.weight());
-
             if (detail.unitPrice() != null || detail.weight() != null) {
                 return new TransactionDetailSaveCommand(
                         detail.name(),
@@ -182,21 +179,21 @@ public class TransactionMapper {
      * Db-ből származó entitást átalakít egy update command-á (az szigorúbb
      * szabályozású, kötelező a detail lista)
      * 
-     * @param t
+     * @param transaction
      * @return
      */
-    public TransactionUpdateCommand entityToCommand(Transaction t) {
-        List<TransactionDetailSaveCommand> details = t.getTransactionDetails().stream().map((detail) -> {
+    public TransactionUpdateCommand entityToCommand(Transaction transaction) {
+        List<TransactionDetailSaveCommand> details = transaction.getTransactionDetails().stream().map((detail) -> {
             if (detail.getWeight() != null || detail.getUnitPrice() != null) {
                 return new TransactionDetailSaveCommand(detail.getName(), detail.getWeight(),
                         detail.getUnitPrice(),
                         detail.getCategoryIds());
             }
             return new TransactionDetailSaveCommand(detail.getName(), detail.getPrice(), List.of(),
-                    t.getTransactionType());
+                    transaction.getTransactionType());
         }).collect(Collectors.toList());
 
-        return new TransactionUpdateCommand(t.getName(), t.getPriceSum(), t.getTransactionDate(),
-                t.getTransactionType(), details, List.of());
+        return new TransactionUpdateCommand(transaction.getName(), transaction.getPriceSum(), transaction.getTransactionDate(),
+                transaction.getTransactionType(), details, List.of());
     }
 }

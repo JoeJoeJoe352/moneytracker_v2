@@ -16,7 +16,9 @@ import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
 import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
+import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
+import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
@@ -110,7 +112,7 @@ class TransactionMapperTest {
 
         transaction.setTransactionDetails(List.of(detail1, detail2));
 
-        TransactionResponseDto dto = mapper.toDto(transaction);
+        TransactionEditResponseDto dto = mapper.toEditDto(transaction);
 
         assertTrue(dto.isComplexTransaction());
         assertEquals(2, dto.transactionDetails().size());
@@ -118,6 +120,33 @@ class TransactionMapperTest {
         var detail1Dto = dto.transactionDetails().stream()
                 .filter(d -> d.name().equals("detail1")).findFirst().orElseThrow();
         assertEquals(List.of(7L), detail1Dto.categories());
+    }
+
+    @Test
+    void toDto_mapsMultipleDetailsAsComplexTransactionWithCategoryIds_list() {
+        Category category = new Category(7L, "teszt!", null, null);
+        Transaction transaction = new Transaction(1L, "multi", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal("300.00"), 0);
+
+        TransactionDetail detail1 = new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null,
+                transaction);
+        TransactionDetail detail2 = new TransactionDetail(2L, "detail2", new BigDecimal("200.00"), null, null,
+                transaction);
+
+        TransactionDetailCategory categoryLink = new TransactionDetailCategory(category, detail1);
+        detail1.setCategoryLinks(List.of(categoryLink));
+        detail2.setCategoryLinks(List.of());
+
+        transaction.setTransactionDetails(List.of(detail1, detail2));
+
+        TransactionResponseDto dto = mapper.toDto(transaction);
+
+        assertTrue(dto.isComplexTransaction());
+        assertEquals(2, dto.transactionDetails().size());
+
+        var detail1Dto = dto.transactionDetails().stream()
+                .filter(d -> d.name().equals("detail1")).findFirst().orElseThrow();
+        assertEquals(List.of("teszt!"), detail1Dto.categories());
     }
 
     /**

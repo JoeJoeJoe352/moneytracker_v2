@@ -108,8 +108,7 @@ class JwtServiceTest {
     void extractUsername_throwsForTamperedSignature() {
         String validToken = jwtService.generateToken("testuser");
         // utolsó karaktert kicseréljük a valid tokennek, így téve invaliddá
-        String tamperedToken = validToken.substring(0, validToken.length() - 1)
-                + (validToken.endsWith("a") ? "b" : "a");
+        String tamperedToken = validToken + "-forged";
 
         assertThrows(JwtException.class, () -> {
             jwtService.extractUsername(tamperedToken);

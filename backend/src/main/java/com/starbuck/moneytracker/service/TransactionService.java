@@ -1,7 +1,6 @@
 package com.starbuck.moneytracker.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +81,6 @@ public class TransactionService {
      */
     @Transactional
     public void updateTransaction(Long id, TransactionUpdateCommand updateCommand) {
-        // ellenőrzöm, hogy a tranzakció a useré-e (nem fogja megtalálni, hogyha nem)
         Transaction transaction = this.getTransactionByIdForActualUser(id);
         transaction.setName(updateCommand.getTransactionName());
         transaction.setTransactionDate(updateCommand.getTransactionDate());
@@ -105,15 +103,7 @@ public class TransactionService {
      * @param transactionDetails
      */
     private void saveDetails(Transaction savedTransaction, TransactionSaveCommand createCommand) {
-        List<TransactionDetailSaveCommand> details = new ArrayList<TransactionDetailSaveCommand>();
-
-        if (createCommand.getDetailCommands().size() == 0) {
-            TransactionDetailSaveCommand defaultDetail = detailFactory.createDefaultDetailSaveCommand(
-                    savedTransaction.getPriceSum(), createCommand.getCategories(), savedTransaction.getTransactionType());
-            details.add(defaultDetail);
-        } else {
-            details.addAll(createCommand.getDetailCommands());
-        }
+        List<TransactionDetailSaveCommand> details = detailFactory.resolveDetailCommands(createCommand, savedTransaction);
 
         for (TransactionDetailSaveCommand detailCommand : details) {
             TransactionDetail detail = new TransactionDetail(
