@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starbuck.moneytracker.commands.TransactionCreateCommand;
@@ -58,8 +59,8 @@ class TransactionServiceTest {
     @Mock
     private CurrentUserUtil currentUser;
 
-    @Mock
-    private TransactionDetailFactory detailFactory;
+    @Spy
+    private TransactionDetailFactory detailFactory = new TransactionDetailFactory();
 
     @InjectMocks
     private TransactionService transactionService;
@@ -157,10 +158,6 @@ class TransactionServiceTest {
         TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction",
                 new BigDecimal("300.00"),
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of());
-
-        Mockito.when(detailFactory.createDefaultDetail(new BigDecimal("300.00")))
-                .thenReturn(new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME,
-                        new BigDecimal("300.00")));
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 

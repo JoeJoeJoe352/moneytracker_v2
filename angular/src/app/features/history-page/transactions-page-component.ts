@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
-import { TransactionDataFromBackend } from '../transaction/interfaces';
+import { TransactionListElementData } from '../transaction/interfaces';
 import { TransactionService } from '../transaction/transaction-service';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -47,7 +47,7 @@ export class TransactionsPage implements OnInit {
     /**
      * Tranzakciós lista
      */
-    protected transactionListData = signal<TransactionDataFromBackend[]>([]);
+    protected transactionListData = signal<TransactionListElementData[]>([]);
     /**
      * Form definiciója
      */

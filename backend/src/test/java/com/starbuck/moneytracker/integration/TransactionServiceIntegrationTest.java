@@ -122,6 +122,40 @@ class TransactionServiceIntegrationTest {
     }
 
     @Test
+    void createTransaction_createSimpleTransaction() {
+        // GIVEN
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        Category category = new Category("simplekategória", this.user, LangEnum.HU);
+        categoryRepo.save(category);
+
+        TransactionCreateCommand command = new TransactionCreateCommand("Test", new BigDecimal("500.00"), LocalDate.of(2026, 6, 8),
+                TransactionTypeEnum.INCOME, List.of(), List.of(category.getId()));
+
+        // WHEN
+        Transaction saved = transactionService.createTransaction(command);
+
+        // THEN
+        assertNotNull(saved.getId());
+
+        TransactionDetail detail = transactionDetailRepo.findAll().get(0);
+        assertEquals(TransactionDetail.DEFAULT_DETAIL_NAME, detail.getName());
+        assertEquals(saved.getId(), detail.getTransaction().getId());
+        assertEquals(new BigDecimal("500.00"), detail.getPrice());
+
+        TransactionDetailCategory detailCategory = detailCategoryRepo.findAll().get(0);
+        assertEquals(detail.getId(), detailCategory.getTransactionDetail().getId());
+        assertEquals(category.getId(), detailCategory.getCategory().getId());
+
+        assertEquals(1, transactionRepo.count());
+        assertEquals(1, transactionDetailRepo.count());
+        assertEquals(1, detailCategoryRepo.count());
+        assertEquals(new BigDecimal("500.00"), saved.getPriceSum());
+
+        this.deleteData(saved);
+    }
+
+    @Test
     void updateTransaction_persistsAllEntities() {
         // GIVEN
         Mockito.when(currentUser.getUser()).thenReturn(this.user);

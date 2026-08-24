@@ -8,4 +8,6 @@ COPY pom.xml .
 RUN mvn dependency:go-offline
 
 COPY . .
-CMD ["mvn", "spring-boot:run"]
+# nincs már wsl2, ezért a watcher ránéz a kódra x másodpercenként, hogy van-e változás és indít egy rebuildet, ha igen
+RUN chmod +x compile-watch.sh
+CMD ["sh", "-c", "./compile-watch.sh & exec mvn spring-boot:run"]

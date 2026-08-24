@@ -8,35 +8,41 @@
     }
 
     .transaction-card {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
         padding: 15px;
 
-        .transaction-type {
-            flex: 0 1 auto;
-            align-items: center;
+        .first-row {
+            display: flex;
             gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
 
-            .transaction-icon {
-                font-size: 25px;
+            .transaction-type {
+                flex: 0 1 auto;
+                align-items: center;
+                gap: 10px;
 
-                &.income {
-                    color: $moneytracker-green;
+                .transaction-icon {
+                    font-size: 25px;
+
+                    &.income {
+                        color: $moneytracker-green;
+                    }
+
+                    &.outcome {
+                        color: $moneytracker-red;
+                    }
                 }
+            }
 
-                &.outcome {
-                    color: $moneytracker-red;
-                }
+            .transaction-name {
+                flex: 1 1 auto;
+            }
+
+            .transaction-date {
             }
         }
 
-        .transaction-name {
-            flex: 1 1 auto;
-        }
-
-        .transaction-date {
+        .second-row {
         }
     }
 }

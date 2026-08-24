@@ -11,7 +11,9 @@ import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
+import com.starbuck.moneytracker.dto.TransactionDetailEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
+import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
@@ -30,16 +32,55 @@ public class TransactionMapper {
             return null;
 
         List<TransactionDetailResponseDto> detailDto = entity.getTransactionDetails().stream()
-                .map(detail -> new TransactionDetailResponseDto(
-                        detail.getName(),
-                        detail.getPrice(),
-                        detail.getWeight(),
-                        detail.getUnitPrice(),
-                        detail.isComplexPriceMode(),
-                        detail.getCategoryIds()))
+                .map(detail -> {
+                    List<String> categoryNames = detail.getCategoryLinks().stream()
+                            .map(link -> link.getCategory().getName())
+                            .collect(Collectors.toList());
+                    return new TransactionDetailResponseDto(
+                            detail.getName(),
+                            detail.getPrice(),
+                            detail.getWeight(),
+                            detail.getUnitPrice(),
+                            detail.isComplexPriceMode(),
+                            categoryNames);
+                })
                 .collect(Collectors.toList());
 
         TransactionResponseDto dto = new TransactionResponseDto(
+                entity.getId(),
+                entity.getName(),
+                entity.getPriceSum(),
+                entity.getTransactionDate(),
+                entity.getTransactionType(),
+                entity.isComplexTransaction(),
+                detailDto);
+
+        return dto;
+    }
+
+    /**
+     * Tranzakció adatok szekresztő felületekhez
+     * 
+     * @param entity
+     * @return
+     */
+    public TransactionEditResponseDto toEditDto(Transaction entity) {
+        if (entity == null)
+            return null;
+
+        List<TransactionDetailEditResponseDto> detailDto = entity.getTransactionDetails().stream()
+                .map(detail -> {
+                    return new TransactionDetailEditResponseDto(
+                            detail.getName(),
+                            detail.getPrice(),
+                            detail.getWeight(),
+                            detail.getUnitPrice(),
+                            detail.isComplexPriceMode(),
+                            detail.getCategoryIds());
+                })
+                .collect(Collectors.toList());
+
+        TransactionEditResponseDto dto = new TransactionEditResponseDto(
                 entity.getId(),
                 entity.getName(),
                 entity.getPriceSum(),
@@ -117,9 +158,6 @@ public class TransactionMapper {
     public List<TransactionDetailSaveCommand> fromDetailCreateRequest(
             @NonNull List<TransactionDetailCreateDto> detailDtos, TransactionTypeEnum type) {
         return detailDtos.stream().map((detail) -> {
-            System.out.println(
-                    detail.name() + ": up: " + detail.unitPrice() + ", weight: " + detail.weight());
-
             if (detail.unitPrice() != null || detail.weight() != null) {
                 return new TransactionDetailSaveCommand(
                         detail.name(),
@@ -141,21 +179,21 @@ public class TransactionMapper {
      * Db-ből származó entitást átalakít egy update command-á (az szigorúbb
      * szabályozású, kötelező a detail lista)
      * 
-     * @param t
+     * @param transaction
      * @return
      */
-    public TransactionUpdateCommand entityToCommand(Transaction t) {
-        List<TransactionDetailSaveCommand> details = t.getTransactionDetails().stream().map((detail) -> {
+    public TransactionUpdateCommand entityToCommand(Transaction transaction) {
+        List<TransactionDetailSaveCommand> details = transaction.getTransactionDetails().stream().map((detail) -> {
             if (detail.getWeight() != null || detail.getUnitPrice() != null) {
                 return new TransactionDetailSaveCommand(detail.getName(), detail.getWeight(),
                         detail.getUnitPrice(),
                         detail.getCategoryIds());
             }
             return new TransactionDetailSaveCommand(detail.getName(), detail.getPrice(), List.of(),
-                    t.getTransactionType());
+                    transaction.getTransactionType());
         }).collect(Collectors.toList());
 
-        return new TransactionUpdateCommand(t.getName(), t.getPriceSum(), t.getTransactionDate(),
-                t.getTransactionType(), details, List.of());
+        return new TransactionUpdateCommand(transaction.getName(), transaction.getPriceSum(), transaction.getTransactionDate(),
+                transaction.getTransactionType(), details, List.of());
     }
 }
