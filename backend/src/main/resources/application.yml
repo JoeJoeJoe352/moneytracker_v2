@@ -5,6 +5,11 @@ spring:
   application:
     name: moneytracker
 
+  devtools:
+    restart:
+      poll-interval: 2s # hogy biztos ne induljon el 2x a rebuild
+      quiet-period: 1500ms
+
   datasource:
     url: jdbc:mysql://db:3306/moneytracker
     username: root  # docker-compose.dev.yml-ben nincs megadva username, de alapérték szerint root
