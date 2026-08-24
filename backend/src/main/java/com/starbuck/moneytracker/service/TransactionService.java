@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.entity.Category;
@@ -68,7 +70,7 @@ public class TransactionService {
                 currentUser.getUser());
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
 
-        this.saveDetails(savedTransactionModel, createCommand.getDetailCommands());
+        this.saveDetails(savedTransactionModel, createCommand);
         return savedTransactionModel;
     }
 
@@ -93,7 +95,7 @@ public class TransactionService {
         // Cascade delete miatt ez törli a detailCategory táblában lévők kapcsolat
         // bejegyzéseket is TODO ez legyen direktben törlés inkább, ne cascade delete
         transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
-        this.saveDetails(transaction, updateCommand.getDetailCommands());
+        this.saveDetails(transaction, updateCommand);
     }
 
     /**
@@ -102,22 +104,21 @@ public class TransactionService {
      * @param savedTransaction
      * @param transactionDetails
      */
-    private void saveDetails(Transaction savedTransaction, List<TransactionDetailSaveCommand> createCommands) {
-        TransactionTypeEnum transactionType = savedTransaction.getTransactionType();
+    private void saveDetails(Transaction savedTransaction, TransactionSaveCommand createCommand) {
+        List<TransactionDetailSaveCommand> details = new ArrayList<TransactionDetailSaveCommand>();
 
-        if (createCommands.size() == 0) {
-            // Minden tranzakciónak lennie kell legalább 1 detailnak TODO biztos kell
-            // lennie?
-            TransactionDetail defaultDetail = detailFactory.createDefaultDetail(savedTransaction.getPriceSum());
-            defaultDetail.setTransaction(savedTransaction);
-            this.transactionDetailRepo.save(defaultDetail);
-            return;
+        if (createCommand.getDetailCommands().size() == 0) {
+            TransactionDetailSaveCommand defaultDetail = detailFactory.createDefaultDetailSaveCommand(
+                    savedTransaction.getPriceSum(), createCommand.getCategories(), savedTransaction.getTransactionType()());
+            details.add(defaultDetail);
+        } else {
+            details.addAll(createCommand.getDetailCommands());
         }
 
-        for (TransactionDetailSaveCommand detailCommand : createCommands) {
+        for (TransactionDetailSaveCommand detailCommand : details) {
             TransactionDetail detail = new TransactionDetail(
                     detailCommand.getName(),
-                    costCalculator.calculateCost(detailCommand, transactionType),
+                    costCalculator.calculateCost(detailCommand, savedTransaction.getTransactionType()),
                     detailCommand.getWeight(),
                     detailCommand.getUnitPrice(),
                     savedTransaction);
@@ -127,6 +128,7 @@ public class TransactionService {
                 this.saveCategoryDetailEntries(detailAfterSave, detailCommand.getCategories());
             }
         }
+
     }
 
     /**

@@ -158,9 +158,11 @@ class TransactionServiceTest {
                 new BigDecimal("300.00"),
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of());
 
-        Mockito.when(detailFactory.createDefaultDetail(new BigDecimal("300.00")))
-                .thenReturn(new TransactionDetail(TransactionDetail.DEFAULT_DETAIL_NAME,
-                        new BigDecimal("300.00")));
+        Mockito.when(detailFactory.createDefaultDetailSaveCommand(new BigDecimal("300.00"), List.of(), TransactionTypeEnum.INCOME))
+                .thenReturn(
+                        new TransactionDetailSaveCommand(TransactionDetail.DEFAULT_DETAIL_NAME,
+                                new BigDecimal("300.00"), List.of(),
+                                TransactionTypeEnum.INCOME));
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
