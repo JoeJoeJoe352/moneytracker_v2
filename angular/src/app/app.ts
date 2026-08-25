@@ -15,6 +15,6 @@ export class App {
     private translate = inject(TranslateService);
 
     constructor() {
-        this.translate.addLangs(['hu']); // TODO en és de hozzáadása
+        this.translate.addLangs(['hu', 'en', 'de']);
     }
 }

@@ -26,6 +26,13 @@
                         <app-header-link-list [linkList]="authenticatedLinkList" class="d-flex" />
                     }
                 </ul>
+                <select class="form-control" (change)="onLanguageDropdownClick($event)">
+                    @for (language of languageData(); track $index) {
+                        <option [value]="language.id">
+                            {{ language.name }}
+                        </option>
+                    }
+                </select>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     @if (userData.isUserLogged()) {
                         <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
