@@ -1,19 +1,19 @@
-import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
-import TransactionListComponent from '../transaction/transaction-list-component';
-import { TransactionModalComponent } from '../transaction/transaction-modal';
+import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Observable, switchMap, tap } from 'rxjs';
+import { switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
+import { TransactionsListComponent } from '../transaction/transactions-component';
+import { TransactionModalComponent } from '../transaction/transaction-modal';
 
 @Component({
     selector: 'app-main-page-component',
     templateUrl: './main-page-component.html',
     styleUrl: './main-page-component.scss',
     standalone: true,
-    imports: [TransactionModalComponent, TransactionListComponent, DecimalPipe, TranslatePipe],
+    imports: [TransactionsListComponent, DecimalPipe, TranslatePipe, TransactionModalComponent],
     providers: [TransactionModalStateService],
 })
 export class MainPage {
@@ -25,12 +25,15 @@ export class MainPage {
      * Azért számot növelünk és nem boolean értéket, mert ha gyorsan hívódik egymás után,
      * akkor többször true-ra állítódik az érték és az nem vált ki új letöltés eventet
      */
-    private reloadTransactionListTrigger = signal(0);
+    protected reloadTransactionListTrigger = signal(0);
 
     /**
-     * Töltődik-e jelenleg a tranzakciós lista
+     * Ha ez az érték változik, újratöltjük az összesítést. Külön jelzőérték a listától,
+     * mert az összesítést a lista saját maga is módosíthatja (pl. szerkesztés/törlés a listában),
+     * nem csak az itt lévő "+ tranzakció létrehozása" gomb
      */
-    protected isTransactionListLoading = signal(true);
+    private reloadMoneySumTrigger = signal(0);
+
     /**
      * Összes pénz töltődik-e
      */
@@ -38,29 +41,32 @@ export class MainPage {
 
     constructor() {
         // Mentés/törlés után újratöltjük a listát és az összesítést
-        this.modal.changed.subscribe(() =>
-            this.reloadTransactionListTrigger.update((value) => value + 1),
-        );
+        this.modal.changed.subscribe(() => {
+            this.reloadTransactionListTrigger.update((value) => value + 1);
+            this.reloadMoneySumTrigger.update((value) => value + 1);
+        });
     }
 
     /**
-     * Tranzakciós lista adatok
+     * A tranzakciós listában történt változás után újratöltjük az összesítést
      */
-    protected transactionListData = this.reloadableSignal(
-        this.reloadTransactionListTrigger,
-        () => this.transactionService.getLastTransactions(),
-        [],
-        this.isTransactionListLoading,
-    );
+    protected onListTransactionsChanged(): void {
+        this.reloadMoneySumTrigger.update((value) => value + 1);
+    }
 
     /**
      * Felhasználó összes pénze.
      */
-    protected moneySum = this.reloadableSignal(
-        this.reloadTransactionListTrigger,
-        () => this.transactionService.getMoneySum(),
-        null,
-        this.isMoneySumLoading,
+    protected moneySum = toSignal(
+        toObservable(this.reloadMoneySumTrigger).pipe(
+            tap(() => this.isMoneySumLoading.set(true)),
+            switchMap(() =>
+                this.transactionService
+                    .getMoneySum()
+                    .pipe(tap(() => this.isMoneySumLoading.set(false))),
+            ),
+        ),
+        { initialValue: null },
     );
 
     /**
@@ -70,30 +76,4 @@ export class MainPage {
         const sum = this.moneySum();
         return sum ? sum.incomeSumThisMonth - sum.expenseSumThisMonth : null;
     });
-
-    /**
-     * Egy trigger jelre újratölti az adatot, és a betöltés alatt/után beállítja a megadott loading jelzőt.
-     * A transactionListData és moneySum azonos szerkezetű (trigger -> loading true -> lekérés -> loading false)
-     * betöltési logikáját fogja össze, hogy ne kelljen kétszer leírni.
-     *
-     * @param trigger           Adatok betöltését triggerelő signal
-     * @param load              Adatok betöltését végző függvény
-     * @param initialValue      Betöltés előtti kezdőértéke az adattagnak
-     * @param loading           Betöltést jelző flag
-     * @returns
-     */
-    private reloadableSignal<T>(
-        trigger: Signal<unknown>,
-        load: () => Observable<T>,
-        initialValue: T,
-        loading: WritableSignal<boolean>,
-    ): Signal<T> {
-        return toSignal(
-            toObservable(trigger).pipe(
-                tap(() => loading.set(true)),
-                switchMap(() => load().pipe(tap(() => loading.set(false)))),
-            ),
-            { initialValue },
-        );
-    }
 }
