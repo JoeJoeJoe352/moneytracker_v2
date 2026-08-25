@@ -1,4 +1,4 @@
-import { Component, inject, Signal, signal, WritableSignal } from '@angular/core';
+import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
 import TransactionListComponent from '../transaction/transaction-list-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { TransactionService } from '../transaction/transaction-service';
@@ -62,6 +62,14 @@ export class MainPage {
         null,
         this.isMoneySumLoading,
     );
+
+    /**
+     * Az egyenleg nettó változása ebben a hónapban
+     */
+    protected balanceChangeThisMonth: Signal<number | null> = computed(() => {
+        const sum = this.moneySum();
+        return sum ? sum.incomeSumThisMonth - sum.expenseSumThisMonth : null;
+    });
 
     /**
      * Egy trigger jelre újratölti az adatot, és a betöltés alatt/után beállítja a megadott loading jelzőt.

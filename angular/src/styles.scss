@@ -37,8 +37,13 @@ body {
 // Modern feel: consistent hover motion on interactive controls.
 .btn,
 .transaction-card-wrapper,
-.color-block {
+.stat-card {
   transition: $transition-base;
+}
+
+.stat-card:hover {
+  box-shadow: $shadow-lg;
+  transform: translateY(-2px);
 }
 
 .btn {

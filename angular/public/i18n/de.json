@@ -104,6 +104,7 @@
     "total_balance": "Gesamtguthaben",
     "create_transaction.button": "Transaktion erstellen",
     "no_transaction": "Noch keine Transaktion erfasst",
+    "balance_change_this_month": "in diesem Monat",
     "total_income": "Einnahmen in diesem Monat",
     "total_expenses": "Ausgaben in diesem Monat",
     "last_transactions": "Letzte Transaktionen"

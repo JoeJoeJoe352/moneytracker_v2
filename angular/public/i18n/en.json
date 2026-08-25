@@ -104,6 +104,7 @@
     "total_balance": "Total balance",
     "create_transaction.button": "Create transaction",
     "no_transaction": "No transactions yet",
+    "balance_change_this_month": "this month",
     "total_income": "Income this month",
     "total_expenses": "Expenses this month",
     "last_transactions": "Latest transactions"

@@ -11,48 +11,65 @@
         (categoryAdded)="modal.saveCategory($event)"
     />
 }
-<div class="row mt-3">
-    <div class="col-lg-4">
-        <div class="color-block blue-block">
-            <div class="mb-3">
-                <div class="my-2">{{ 'mainpage.total_balance' | translate }}</div>
-                @if (isMoneySumLoading()) {
-                    <div class="spinner-border" role="status"></div>
-                } @else {
-                    <h2>{{ moneySum()?.moneySum | number }} Ft</h2>
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="stat-card balance-card">
+            <div class="stat-card-header">
+                <span class="stat-icon-badge"><i class="bi bi-wallet2"></i></span>
+                <div class="stat-label">{{ 'mainpage.total_balance' | translate }}</div>
+            </div>
+            @if (isMoneySumLoading()) {
+                <div class="spinner-border" role="status"></div>
+            } @else {
+                <div class="stat-value">{{ moneySum()?.moneySum | number }} Ft</div>
+                @if (balanceChangeThisMonth(); as change) {
+                    <div class="stat-trend" [class.positive]="change >= 0" [class.negative]="change < 0">
+                        @if (change >= 0) {
+                            <i class="bi bi-arrow-up-short"></i>
+                        } @else {
+                            <i class="bi bi-arrow-down-short"></i>
+                        }
+                        {{ change | number }} Ft {{ 'mainpage.balance_change_this_month' | translate }}
+                    </div>
                 }
-            </div>
-
-            <div>
-                <button class="btn btn-green-hollow" (click)="modal.open(null)">
-                    + {{ 'mainpage.create_transaction.button' | translate }}
-                </button>
-            </div>
-        </div>
-
-        <div class="color-block green-block mt-3">
-            <div class="mb-3">
-                <div class="my-2">{{ 'mainpage.total_income' | translate }}</div>
-                @if (isMoneySumLoading()) {
-                    <div class="spinner-border" role="status"></div>
-                } @else {
-                    <h2>{{ moneySum()?.incomeSumThisMonth | number }} Ft</h2>
-                }
-            </div>
-        </div>
-
-        <div class="color-block red-block mt-3">
-            <div class="mb-3">
-                <div class="my-2">{{ 'mainpage.total_expenses' | translate }}</div>
-                @if (isMoneySumLoading()) {
-                    <div class="spinner-border" role="status"></div>
-                } @else {
-                    <h2>{{ moneySum()?.expenseSumThisMonth | number }} Ft</h2>
-                }
-            </div>
+            }
+            <button class="btn btn-green-hollow btn-sm align-self-start" (click)="modal.open(null)">
+                + {{ 'mainpage.create_transaction.button' | translate }}
+            </button>
         </div>
     </div>
-    <div class="col-lg-8">
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-icon-badge green"><i class="bi bi-arrow-up-short"></i></span>
+                <div class="stat-label">{{ 'mainpage.total_income' | translate }}</div>
+            </div>
+            @if (isMoneySumLoading()) {
+                <div class="spinner-border" role="status"></div>
+            } @else {
+                <div class="stat-value income">{{ moneySum()?.incomeSumThisMonth | number }} Ft</div>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-icon-badge red"><i class="bi bi-arrow-down-short"></i></span>
+                <div class="stat-label">{{ 'mainpage.total_expenses' | translate }}</div>
+            </div>
+            @if (isMoneySumLoading()) {
+                <div class="spinner-border" role="status"></div>
+            } @else {
+                <div class="stat-value expense">{{ moneySum()?.expenseSumThisMonth | number }} Ft</div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
         <app-transaction-list
             [title]="'mainpage.last_transactions' | translate"
             [isTransactionListLoading]="isTransactionListLoading()"

@@ -1,20 +1,113 @@
 @use '../../shared/variables.scss' as *;
 
-.color-block {
-    padding: 15px;
-    color: $moneytracker-white;
+.stat-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    background-color: $moneytracker-white;
     border-radius: $border-radius-lg;
-    box-shadow: $shadow-sm;
+    box-shadow: $shadow;
+}
 
-    &.green-block {
-        background-color: $moneytracker-green;
-    }
+.stat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
 
-    &.blue-block {
+.stat-icon-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    font-size: 1.15rem;
+    color: $moneytracker-white;
+
+    &.blue {
         background-color: $moneytracker-blue;
     }
 
-    &.red-block {
+    &.green {
+        background-color: $moneytracker-green;
+    }
+
+    &.red {
         background-color: $moneytracker-red;
+    }
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+
+    &.income {
+        color: $moneytracker-green;
+    }
+
+    &.expense {
+        color: $moneytracker-red;
+    }
+}
+
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+// Az egyenleg kártya bankkártya-szerű megjelenést kap, hogy kiemelkedjen a másik két kártya közül
+.balance-card {
+    position: relative;
+    overflow: hidden;
+    color: $moneytracker-white;
+    background: linear-gradient(135deg, $moneytracker-green 0%, $moneytracker-darkest-green 100%);
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: -3.5rem;
+        right: -3.5rem;
+        width: 11rem;
+        height: 11rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-icon-badge {
+        background-color: rgba(255, 255, 255, 0.18);
+        color: $moneytracker-white;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .stat-trend {
+        color: rgba(255, 255, 255, 0.85);
+
+        &.negative {
+            color: #ffd7d7;
+        }
     }
 }

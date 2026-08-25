@@ -1,4 +1,4 @@
-@use '../../shared/variables.scss' as *; // így lesz globálisan elérhető a változók
+@use '../../shared/variables.scss' as *;
 
 .transaction-card-wrapper {
     cursor: pointer;
@@ -8,41 +8,72 @@
     }
 
     .transaction-card {
-        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+    }
+}
 
-        .first-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
+.transaction-icon-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    flex-shrink: 0;
 
-            .transaction-type {
-                flex: 0 1 auto;
-                align-items: center;
-                gap: 10px;
+    &.income {
+        color: $moneytracker-green;
+        background-color: rgba($moneytracker-green, 0.12);
+    }
 
-                .transaction-icon {
-                    font-size: 25px;
+    &.outcome {
+        color: $moneytracker-red;
+        background-color: rgba($moneytracker-red, 0.12);
+    }
+}
 
-                    &.income {
-                        color: $moneytracker-green;
-                    }
+.transaction-info {
+    flex: 1 1 auto;
+    min-width: 0;
 
-                    &.outcome {
-                        color: $moneytracker-red;
-                    }
-                }
-            }
+    .transaction-name {
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-            .transaction-name {
-                flex: 1 1 auto;
-            }
+    .transaction-categories {
+        font-size: 0.85rem;
+        color: #6b7280;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
-            .transaction-date {
-            }
+    .transaction-price {
+        font-weight: 700;
+
+        &.income {
+            color: $moneytracker-green;
         }
 
-        .second-row {
+        &.outcome {
+            color: $moneytracker-red;
         }
+    }
+}
+
+.transaction-meta {
+    flex: 0 0 auto;
+    text-align: right;
+
+    .transaction-date {
+        font-size: 0.8rem;
+        color: #6b7280;
     }
 }

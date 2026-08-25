@@ -104,6 +104,7 @@
     "total_balance": "Összes pénz",
     "create_transaction.button": "Tranzakció létrehozása",
     "no_transaction": "Nincs még felvett tranzakció",
+    "balance_change_this_month": "ebben a hónapban",
     "total_income": "Bevétel ebben a hónapban",
     "total_expenses": "Kiadás ebben a hónapban",
     "last_transactions": "Legutóbbi tranzakciók"
