@@ -42,3 +42,21 @@ jobs:
         with:
           name: coverage-report
           path: backend/target/site/jacoco/
+
+      - name: Cache OWASP dependency-check NVD database
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: owasp-dependency-check-data
+
+      - name: OWASP dependency vulnerability scan
+        run: >
+          mvn -B org.owasp:dependency-check-maven:check -f backend/pom.xml
+          -Dnvd.api.key=${{ secrets.NVD_API_KEY }}
+
+      - name: Upload dependency-check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: backend/target/dependency-check-report.html

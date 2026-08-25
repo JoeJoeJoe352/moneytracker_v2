@@ -1,13 +1,29 @@
 import { Routes } from '@angular/router';
-import { Welcome } from './features/welcome/welcome';
-import { MainPage } from './features/main-page/main-page-component';
-import { ErrorPage } from './features/error/error-page-component';
 import { authGuard } from './auth-guard-guard';
-import { TransactionsPage } from './features/history-page/transactions-page-component';
 
+/**
+ * Routes lazy load-al van betöltve, hogy ne lépjük túl a bundle-size budget-et
+ */
 export const routes: Routes = [
-    {path: '', component: MainPage, canActivate: [authGuard]},
-    {path: 'welcome', component: Welcome},
-    {path: 'transactions', component: TransactionsPage, canActivate: [authGuard]},
-    {path: '**', component: ErrorPage}
+    {
+        path: '',
+        loadComponent: () => import('./features/main-page/main-page-component').then((m) => m.MainPage),
+        canActivate: [authGuard],
+    },
+    {
+        path: 'welcome',
+        loadComponent: () => import('./features/welcome/welcome').then((m) => m.Welcome),
+    },
+    {
+        path: 'transactions',
+        loadComponent: () =>
+            import('./features/history-page/transactions-page-component').then(
+                (m) => m.TransactionsPage,
+            ),
+        canActivate: [authGuard],
+    },
+    {
+        path: '**',
+        loadComponent: () => import('./features/error/error-page-component').then((m) => m.ErrorPage),
+    },
 ];
