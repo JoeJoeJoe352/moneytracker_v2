@@ -160,7 +160,7 @@ class CategoryE2ETest {
                 new HttpEntity<>(ownRequest, headers), CategoryResponseDto.class);
         createdCategoryIds.add(ownResponse.getBody().id());
 
-        Category commonCategory = categoryRepository.save(new Category("CommonCategory", null, LangEnum.HU));
+        Category commonCategory = categoryRepository.save(new Category("CommonCategory", null, LangEnum.EN));
         createdCategoryIds.add(commonCategory.getId());
 
         ResponseEntity<CategoryResponseDto[]> response = restTemplate.exchange("/category", HttpMethod.GET,

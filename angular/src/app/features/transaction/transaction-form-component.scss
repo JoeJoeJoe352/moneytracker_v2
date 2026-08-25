@@ -1,5 +1,17 @@
 @use '../../shared/variables.scss' as *; // így lesz globálisan elérhető a változók
 
+.detail-inputs-title {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.detail-toggle-row {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: $border-radius;
+}
+
 .detail-add-row {
     display: flex;
     align-items: center;
@@ -18,7 +30,24 @@
     & button {
         // távolság a csíkoktól
         margin: 0 1rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        flex-shrink: 0;
     }
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eef0f1;
 }
 
 // A ng-multiselect-dropdown "nincs találat" sorát kategória-hozzáadó gombbá alakítjuk,
@@ -49,7 +78,8 @@
 
 .input-with-suffix {
     position: relative;
-    display: inline-block;
+    display: block;
+    width: 100%;
 
     .suffix {
         position: absolute;
