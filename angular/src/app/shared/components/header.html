@@ -19,12 +19,17 @@
                 id="navbarSupportedContent"
                 [class.show]="menuOpen"
             >
-                <!-- todo főoldal és üdvözlünk gomb egymásra tolódik mobilnézetben, mert flex elemek-->
                 <ul class="navbar-nav">
-                    <app-header-link-list [linkList]="publicLinkList" class="d-flex" />
+                    <app-header-link-list
+                        [linkList]="publicLinkList"
+                        class="d-flex flex-column flex-lg-row"
+                    />
 
                     @if (userData.isUserLogged()) {
-                        <app-header-link-list [linkList]="authenticatedLinkList" class="d-flex" />
+                        <app-header-link-list
+                            [linkList]="authenticatedLinkList"
+                            class="d-flex flex-column flex-lg-row"
+                        />
                     }
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
