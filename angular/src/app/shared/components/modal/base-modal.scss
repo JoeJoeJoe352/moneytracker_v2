@@ -13,7 +13,9 @@
 
 .modal-content {
     z-index: 3;
-    border-radius: $border-radius;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+    border: none;
 }
 
 // bootstrap felülírás

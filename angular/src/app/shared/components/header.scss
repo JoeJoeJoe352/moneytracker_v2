@@ -10,6 +10,7 @@
 .navbar {
   z-index: 2;
   background-color: $moneytracker-green !important;
+  box-shadow: $shadow-sm;
 
   .navbar-brand {
     color: $moneytracker-white;

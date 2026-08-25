@@ -3,7 +3,8 @@
 .color-block {
     padding: 15px;
     color: $moneytracker-white;
-    border-radius: $border-radius;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-sm;
 
     &.green-block {
         background-color: $moneytracker-green;

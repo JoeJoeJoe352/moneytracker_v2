@@ -1,8 +1,9 @@
 @use '../../shared/variables.scss' as *;
 
 .transaction_list {
-    border-radius: $border-radius;
-    border: 1px solid $moneytracker-grey;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow;
+    background-color: $moneytracker-white;
 
     h2 {
         padding: 15px;
