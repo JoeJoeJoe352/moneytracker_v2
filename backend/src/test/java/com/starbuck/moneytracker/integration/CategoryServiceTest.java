@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.NonUniqueObjectException;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -66,6 +69,15 @@ public class CategoryServiceTest {
     @BeforeEach
     void mockUserUtil() {
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
+        // A tesztadatok végig LangEnum.HU-t használnak, de LocaleContextHolder.getLocale() a JVM
+        // alapértelmezett locale-jára esik vissza, ha nincs HTTP request kontextus. Explicit
+        // beállítás nélkül a teszt csak azon a gépen menne át, aminek a JVM-je magyar locale-ú.
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("hu"));
+    }
+
+    @AfterEach
+    void resetLocale() {
+        LocaleContextHolder.resetLocaleContext();
     }
 
     @Test

@@ -1,25 +1,4 @@
 {
-  "in_db": {
-    "category": {
-      "food": "Lebensmittel",
-      "household": "Haushalt",
-      "hygiene": "Hygiene",
-      "health": "Gesundheit",
-      "transport": "Verkehr",
-      "fuel": "Kraftstoff",
-      "entertainment": "Unterhaltung",
-      "clothing": "Kleidung",
-      "electronics": "Elektronik",
-      "home": "Zuhause",
-      "pets": "Haustiere",
-      "gifts": "Geschenke",
-      "education": "Bildung",
-      "sport": "Sport",
-      "subscription": "Abonnement",
-      "other": "Sonstiges"
-    }
-  },
-
   "welcome": {
     "title": "Willkommen bei Moneytracker!",
     "welcomeText": "Die regelmäßige Verfolgung unserer Ausgaben hilft uns, im Alltag bewusster zu handeln. Sie zeigt, wo das Geld versickert, welche Gewohnheiten uns unterstützen und welche uns zurückhalten. Wenn du die echten Zahlen siehst, fällt es leichter, kluge Entscheidungen zu treffen: sparen, planen oder dir mutig etwas gönnen. Finanzielle Transparenz schränkt nicht ein, sondern schenkt Freiheit — du weißt genau, wo du stehst und wohin du willst.",
@@ -125,6 +104,7 @@
     "total_balance": "Gesamtguthaben",
     "create_transaction.button": "Transaktion erstellen",
     "no_transaction": "Noch keine Transaktion erfasst",
+    "balance_change_this_month": "in diesem Monat",
     "total_income": "Einnahmen in diesem Monat",
     "total_expenses": "Ausgaben in diesem Monat",
     "last_transactions": "Letzte Transaktionen"
@@ -139,5 +119,10 @@
       "submit": "Suchen",
       "clear": "Filter zurücksetzen"
     }
+  },
+  "language": {
+    "hu": "Ungarn",
+    "de": "Deutsch",
+    "en": "Englisch"
   }
 }

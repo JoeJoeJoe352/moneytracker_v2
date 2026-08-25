@@ -5,12 +5,14 @@ import { UserDataStore } from '../services/user-data-store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LinkInterface } from '../interfaces';
 import { HeaderLinkListComponent } from './header-link-list-component';
+import { FormsModule } from '@angular/forms';
+import { LanguageSwitcherComponent } from './language-switch-component';
 
 @Component({
     selector: 'app-header',
     templateUrl: 'header.html',
     styleUrl: './header.scss',
-    imports: [RouterLink, TranslatePipe, HeaderLinkListComponent],
+    imports: [RouterLink, TranslatePipe, HeaderLinkListComponent, FormsModule, LanguageSwitcherComponent],
 })
 export class Header {
     private authService = inject(AuthService);
@@ -34,7 +36,7 @@ export class Header {
      * Belépés után elérhető linkek listája a fejlécben
      */
     protected authenticatedLinkList: LinkInterface[] = [
-        {url: "/transactions", langKey: "header.transactions"}
+        { url: '/transactions', langKey: 'header.transactions' },
     ];
 
     /**

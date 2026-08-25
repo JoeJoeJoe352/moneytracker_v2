@@ -1,32 +1,33 @@
 <div class="transaction-card-wrapper">
     <div class="transaction-card">
-        <div class="first-row">
-            <div class="transaction-type d-flex">
-                <div class="transaction-icon" [class]="isIncome() ? 'income' : 'outcome'">
-                    @if (isIncome()) {
-                        <i class="bi bi-arrow-up-circle-fill"></i>
-                    } @else {
-                        <i class="bi bi-arrow-down-circle-fill"></i>
-                    }
-                </div>
-
-                <div class="transaction-price">
-                    {{ transaction.priceSum | number }}
-                </div>
-            </div>
-
-            <div class="transaction-name">
-                {{ transaction.name }}
-            </div>
-
-            <div class="transaction-date">
-                {{ transaction.transactionDate }}
-            </div>
+        <div
+            class="transaction-icon-badge"
+            [class.income]="isIncome()"
+            [class.outcome]="!isIncome()"
+        >
+            @if (isIncome()) {
+                <i class="bi bi-arrow-up-short"></i>
+            } @else {
+                <i class="bi bi-arrow-down-short"></i>
+            }
         </div>
-        <div class="second-row">
-            <div class="categories">
-                {{ categoriesAsString() }}
+
+        <div class="transaction-info">
+            <div
+                class="transaction-price"
+                [class.income]="isIncome()"
+                [class.outcome]="!isIncome()"
+            >
+                {{ transaction.priceSum | number }}
             </div>
+            <div class="transaction-name">{{ transaction.name }}</div>
+            @if (categoriesAsString()) {
+                <div class="transaction-categories">{{ categoriesAsString() }}</div>
+            }
+        </div>
+
+        <div class="transaction-meta">
+            <div class="transaction-date">{{ transaction.transactionDate }}</div>
         </div>
     </div>
 </div>

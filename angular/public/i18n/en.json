@@ -1,25 +1,4 @@
 {
-  "in_db": {
-    "category": {
-      "food": "Food",
-      "household": "Household",
-      "hygiene": "Hygiene",
-      "health": "Health",
-      "transport": "Transport",
-      "fuel": "Fuel",
-      "entertainment": "Entertainment",
-      "clothing": "Clothing",
-      "electronics": "Electronics",
-      "home": "Home",
-      "pets": "Pets",
-      "gifts": "Gifts",
-      "education": "Education",
-      "sport": "Sport",
-      "subscription": "Subscription",
-      "other": "Other"
-    }
-  },
-
   "welcome": {
     "title": "Welcome to Moneytracker!",
     "welcomeText": "Regularly tracking our expenses helps us become more mindful in everyday life. It shows where the money leaks away, which habits support us, and which hold us back. When you see the real numbers, it's easier to make smart decisions: saving, planning, or confidently allowing yourself something. Financial transparency doesn't limit you — it gives you freedom, since you know exactly where you stand and where you want to go.",
@@ -125,6 +104,7 @@
     "total_balance": "Total balance",
     "create_transaction.button": "Create transaction",
     "no_transaction": "No transactions yet",
+    "balance_change_this_month": "this month",
     "total_income": "Income this month",
     "total_expenses": "Expenses this month",
     "last_transactions": "Latest transactions"
@@ -139,5 +119,10 @@
       "submit": "Search",
       "clear": "Clear filters"
     }
+  },
+  "language": {
+    "hu": "Hungary",
+    "de": "German",
+    "en": "English"
   }
 }

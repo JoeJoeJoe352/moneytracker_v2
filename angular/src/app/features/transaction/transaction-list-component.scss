@@ -1,16 +1,20 @@
 @use '../../shared/variables.scss' as *;
 
 .transaction_list {
-    border-radius: $border-radius;
-    border: 1px solid $moneytracker-grey;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow;
+    background-color: $moneytracker-white;
+    overflow: hidden;
 
     h2 {
-        padding: 15px;
+        padding: 1rem 1.25rem;
         margin: 0;
-        border-bottom: 1px solid $moneytracker-grey;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-bottom: 1px solid #f1f1f2;
     }
-    
+
     .transaction_cards:not(:last-child) {
-        border-bottom: 1px solid $moneytracker-grey;
+        border-bottom: 1px solid #f1f1f2;
     }
 }

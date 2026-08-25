@@ -1,4 +1,4 @@
-<form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form">
+<form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form transaction-form">
     <!-- Név -->
     <div class="form-group mb-3">
         <label for="transaction-name">{{ 'transaction.name' | translate }}</label>
@@ -22,102 +22,99 @@
         }
     </div>
 
-    <!-- Tranzakciótípus -->
-    <div class="form-group mb-3">
-        <label for="transaction-transactionType-bool">{{ 'transaction.type' | translate }}</label>
-        <div>
-            <app-switch
-                id="transaction-transactionType-bool"
-                formControlName="isIncome"
-                [labelBefore]="'transaction.expense' | translate"
-                [labelAfter]="'transaction.income' | translate"
-            />
+    <div class="row">
+        <!-- Tranzakciótípus -->
+        <div class="col-sm-6 form-group mb-3">
+            <label for="transaction-transactionType-bool">{{ 'transaction.type' | translate }}</label>
+            <div>
+                <app-switch
+                    id="transaction-transactionType-bool"
+                    formControlName="isIncome"
+                    [labelBefore]="'transaction.expense' | translate"
+                    [labelAfter]="'transaction.income' | translate"
+                />
+            </div>
         </div>
-    </div>
 
-    <!-- Dátum -->
-    <div class="form-group mb-3">
-        <label class="d-block" for="transaction-date">{{ 'transaction.date' | translate }}</label>
-        <ngxsmk-datepicker
-            id="transaction-date"
-            mode="single"
-            formControlName="transactionDate"
-            [placeholder]="'transaction.date.placeholder' | translate"
-        />
-        @if (transactionDate.invalid && transactionDate.touched) {
-            @if (transactionDate.hasError('required')) {
-                <div class="form-field-error">{{ 'transaction.date.required' | translate }}</div>
+        <!-- Dátum -->
+        <div class="col-sm-6 form-group mb-3">
+            <label class="d-block" for="transaction-date">{{ 'transaction.date' | translate }}</label>
+            <ngxsmk-datepicker
+                id="transaction-date"
+                mode="single"
+                formControlName="transactionDate"
+                [placeholder]="'transaction.date.placeholder' | translate"
+            />
+            @if (transactionDate.invalid && transactionDate.touched) {
+                @if (transactionDate.hasError('required')) {
+                    <div class="form-field-error">{{ 'transaction.date.required' | translate }}</div>
+                }
+                @if (transactionDate.hasError('invalidDate')) {
+                    <div class="form-field-error">{{ 'transaction.date.invalid' | translate }}</div>
+                }
             }
-            @if (transactionDate.hasError('invalidDate')) {
-                <div class="form-field-error">{{ 'transaction.date.invalid' | translate }}</div>
-            }
-        }
+        </div>
     </div>
 
     <!-- részletek mutatása/elrejtése kapcsoló -->
-    <div class="form-group mb-3">
-        <div>
-            <app-switch
-                theme="on-off"
-                formControlName="isComplexTransaction"
-                id="transaction-show-details"
-                [labelBefore]="'transaction.hide_details' | translate"
-                [labelAfter]="'transaction.show_details' | translate"
-            />
-        </div>
+    <div class="form-group mb-3 detail-toggle-row">
+        <app-switch
+            theme="on-off"
+            formControlName="isComplexTransaction"
+            id="transaction-show-details"
+            [labelBefore]="'transaction.hide_details' | translate"
+            [labelAfter]="'transaction.show_details' | translate"
+        />
     </div>
 
     <!-- Ár -->
     @if (!isComplexTransaction.value) {
-        <div class="form-group mb-3">
-            <div class="d-flex">
-                <div class="me-2">
-                    <label for="transaction-price">{{ 'transaction.price' | translate }}</label
-                    ><br />
-                    <div class="input-with-suffix">
-                        <input
-                            id="transaction-price"
-                            type="number"
-                            formControlName="price"
-                            class="form-control"
-                            autocomplete="price"
-                        />
-                        <span class="suffix">Ft</span>
-                    </div>
-                    @if (price.invalid && price.touched) {
-                        @if (price.hasError('required')) {
-                            <div class="form-field-error">
-                                {{ 'transaction.price.required' | translate }}
-                            </div>
-                        }
-                        @if (price.hasError('min')) {
-                            <div class="form-field-error">
-                                {{ 'transaction.price.min' | translate }}
-                            </div>
-                        }
-                    }
-                </div>
-                <div class="w-100">
-                    <label for="transaction-categories">{{
-                        'transaction.categories' | translate
-                    }}</label>
-                    <ng-multiselect-dropdown
-                        [placeholder]="'transaction.categories.add' | translate"
-                        [settings]="multiselectSettings()"
-                        [disabled]="isCategorySaveInProgress"
-                        [data]="categoryData()"
-                        formControlName="categories"
-                        (onFilterChange)="onCategoryFilterChange($event)"
-                        (click)="onCategoryDropdownClick($event)"
-                        (onDropDownClose)="categorySearchText.set('')"
+        <div class="row mb-3">
+            <div class="col-sm-4 form-group mb-3 mb-sm-0">
+                <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
+                <div class="input-with-suffix">
+                    <input
+                        id="transaction-price"
+                        type="number"
+                        formControlName="price"
+                        class="form-control"
+                        autocomplete="price"
                     />
+                    <span class="suffix">Ft</span>
                 </div>
+                @if (price.invalid && price.touched) {
+                    @if (price.hasError('required')) {
+                        <div class="form-field-error">
+                            {{ 'transaction.price.required' | translate }}
+                        </div>
+                    }
+                    @if (price.hasError('min')) {
+                        <div class="form-field-error">
+                            {{ 'transaction.price.min' | translate }}
+                        </div>
+                    }
+                }
+            </div>
+            <div class="col-sm-8 form-group">
+                <label for="transaction-categories">{{
+                    'transaction.categories' | translate
+                }}</label>
+                <ng-multiselect-dropdown
+                    [placeholder]="'transaction.categories.add' | translate"
+                    [settings]="multiselectSettings()"
+                    [disabled]="isCategorySaveInProgress"
+                    [data]="categoryData()"
+                    formControlName="categories"
+                    (onFilterChange)="onCategoryFilterChange($event)"
+                    (click)="onCategoryDropdownClick($event)"
+                    (onDropDownClose)="categorySearchText.set('')"
+                />
             </div>
         </div>
     } @else {
         <!-- Tranzakció részletei -->
         <div class="detail-inputs">
-            <h4 class="mb-1">{{ 'transaction.detail.title' | translate }}</h4>
+            <h4 class="detail-inputs-title">{{ 'transaction.detail.title' | translate }}</h4>
             @for (detail of details.controls; track $index) {
                 <app-transaction-detail-row-component
                     [detail]="detail"
@@ -139,25 +136,28 @@
             </div>
         </div>
     }
-    <button
-        type="submit"
-        [disabled]="transactionForm.invalid || isTransactionFormDisabled"
-        class="btn btn-primary-green"
-    >
-        {{
-            isExistingTransaction()
-                ? ('transaction.update' | translate)
-                : ('transaction.create' | translate)
-        }}
-    </button>
-    @if (isExistingTransaction()) {
+
+    <div class="form-actions">
         <button
-            type="button"
-            [disabled]="isTransactionFormDisabled"
-            class="btn btn-primary-red ms-2"
-            (click)="deleted.emit(transaction.id)"
+            type="submit"
+            [disabled]="transactionForm.invalid || isTransactionFormDisabled"
+            class="btn btn-primary-green"
         >
-            {{ 'transaction.delete' | translate }}
+            {{
+                isExistingTransaction()
+                    ? ('transaction.update' | translate)
+                    : ('transaction.create' | translate)
+            }}
         </button>
-    }
+        @if (isExistingTransaction()) {
+            <button
+                type="button"
+                [disabled]="isTransactionFormDisabled"
+                class="btn btn-primary-red"
+                (click)="deleted.emit(transaction.id)"
+            >
+                {{ 'transaction.delete' | translate }}
+            </button>
+        }
+    </div>
 </form>

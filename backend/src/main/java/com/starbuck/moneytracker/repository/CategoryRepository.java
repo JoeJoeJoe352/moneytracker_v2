@@ -12,8 +12,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     /**
      * Megnézi, hogy a usernek van-e már ilyen néven kategóriája (saját, vagy közös)
-     * TODO a nyelvi kulcsok miatt fel lehet venni ugyanazzal a névvel egy közös meg
-     * egy saját kategóriát (elvileg, mert a frontend nem engedi)
      * 
      * @param name
      * @param userId
@@ -23,7 +21,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean isUserHaveThisCategoryName(String name, long userId, LangEnum lang);
 
     /**
-     * Kilistázza a user saját kategóriáit és a közös kategóriákat (null used_id)
+     * Kilistázza a user saját kategóriáit és a közös kategóriákat, de csak adott nyelvre (null user_id)
      * 
      * @param userId
      * @return

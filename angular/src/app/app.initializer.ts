@@ -10,7 +10,6 @@ export function initApp(authService: AuthService, userDataStore: UserDataStore) 
             },
             error: (error) => {
                 userDataStore.resetData();
-                // todo 401 = not logged in-t dobjon az authcheck
                 if (error.status !== 401) {
                     console.error('unknown error during authcheck!', error);
                 }

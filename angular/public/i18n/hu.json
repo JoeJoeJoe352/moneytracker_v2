@@ -1,25 +1,4 @@
 {
-  "in_db": {
-    "category": {
-      "food": "Élelmiszer",
-      "household": "Háztartás",
-      "hygiene": "Higiénia",
-      "health": "Egészség",
-      "transport": "Közlekedés",
-      "fuel": "Üzemanyag",
-      "entertainment": "Szórakozás",
-      "clothing": "Ruházat",
-      "electronics": "Elektronika",
-      "home": "Otthon",
-      "pets": "Háziállat",
-      "gifts": "Ajándék",
-      "education": "Oktatás",
-      "sport": "Sport",
-      "subscription": "Előfizetés",
-      "other": "Egyéb"
-    }
-  },
-
   "welcome": {
     "title": "Üdvözlünk a Moneytrackerben!",
     "welcomeText": "A kiadásaink rendszeres nyomonkövetése segít tudatosabbá válni a mindennapokban. Megmutatja, hol szivárog el a pénz, mely szokások támogatnak, és melyek húznak vissza. Ha látod a valós számokat, könnyebb okos döntéseket hozni: félretenni, tervezni, vagy épp bátran megengedni magadnak valamit. A pénzügyi átláthatóság nem korlátoz, hanem szabadságot ad — pontosan tudod, hol tartasz, és merre szeretnél menni.",
@@ -125,6 +104,7 @@
     "total_balance": "Összes pénz",
     "create_transaction.button": "Tranzakció létrehozása",
     "no_transaction": "Nincs még felvett tranzakció",
+    "balance_change_this_month": "ebben a hónapban",
     "total_income": "Bevétel ebben a hónapban",
     "total_expenses": "Kiadás ebben a hónapban",
     "last_transactions": "Legutóbbi tranzakciók"
@@ -139,5 +119,10 @@
       "submit": "Keresés",
       "clear": "Filterek törlése"
     }
+  },
+  "language": {
+    "hu": "Magyar",
+    "de": "Német",
+    "en": "Angol"
   }
 }

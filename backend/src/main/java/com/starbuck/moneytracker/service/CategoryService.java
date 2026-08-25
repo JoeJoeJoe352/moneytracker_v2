@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.hibernate.NonUniqueObjectException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
@@ -22,7 +24,8 @@ public class CategoryService {
     @Autowired
     CurrentUserUtil currentUser;
 
-    public static final String HU_LANG = "hu";
+    @Autowired
+    ConversionService conversionService;
 
     /**
      * Létrehoz egy új kategóriát a user számára
@@ -34,19 +37,17 @@ public class CategoryService {
         if (command == null) {
             throw new IllegalArgumentException("Category is null");
         }
-
+        LangEnum currentLang = conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class);
         User user = currentUser.getUser();
 
-        if (this.categoryRepository.isUserHaveThisCategoryName(command.getName(), user.getId(), LangEnum.HU)) {
+        if (this.categoryRepository.isUserHaveThisCategoryName(command.getName(), user.getId(), currentLang)) {
             throw new NonUniqueObjectException("Category with this name already exists for the user", null,
                     command.getName());
         }
-
         Category categoryModel = new Category(
                 command.getName(),
                 user,
-                LangEnum.HU // TODO ez dinamikussá tenni később
-        );
+                currentLang);
 
         return this.categoryRepository.save(categoryModel);
     }
@@ -59,7 +60,6 @@ public class CategoryService {
     public List<Category> listCategories() {
         return categoryRepository.findAllForUser(
                 currentUser.getUser().getId(),
-                LangEnum.HU // TODO ezt majd dinamikussá tenni
-        );
+                conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class));
     }
 }
