@@ -27,8 +27,6 @@ public class CategoryService {
     @Autowired
     ConversionService conversionService;
 
-    public static final String HU_LANG = "hu";
-
     /**
      * Létrehoz egy új kategóriát a user számára
      * 
@@ -39,17 +37,17 @@ public class CategoryService {
         if (command == null) {
             throw new IllegalArgumentException("Category is null");
         }
-
+        LangEnum currentLang = conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class);
         User user = currentUser.getUser();
 
-        if (this.categoryRepository.isUserHaveThisCategoryName(command.getName(), user.getId(), LangEnum.HU)) {
+        if (this.categoryRepository.isUserHaveThisCategoryName(command.getName(), user.getId(), currentLang)) {
             throw new NonUniqueObjectException("Category with this name already exists for the user", null,
                     command.getName());
         }
         Category categoryModel = new Category(
                 command.getName(),
                 user,
-                conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class));
+                currentLang);
 
         return this.categoryRepository.save(categoryModel);
     }
@@ -62,7 +60,6 @@ public class CategoryService {
     public List<Category> listCategories() {
         return categoryRepository.findAllForUser(
                 currentUser.getUser().getId(),
-                conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class)
-        );
+                conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class));
     }
 }

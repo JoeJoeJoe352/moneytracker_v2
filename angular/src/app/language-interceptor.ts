@@ -10,6 +10,7 @@ export const LanguageInterceptor: HttpInterceptorFn = (req, next) => {
     if (lang === null) {
         console.error('Lang is not set in localStorage when the interceptor activated');
         lang = LANGUAGE_EN;
+        localStorage.setItem('lang', lang);
     }
 
     const modified = req.clone({
