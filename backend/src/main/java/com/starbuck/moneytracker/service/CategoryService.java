@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.hibernate.NonUniqueObjectException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
@@ -21,6 +23,9 @@ public class CategoryService {
 
     @Autowired
     CurrentUserUtil currentUser;
+
+    @Autowired
+    ConversionService conversionService;
 
     public static final String HU_LANG = "hu";
 
@@ -41,12 +46,10 @@ public class CategoryService {
             throw new NonUniqueObjectException("Category with this name already exists for the user", null,
                     command.getName());
         }
-
         Category categoryModel = new Category(
                 command.getName(),
                 user,
-                LangEnum.HU // TODO ez dinamikussá tenni később
-        );
+                conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class));
 
         return this.categoryRepository.save(categoryModel);
     }
@@ -59,7 +62,7 @@ public class CategoryService {
     public List<Category> listCategories() {
         return categoryRepository.findAllForUser(
                 currentUser.getUser().getId(),
-                LangEnum.HU // TODO ezt majd dinamikussá tenni
+                conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class)
         );
     }
 }
