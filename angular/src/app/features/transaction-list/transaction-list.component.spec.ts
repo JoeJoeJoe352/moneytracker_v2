@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import TransactionListComponent from './transaction-list-component';
 import TransactionCardComponent from './transaction-card-component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 
 describe('TransactionListComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionListComponent>;
@@ -11,6 +11,7 @@ describe('TransactionListComponent (Vitest)', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [TransactionListComponent, TransactionCardComponent, TranslatePipe],
+            providers: [provideTranslateService()],
         }).compileComponents();
 
         fixture = TestBed.createComponent(TransactionListComponent);
