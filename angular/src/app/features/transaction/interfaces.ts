@@ -39,8 +39,8 @@ export interface NewTransaction {
     details: {
         detailName: string;
         detailPrice: number;
-        detailWeight: number;
-        detailUnitPrice: number;
+        detailWeight: number | null;
+        detailUnitPrice: number | null;
         categories: DropdownInterface[];
         detailIsComplexPriceMode: boolean;
     }[];
