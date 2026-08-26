@@ -23,7 +23,7 @@ import { SwitchComponent } from '../../shared/components/switch.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { DropdownInterface } from '../../shared/interfaces';
-import { TransactionDetailRowComponent } from '../transaction/transaction-detail-row-component';
+import { TransactionDetailRowComponent } from './transaction-detail-row-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { CategoryResponseInterface, DetailForm, NewTransaction, TransactionDataFromBackend, TransactionInputDefaultValuesWithDetails } from '../transaction/interfaces';
 import { validDate } from './valid-date-validator';
