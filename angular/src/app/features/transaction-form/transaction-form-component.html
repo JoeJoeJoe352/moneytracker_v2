@@ -115,7 +115,7 @@
         <!-- Tranzakció részletei -->
         <div class="detail-inputs">
             <h4 class="detail-inputs-title">{{ 'transaction.detail.title' | translate }}</h4>
-            @for (detail of details.controls; track $index) {
+            @for (detail of details.controls; track detail) {
                 <app-transaction-detail-row-component
                     [detail]="detail"
                     [index]="$index"
