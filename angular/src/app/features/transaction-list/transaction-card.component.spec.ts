@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import TransactionCardComponent from './transaction-card-component';
 import { DecimalPipe } from '@angular/common';
-import { TransactionTypeEnum } from './transaction-type-enum';
+import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 
 describe('TransactionCardComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionCardComponent>;
@@ -17,7 +17,7 @@ describe('TransactionCardComponent (Vitest)', () => {
         component = fixture.componentInstance;
     });
 
-    it('should render income transaction correctly', () => {
+    it('should render income transaction correctly. No categories, simple transaction', () => {
         // GIVEN
         component.transaction = {
             id: 25,
@@ -54,7 +54,7 @@ describe('TransactionCardComponent (Vitest)', () => {
         expect(date.textContent.trim()).toBe('2024-01-10');
 
         const categoriesEl = fixture.nativeElement.querySelector('.transaction-categories');
-        expect(categoriesEl).toBe(null);
+        expect(categoriesEl).toBe(null); // kategória sor nincs a dom-ban
 
         const badge = fixture.nativeElement.querySelector('.transaction-icon-badge');
         expect(badge.classList.contains('income')).toBe(true);
@@ -63,7 +63,7 @@ describe('TransactionCardComponent (Vitest)', () => {
         expect(badgeClass.classList.contains('bi-arrow-up-short')).toBe(true);
     });
 
-    it('should render outcome transaction correctly', () => {
+    it('should render outcome transaction correctly. Categories and ', () => {
         // GIVEN
         component.transaction = {
             id: 26,

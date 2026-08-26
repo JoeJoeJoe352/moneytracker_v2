@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MoneySumInterface, NewTransaction, TransactionDataFromBackend, TransactionListElementData } from './interfaces';
+import { MoneySumInterface, NewTransaction, TransactionDataFromBackend } from './interfaces';
 import { TransactionUtils } from './transaction-utils';
+import { TransactionListElementData } from '../transaction-list/interfaces';
 
 @Injectable({
   providedIn: 'root',

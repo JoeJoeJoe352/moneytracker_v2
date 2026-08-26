@@ -9,15 +9,16 @@ import {
     signal,
     SimpleChanges,
 } from '@angular/core';
-import TransactionListComponent from '../transaction/transaction-list-component';
+
 import { TransactionModalComponent } from '../transaction/transaction-modal';
-import { TransactionListElementData } from '../transaction/interfaces';
 import { TransactionService } from '../transaction/transaction-service';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
+import TransactionListComponent from '../transaction-list/transaction-list-component';
+import { TransactionListElementData } from '../transaction-list/interfaces';
 
 interface FilterFormInterface {
     name: FormControl<string>;

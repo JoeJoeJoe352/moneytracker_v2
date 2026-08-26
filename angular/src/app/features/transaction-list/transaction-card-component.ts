@@ -1,6 +1,6 @@
 import { Component, computed, Input, Signal } from '@angular/core';
 import { TransactionListElementData } from './interfaces';
-import { TransactionTypeEnum } from './transaction-type-enum';
+import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 import { DecimalPipe } from '@angular/common';
 
 @Component({

@@ -110,23 +110,3 @@ export interface CategoryResponseInterface {
     name: string;
     isDefaultCategory: boolean;
 }
-
-// Listázó oldalak
-export interface TransactionListElementData {
-    id: number;
-    name: string;
-    priceSum: number;
-    transactionDate: string;
-    transactionType: string;
-    isComplexTransaction: boolean;
-    transactionDetails: TransactionDetailListElementData[];
-}
-
-export interface TransactionDetailListElementData {
-    name: string;
-    price: number;
-    weight: number | null;
-    unitPrice: number | null;
-    isComplexPriceMode: boolean;
-    categories: string[];
-}
