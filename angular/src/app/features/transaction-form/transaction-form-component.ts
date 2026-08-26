@@ -20,32 +20,26 @@ import {
 } from '@angular/forms';
 import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
 import { SwitchComponent } from '../../shared/components/switch.component';
-import { validDate } from './valid-date-validator';
-import { TransactionService } from './transaction-service';
-import {
-    CategoryResponseInterface,
-    DetailForm,
-    NewTransaction,
-    TransactionDataFromBackend,
-    TransactionInputDefaultValuesWithDetails,
-} from './interfaces';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { DropdownInterface } from '../../shared/interfaces';
 import { TransactionDetailRowComponent } from './transaction-detail-row-component';
+import { TransactionService } from '../transaction/transaction-service';
+import { CategoryResponseInterface, DetailForm, NewTransaction, TransactionDataFromBackend, TransactionInputDefaultValuesWithDetails } from '../transaction/interfaces';
+import { validDate } from './valid-date-validator';
 
 @Component({
     selector: 'app-transaction-form-component',
     templateUrl: './transaction-form-component.html',
     styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
     imports: [
-        ReactiveFormsModule,
-        NgxsmkDatepickerComponent,
-        SwitchComponent,
-        TranslatePipe,
-        NgMultiSelectDropDownModule,
-        TransactionDetailRowComponent,
-    ],
+    ReactiveFormsModule,
+    NgxsmkDatepickerComponent,
+    SwitchComponent,
+    TranslatePipe,
+    NgMultiSelectDropDownModule,
+    TransactionDetailRowComponent,
+],
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);

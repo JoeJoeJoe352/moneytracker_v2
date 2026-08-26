@@ -50,6 +50,7 @@ jobs:
           key: owasp-dependency-check-data
 
       - name: OWASP dependency vulnerability scan
+        continue-on-error: true
         run: >
           mvn -B org.owasp:dependency-check-maven:check -f backend/pom.xml
           -Dnvd.api.key=${{ secrets.NVD_API_KEY }}

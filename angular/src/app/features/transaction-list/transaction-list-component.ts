@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import TransactionCardComponent from './transaction-card-component';
+import TransactionCardComponent from '../transaction-list/transaction-card-component';
 import { TransactionListElementData } from './interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 

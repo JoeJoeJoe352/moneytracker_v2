@@ -4,12 +4,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { SwitchComponent } from '../../shared/components/switch.component';
 import { DropdownInterface } from '../../shared/interfaces';
-import { DetailForm } from './interfaces';
+import { DetailForm } from '../transaction/interfaces';
 
 @Component({
     selector: 'app-transaction-detail-row-component',
     templateUrl: './transaction-detail-row-component.html',
-    styleUrls: ['/transaction-detail-row-component.scss'],
+    styleUrl: './transaction-detail-row-component.scss',
     imports: [ReactiveFormsModule, TranslatePipe, NgMultiSelectDropDownModule, SwitchComponent],
 })
 export class TransactionDetailRowComponent {

@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, Output, Signal } from '@angular/core';
 import { BaseModal } from '../../shared/components/modal/base-modal';
-import { TransactionFormComponent } from './transaction-form-component';
 import {
     CategoryResponseInterface,
     NewTransaction,
     TransactionDataFromBackend,
 } from './interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TransactionFormComponent } from '../transaction-form/transaction-form-component';
 
 @Component({
     selector: 'app-create-transaction-modal',
