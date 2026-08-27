@@ -59,17 +59,11 @@ public class Wallet {
     public Wallet() {
     }
 
-    public Wallet(Long id, String name, User user, GeneralStatusEnum status, CurrencyEnum currencyCode,
-            WalletTypeEnum type, LocalDateTime createdAt, LocalDateTime updatedAt, List<Transaction> transactions) {
-        this.id = id;
+    public Wallet(String name, User user, CurrencyEnum currencyCode, WalletTypeEnum type) {
         this.name = name;
         this.user = user;
-        this.status = status;
         this.currencyCode = currencyCode;
         this.type = type;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.transactions = transactions;
     }
 
     public Long getId() {

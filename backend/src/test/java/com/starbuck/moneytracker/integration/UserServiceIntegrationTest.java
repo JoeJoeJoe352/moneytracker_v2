@@ -7,18 +7,26 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.JwtService;
 import com.starbuck.moneytracker.service.UserService;
+import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,7 +40,13 @@ class UserServiceIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
     private JwtService jwtService;
+
+    @MockitoBean
+    private CurrentUserUtil currentUser;
 
     /**
      * Sikeres létrehozás esetén a jelszó titkosítva, uuid-vel ellátva
@@ -40,6 +54,10 @@ class UserServiceIntegrationTest {
      */
     @Test
     void createUser_persistsEncodedPasswordAndUuid() {
+        // Ez accpet-lang headerből jönne, de integrációs teszteknél nem használjuk,
+        // ilyenkor viszont a gép nyelvét használná alapesetben
+        LocaleContextHolder.setDefaultLocale(Locale.ENGLISH);
+
         UserCreateCommand command = new UserCreateCommand("integrationUser", "integration@email.com", "teszt");
         User saved = userService.createUser(command);
 
@@ -48,6 +66,13 @@ class UserServiceIntegrationTest {
         assertNotEquals("password", saved.getPassword());
         assertTrue(userRepository.existsByUsername("integrationUser"));
 
+        List<Wallet> wallets = walletRepository.findAll();
+        assertEquals(1, wallets.size());
+
+        // default a magyar nyelv, ezért wallet lesz a név
+        assertEquals("Wallet", wallets.get(0).getName());
+
+        walletRepository.delete(wallets.get(0));
         userRepository.delete(saved);
     }
 

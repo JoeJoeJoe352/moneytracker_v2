@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.commands.UserLoginCommand;
@@ -21,6 +22,9 @@ public class UserService {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private WalletService walletService;
+
     /**
      * Felhasználó létrehozása a megadott adatokkal. Username és email cím egyediség
      * ellenőrzés
@@ -28,6 +32,7 @@ public class UserService {
      * @param User user
      * @return User
      */
+    @Transactional
     public User createUser(UserCreateCommand command) {
         if (userRepository.existsByEmail(command.getEmail()) || userRepository.existsByUsername(command.getUsername())) {
             throw new IllegalArgumentException("Username or email already exists");
@@ -35,9 +40,9 @@ public class UserService {
 
         User user = new User(command.getUsername(), passwordEncoder.encode(command.getPassword()), command.getEmail());
         user.setUuid();
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
         
-        // TODO létrehozni default walletet. Transactional legyen a függvény
+        walletService.createDefaultWallet(savedUser);
 
         return user;
     }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +23,16 @@ import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.service.JwtService;
 import com.starbuck.moneytracker.service.UserService;
+import com.starbuck.moneytracker.service.WalletService;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private WalletService walletService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -56,6 +61,8 @@ class UserServiceTest {
         // THEN
         assertEquals("encodedPassword", result.getPassword());
         assertNotNull(result.getUuid());
+
+        Mockito.verify(walletService, times(1)).createDefaultWallet(any());
     }
 
     /**
