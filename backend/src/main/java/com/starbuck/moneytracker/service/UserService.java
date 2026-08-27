@@ -37,6 +37,8 @@ public class UserService {
         user.setUuid();
         userRepository.save(user);
         
+        // TODO létrehozni default walletet. Transactional legyen a függvény
+
         return user;
     }
 

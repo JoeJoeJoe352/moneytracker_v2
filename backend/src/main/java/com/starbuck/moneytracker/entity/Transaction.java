@@ -67,6 +67,10 @@ public class Transaction {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "wallet_id", nullable = false)
+    private Wallet wallet;
+
     /**
      * Törölt-e a tranzakció
      * 
@@ -215,5 +219,13 @@ public class Transaction {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 }

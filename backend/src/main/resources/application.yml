@@ -17,8 +17,7 @@ spring:
 
   jpa:
     hibernate:
-      #ddl-auto: validate  # validate: ellenőrzi a séma megfelelőségét, de nem módosítja azt
-      ddl-auto: update  # validate: ellenőrzi a séma megfelelőségét, de nem módosítja azt
+      ddl-auto: validate  # ellenőrzi a séma megfelelőségét, de nem módosítja azt
     show-sql: true
 
   flyway:
