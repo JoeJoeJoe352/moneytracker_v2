@@ -133,12 +133,13 @@ public class Transaction {
     }
 
     public Transaction(String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
-            BigDecimal priceSum, User user) {
+            BigDecimal priceSum, User user, Wallet wallet) {
         this.name = name;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
         this.priceSum = priceSum;
         this.user = user;
+        this.wallet = wallet;
     }
 
     public Long getId() {

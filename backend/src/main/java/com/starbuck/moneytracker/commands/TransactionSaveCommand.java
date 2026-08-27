@@ -14,6 +14,7 @@ public abstract class TransactionSaveCommand {
     protected TransactionTypeEnum transactionType;
     protected List<TransactionDetailSaveCommand> detailCommands;
     protected List<Long> categories;
+    protected Long walletId;
 
     /**
      * @param name
@@ -24,7 +25,7 @@ public abstract class TransactionSaveCommand {
      * @param categories
      */
     public TransactionSaveCommand(String name, BigDecimal globalPrice, LocalDate date, TransactionTypeEnum type,
-            List<TransactionDetailSaveCommand> detailCommands, List<Long> categories) {
+            List<TransactionDetailSaveCommand> detailCommands, List<Long> categories, Long walletId) {
 
         if (detailCommands == null) {
             throw new IllegalArgumentException("Detailcommands cannot be null (use empty List instead)");
@@ -48,6 +49,9 @@ public abstract class TransactionSaveCommand {
         if (date == null) {
             throw new IllegalArgumentException("Transaction date cannot be null");
         }
+        if (walletId == null) {
+            throw new IllegalArgumentException("WalletId cannot be null");
+        }
 
         var set = new HashSet<Long>(categories);
         if (categories.size() != set.size()) {
@@ -60,6 +64,7 @@ public abstract class TransactionSaveCommand {
         this.transactionType = type;
         this.detailCommands = detailCommands;
         this.categories = categories;
+        this.walletId = walletId;
     }
 
     public String getTransactionName() {
@@ -84,6 +89,10 @@ public abstract class TransactionSaveCommand {
 
     public List<Long> getCategories() {
         return categories;
+    }
+
+    public Long getWalletId() {
+        return walletId;
     }
 
 }

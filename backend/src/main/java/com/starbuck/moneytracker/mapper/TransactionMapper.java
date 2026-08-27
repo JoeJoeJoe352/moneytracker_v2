@@ -121,7 +121,8 @@ public class TransactionMapper {
                 request.transactionDate(),
                 request.transactionType(),
                 detailCommands,
-                request.globalCategories());
+                request.globalCategories(),
+                request.walletId());
 
         return command;
     }
@@ -143,7 +144,8 @@ public class TransactionMapper {
                 request.transactionDate(),
                 request.transactionType(),
                 detailCommands,
-                request.globalCategories());
+                request.globalCategories(),
+                request.walletId());
 
         return command;
     }
@@ -183,17 +185,26 @@ public class TransactionMapper {
      * @return
      */
     public TransactionUpdateCommand entityToCommand(Transaction transaction) {
-        List<TransactionDetailSaveCommand> details = transaction.getTransactionDetails().stream().map((detail) -> {
-            if (detail.getWeight() != null || detail.getUnitPrice() != null) {
-                return new TransactionDetailSaveCommand(detail.getName(), detail.getWeight(),
-                        detail.getUnitPrice(),
-                        detail.getCategoryIds());
-            }
-            return new TransactionDetailSaveCommand(detail.getName(), detail.getPrice(), List.of(),
-                    transaction.getTransactionType());
-        }).collect(Collectors.toList());
+        List<TransactionDetailSaveCommand> details = transaction.getTransactionDetails().stream()
+                .map((detail) -> {
+                    if (detail.getWeight() != null || detail.getUnitPrice() != null) {
+                        return new TransactionDetailSaveCommand(detail.getName(),
+                                detail.getWeight(),
+                                detail.getUnitPrice(),
+                                detail.getCategoryIds());
+                    }
+                    return new TransactionDetailSaveCommand(detail.getName(), detail.getPrice(),
+                            List.of(),
+                            transaction.getTransactionType());
+                }).collect(Collectors.toList());
 
-        return new TransactionUpdateCommand(transaction.getName(), transaction.getPriceSum(), transaction.getTransactionDate(),
-                transaction.getTransactionType(), details, List.of());
+        return new TransactionUpdateCommand(
+                transaction.getName(),
+                transaction.getPriceSum(),
+                transaction.getTransactionDate(),
+                transaction.getTransactionType(),
+                details,
+                List.of(),
+                transaction.getWallet().getId()); // TODO lehet, hogy nincs betöltve a wallet
     }
 }
