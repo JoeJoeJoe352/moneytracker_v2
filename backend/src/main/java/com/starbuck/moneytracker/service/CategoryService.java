@@ -3,7 +3,6 @@ package com.starbuck.moneytracker.service;
 import java.util.List;
 
 import org.hibernate.NonUniqueObjectException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -19,14 +18,16 @@ import com.starbuck.moneytracker.util.CurrentUserUtil;
 @Service
 public class CategoryService {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final CurrentUserUtil currentUser;
+    private final ConversionService conversionService;
 
-    @Autowired
-    private CurrentUserUtil currentUser;
-
-    @Autowired
-    private ConversionService conversionService;
+    public CategoryService(CategoryRepository categoryRepository, CurrentUserUtil currentUser,
+            ConversionService conversionService) {
+        this.categoryRepository = categoryRepository;
+        this.currentUser = currentUser;
+        this.conversionService = conversionService;
+    }
 
     /**
      * Létrehoz egy új kategóriát a user számára

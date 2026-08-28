@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -39,28 +38,27 @@ import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 @Service
 public class TransactionService {
 
-    @Autowired
-    private TransactionRepository transactionRepo;
-
-    @Autowired
-    private TransactionDetailRepository transactionDetailRepo;
-
-    @Autowired
-    private CategoryRepository categoryRepo;
-
-    @Autowired
-    private TransactionDetailCategoryRepository transactionDetailCategoryRepository;
-
-    @Autowired
-    private CurrentUserUtil currentUser;
-
-    @Autowired
-    private WalletRepository walletRepo;
-
-    @Autowired
-    private TransactionDetailFactory detailFactory;
+    private final TransactionRepository transactionRepo;
+    private final TransactionDetailRepository transactionDetailRepo;
+    private final CategoryRepository categoryRepo;
+    private final TransactionDetailCategoryRepository transactionDetailCategoryRepository;
+    private final CurrentUserUtil currentUser;
+    private final WalletRepository walletRepo;
+    private final TransactionDetailFactory detailFactory;
 
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
+
+    public TransactionService(TransactionRepository transactionRepo, TransactionDetailRepository transactionDetailRepo,
+            CategoryRepository categoryRepo, TransactionDetailCategoryRepository transactionDetailCategoryRepository,
+            CurrentUserUtil currentUser, WalletRepository walletRepo, TransactionDetailFactory detailFactory) {
+        this.transactionRepo = transactionRepo;
+        this.transactionDetailRepo = transactionDetailRepo;
+        this.categoryRepo = categoryRepo;
+        this.transactionDetailCategoryRepository = transactionDetailCategoryRepository;
+        this.currentUser = currentUser;
+        this.walletRepo = walletRepo;
+        this.detailFactory = detailFactory;
+    }
 
     /**
      * Tranzakció létrehozása

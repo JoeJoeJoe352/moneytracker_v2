@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,11 +22,13 @@ public class IntegrityConfig {
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
     private static final Logger logger = LoggerFactory.getLogger(IntegrityConfig.class);
 
-    @Autowired
-    private TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository;
+    private final TransactionMapper mapper;
 
-    @Autowired
-    private TransactionMapper mapper;
+    public IntegrityConfig(TransactionRepository transactionRepository, TransactionMapper mapper) {
+        this.transactionRepository = transactionRepository;
+        this.mapper = mapper;
+    }
 
     /**
      * Integritás vizsgálatot végez, hogy a tranzakciók összegzett értéke

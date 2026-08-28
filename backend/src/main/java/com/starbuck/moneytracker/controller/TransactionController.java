@@ -3,7 +3,6 @@ package com.starbuck.moneytracker.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,11 +31,13 @@ import jakarta.validation.Valid;
 @RestController
 public class TransactionController {
 
-    @Autowired
-    TransactionService transactionService;
+    private final TransactionService transactionService;
+    private final TransactionMapper transactionMapper;
 
-    @Autowired
-    private TransactionMapper transactionMapper;
+    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper) {
+        this.transactionService = transactionService;
+        this.transactionMapper = transactionMapper;
+    }
 
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)

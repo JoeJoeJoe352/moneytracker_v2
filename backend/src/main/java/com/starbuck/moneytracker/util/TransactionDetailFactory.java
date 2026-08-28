@@ -3,7 +3,6 @@ package com.starbuck.moneytracker.util;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
@@ -11,13 +10,9 @@ import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
-import com.starbuck.moneytracker.mapper.TransactionMapper;
 
 @Component
 public class TransactionDetailFactory {
-
-    @Autowired
-    TransactionMapper mapper;
 
     /**
      * Visszaadja a mentendő detailokat: a megadottakat, vagy ha nincs egy sem,

@@ -16,17 +16,18 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 @RestController
 public class CategoryController {
 
-    @Autowired
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
+    private final CategoryMapper mapper;
 
-    @Autowired
-    private CategoryMapper mapper;
+    public CategoryController(CategoryService categoryService, CategoryMapper mapper) {
+        this.categoryService = categoryService;
+        this.mapper = mapper;
+    }
 
     /**
      * Létrehoz egy új kategóriát

@@ -1,6 +1,5 @@
 package com.starbuck.moneytracker.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -30,14 +29,15 @@ public class AuthController {
     /**
      * Felhasználó autentikációs szolgáltatás
      */
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final CurrentUserUtil userUtil;
+    private final CookieUtil cookieUtil;
 
-    @Autowired
-    private CurrentUserUtil userUtil;
-
-    @Autowired
-    private CookieUtil cookieUtil;
+    public AuthController(UserService userService, CurrentUserUtil userUtil, CookieUtil cookieUtil) {
+        this.userService = userService;
+        this.userUtil = userUtil;
+        this.cookieUtil = cookieUtil;
+    }
 
     /**
      * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba
