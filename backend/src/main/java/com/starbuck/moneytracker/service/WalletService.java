@@ -22,28 +22,35 @@ public class WalletService {
     private MessageSource messageSource;
 
     /**
-     * Létrehoz egy walletet a megadott adatokkal
-     * 
+     * Létrehoz egy walletet a megadott adatokkal.
+     * A user.wallets kapcsolat inverz oldala, Hibernate nem szinkronizálja
+     * automatikusan, ezért explicit hozzáadjuk a mentett wallet-et a
+     * usernek átadott entitás wallets listájához.
+     *
      * @param command
+     * @return a létrehozott wallet
      */
-    public void createWallet(CreateWalletCommand command) {
+    public Wallet createWallet(CreateWalletCommand command) {
         Wallet wallet = new Wallet(command.getName(), command.getUser(), command.getCurrency(), command.getType());
-        walletRepo.save(wallet);
+        Wallet savedWallet = walletRepo.save(wallet);
+        command.getUser().getWallets().add(savedWallet);
+        return savedWallet;
     }
 
     /**
      * Létrehoz egy alapértelmezett walletet az új felhasználónak.
-     * 
+     *
      * @param registeredUser -> regisztráció most történt meg, még nincs
      *                       currentUser-ben senki
+     * @return a létrehozott wallet
      */
-    public void createDefaultWallet(User registeredUser) {
+    public Wallet createDefaultWallet(User registeredUser) {
         String defaultNameLocalised = messageSource.getMessage("defaultWalletName", null,
                 LocaleContextHolder.getLocale());
 
         CreateWalletCommand command = new CreateWalletCommand(defaultNameLocalised, CurrencyEnum.HUF,
                 WalletTypeEnum.DEFAULT, registeredUser);
-        createWallet(command);
+        return createWallet(command);
     }
 
 }

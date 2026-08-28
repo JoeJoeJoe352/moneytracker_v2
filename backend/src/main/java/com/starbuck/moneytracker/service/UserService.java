@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,30 +35,30 @@ public class UserService {
      */
     @Transactional
     public User createUser(UserCreateCommand command) {
-        if (userRepository.existsByEmail(command.getEmail()) || userRepository.existsByUsername(command.getUsername())) {
+        if (userRepository.existsByEmail(command.getEmail())
+                || userRepository.existsByUsername(command.getUsername())) {
             throw new IllegalArgumentException("Username or email already exists");
         }
 
         User user = new User(command.getUsername(), passwordEncoder.encode(command.getPassword()), command.getEmail());
         user.setUuid();
         User savedUser = userRepository.save(user);
-        
+
         walletService.createDefaultWallet(savedUser);
 
-        return user;
+        return savedUser;
     }
 
     /**
-     * Felhasználó bejelentkezése. Siker esetén visszaadja a felhasználó adatait,
-     * hiba esetén IllegalArgumentException-t dob.
-     * 
+     * Felhasználó bejelentkezése. Siker esetén visszaadja a felhasználó adatait
+     *
      * @param loginRequest
      * @return User
      */
     public String login(UserLoginCommand command) {
         User user = this.userRepository.findByUsername(command.getUsername());
         if (user == null || !this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Invalid username or password");
+            throw new BadCredentialsException("Invalid username or password");
         }
         return this.jwtService.generateToken(command.getUsername());
     }
@@ -66,9 +67,9 @@ public class UserService {
      * Megnézi, hogy felhasználónév foglalt-e már
      * 
      * @param username
-     * @return Boolean
+     * @return boolean
      */
-    public Boolean isUsernameExists(String username) {
+    public boolean isUsernameExists(String username) {
         return userRepository.existsByUsername(username);
     }
 
@@ -76,9 +77,9 @@ public class UserService {
      * Megnézi, hogy az email cím foglalt-e már
      * 
      * @param email
-     * @return Boolean
+     * @return boolean
      */
-    public Boolean isEmailExists(String email) {
+    public boolean isEmailExists(String email) {
         return userRepository.existsByEmail(email);
     }
 }

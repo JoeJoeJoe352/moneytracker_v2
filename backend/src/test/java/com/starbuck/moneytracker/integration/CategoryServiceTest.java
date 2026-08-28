@@ -29,6 +29,7 @@ import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.CategoryService;
 import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -49,6 +50,9 @@ public class CategoryServiceTest {
     @Autowired
     private UserRepository userRepo;
 
+    @Autowired
+    private WalletRepository walletRepo;
+
     @MockitoBean
     private CurrentUserUtil currentUser;
 
@@ -63,6 +67,9 @@ public class CategoryServiceTest {
 
     @AfterAll
     void afterAll() {
+        var wallet = walletRepo.findAll();
+        assertEquals(1, wallet.size());
+        walletRepo.delete(wallet.get(0));
         userRepo.delete(this.user);
     }
 
@@ -164,6 +171,8 @@ public class CategoryServiceTest {
         categoryRepository.delete(savedCategoryOwn);
         categoryRepository.delete(savedCategoryNotOwned);
         categoryRepository.delete(savedCategoryCommon);
+
+        walletRepo.delete(savedUser2.getWallets().get(0));
         userRepo.delete(savedUser2);
     }
 }

@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
@@ -54,6 +55,7 @@ class UserServiceTest {
         Mockito.when(userRepository.existsByEmail("teszt@email.com")).thenReturn(false);
         Mockito.when(userRepository.existsByUsername("testuser")).thenReturn(false);
         Mockito.when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+        Mockito.when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // WHEN
         User result = userService.createUser(UserCreateCommand);
@@ -124,7 +126,7 @@ class UserServiceTest {
 
         UserLoginCommand command = new UserLoginCommand("missing", "password");
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BadCredentialsException.class, () -> {
             userService.login(command);
         });
 
@@ -142,7 +144,7 @@ class UserServiceTest {
         Mockito.when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
         UserLoginCommand command = new UserLoginCommand("testuser", "wrongPassword");
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BadCredentialsException.class, () -> {
             userService.login(command);
         });
 

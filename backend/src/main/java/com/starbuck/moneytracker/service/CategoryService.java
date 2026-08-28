@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
@@ -33,6 +34,7 @@ public class CategoryService {
      * @param command
      * @return
      */
+    @Transactional
     public Category createCategory(CategoryCreateCommand command) {
         if (command == null) {
             throw new IllegalArgumentException("Category is null");

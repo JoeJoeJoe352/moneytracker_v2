@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,7 @@ public class User implements UserDetails {
     private Set<Transaction> transactions;
 
     @OneToMany(mappedBy = "user")
-    private List<Wallet> wallets;
+    private List<Wallet> wallets = new ArrayList<>();
 
     public User() {
     }

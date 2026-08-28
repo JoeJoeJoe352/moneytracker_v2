@@ -63,15 +63,11 @@ public class AuthController {
     public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequestDto loginRequest) {
         UserLoginCommand command = new UserLoginCommand(loginRequest.username(), loginRequest.password());
 
-        try {
-            String jwtToken = userService.login(command);
-            ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Set-Cookie", cookie.toString());
-            return ResponseEntity.ok().headers(headers).build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        String jwtToken = userService.login(command);
+        ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Set-Cookie", cookie.toString());
+        return ResponseEntity.ok().headers(headers).build();
     }
 
     /**
