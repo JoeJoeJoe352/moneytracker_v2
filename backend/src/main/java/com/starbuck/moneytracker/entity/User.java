@@ -119,7 +119,7 @@ public class User implements UserDetails {
         return uuid;
     }
 
-    public void setUuid() {
+    public void generateUuid() {
         this.uuid = java.util.UUID.randomUUID().toString();
     }
 

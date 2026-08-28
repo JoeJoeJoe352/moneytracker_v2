@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
@@ -29,6 +30,7 @@ import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
@@ -78,18 +80,28 @@ class TransactionServiceIntegrationTest {
     private CurrentUserUtil currentUser;
 
     private User user;
+    private Wallet wallet;
 
     @BeforeAll
     void beforeAll() {
         UserCreateCommand command = new UserCreateCommand("testuser", "teszt@email.com", "password");
         this.user = userService.createUser(command);
+        this.wallet = walletRepo.findByUserId(this.user.getId()).get(0);
+    }
+
+    /**
+     * @MockitoBean mockokat Spring minden teszt metódus után resetel, ezért
+     * a stubbolást minden teszt előtt újra be kell állítani
+     */
+    @BeforeEach
+    void mockUserUtil() {
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
     }
 
     @AfterAll
     void afterAll() {
+        walletRepo.delete(this.wallet);
         userRepo.delete(this.user);
-        walletRepo.delete(this.user.getWallets().get(0));
     }
 
     /**
@@ -105,7 +117,7 @@ class TransactionServiceIntegrationTest {
                 TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), List.of(category.getId()),
                 TransactionTypeEnum.INCOME);
         TransactionCreateCommand command = new TransactionCreateCommand("Test", null, LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.user.getWallets().get(0).getId());
+                TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.wallet.getId());
 
         // WHEN
         Transaction saved = transactionService.createTransaction(command);
@@ -136,7 +148,7 @@ class TransactionServiceIntegrationTest {
         categoryRepo.save(category);
 
         TransactionCreateCommand command = new TransactionCreateCommand("Test", new BigDecimal("500.00"), LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(), List.of(category.getId()), this.user.getWallets().get(0).getId());
+                TransactionTypeEnum.INCOME, List.of(), List.of(category.getId()), this.wallet.getId());
 
         // WHEN
         Transaction saved = transactionService.createTransaction(command);
@@ -171,7 +183,7 @@ class TransactionServiceIntegrationTest {
                 TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), List.of(category1.getId()),
                 TransactionTypeEnum.INCOME);
         TransactionCreateCommand createCommand = new TransactionCreateCommand("Test", null,
-                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.user.getWallets().get(0).getId());
+                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.wallet.getId());
 
         // Van DB-ben elem mostmár
         Transaction createdTransaction = transactionService.createTransaction(createCommand);
@@ -190,7 +202,7 @@ class TransactionServiceIntegrationTest {
 
         TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("Update test", null,
                 LocalDate.of(2026, 7, 8), TransactionTypeEnum.OUTCOME,
-                List.of(updateDetailCommand1, updateDetailCommand2), List.of(), this.user.getWallets().get(0).getId());
+                List.of(updateDetailCommand1, updateDetailCommand2), List.of(), this.wallet.getId());
 
         // WHEN
         transactionService.updateTransaction(createdTransaction.getId(), updateCommand);
@@ -422,7 +434,7 @@ class TransactionServiceIntegrationTest {
         TransactionDetailSaveCommand detail = new TransactionDetailSaveCommand(
                 TransactionDetail.DEFAULT_DETAIL_NAME, price, List.of(), type);
         TransactionCreateCommand command = new TransactionCreateCommand(name, null, date, type, List.of(detail),
-                List.of(), this.user.getWallets().get(0).getId());
+                List.of(), this.wallet.getId());
 
         return transactionService.createTransaction(command);
     }

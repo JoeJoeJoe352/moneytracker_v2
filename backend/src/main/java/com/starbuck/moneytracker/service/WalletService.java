@@ -23,18 +23,13 @@ public class WalletService {
 
     /**
      * Létrehoz egy walletet a megadott adatokkal.
-     * A user.wallets kapcsolat inverz oldala, Hibernate nem szinkronizálja
-     * automatikusan, ezért explicit hozzáadjuk a mentett wallet-et a
-     * usernek átadott entitás wallets listájához.
      *
      * @param command
      * @return a létrehozott wallet
      */
     public Wallet createWallet(CreateWalletCommand command) {
         Wallet wallet = new Wallet(command.getName(), command.getUser(), command.getCurrency(), command.getType());
-        Wallet savedWallet = walletRepo.save(wallet);
-        command.getUser().getWallets().add(savedWallet);
-        return savedWallet;
+        return walletRepo.save(wallet);
     }
 
     /**

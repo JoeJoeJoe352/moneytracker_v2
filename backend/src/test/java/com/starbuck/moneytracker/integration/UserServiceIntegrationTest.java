@@ -73,8 +73,7 @@ class UserServiceIntegrationTest {
         // default a magyar nyelv, ezért wallet lesz a név
         assertEquals("Wallet", wallets.get(0).getName());
 
-        walletRepository.delete(wallets.get(0));
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
     }
 
     /**
@@ -94,7 +93,7 @@ class UserServiceIntegrationTest {
 
         assertFalse(userRepository.existsByUsername("brandNewUsername"));
 
-        userRepository.delete(existing);
+        deleteUserAndWallet(existing);
     }
 
     /**
@@ -113,7 +112,7 @@ class UserServiceIntegrationTest {
 
         assertFalse(userRepository.existsByEmail("brandnew@email.com"));
 
-        userRepository.delete(existing);
+        deleteUserAndWallet(existing);
     }
 
     /**
@@ -132,7 +131,7 @@ class UserServiceIntegrationTest {
         assertEquals("loginUser", jwtService.extractUsername(token));
         assertTrue(jwtService.isTokenValid(token, saved));
 
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
     }
 
     /**
@@ -148,7 +147,7 @@ class UserServiceIntegrationTest {
             userService.login(loginCommand);
         });
 
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
     }
 
     /**
@@ -175,7 +174,7 @@ class UserServiceIntegrationTest {
 
         assertTrue(userService.isUsernameExists("notYetRegisteredUsername"));
 
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
     }
 
     /**
@@ -191,6 +190,15 @@ class UserServiceIntegrationTest {
 
         assertTrue(userService.isEmailExists("notyetregistered@email.com"));
 
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
+    }
+
+    /**
+     * Előbb a user walletjét kell törölni, különben a user törlése FK
+     * constraint hibával elbukik.
+     */
+    private void deleteUserAndWallet(User user) {
+        walletRepository.deleteAll(walletRepository.findByUserId(user.getId()));
+        userRepository.delete(user);
     }
 }

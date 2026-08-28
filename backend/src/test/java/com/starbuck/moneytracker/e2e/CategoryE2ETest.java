@@ -39,6 +39,7 @@ import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
@@ -53,6 +54,9 @@ class CategoryE2ETest {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private WalletRepository walletRepository;
 
     private String authCookie;
     private User user;
@@ -87,6 +91,7 @@ class CategoryE2ETest {
     void cleanupCreatedData() {
         createdCategoryIds.forEach(id -> categoryRepository.findById(id).ifPresent(categoryRepository::delete));
         createdCategoryIds.clear();
+        walletRepository.deleteAll(walletRepository.findByUserId(this.user.getId()));
         userRepository.delete(this.user);
     }
 
@@ -179,7 +184,7 @@ class CategoryE2ETest {
     @Test
     void getCategories_doesNotReturnOtherUsersCategories() {
         User otherUser = new User("e2eOtherCategoryUser", "irrelevantEncodedPassword", "othercategory@email.com");
-        otherUser.setUuid();
+        otherUser.generateUuid();
         otherUser = userRepository.save(otherUser);
 
         Category otherUsersCategory = categoryRepository.save(new Category("OtherUsersCategory", otherUser, LangEnum.HU));

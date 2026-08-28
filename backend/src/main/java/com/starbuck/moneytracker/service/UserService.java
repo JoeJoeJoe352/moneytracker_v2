@@ -41,7 +41,7 @@ public class UserService {
         }
 
         User user = new User(command.getUsername(), passwordEncoder.encode(command.getPassword()), command.getEmail());
-        user.setUuid();
+        user.generateUuid();
         User savedUser = userRepository.save(user);
 
         walletService.createDefaultWallet(savedUser);

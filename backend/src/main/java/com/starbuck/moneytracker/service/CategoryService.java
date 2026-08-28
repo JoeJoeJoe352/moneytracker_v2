@@ -23,10 +23,10 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    CurrentUserUtil currentUser;
+    private CurrentUserUtil currentUser;
 
     @Autowired
-    ConversionService conversionService;
+    private ConversionService conversionService;
 
     /**
      * Létrehoz egy új kategóriát a user számára

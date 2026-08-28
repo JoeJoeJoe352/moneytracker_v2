@@ -35,6 +35,7 @@ import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -63,6 +64,7 @@ class TransactionCreateE2ETest {
 
     private String authCookie;
     private User user;
+    private Wallet wallet;
 
     /**
      * Minden teszt előtt egy valódi usert regisztrálunk és beléptetünk a
@@ -92,6 +94,7 @@ class TransactionCreateE2ETest {
         this.authCookie = setCookieHeader.split(";")[0];
 
         this.user = userRepository.findByUsername("e2eCreateUser");
+        this.wallet = walletRepository.findByUserId(this.user.getId()).get(0);
     }
 
     @AfterEach
@@ -100,7 +103,7 @@ class TransactionCreateE2ETest {
         transactionRepository.findAll()
                 .forEach(transaction -> transactionRepository
                         .hardDeleteTransaction(transaction.getId()));
-                        walletRepository.delete(user.getWallets().get(0));
+        walletRepository.delete(this.wallet);
         userRepository.delete(this.user);
     }
 
@@ -117,7 +120,7 @@ class TransactionCreateE2ETest {
                 null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("E2E groceries", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), user.getWallets().get(0).getId());
+                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -161,7 +164,7 @@ class TransactionCreateE2ETest {
                 new BigDecimal("0.5"),
                 new BigDecimal("1500"), List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("Félegyházi bevásárlás", null,
-                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(detail, detail2), List.of(), user.getWallets().get(0).getId());
+                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(detail, detail2), List.of(), this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -217,7 +220,7 @@ class TransactionCreateE2ETest {
     void createTransaction_persistsAndIsRetrievableThroughTheApi_simpleTransaction() {
         // GIVEN
         TransactionCreateRequest request = new TransactionCreateRequest("Strandbelépő", new BigDecimal("-1500"),
-                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(), List.of(), user.getWallets().get(0).getId());
+                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(), List.of(), this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -273,7 +276,7 @@ class TransactionCreateE2ETest {
         TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("100.00"), null, null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("Should not persist", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), user.getWallets().get(0).getId());
+                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), this.wallet.getId());
 
         ResponseEntity<Void> response = restTemplate.postForEntity("/transaction", request, Void.class);
 
@@ -289,7 +292,7 @@ class TransactionCreateE2ETest {
     void createTransaction_returnsBadRequestForInvalidPayload() {
         // "ab" rövidebb, mint az elvárt minimum 3 karakter
         TransactionCreateRequest invalidRequest = new TransactionCreateRequest("ab", new BigDecimal("10.00"),
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(), List.of(), user.getWallets().get(0).getId());
+                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(), List.of(), this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 

@@ -31,6 +31,7 @@ import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
@@ -43,6 +44,9 @@ class AuthE2ETest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private WalletRepository walletRepository;
+
     // A tesztek során regisztrált usernevek, hogy minden teszt végén automatikusan
     // ki tudjuk törölni
     private final List<String> createdUsernames = new ArrayList<>();
@@ -52,6 +56,7 @@ class AuthE2ETest {
         createdUsernames.forEach(username -> {
             User user = userRepository.findByUsername(username);
             if (user != null) {
+                walletRepository.deleteAll(walletRepository.findByUserId(user.getId()));
                 userRepository.delete(user);
             }
         });

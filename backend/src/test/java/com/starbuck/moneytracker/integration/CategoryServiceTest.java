@@ -172,7 +172,7 @@ public class CategoryServiceTest {
         categoryRepository.delete(savedCategoryNotOwned);
         categoryRepository.delete(savedCategoryCommon);
 
-        walletRepo.delete(savedUser2.getWallets().get(0));
+        walletRepo.delete(walletRepo.findByUserId(savedUser2.getId()).get(0));
         userRepo.delete(savedUser2);
     }
 }
