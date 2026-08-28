@@ -32,7 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.starbuck.moneytracker.dto.LoginRequest;
+import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
@@ -43,6 +43,7 @@ import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
@@ -54,6 +55,9 @@ class TransactionE2ETest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private WalletRepository walletRepository;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -75,7 +79,7 @@ class TransactionE2ETest {
                 "e2etx@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
-        LoginRequest loginRequest = new LoginRequest("e2eTxUser", "password123");
+        LoginRequestDto loginRequest = new LoginRequestDto("e2eTxUser", "password123");
         ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login",
                 HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
@@ -96,6 +100,7 @@ class TransactionE2ETest {
         transactionDetailRepository.deleteAllInBatch();
         createdTransactionIds.forEach(id -> transactionRepository.hardDeleteTransaction(id));
         createdTransactionIds.clear();
+        walletRepository.delete(user.getWallets().get(0));
         userRepository.delete(this.user);
     }
 
@@ -107,7 +112,7 @@ class TransactionE2ETest {
         TransactionDetailCreateDto detail = new TransactionDetailCreateDto(price, "teszt", null, null,
                 List.of());
         TransactionCreateRequest request = new TransactionCreateRequest(name, null, type, date, List.of(detail),
-                List.of());
+                List.of(), user.getWallets().get(0).getId());
 
         restTemplate.postForEntity("/transaction", new HttpEntity<>(request, headers), Void.class);
 
@@ -138,7 +143,7 @@ class TransactionE2ETest {
                 null, null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Updated", null,
                 TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 1, 1), List.of(updatedDetail, updatedDetail2),
-                List.of());
+                List.of(), user.getWallets().get(0).getId());
 
         ResponseEntity<Void> updateResponse = restTemplate.exchange("/transaction/" + id, HttpMethod.PUT,
                 new HttpEntity<>(updateRequest, headers), Void.class);
@@ -180,7 +185,7 @@ class TransactionE2ETest {
                 null,
                 null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Doesn't matter", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of());
+                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), user.getWallets().get(0).getId());
 
         ResponseEntity<Void> response = restTemplate.exchange("/transaction/999999", HttpMethod.PUT,
                 new HttpEntity<>(updateRequest, headers), Void.class);

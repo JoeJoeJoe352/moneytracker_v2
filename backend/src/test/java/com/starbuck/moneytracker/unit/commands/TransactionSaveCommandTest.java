@@ -24,40 +24,40 @@ class TransactionSaveCommandTest {
     void nullName_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionCreateCommand(null, new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
-                        List.of(), List.of()));
+                        List.of(), List.of(), 1L));
     }
 
     @Test
     void blankName_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionCreateCommand("   ", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
-                        List.of(), List.of()));
+                        List.of(), List.of(), 1L));
     }
 
     @Test
     void nullDate_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), null, TransactionTypeEnum.INCOME,
-                        List.of(), List.of()));
+                        List.of(), List.of(), 1L));
     }
 
     @Test
     void nullType_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), LocalDate.now(), null,
-                        List.of(), List.of()));
+                        List.of(), List.of(), 1L));
     }
     @Test
     void noGlobalPriceAndNoDetails_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionCreateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
-                        List.of(), List.of()));
+                        List.of(), List.of(), 1L));
     }
     @Test
     void globalPriceAndDetails_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
-                        List.of(new TransactionDetailSaveCommand("teszt", new BigDecimal("400"), List.of(), TransactionTypeEnum.INCOME)), List.of()));
+                        List.of(new TransactionDetailSaveCommand("teszt", new BigDecimal("400"), List.of(), TransactionTypeEnum.INCOME)), List.of(), 1L));
     }
 
     @Test
@@ -67,7 +67,7 @@ class TransactionSaveCommandTest {
         LocalDate date = LocalDate.of(2026, 3, 1);
 
         var command = new TransactionCreateCommand("teszt", null, date,
-                TransactionTypeEnum.INCOME, List.of(detail), List.of(1L, 2L));
+                TransactionTypeEnum.INCOME, List.of(detail), List.of(1L, 2L), 1L);
 
         assertEquals("teszt", command.getTransactionName());
         assertEquals(null, command.getGlobalPrice());

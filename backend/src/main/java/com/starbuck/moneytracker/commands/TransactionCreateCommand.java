@@ -18,7 +18,7 @@ public class TransactionCreateCommand extends TransactionSaveCommand {
      * @param categories        Tranzakcióhoz kategóriái (lehet üres)
      */
     public TransactionCreateCommand(String name, BigDecimal globalPrice, LocalDate date, TransactionTypeEnum type,
-            List<TransactionDetailSaveCommand> detailCommands, List<Long> categories, Long walletId) {
+            List<TransactionDetailSaveCommand> detailCommands, List<Long> categories, long walletId) {
         super(name, globalPrice, date, type, detailCommands, categories, walletId);
     }
 

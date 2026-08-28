@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.entity;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -45,6 +46,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private Set<Transaction> transactions;
+
+    @OneToMany(mappedBy = "user")
+    private List<Wallet> wallets;
 
     public User() {
     }
@@ -137,4 +141,17 @@ public class User implements UserDetails {
         // TODO statust berakni a userhez
         return UserDetails.super.isEnabled();
     }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public List<Wallet> getWallets() {
+        return wallets;
+    }
+
+    public void setWallets(List<Wallet> wallets) {
+        this.wallets = wallets;
+    }
+
 }

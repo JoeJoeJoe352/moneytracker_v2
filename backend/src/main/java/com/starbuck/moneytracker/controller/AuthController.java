@@ -14,7 +14,7 @@ import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.dto.IsEmailExistsDto;
 import com.starbuck.moneytracker.dto.IsUsernameExistsDto;
-import com.starbuck.moneytracker.dto.LoginRequest;
+import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
@@ -60,7 +60,7 @@ public class AuthController {
      * @return üres body + JWT token egy HttpOnly cookie-ban
      */
     @PostMapping(path = "/auth/login")
-    public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequestDto loginRequest) {
         UserLoginCommand command = new UserLoginCommand(loginRequest.username(), loginRequest.password());
 
         try {

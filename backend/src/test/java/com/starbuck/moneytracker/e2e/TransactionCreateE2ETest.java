@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.starbuck.moneytracker.dto.LoginRequest;
+import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
@@ -39,6 +39,7 @@ import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
@@ -50,6 +51,9 @@ class TransactionCreateE2ETest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private WalletRepository walletRepository;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -73,7 +77,7 @@ class TransactionCreateE2ETest {
                 Void.class);
         assertEquals(HttpStatus.CREATED, registerResponse.getStatusCode());
 
-        LoginRequest loginRequest = new LoginRequest("e2eCreateUser", "password123");
+        LoginRequestDto loginRequest = new LoginRequestDto("e2eCreateUser", "password123");
         ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login",
                 HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
@@ -96,6 +100,7 @@ class TransactionCreateE2ETest {
         transactionRepository.findAll()
                 .forEach(transaction -> transactionRepository
                         .hardDeleteTransaction(transaction.getId()));
+                        walletRepository.delete(user.getWallets().get(0));
         userRepository.delete(this.user);
     }
 
@@ -112,7 +117,7 @@ class TransactionCreateE2ETest {
                 null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("E2E groceries", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of());
+                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), user.getWallets().get(0).getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -156,7 +161,7 @@ class TransactionCreateE2ETest {
                 new BigDecimal("0.5"),
                 new BigDecimal("1500"), List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("Félegyházi bevásárlás", null,
-                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(detail, detail2), List.of());
+                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(detail, detail2), List.of(), user.getWallets().get(0).getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -212,7 +217,7 @@ class TransactionCreateE2ETest {
     void createTransaction_persistsAndIsRetrievableThroughTheApi_simpleTransaction() {
         // GIVEN
         TransactionCreateRequest request = new TransactionCreateRequest("Strandbelépő", new BigDecimal("-1500"),
-                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(), List.of());
+                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(), List.of(), user.getWallets().get(0).getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -268,7 +273,7 @@ class TransactionCreateE2ETest {
         TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("100.00"), null, null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("Should not persist", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of());
+                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), user.getWallets().get(0).getId());
 
         ResponseEntity<Void> response = restTemplate.postForEntity("/transaction", request, Void.class);
 
@@ -284,7 +289,7 @@ class TransactionCreateE2ETest {
     void createTransaction_returnsBadRequestForInvalidPayload() {
         // "ab" rövidebb, mint az elvárt minimum 3 karakter
         TransactionCreateRequest invalidRequest = new TransactionCreateRequest("ab", new BigDecimal("10.00"),
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(), List.of());
+                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(), List.of(), user.getWallets().get(0).getId());
 
         var headers = this.getHeaderWithCookie();
 

@@ -26,7 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.starbuck.moneytracker.dto.LoginRequest;
+import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
@@ -73,7 +73,7 @@ class AuthE2ETest {
      * auth cookie-t
      */
     private String login(String username, String password) {
-        LoginRequest loginRequest = new LoginRequest(username, password);
+        LoginRequestDto loginRequest = new LoginRequestDto(username, password);
         ResponseEntity<Map<String, String>> response = restTemplate.exchange("/auth/login", HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
                 });
@@ -145,7 +145,7 @@ class AuthE2ETest {
     void login_returnsUnauthorizedForInvalidCredentials() {
         register("e2eWrongPassUser", "password123", "e2ewrongpass@email.com");
 
-        LoginRequest loginRequest = new LoginRequest("e2eWrongPassUser", "notThePassword");
+        LoginRequestDto loginRequest = new LoginRequestDto("e2eWrongPassUser", "notThePassword");
         ResponseEntity<Map<String, String>> response = restTemplate.exchange("/auth/login", HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
                 });
