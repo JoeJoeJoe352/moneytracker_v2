@@ -2,10 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserDataStore } from '../../shared/services/user-data-store';
+import { UserData } from './interfaces';
 
-interface UserData {
-    username: string;
-}
+
 
 export interface GeneralResponse {
     message: string;
@@ -88,7 +87,7 @@ export class AuthService {
         return new Promise((resolve) => {
             this.authenticateUser().subscribe({
                 next: (response) => {
-                    this.userDataStore.loadUser(response.username);
+                    this.userDataStore.loadUserData(response);
                     resolve();
                 },
                 error: (error) => {

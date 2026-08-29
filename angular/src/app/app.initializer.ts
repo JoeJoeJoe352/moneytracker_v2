@@ -5,7 +5,7 @@ export function initApp(authService: AuthService, userDataStore: UserDataStore) 
     return new Promise<void>((resolve) => {
         authService.authenticateUser().subscribe({
             next: (userData) => {
-                userDataStore.loadUser(userData.username);
+                userDataStore.loadUserData(userData);
                 resolve();
             },
             error: (error) => {

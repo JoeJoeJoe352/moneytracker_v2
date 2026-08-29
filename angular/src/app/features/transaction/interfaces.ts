@@ -24,6 +24,7 @@ export interface TransactionInputDefaultValuesWithDetails {
     transactionDate: Date | null;
     details: TransactionDetailsDataFromBackend[];
     isComplexTransaction: boolean;
+    walletId: number;
 }
 
 /**
@@ -36,6 +37,7 @@ export interface NewTransaction {
     price: number | null;
     transactionDate: Date;
     categories: DropdownInterface[];
+    walletId: number;
     details: {
         detailName: string;
         detailPrice: number;
@@ -57,6 +59,7 @@ export interface TransactionDataForBackend {
     transactionDate: string;
     transactionType: string;
     transactionDetails: TransactionDetailsDataForBackend[];
+    walletId: number;
 }
 
 /**
@@ -81,6 +84,7 @@ export interface TransactionDataFromBackend {
     transactionType: string;
     isComplexTransaction: boolean;
     transactionDetails: TransactionDetailsDataFromBackend[];
+    walletId: number;
 }
 
 /**
