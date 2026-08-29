@@ -43,7 +43,7 @@ public class IntegrityConfig {
      * lezárja a sessiont.
      */
     @Transactional(readOnly = true)
-    //@Scheduled(cron = "0 */30 * * * *")
+    @Scheduled(cron = "0 */30 * * * *")
     public void checkTransactionIntegrity() {
         logger.info("Checking integrity of the transactions...");
         List<Transaction> transactions = transactionRepository.getAllTransaction();
