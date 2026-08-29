@@ -1,0 +1,32 @@
+package com.starbuck.moneytracker.mapper;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.starbuck.moneytracker.dto.UserDataResponseDto;
+import com.starbuck.moneytracker.dto.WalletResponseDto;
+import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
+
+@Component
+public class UserMapper {
+
+    /**
+     * Átalakítja a usert dto-vá. Walletek azért jönnek paraméterből, hogy a hívó
+     * felelőssége legyen olyan query-t lekérni, ahol biztos létezik
+     * 
+     * @param user
+     * @param wallets
+     * @return
+     */
+    public UserDataResponseDto toDto(User user, List<Wallet> wallets) {
+        List<WalletResponseDto> walletDtos = wallets.stream()
+                .map((wallet) -> new WalletResponseDto(wallet.getId(), wallet.getName(), wallet.getCurrencyCode(),
+                        wallet.getType()))
+                .collect(Collectors.toList());
+
+        return new UserDataResponseDto(user.getUsername(), walletDtos);
+    }
+}
