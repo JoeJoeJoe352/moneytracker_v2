@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -65,19 +64,24 @@ class TransactionServiceTest {
     @Spy
     private TransactionDetailFactory detailFactory = new TransactionDetailFactory();
 
-    @InjectMocks
-    private TransactionService transactionService;
-
     @Mock
     private CategoryRepository categoryRepo;
 
     @Mock
     private WalletRepository walletRepo;
 
+    private TransactionService transactionService;
+
     private AssertUtil assertUtil;
 
     TransactionServiceTest() {
         this.assertUtil = new AssertUtil();
+    }
+
+    @BeforeEach
+    void setUp() {
+        transactionService = new TransactionService(transactionRepo, transactionDetailRepo, categoryRepo,
+                transactionDetailCategoryRepository, currentUser, walletRepo, detailFactory);
     }
 
     @BeforeEach

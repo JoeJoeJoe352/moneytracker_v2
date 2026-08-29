@@ -2,6 +2,7 @@ package com.starbuck.moneytracker.service;
 
 import java.util.Date;
 import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.util.CookieUtil;
@@ -14,8 +15,11 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-    // TODO environment variable-be átrakni, ne legyen a kódban
-    private static final String SECRET_KEY = "aV9hbV9wZXRlcl8yMDI2MDUyMl9tb25leXRyYWNrZXJfYXBwXzE=";
+    private final String secretKey;
+
+    public JwtService(@Value("${jwt.secret}") String secretKey) {
+        this.secretKey = secretKey;
+    }
 
     /**
      * A tokenben lévő Subject mezőből kinyert username-el tér vissza
@@ -87,7 +91,7 @@ public class JwtService {
      * @return SecretKey
      */
     private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

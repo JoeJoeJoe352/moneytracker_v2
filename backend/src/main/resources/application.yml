@@ -1,6 +1,10 @@
 logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: "debug"
+
+jwt:
+  secret: ${JWT_SECRET}  # nincs alapérték - minden környezetnek kötelező explicit beállítania
+
 spring:
   application:
     name: moneytracker
