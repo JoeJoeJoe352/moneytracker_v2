@@ -16,6 +16,7 @@ import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
+import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 @Component
@@ -76,7 +77,7 @@ public class TransactionMapper {
                             detail.getWeight(),
                             detail.getUnitPrice(),
                             detail.isComplexPriceMode(),
-                            detail.getCategoryIds());
+                            categoryIdsOf(detail));
                 })
                 .collect(Collectors.toList());
 
@@ -191,7 +192,7 @@ public class TransactionMapper {
                         return new TransactionDetailSaveCommand(detail.getName(),
                                 detail.getWeight(),
                                 detail.getUnitPrice(),
-                                detail.getCategoryIds());
+                                categoryIdsOf(detail));
                     }
                     return new TransactionDetailSaveCommand(detail.getName(), detail.getPrice(),
                             List.of(),
@@ -206,5 +207,17 @@ public class TransactionMapper {
                 details,
                 List.of(),
                 transaction.getWallet().getId()); // TODO lehet, hogy nincs betöltve a wallet
+    }
+
+    /**
+     * Tételhez kapcsolt kategória azonosítók listájával tér vissza.
+     *
+     * @param detail -> betöltött getCategoryLinks-el
+     * @return
+     */
+    private List<Long> categoryIdsOf(TransactionDetail detail) {
+        return detail.getCategoryLinks().stream()
+                .map(categoryLink -> categoryLink.getCategory().getId())
+                .collect(Collectors.toList());
     }
 }

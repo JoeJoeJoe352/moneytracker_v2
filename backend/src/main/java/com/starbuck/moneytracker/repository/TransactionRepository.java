@@ -64,19 +64,6 @@ public interface TransactionRepository extends
     BigDecimal summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
 
     /**
-     * Utolsó X darab tranzakcióval tér vissza (id alapján van csökkenő sorrendbe
-     * rendezve)
-     * TODO átgondolni a feltételt, a pl.: jövő hétre felvett tranzakciók hol
-     * jelenjenek meg? Legelején?
-     *
-     * @param userId
-     * @param limit
-     * @return
-     */
-    @Query("SELECT t FROM Transaction t where t.user.id = ?1 AND t.status = 0 ORDER BY t.id DESC LIMIT ?2")
-    Transaction[] getLastTransactionsForUserWithLimit(long userId, int limit);
-
-    /**
      * Id alapján lekéri a tranzakciós adatokat
      * 
      * @param userId

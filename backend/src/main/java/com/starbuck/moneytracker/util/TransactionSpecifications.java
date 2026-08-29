@@ -8,6 +8,8 @@ import com.starbuck.moneytracker.entity.Transaction;
 
 public class TransactionSpecifications {
 
+    private TransactionSpecifications(){}
+
     /**
      * Opcionális query paraméter, ami ha van, akkor a név-re szűr
      * 
