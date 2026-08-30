@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.starbuck.moneytracker.entity.Transaction;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -113,11 +114,13 @@ class TransactionSpecificationsTest {
     @Test
     void hasUserId_buildsEqualsPredicateOnUserId() {
         Long userId = 42L;
+        Path<Object> walletPath = mock(Path.class);
         Path<Object> userPath = mock(Path.class);
         Path<Object> userIdPath = mock(Path.class);
         Predicate equalsPredicate = mock(Predicate.class);
 
-        when(root.<Object>get("user")).thenReturn(userPath);
+        when(root.<Object>get("wallet")).thenReturn(walletPath);
+        when(walletPath.<Object>get("user")).thenReturn(userPath);
         when(userPath.<Object>get("id")).thenReturn(userIdPath);
         when(cb.equal(userIdPath, userId)).thenReturn(equalsPredicate);
 
