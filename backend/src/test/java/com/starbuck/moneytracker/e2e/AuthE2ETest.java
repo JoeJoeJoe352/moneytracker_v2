@@ -30,6 +30,7 @@ import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 
@@ -97,7 +98,7 @@ class AuthE2ETest {
 
     /**
      * Sikeres regisztráció esetén a user titkosított jelszóval jön létre az
-     * adatbázisban
+     * adatbázisban és egy wallet automatikusan létrejön neki
      */
     @Test
     void register_createsUserWithEncodedPassword() {
@@ -109,6 +110,10 @@ class AuthE2ETest {
         assertNotNull(savedUser);
         assertNotEquals("password123", savedUser.getPassword());
         assertNotNull(savedUser.getUuid());
+
+        List<Wallet> wallets = walletRepository.findAll();
+        assertEquals(1, wallets.size());
+        assertEquals(savedUser.getId(), wallets.get(0).getUser().getId());
     }
 
     /**
@@ -241,8 +246,11 @@ class AuthE2ETest {
         ResponseEntity<UserDataResponseDto> response = restTemplate.postForEntity("/auth/authenticateUser",
                 new HttpEntity<>(authHeaders(cookie)), UserDataResponseDto.class);
 
+        var userData = response.getBody();
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("e2eAuthenticateUser", response.getBody().username());
+        assertEquals("e2eAuthenticateUser", userData.username());
+
+        assertEquals(1, userData.wallets().size());
     }
 
     /**

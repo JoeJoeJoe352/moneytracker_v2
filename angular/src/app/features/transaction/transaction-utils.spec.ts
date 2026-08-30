@@ -17,6 +17,7 @@ describe('TransactionUtils', () => {
                 transactionType: TransactionTypeEnum.INCOME,
                 transactionDate: '2024-01-10',
                 isComplexTransaction: false,
+                walletId: 1,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -55,6 +56,7 @@ describe('TransactionUtils', () => {
                 transactionDate: '2024-01-10',
                 isComplexTransaction: true,
                 categories: [],
+                walletId: 1,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -84,6 +86,7 @@ describe('TransactionUtils', () => {
                 transactionType: TransactionTypeEnum.INCOME,
                 transactionDate: '2024-01-10',
                 isComplexTransaction: true,
+                walletId: 1,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -138,6 +141,7 @@ describe('TransactionUtils', () => {
                 transactionDate: '2024-01-10',
                 isComplexTransaction: true,
                 categories: [],
+                walletId: 1,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -166,6 +170,7 @@ describe('TransactionUtils', () => {
                 isIncome: false,
                 transactionDate: new Date('2024-01-10'),
                 isComplexTransaction: false,
+                walletId: 1,
                 categories: [{ item_id: 41, item_text: 'Élelmiszer' }],
                 details: [
                     {
@@ -197,6 +202,7 @@ describe('TransactionUtils', () => {
                 transactionDate: new Date('2024-01-10'),
                 isComplexTransaction: true,
                 categories: [],
+                walletId: 2,
                 details: [
                     {
                         detailName: 'Tétel 1',

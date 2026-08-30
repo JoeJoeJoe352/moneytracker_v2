@@ -21,6 +21,7 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         transactionType: TransactionTypeEnum.OUTCOME,
         transactionDate: '2024-03-01',
         isComplexTransaction: true,
+        walletId: 1,
         transactionDetails: [
             {
                 name: 'Kenyér',

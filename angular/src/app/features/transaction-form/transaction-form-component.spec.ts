@@ -79,6 +79,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             transactionType: TransactionTypeEnum.INCOME,
             transactionDate: '2024-02-01',
             isComplexTransaction: false,
+            walletId: 1,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -137,6 +138,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             transactionType: TransactionTypeEnum.INCOME,
             transactionDate: '2024-02-01',
             isComplexTransaction: false,
+            walletId: 1,
             transactionDetails: [
                 {
                     name: 'sum',

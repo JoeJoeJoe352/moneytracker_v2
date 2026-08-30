@@ -54,9 +54,9 @@ class UserServiceIntegrationTest {
      * mentődik el
      */
     @Test
-    void createUser_persistsEncodedPasswordAndUuid() {
-        // Ez accpet-lang headerből jönne, de integrációs teszteknél nem használjuk,
-        // ilyenkor viszont a gép nyelvét használná alapesetben
+    void createUser_persistsEncodedPasswordAndUuidAndWallet() {
+        // Ez accept-lang headerből jönne, de integrációs teszteknél nem használjuk,
+        // ilyenkor viszont a gép nyelvét használná alapesetben, ezért inkább beállítom az angolt
         LocaleContextHolder.setDefaultLocale(Locale.ENGLISH);
 
         UserCreateCommand command = new UserCreateCommand("integrationUser", "integration@email.com", "teszt");
@@ -70,7 +70,7 @@ class UserServiceIntegrationTest {
         List<Wallet> wallets = walletRepository.findAll();
         assertEquals(1, wallets.size());
 
-        // default a magyar nyelv, ezért wallet lesz a név
+        // Az angol nyelv van beállítva, ezért wallet lesz a név
         assertEquals("Wallet", wallets.get(0).getName());
 
         deleteUserAndWallet(saved);
