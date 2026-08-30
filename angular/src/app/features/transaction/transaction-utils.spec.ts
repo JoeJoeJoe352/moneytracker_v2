@@ -38,6 +38,7 @@ describe('TransactionUtils', () => {
             expect(result.transactionDate instanceof Date).toBe(true);
             expect(result.isComplexTransaction).toBe(false);
             expect(result.categories).toEqual([10, 20]);
+            expect(result.walletId).toBe(1);
             expect(result.details.length).toBe(1);
             expect(result.details[0].name).toBe('Részlet 1');
             expect(result.details[0].price).toBe(5000);
@@ -218,7 +219,10 @@ describe('TransactionUtils', () => {
                         detailWeight: 3,
                         detailUnitPrice: 100,
                         detailIsComplexPriceMode: true,
-                        categories: [{ item_id: 7, item_text: 'teszt2' }, { item_id:8, item_text: 'teszt3' }],
+                        categories: [
+                            { item_id: 7, item_text: 'teszt2' },
+                            { item_id: 8, item_text: 'teszt3' },
+                        ],
                     },
                 ],
             };
@@ -227,6 +231,7 @@ describe('TransactionUtils', () => {
 
             expect(result.globalPrice).toBe(null); // complex → globalPrice nem küldjük
             expect(result.transactionDetails.length).toBe(2);
+            expect(result.walletId).toBe(1);
 
             // 1. tétel → price mód
             expect(result.transactionDetails[0]).toEqual({
