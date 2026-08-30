@@ -4,24 +4,24 @@ import java.util.List;
 
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mysql.MySQLContainer;
 
-// Egy eldobható MySQL konténert indít. Egyszer indul a teljes futás alatt. 
-@Testcontainers
+//Egy eldobható MySQL konténert indít. Egyszer indul a teljes futás alatt.
 @ActiveProfiles("test")
 public abstract class MySqlContainerTest {
 
-    @Container
+    // Szándékosan nincs lezárva a resource, a Ryuk resource handler fogja lezárni, amikor a JVM lezáródik 
+    @SuppressWarnings("resource")
     @ServiceConnection
-    static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.0.30")
+    static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.0.30")
             .withDatabaseName("testing")
             .withUsername("root")
             .withPassword("root");
 
     static {
-        // Fix port, hogy a konténer futása alatt MySQL Workbench-ből is elérhető legyen.
+        // Fix port, hogy a konténer futása alatt MySQL Workbench-ből is elérhető
+        // legyen.
         MYSQL.setPortBindings(List.of("3307:3306"));
+        MYSQL.start();
     }
 }
