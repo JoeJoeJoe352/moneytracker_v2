@@ -64,10 +64,6 @@ public class Transaction {
     private List<TransactionDetail> transactionDetails;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne(optional = false)
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
@@ -133,12 +129,11 @@ public class Transaction {
     }
 
     public Transaction(String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
-            BigDecimal priceSum, User user, Wallet wallet) {
+            BigDecimal priceSum, Wallet wallet) {
         this.name = name;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
         this.priceSum = priceSum;
-        this.user = user;
         this.wallet = wallet;
     }
 
@@ -196,14 +191,6 @@ public class Transaction {
 
     public void setTransactionDetails(List<TransactionDetail> transactionDetails) {
         this.transactionDetails = transactionDetails;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public BigDecimal getPriceSum() {

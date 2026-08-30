@@ -49,9 +49,6 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "user")
-    private Set<Transaction> transactions;
-
-    @OneToMany(mappedBy = "user")
     private List<Wallet> wallets = new ArrayList<>();
 
     public User() {
@@ -124,14 +121,6 @@ public class User implements UserDetails {
 
     public void generateUuid() {
         this.uuid = java.util.UUID.randomUUID().toString();
-    }
-
-    public Set<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    public void setTransactions(Set<Transaction> transactions) {
-        this.transactions = transactions;
     }
 
     @Override

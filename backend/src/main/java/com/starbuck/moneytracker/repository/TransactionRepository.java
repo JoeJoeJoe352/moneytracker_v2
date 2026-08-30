@@ -51,7 +51,7 @@ public interface TransactionRepository extends
      * @param userId
      * @return
      */
-    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.user.id = ?1 AND t.status = 0")
+    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.wallet.user.id = ?1 AND t.status = 0")
     BigDecimal summarizeTotalMoneyForUser(long userId);
 
     /**
@@ -60,7 +60,7 @@ public interface TransactionRepository extends
      * @param userId
      * @return
      */
-    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.user.id = ?1 AND t.status = 0 AND YEAR(t.transactionDate) = YEAR(CURDATE()) AND MONTH(t.transactionDate) = MONTH(CURDATE()) AND t.transactionType = ?2")
+    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.wallet.user.id = ?1 AND t.status = 0 AND YEAR(t.transactionDate) = YEAR(CURDATE()) AND MONTH(t.transactionDate) = MONTH(CURDATE()) AND t.transactionType = ?2")
     BigDecimal summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
 
     /**
@@ -70,7 +70,7 @@ public interface TransactionRepository extends
      * @param transactionId
      * @return
      */
-    @Query("SELECT t FROM Transaction t LEFT JOIN FETCH t.transactionDetails WHERE t.id = ?1 AND t.user.id = ?2 AND t.status = 0")
+    @Query("SELECT t FROM Transaction t LEFT JOIN FETCH t.transactionDetails WHERE t.id = ?1 AND t.wallet.user.id = ?2 AND t.status = 0")
     Optional<Transaction> getTransactionByIdWithDetails(long transactionId, long userId);
 
     /**

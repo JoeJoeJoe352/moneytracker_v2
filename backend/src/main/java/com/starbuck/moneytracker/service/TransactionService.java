@@ -74,7 +74,6 @@ public class TransactionService {
                 createCommand.getTransactionDate(),
                 createCommand.getTransactionType(),
                 costCalculator.calculateTransactionCost(createCommand),
-                currentUser.getUser(),
                 wallet);
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
 
@@ -267,7 +266,7 @@ public class TransactionService {
         // töltené be a detailokat és ez törléskor bizonyos esetekben problémát okoz
         Long userId = currentUser.getUser().getId();
         Transaction transaction = this.transactionRepo.findById(transactionId)
-                .filter(t -> t.getUser().getId().equals(userId))
+                .filter(t -> t.getWallet().getUser().getId().equals(userId))
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
         this.transactionRepo.delete(transaction);
     }
