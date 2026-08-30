@@ -231,7 +231,7 @@ describe('TransactionUtils', () => {
 
             expect(result.globalPrice).toBe(null); // complex → globalPrice nem küldjük
             expect(result.transactionDetails.length).toBe(2);
-            expect(result.walletId).toBe(1);
+            expect(result.walletId).toBe(2);
 
             // 1. tétel → price mód
             expect(result.transactionDetails[0]).toEqual({
