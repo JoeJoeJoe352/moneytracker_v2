@@ -2,12 +2,6 @@ jwt:
   secret: k/St2Y5jCAUMQKMP7jIO1y0hGN0N/1xT8f3qDXruutg=
 
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/testing?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC    
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: root
-
   jpa:
     hibernate:
       ddl-auto: validate
@@ -22,8 +16,6 @@ spring:
       enabled: true
   flyway:
     enabled: true
-    baseline-on-migrate: true
-    baseline-version: 20260822  # meglévő migrációk a V20260822-ig már lefutottnak számítanak
     logging:
 
 logging:

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.TransactionCreateCommand;
@@ -40,16 +39,16 @@ import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.UserService;
+import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @SpringBootTest
-@ActiveProfiles("test")
 // csak így használható a beforeall, mert egyébként statikusan futna és nem
 // elérhető az injektált dolgok
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TransactionServiceIntegrationTest {
+class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
     @Autowired
     private TransactionService transactionService;

@@ -28,7 +28,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 
 import com.starbuck.moneytracker.dto.CategoryCreateDto;
 import com.starbuck.moneytracker.dto.CategoryResponseDto;
@@ -40,11 +39,11 @@ import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
+import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
-@ActiveProfiles("test")
-class CategoryE2ETest {
+class CategoryE2ETest extends MySqlContainerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
