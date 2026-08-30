@@ -9,6 +9,9 @@ import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
+import { UserDataStore } from '../../shared/services/user-data-store';
+import { CurrencyCodes, WalletTypes } from '../../shared/enums';
+import { WalletDataInterface } from '../auth/interfaces';
 
 describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
     let fixture: ComponentFixture<TransactionFormComponent>;
@@ -48,6 +51,18 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
             providers: [
                 provideTranslateService(),
                 { provide: TransactionService, useValue: { utils: new TransactionUtils() } },
+                {
+                    provide: UserDataStore,
+                    useValue: {
+                        getDefaultWallet: () =>
+                            ({
+                                id: 1,
+                                name: 'Test Wallet',
+                                type: WalletTypes.default,
+                                currencyCode: CurrencyCodes.huf,
+                            }) as WalletDataInterface,
+                    },
+                },
             ],
         }).compileComponents();
 
@@ -109,7 +124,7 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         expect(fixture.nativeElement.querySelector('#detail-name-0').value).toBe('Tej');
     });
 
-    it('should disable every row\'s delete button once only one detail row remains', () => {
+    it("should disable every row's delete button once only one detail row remains", () => {
         const deleteButtons = fixture.nativeElement.querySelectorAll(
             'app-transaction-detail-row-component .btn-primary-red',
         );
