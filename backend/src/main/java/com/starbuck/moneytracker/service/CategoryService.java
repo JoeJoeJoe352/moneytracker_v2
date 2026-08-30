@@ -60,7 +60,7 @@ public class CategoryService {
      * 
      * @return
      */
-    public List<Category> listCategories() {
+    public List<Category> listCategoriesForUser() {
         return categoryRepository.findAllForUser(
                 currentUser.getUser().getId(),
                 conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class));

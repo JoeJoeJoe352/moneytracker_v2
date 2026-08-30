@@ -136,7 +136,7 @@ class TransactionCreateE2ETest {
         assertEquals(1, transactionsInDb.size());
         assertEquals("E2E groceries", transactionsInDb.get(0).getName());
         assertEquals(new BigDecimal("100.00"), transactionsInDb.get(0).getPriceSum());
-        assertEquals(this.user.getId(), transactionsInDb.get(0).getUser().getId());
+        assertEquals(this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció
@@ -180,7 +180,7 @@ class TransactionCreateE2ETest {
         assertEquals(1, transactionsInDb.size());
         assertEquals("Félegyházi bevásárlás", transactionsInDb.get(0).getName());
         assertEquals(new BigDecimal("-1229.00"), transactionsInDb.get(0).getPriceSum());
-        assertEquals(this.user.getId(), transactionsInDb.get(0).getUser().getId());
+        assertEquals(this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció
@@ -236,7 +236,7 @@ class TransactionCreateE2ETest {
         assertEquals(1, transactionsInDb.size());
         assertEquals("Strandbelépő", transactionsInDb.get(0).getName());
         assertEquals(new BigDecimal("-1500.00"), transactionsInDb.get(0).getPriceSum());
-        assertEquals(this.user.getId(), transactionsInDb.get(0).getUser().getId());
+        assertEquals(this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció

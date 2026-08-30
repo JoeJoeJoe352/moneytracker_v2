@@ -50,7 +50,7 @@ public class CategoryController {
     @GetMapping(path = "/category")
     public List<CategoryResponseDto> getCategories() {
         // TODO keresést beletenni
-        var categories = categoryService.listCategories();
+        var categories = categoryService.listCategoriesForUser();
         return mapper.toDtoList(categories);
     }
 }

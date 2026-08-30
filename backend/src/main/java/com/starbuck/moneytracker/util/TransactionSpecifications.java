@@ -42,6 +42,6 @@ public class TransactionSpecifications {
      */
     public static Specification<Transaction> hasUserId(Long userId) {
         return (root, query, cb) ->
-                cb.equal(root.get("user").get("id"), userId);
+                cb.equal(root.get("wallet").get("user").get("id"), userId);
     }
 }

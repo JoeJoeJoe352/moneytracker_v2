@@ -159,14 +159,15 @@ public class CategoryServiceTest {
         var savedCategoryCommon = categoryRepository.save(new Category("commonCategory", null, LangEnum.HU));
 
         // when
-        List<Category> categories = categoryService.listCategories();
+        List<Category> categories = categoryService.listCategoriesForUser();
 
         // then
-        assertEquals(2, categories.size());
-        assertEquals("ownCategory", categories.get(0).getName());
-        assertEquals(this.user.getUsername(), categories.get(0).getUser().getUsername());
-        assertEquals("commonCategory", categories.get(1).getName());
-        assertNull(categories.get(1).getUser());
+        // migráció felvesz 16 közöset + 2 van, amit használhat
+        assertEquals(18, categories.size());
+        assertEquals("ownCategory", categories.get(16).getName());
+        assertEquals(this.user.getUsername(), categories.get(16).getUser().getUsername());
+        assertEquals("commonCategory", categories.get(17).getName());
+        assertNull(categories.get(17).getUser());
 
         categoryRepository.delete(savedCategoryOwn);
         categoryRepository.delete(savedCategoryNotOwned);
