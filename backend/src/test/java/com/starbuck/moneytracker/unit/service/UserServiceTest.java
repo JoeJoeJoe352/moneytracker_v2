@@ -7,13 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
@@ -22,6 +24,7 @@ import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.service.JwtService;
 import com.starbuck.moneytracker.service.UserService;
+import com.starbuck.moneytracker.service.WalletService;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -30,13 +33,20 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private WalletService walletService;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
     private JwtService jwtService;
 
-    @InjectMocks
     private UserService userService;
+
+    @BeforeEach
+    void setUp() {
+        userService = new UserService(userRepository, passwordEncoder, jwtService, walletService);
+    }
 
     /**
      * Sikeres létrehozás esetén a jelszót titkosítva menti, uuid-t generál és
@@ -49,6 +59,7 @@ class UserServiceTest {
         Mockito.when(userRepository.existsByEmail("teszt@email.com")).thenReturn(false);
         Mockito.when(userRepository.existsByUsername("testuser")).thenReturn(false);
         Mockito.when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+        Mockito.when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // WHEN
         User result = userService.createUser(UserCreateCommand);
@@ -56,6 +67,8 @@ class UserServiceTest {
         // THEN
         assertEquals("encodedPassword", result.getPassword());
         assertNotNull(result.getUuid());
+
+        Mockito.verify(walletService, times(1)).createDefaultWallet(any());
     }
 
     /**
@@ -117,7 +130,7 @@ class UserServiceTest {
 
         UserLoginCommand command = new UserLoginCommand("missing", "password");
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BadCredentialsException.class, () -> {
             userService.login(command);
         });
 
@@ -135,7 +148,7 @@ class UserServiceTest {
         Mockito.when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
         UserLoginCommand command = new UserLoginCommand("testuser", "wrongPassword");
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BadCredentialsException.class, () -> {
             userService.login(command);
         });
 

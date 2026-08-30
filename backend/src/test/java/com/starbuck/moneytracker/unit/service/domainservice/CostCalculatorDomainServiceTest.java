@@ -80,7 +80,7 @@ class CostCalculatorDomainServiceTest {
     @Test
     void emptyDetailArray_returnsZero() {
         var transaction = new TransactionCreateCommand("bevásárlás", new BigDecimal("300.00"), LocalDate.now(),
-                TransactionTypeEnum.INCOME, List.of(), List.of());
+                TransactionTypeEnum.INCOME, List.of(), List.of(), 1L);
 
         assertEquals(new BigDecimal("300.00"), service.calculateTransactionCost(transaction));
     }
@@ -146,7 +146,7 @@ class CostCalculatorDomainServiceTest {
         var detail2 = new TransactionDetailSaveCommand("tej", new BigDecimal("-300"), List.of(),
                 TransactionTypeEnum.OUTCOME);
         var transaction = new TransactionCreateCommand("bevásárlás", null, LocalDate.now(),
-                TransactionTypeEnum.OUTCOME, List.of(detail1, detail2), List.of());
+                TransactionTypeEnum.OUTCOME, List.of(detail1, detail2), List.of(), 1L);
 
         var result = service.calculateTransactionCost(transaction);
 

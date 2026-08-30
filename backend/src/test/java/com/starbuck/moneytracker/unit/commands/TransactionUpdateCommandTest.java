@@ -23,7 +23,7 @@ class TransactionUpdateCommandTest {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionUpdateCommand("teszt", null, LocalDate.now(),
                         TransactionTypeEnum.INCOME,
-                        null, List.of()));
+                        null, List.of(), 1L));
     }
 
     @Test
@@ -31,7 +31,7 @@ class TransactionUpdateCommandTest {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionUpdateCommand("teszt", null, LocalDate.now(),
                         TransactionTypeEnum.INCOME,
-                        List.of(), List.of()));
+                        List.of(), List.of(), 1L));
     }
 
     @Test
@@ -41,7 +41,7 @@ class TransactionUpdateCommandTest {
                         TransactionTypeEnum.INCOME,
                         List.of(new TransactionDetailSaveCommand("teszt", new BigDecimal("400"),
                                 List.of(), TransactionTypeEnum.INCOME)),
-                        List.of()));
+                        List.of(), 1L));
     }
 
     /**
@@ -53,7 +53,7 @@ class TransactionUpdateCommandTest {
         assertThrowsExactly(IllegalArgumentException.class,
                 () -> new TransactionUpdateCommand("", null, LocalDate.now(),
                         TransactionTypeEnum.INCOME,
-                        List.of(detail), List.of()));
+                        List.of(detail), List.of(), 1L));
     }
 
     @Test
@@ -61,7 +61,7 @@ class TransactionUpdateCommandTest {
         LocalDate date = LocalDate.of(2026, 5, 20);
 
         var command = new TransactionUpdateCommand("updated", null, date,
-                TransactionTypeEnum.OUTCOME, List.of(detail), List.of(3L));
+                TransactionTypeEnum.OUTCOME, List.of(detail), List.of(3L), 1L);
 
         assertEquals("updated", command.getTransactionName());
         assertEquals(null, command.getGlobalPrice());

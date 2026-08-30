@@ -23,7 +23,7 @@ import io.jsonwebtoken.Jwts;
 
 class JwtServiceTest {
 
-    private final JwtService jwtService = new JwtService();
+    private final JwtService jwtService = new JwtService("dGVzdC1vbmx5LWp3dC1zZWNyZXQtZm9yLXVuaXQtdGVzdHM=");
 
     private SecretKey signInKey;
 

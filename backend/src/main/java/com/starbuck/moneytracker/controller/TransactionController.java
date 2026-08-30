@@ -3,8 +3,6 @@ package com.starbuck.moneytracker.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
@@ -23,7 +20,6 @@ import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionFilter;
-import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
 
@@ -35,16 +31,17 @@ import jakarta.validation.Valid;
 @RestController
 public class TransactionController {
 
-    @Autowired
-    TransactionService transactionService;
+    private final TransactionService transactionService;
+    private final TransactionMapper transactionMapper;
 
-    @Autowired
-    private TransactionMapper transactionMapper;
+    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper) {
+        this.transactionService = transactionService;
+        this.transactionMapper = transactionMapper;
+    }
 
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createTransaction(@Valid @RequestBody TransactionCreateRequest request,
-            @AuthenticationPrincipal @NonNull User user) {
+    public void createTransaction(@Valid @RequestBody TransactionCreateRequest request) {
         TransactionCreateCommand transaction = transactionMapper.fromTransactionCreateRequest(request);
 
         this.transactionService.createTransaction(transaction);

@@ -7,6 +7,9 @@ import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
+import { UserDataStore } from '../../shared/services/user-data-store';
+import { WalletDataInterface } from '../auth/interfaces';
+import { CurrencyCodes, WalletTypes } from '../../shared/enums';
 
 describe('TransactionFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionFormComponent>;
@@ -18,6 +21,18 @@ describe('TransactionFormComponent (Vitest)', () => {
             providers: [
                 provideTranslateService(),
                 { provide: TransactionService, useValue: { utils: new TransactionUtils() } },
+                {
+                    provide: UserDataStore,
+                    useValue: {
+                        getDefaultWallet: () => ({
+                            id: 1,
+                            name: 'Test Wallet',
+                            type: WalletTypes.default,
+                            currencyCode: CurrencyCodes.huf
+
+                        }) as WalletDataInterface,
+                    },
+                },
             ],
         }).compileComponents();
 
@@ -79,6 +94,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             transactionType: TransactionTypeEnum.INCOME,
             transactionDate: '2024-02-01',
             isComplexTransaction: false,
+            walletId: 1,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -137,6 +153,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             transactionType: TransactionTypeEnum.INCOME,
             transactionDate: '2024-02-01',
             isComplexTransaction: false,
+            walletId: 1,
             transactionDetails: [
                 {
                     name: 'sum',

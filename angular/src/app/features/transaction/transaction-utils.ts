@@ -32,6 +32,7 @@ export class TransactionUtils {
             transactionDate: transactionDate,
             isComplexTransaction: transaction.isComplexTransaction,
             details: transactionDetailsFormatted,
+            walletId: transaction.walletId,
             categories: transaction.isComplexTransaction
                 ? []
                 : transaction.transactionDetails[0].categories,
@@ -72,6 +73,7 @@ export class TransactionUtils {
             name: input.name,
             transactionType: TransactionTypeString,
             transactionDate: transactionDateString,
+            walletId: input.walletId,
             transactionDetails: transactionDetailsFormatted,
             globalCategories: input.categories.map((category) => category.item_id),
         };

@@ -2,6 +2,7 @@ package com.starbuck.moneytracker.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -68,9 +69,12 @@ public class SecurityConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Api hívások loggolása a konzolra
+     * Api hívások loggolása a konzolra. Csak dev profilban aktív, mert
+     * a request body-t is logolja (pl. login/register jelszavakat), ami
+     * production logokba nem kerülhet.
      */
     @Bean
+    @Profile("dev")
     public CommonsRequestLoggingFilter logFilter() {
         CommonsRequestLoggingFilter filter = new CommonsRequestLoggingFilter();
         filter.setIncludePayload(true);

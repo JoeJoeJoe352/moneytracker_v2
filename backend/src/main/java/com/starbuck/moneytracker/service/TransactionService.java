@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -21,6 +20,7 @@ import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionDetailFactory;
@@ -31,42 +31,51 @@ import jakarta.persistence.EntityNotFoundException;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
+import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 @Service
 public class TransactionService {
 
-    @Autowired
-    private TransactionRepository transactionRepo;
-
-    @Autowired
-    private TransactionDetailRepository transactionDetailRepo;
-
-    @Autowired
-    private CategoryRepository categoryRepo;
-
-    @Autowired
-    private TransactionDetailCategoryRepository transactionDetailCategoryRepository;
-
-    @Autowired
-    private CurrentUserUtil currentUser;
-
-    @Autowired
-    private TransactionDetailFactory detailFactory;
+    private final TransactionRepository transactionRepo;
+    private final TransactionDetailRepository transactionDetailRepo;
+    private final CategoryRepository categoryRepo;
+    private final TransactionDetailCategoryRepository transactionDetailCategoryRepository;
+    private final CurrentUserUtil currentUser;
+    private final WalletRepository walletRepo;
+    private final TransactionDetailFactory detailFactory;
 
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
+
+    public TransactionService(TransactionRepository transactionRepo, TransactionDetailRepository transactionDetailRepo,
+            CategoryRepository categoryRepo, TransactionDetailCategoryRepository transactionDetailCategoryRepository,
+            CurrentUserUtil currentUser, WalletRepository walletRepo, TransactionDetailFactory detailFactory) {
+        this.transactionRepo = transactionRepo;
+        this.transactionDetailRepo = transactionDetailRepo;
+        this.categoryRepo = categoryRepo;
+        this.transactionDetailCategoryRepository = transactionDetailCategoryRepository;
+        this.currentUser = currentUser;
+        this.walletRepo = walletRepo;
+        this.detailFactory = detailFactory;
+    }
 
     /**
      * Tranzakció létrehozása
      */
     @Transactional
     public Transaction createTransaction(TransactionCreateCommand createCommand) {
+        User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
+        Wallet wallet = walletRepo.getWalletById(createCommand.getWalletId(), user.getId()).orElseThrow(
+                () -> new EntityNotFoundException("Wallet doesn't exists"));
+
         Transaction transaction = new Transaction(
                 createCommand.getTransactionName(),
                 createCommand.getTransactionDate(),
                 createCommand.getTransactionType(),
                 costCalculator.calculateTransactionCost(createCommand),
-                currentUser.getUser());
+                currentUser.getUser(),
+                wallet);
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
 
         this.saveDetails(savedTransactionModel, createCommand);
@@ -81,11 +90,18 @@ public class TransactionService {
      */
     @Transactional
     public void updateTransaction(Long id, TransactionUpdateCommand updateCommand) {
+        User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ  NEM KELL MAJD USERID
+
+        Wallet wallet = walletRepo.getWalletById(updateCommand.getWalletId(), user.getId()).orElseThrow(
+            () -> new EntityNotFoundException("Wallet doesn't exists")
+        );
+
         Transaction transaction = this.getTransactionByIdForActualUser(id);
         transaction.setName(updateCommand.getTransactionName());
         transaction.setTransactionDate(updateCommand.getTransactionDate());
         transaction.setTransactionType(updateCommand.getTransactionType());
         transaction.setPriceSum(costCalculator.calculateTransactionCost(updateCommand));
+        transaction.setWallet(wallet);
         transactionRepo.save(transaction);
 
         // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
@@ -103,7 +119,8 @@ public class TransactionService {
      * @param transactionDetails
      */
     private void saveDetails(Transaction savedTransaction, TransactionSaveCommand createCommand) {
-        List<TransactionDetailSaveCommand> details = detailFactory.resolveDetailCommands(createCommand, savedTransaction);
+        List<TransactionDetailSaveCommand> details = detailFactory.resolveDetailCommands(createCommand,
+                savedTransaction);
 
         for (TransactionDetailSaveCommand detailCommand : details) {
             TransactionDetail detail = new TransactionDetail(

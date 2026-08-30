@@ -3,9 +3,9 @@ package com.starbuck.moneytracker.unit.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,8 +21,12 @@ class CustomUserDetailServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @InjectMocks
     private CustomUserDetailService customUserDetailService;
+
+    @BeforeEach
+    void setUp() {
+        customUserDetailService = new CustomUserDetailService(userRepository);
+    }
 
     /**
      * Ha létezik a userrel a felhasználónév, azt adja vissza

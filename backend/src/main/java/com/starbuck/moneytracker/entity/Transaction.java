@@ -67,6 +67,10 @@ public class Transaction {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "wallet_id", nullable = false)
+    private Wallet wallet;
+
     /**
      * Törölt-e a tranzakció
      * 
@@ -129,12 +133,13 @@ public class Transaction {
     }
 
     public Transaction(String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
-            BigDecimal priceSum, User user) {
+            BigDecimal priceSum, User user, Wallet wallet) {
         this.name = name;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
         this.priceSum = priceSum;
         this.user = user;
+        this.wallet = wallet;
     }
 
     public Long getId() {
@@ -215,5 +220,13 @@ public class Transaction {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
     }
 }

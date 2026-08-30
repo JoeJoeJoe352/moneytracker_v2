@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
@@ -22,12 +23,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
+import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
@@ -35,7 +38,9 @@ import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.TransactionService;
+import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -65,20 +70,37 @@ class TransactionServiceIntegrationTest {
     @Autowired
     private UserRepository userRepo;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private WalletRepository walletRepo;
+
     @MockitoBean
     private CurrentUserUtil currentUser;
 
-    private User user = null;
+    private User user;
+    private Wallet wallet;
 
     @BeforeAll
     void beforeAll() {
-        User user = new User("testuser", "password", "teszt@email.com");
-        user.setUuid();
-        this.user = userRepo.save(user);
+        UserCreateCommand command = new UserCreateCommand("testuser", "teszt@email.com", "password");
+        this.user = userService.createUser(command);
+        this.wallet = walletRepo.findByUserId(this.user.getId()).get(0);
+    }
+
+    /**
+     * @MockitoBean mockokat Spring minden teszt metódus után resetel, ezért
+     * a stubbolást minden teszt előtt újra be kell állítani
+     */
+    @BeforeEach
+    void mockUserUtil() {
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
     }
 
     @AfterAll
     void afterAll() {
+        walletRepo.delete(this.wallet);
         userRepo.delete(this.user);
     }
 
@@ -88,8 +110,6 @@ class TransactionServiceIntegrationTest {
     @Test
     void createTransaction_persistsAllEntities() {
         // GIVEN
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         Category category = new Category("tesztkategória", this.user, LangEnum.HU);
         categoryRepo.save(category);
 
@@ -97,7 +117,7 @@ class TransactionServiceIntegrationTest {
                 TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), List.of(category.getId()),
                 TransactionTypeEnum.INCOME);
         TransactionCreateCommand command = new TransactionCreateCommand("Test", null, LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
+                TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.wallet.getId());
 
         // WHEN
         Transaction saved = transactionService.createTransaction(command);
@@ -124,13 +144,11 @@ class TransactionServiceIntegrationTest {
     @Test
     void createTransaction_createSimpleTransaction() {
         // GIVEN
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         Category category = new Category("simplekategória", this.user, LangEnum.HU);
         categoryRepo.save(category);
 
         TransactionCreateCommand command = new TransactionCreateCommand("Test", new BigDecimal("500.00"), LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(), List.of(category.getId()));
+                TransactionTypeEnum.INCOME, List.of(), List.of(category.getId()), this.wallet.getId());
 
         // WHEN
         Transaction saved = transactionService.createTransaction(command);
@@ -158,8 +176,6 @@ class TransactionServiceIntegrationTest {
     @Test
     void updateTransaction_persistsAllEntities() {
         // GIVEN
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         Category category1 = new Category("tesztKategória", this.user, LangEnum.HU);
         categoryRepo.save(category1);
 
@@ -167,7 +183,7 @@ class TransactionServiceIntegrationTest {
                 TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), List.of(category1.getId()),
                 TransactionTypeEnum.INCOME);
         TransactionCreateCommand createCommand = new TransactionCreateCommand("Test", null,
-                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
+                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.wallet.getId());
 
         // Van DB-ben elem mostmár
         Transaction createdTransaction = transactionService.createTransaction(createCommand);
@@ -186,7 +202,7 @@ class TransactionServiceIntegrationTest {
 
         TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("Update test", null,
                 LocalDate.of(2026, 7, 8), TransactionTypeEnum.OUTCOME,
-                List.of(updateDetailCommand1, updateDetailCommand2), List.of());
+                List.of(updateDetailCommand1, updateDetailCommand2), List.of(), this.wallet.getId());
 
         // WHEN
         transactionService.updateTransaction(createdTransaction.getId(), updateCommand);
@@ -230,15 +246,15 @@ class TransactionServiceIntegrationTest {
 
     @Test
     void createTransaction_throwsExceptionAndRollsBack() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         // emiatt nem fogja tudni elmenteni a detailst és rollback az egész
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
-                "hosszunev0".repeat(26), new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
-        TransactionCreateCommand command = new TransactionCreateCommand("hibásteszt", null,
-                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
+                "tesztnév", new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
+        TransactionCreateCommand command = new TransactionCreateCommand(
+                "hibásteszt", null,
+                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), 
+                22);//Nincs ilyen walletId -> entityNotFoundException
 
-        assertThrows(DataIntegrityViolationException.class, () -> {
+        assertThrows(EntityNotFoundException.class, () -> {
             transactionService.createTransaction(command);
         });
 
@@ -247,14 +263,14 @@ class TransactionServiceIntegrationTest {
         assertEquals(0, transactionDetailRepo.count());
     }
 
+
+
     /**
      * A user aktív tranzakcióinak összegét adja vissza
      */
     @Test
     void sumAllMoney_returnsSumOfActiveTransactions() {
         // GIVEN
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         Transaction income = this.persistSimpleTransaction("income", TransactionTypeEnum.INCOME,
                 new BigDecimal(500), LocalDate.now());
         Transaction expense = this.persistSimpleTransaction("expense", TransactionTypeEnum.OUTCOME,
@@ -275,8 +291,6 @@ class TransactionServiceIntegrationTest {
      */
     @Test
     void sumAllMoney_returnsZeroWhenNoTransactions() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         BigDecimal result = transactionService.sumAllMoney();
 
         assertEquals(BigDecimal.ZERO, result);
@@ -288,8 +302,6 @@ class TransactionServiceIntegrationTest {
      */
     @Test
     void sumAllExpenseForMonth_returnsOnlyCurrentMonthExpenses() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth", TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-150), LocalDate.now());
         Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth", TransactionTypeEnum.INCOME,
@@ -312,8 +324,6 @@ class TransactionServiceIntegrationTest {
      */
     @Test
     void sumAllIncomeForMonth_returnsOnlyCurrentMonthIncome() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth", TransactionTypeEnum.INCOME,
                 new BigDecimal(250), LocalDate.now());
         Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth", TransactionTypeEnum.OUTCOME,
@@ -335,8 +345,6 @@ class TransactionServiceIntegrationTest {
      */
     @Test
     void getTransactionByIdForActualUser_returnsTransactionWithDetails() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         Transaction transaction = this.persistSimpleTransaction("lookup", TransactionTypeEnum.INCOME,
                 new BigDecimal(100), LocalDate.now());
 
@@ -353,8 +361,6 @@ class TransactionServiceIntegrationTest {
      */
     @Test
     void getTransactionByIdForActualUser_throwsWhenNotFound() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         assertThrows(EntityNotFoundException.class, () -> {
             transactionService.getTransactionByIdForActualUser(-1L);
         });
@@ -366,8 +372,6 @@ class TransactionServiceIntegrationTest {
      */
     @Test
     void getLastTransactions_returnsAtMostFiveNewestTransactions() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         List<Transaction> created = new java.util.ArrayList<>();
         for (int i = 0; i < 6; i++) {
             created.add(this.persistSimpleTransaction("last" + i, TransactionTypeEnum.INCOME, new BigDecimal(10),
@@ -386,8 +390,6 @@ class TransactionServiceIntegrationTest {
      */
     @Test
     void getHistoryPageData_filtersTransactionsByName() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         var now = LocalDate.now();
 
         Transaction matching = this.persistSimpleTransaction("groceries shopping", TransactionTypeEnum.OUTCOME,
@@ -410,8 +412,6 @@ class TransactionServiceIntegrationTest {
      */
     @Test
     void deleteTransaction_softDeletesTransactionForOwner() {
-        Mockito.when(currentUser.getUser()).thenReturn(this.user);
-
         Transaction transaction = this.persistSimpleTransaction("toDelete", TransactionTypeEnum.INCOME,
                 new BigDecimal(100), LocalDate.now());
 
@@ -434,7 +434,7 @@ class TransactionServiceIntegrationTest {
         TransactionDetailSaveCommand detail = new TransactionDetailSaveCommand(
                 TransactionDetail.DEFAULT_DETAIL_NAME, price, List.of(), type);
         TransactionCreateCommand command = new TransactionCreateCommand(name, null, date, type, List.of(detail),
-                List.of());
+                List.of(), this.wallet.getId());
 
         return transactionService.createTransaction(command);
     }

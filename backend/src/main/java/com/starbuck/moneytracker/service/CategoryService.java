@@ -3,10 +3,10 @@ package com.starbuck.moneytracker.service;
 import java.util.List;
 
 import org.hibernate.NonUniqueObjectException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
@@ -18,14 +18,16 @@ import com.starbuck.moneytracker.util.CurrentUserUtil;
 @Service
 public class CategoryService {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
+    private final CurrentUserUtil currentUser;
+    private final ConversionService conversionService;
 
-    @Autowired
-    CurrentUserUtil currentUser;
-
-    @Autowired
-    ConversionService conversionService;
+    public CategoryService(CategoryRepository categoryRepository, CurrentUserUtil currentUser,
+            ConversionService conversionService) {
+        this.categoryRepository = categoryRepository;
+        this.currentUser = currentUser;
+        this.conversionService = conversionService;
+    }
 
     /**
      * Létrehoz egy új kategóriát a user számára
@@ -33,6 +35,7 @@ public class CategoryService {
      * @param command
      * @return
      */
+    @Transactional
     public Category createCategory(CategoryCreateCommand command) {
         if (command == null) {
             throw new IllegalArgumentException("Category is null");

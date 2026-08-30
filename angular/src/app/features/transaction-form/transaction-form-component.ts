@@ -27,6 +27,7 @@ import { TransactionDetailRowComponent } from './transaction-detail-row-componen
 import { TransactionService } from '../transaction/transaction-service';
 import { CategoryResponseInterface, DetailForm, NewTransaction, TransactionDataFromBackend, TransactionInputDefaultValuesWithDetails } from '../transaction/interfaces';
 import { validDate } from './valid-date-validator';
+import { UserDataStore } from '../../shared/services/user-data-store';
 
 @Component({
     selector: 'app-transaction-form-component',
@@ -45,6 +46,7 @@ export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
     private translateService = inject(TranslateService);
+    private userData = inject(UserDataStore)
 
     /**
      * Form disabled-e (pl.: töltődéskor)
@@ -108,6 +110,7 @@ export class TransactionFormComponent implements OnChanges {
             transactionDate: null,
             details: [],
             categories: [],
+            walletId: this.userData.getDefaultWallet().id
         });
     }
 
@@ -168,6 +171,7 @@ export class TransactionFormComponent implements OnChanges {
             transactionDate: this.fb.control(defaults.transactionDate, {
                 validators: [Validators.required, validDate],
             }),
+            walletId: new FormControl(defaults.walletId),
             details: this.fb.array(defaults.details.map((detail) => this.generateNewRow(detail))),
             categories: this.fb.control<DropdownInterface[]>(
                 this.mapCategoryIdsToDropdownData(defaults.categories ?? []),

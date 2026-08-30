@@ -1,6 +1,10 @@
 logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: "debug"
+
+jwt:
+  secret: ${JWT_SECRET}  # nincs alapérték - minden környezetnek kötelező explicit beállítania
+
 spring:
   application:
     name: moneytracker
@@ -17,11 +21,11 @@ spring:
 
   jpa:
     hibernate:
-      #ddl-auto: validate  # validate: ellenőrzi a séma megfelelőségét, de nem módosítja azt
-      ddl-auto: update  # validate: ellenőrzi a séma megfelelőségét, de nem módosítja azt
+      ddl-auto: validate  # ellenőrzi a séma megfelelőségét, de nem módosítja azt
     show-sql: true
 
   flyway:
     enabled: true
     baseline-on-migrate: true
+    baseline-version: 20260822  # meglévő migrációk a V20260822-ig már lefutottnak számítanak
     locations: classpath:db/migration  # Flyway migrációk helye

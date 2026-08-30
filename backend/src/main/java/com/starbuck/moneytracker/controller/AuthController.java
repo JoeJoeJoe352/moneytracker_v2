@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -14,10 +15,13 @@ import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.dto.IsEmailExistsDto;
 import com.starbuck.moneytracker.dto.IsUsernameExistsDto;
-import com.starbuck.moneytracker.dto.LoginRequest;
+import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
+import com.starbuck.moneytracker.mapper.UserMapper;
+import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.util.CookieUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -30,14 +34,20 @@ public class AuthController {
     /**
      * Felhasználó autentikációs szolgáltatás
      */
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final CurrentUserUtil userUtil;
+    private final CookieUtil cookieUtil;
+    private final UserMapper mapper;
+    private final WalletRepository walletRepository;
 
-    @Autowired
-    private CurrentUserUtil userUtil;
-
-    @Autowired
-    private CookieUtil cookieUtil;
+    public AuthController(UserService userService, CurrentUserUtil userUtil, CookieUtil cookieUtil, UserMapper mapper,
+            WalletRepository walletRepository) {
+        this.userService = userService;
+        this.userUtil = userUtil;
+        this.cookieUtil = cookieUtil;
+        this.mapper = mapper;
+        this.walletRepository = walletRepository;
+    }
 
     /**
      * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba
@@ -60,24 +70,21 @@ public class AuthController {
      * @return üres body + JWT token egy HttpOnly cookie-ban
      */
     @PostMapping(path = "/auth/login")
-    public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequestDto loginRequest) {
         UserLoginCommand command = new UserLoginCommand(loginRequest.username(), loginRequest.password());
 
-        try {
-            String jwtToken = userService.login(command);
-            ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Set-Cookie", cookie.toString());
-            return ResponseEntity.ok().headers(headers).build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        String jwtToken = userService.login(command);
+        ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Set-Cookie", cookie.toString());
+        return ResponseEntity.ok().headers(headers).build();
     }
 
     /**
      * Felhasználó kiejlentkeztetése (jwt token törlése a böngészőből)
      * 
-     * @return ResponseEntity üres body, de tartalmaz headerben egy expiration cookie-t
+     * @return ResponseEntity üres body, de tartalmaz headerben egy expiration
+     *         cookie-t
      */
     @PostMapping(path = "/auth/logout")
     public ResponseEntity<Void> logoutUser() {
@@ -121,7 +128,10 @@ public class AuthController {
     @PostMapping(path = "auth/authenticateUser")
     public UserDataResponseDto authenticateUser() {
         User user = this.userUtil.getUser();
+        // user.getWallets() nem használható, mert itt már a security principal user
+        // detached
+        List<Wallet> wallets = walletRepository.findByUserId(user.getId());
 
-        return new UserDataResponseDto(user.getUsername());
+        return mapper.toDto(user, wallets);
     }
 }

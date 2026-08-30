@@ -1,14 +1,18 @@
 package com.starbuck.moneytracker.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +35,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String username;
 
+    @JsonIgnore // hogy biztos ne kerüljön ki frontendre
     @Column(nullable = false)
     private String password;
 
@@ -45,6 +50,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private Set<Transaction> transactions;
+
+    @OneToMany(mappedBy = "user")
+    private List<Wallet> wallets = new ArrayList<>();
 
     public User() {
     }
@@ -114,7 +122,7 @@ public class User implements UserDetails {
         return uuid;
     }
 
-    public void setUuid() {
+    public void generateUuid() {
         this.uuid = java.util.UUID.randomUUID().toString();
     }
 
@@ -137,4 +145,17 @@ public class User implements UserDetails {
         // TODO statust berakni a userhez
         return UserDetails.super.isEnabled();
     }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public List<Wallet> getWallets() {
+        return wallets;
+    }
+
+    public void setWallets(List<Wallet> wallets) {
+        this.wallets = wallets;
+    }
+
 }

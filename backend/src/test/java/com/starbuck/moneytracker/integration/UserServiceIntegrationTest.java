@@ -7,18 +7,27 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import java.util.Locale;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.JwtService;
 import com.starbuck.moneytracker.service.UserService;
+import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,14 +41,24 @@ class UserServiceIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
     private JwtService jwtService;
+
+    @MockitoBean
+    private CurrentUserUtil currentUser;
 
     /**
      * Sikeres létrehozás esetén a jelszó titkosítva, uuid-vel ellátva
      * mentődik el
      */
     @Test
-    void createUser_persistsEncodedPasswordAndUuid() {
+    void createUser_persistsEncodedPasswordAndUuidAndWallet() {
+        // Ez accept-lang headerből jönne, de integrációs teszteknél nem használjuk,
+        // ilyenkor viszont a gép nyelvét használná alapesetben, ezért inkább beállítom az angolt
+        LocaleContextHolder.setDefaultLocale(Locale.ENGLISH);
+
         UserCreateCommand command = new UserCreateCommand("integrationUser", "integration@email.com", "teszt");
         User saved = userService.createUser(command);
 
@@ -48,7 +67,13 @@ class UserServiceIntegrationTest {
         assertNotEquals("password", saved.getPassword());
         assertTrue(userRepository.existsByUsername("integrationUser"));
 
-        userRepository.delete(saved);
+        List<Wallet> wallets = walletRepository.findAll();
+        assertEquals(1, wallets.size());
+
+        // Az angol nyelv van beállítva, ezért wallet lesz a név
+        assertEquals("Wallet", wallets.get(0).getName());
+
+        deleteUserAndWallet(saved);
     }
 
     /**
@@ -68,7 +93,7 @@ class UserServiceIntegrationTest {
 
         assertFalse(userRepository.existsByUsername("brandNewUsername"));
 
-        userRepository.delete(existing);
+        deleteUserAndWallet(existing);
     }
 
     /**
@@ -87,7 +112,7 @@ class UserServiceIntegrationTest {
 
         assertFalse(userRepository.existsByEmail("brandnew@email.com"));
 
-        userRepository.delete(existing);
+        deleteUserAndWallet(existing);
     }
 
     /**
@@ -106,7 +131,7 @@ class UserServiceIntegrationTest {
         assertEquals("loginUser", jwtService.extractUsername(token));
         assertTrue(jwtService.isTokenValid(token, saved));
 
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
     }
 
     /**
@@ -118,11 +143,11 @@ class UserServiceIntegrationTest {
         User saved = userService.createUser(command);
 
         UserLoginCommand loginCommand = new UserLoginCommand("wrongPassUser", "notThePassword");
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BadCredentialsException.class, () -> {
             userService.login(loginCommand);
         });
 
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
     }
 
     /**
@@ -131,7 +156,7 @@ class UserServiceIntegrationTest {
     @Test
     void login_throwsForUnknownUsername() {
         UserLoginCommand loginCommand = new UserLoginCommand("nonExistentUser", "password");
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(BadCredentialsException.class, () -> {
             userService.login(loginCommand);
         });
     }
@@ -149,7 +174,7 @@ class UserServiceIntegrationTest {
 
         assertTrue(userService.isUsernameExists("notYetRegisteredUsername"));
 
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
     }
 
     /**
@@ -165,6 +190,15 @@ class UserServiceIntegrationTest {
 
         assertTrue(userService.isEmailExists("notyetregistered@email.com"));
 
-        userRepository.delete(saved);
+        deleteUserAndWallet(saved);
+    }
+
+    /**
+     * Előbb a user walletjét kell törölni, különben a user törlése FK
+     * constraint hibával elbukik.
+     */
+    private void deleteUserAndWallet(User user) {
+        walletRepository.deleteAll(walletRepository.findByUserId(user.getId()));
+        userRepository.delete(user);
     }
 }

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -31,12 +30,15 @@ import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.testutils.AssertUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -62,16 +64,24 @@ class TransactionServiceTest {
     @Spy
     private TransactionDetailFactory detailFactory = new TransactionDetailFactory();
 
-    @InjectMocks
-    private TransactionService transactionService;
-
     @Mock
     private CategoryRepository categoryRepo;
+
+    @Mock
+    private WalletRepository walletRepo;
+
+    private TransactionService transactionService;
 
     private AssertUtil assertUtil;
 
     TransactionServiceTest() {
         this.assertUtil = new AssertUtil();
+    }
+
+    @BeforeEach
+    void setUp() {
+        transactionService = new TransactionService(transactionRepo, transactionDetailRepo, categoryRepo,
+                transactionDetailCategoryRepository, currentUser, walletRepo, detailFactory);
     }
 
     @BeforeEach
@@ -85,6 +95,10 @@ class TransactionServiceTest {
             }
             return invocatedTransaction;
         });
+        Mockito.lenient().when(currentUser.getUser()).thenReturn(new User(1L, "name", "password", "email"));
+        Mockito.lenient().when(walletRepo.getWalletById(anyLong(), anyLong()))
+                .thenReturn(Optional.of(new Wallet("wallet", new User(1L, "name", "password", "email"), null,
+                        WalletTypeEnum.DEFAULT)));
     }
 
     /**
@@ -96,9 +110,14 @@ class TransactionServiceTest {
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
                 TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(100), List.of(),
                 TransactionTypeEnum.INCOME);
-        TransactionCreateCommand command = new TransactionCreateCommand("simpleTransaction", null,
+        TransactionCreateCommand command = new TransactionCreateCommand(
+                "simpleTransaction",
+                null,
                 LocalDate.now(),
-                TransactionTypeEnum.INCOME, List.of(detailCommand), List.of());
+                TransactionTypeEnum.INCOME,
+                List.of(detailCommand),
+                List.of(),
+                1L);
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
@@ -128,7 +147,7 @@ class TransactionServiceTest {
         TransactionDetailSaveCommand detail2 = new TransactionDetailSaveCommand("detail2", new BigDecimal(200),
                 List.of(), TransactionTypeEnum.INCOME);
         TransactionCreateCommand command = new TransactionCreateCommand("multipleDetailedTransaction", null,
-                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail, detail2), List.of());
+                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail, detail2), List.of(), 1L);
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
@@ -157,7 +176,7 @@ class TransactionServiceTest {
     void createTransaction_withNoDetails_createsDefaultDetail() {
         TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction",
                 new BigDecimal("300.00"),
-                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of());
+                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of(), 1L);
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
@@ -205,7 +224,7 @@ class TransactionServiceTest {
                 new BigDecimal(-300), List.of(), TransactionTypeEnum.OUTCOME);
         TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("updated", null,
                 LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME,
-                List.of(updatedDetailCommand, updatedDetailCommand2), List.of());
+                List.of(updatedDetailCommand, updatedDetailCommand2), List.of(), 1L);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
@@ -248,7 +267,7 @@ class TransactionServiceTest {
                 List.of(), TransactionTypeEnum.INCOME);
         TransactionCreateCommand createCommand = new TransactionCreateCommand(
                 "multipleDetailedTransactionWithWeightAndUnitPrice", null, LocalDate.now(),
-                TransactionTypeEnum.INCOME, List.of(detail1, detail2), List.of());
+                TransactionTypeEnum.INCOME, List.of(detail1, detail2), List.of(), 1L);
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
 
@@ -297,7 +316,7 @@ class TransactionServiceTest {
         TransactionUpdateCommand updatedTransaction = new TransactionUpdateCommand("updated", null,
                 LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME,
                 List.of(updatedDetail, updatedDetail2),
-                List.of());
+                List.of(), 1L);
 
         ArgumentCaptor<Transaction> captorTransaction = ArgumentCaptor.forClass(Transaction.class);
         ArgumentCaptor<TransactionDetail> captorDetails = ArgumentCaptor.forClass(TransactionDetail.class);
@@ -336,7 +355,7 @@ class TransactionServiceTest {
         TransactionDetailSaveCommand detail = new TransactionDetailSaveCommand("detailWithCategory",
                 new BigDecimal(100), List.of(5L), TransactionTypeEnum.INCOME);
         TransactionCreateCommand command = new TransactionCreateCommand("categorizedTransaction", null,
-                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail), List.of());
+                LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail), List.of(), 1L);
         User userInDB = new User(1l, "alma", "pass", "email");
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
 
@@ -394,7 +413,7 @@ class TransactionServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             new TransactionUpdateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
                     List.of(),
-                    List.of());
+                    List.of(), 1L);
         });
     }
 
@@ -408,7 +427,7 @@ class TransactionServiceTest {
                 new BigDecimal(100),
                 List.of(), TransactionTypeEnum.INCOME);
         TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("updated", null, LocalDate.now(),
-                TransactionTypeEnum.INCOME, List.of(updatedDetail), List.of());
+                TransactionTypeEnum.INCOME, List.of(updatedDetail), List.of(), 1L);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))

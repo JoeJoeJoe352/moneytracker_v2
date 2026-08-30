@@ -32,17 +32,19 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.starbuck.moneytracker.dto.LoginRequest;
+import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
@@ -56,6 +58,9 @@ class TransactionE2ETest {
     private UserRepository userRepository;
 
     @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
     private TransactionRepository transactionRepository;
 
     @Autowired
@@ -63,6 +68,7 @@ class TransactionE2ETest {
 
     private String authCookie;
     private User user;
+    private Wallet wallet;
     private HttpHeaders headers;
 
     // A teszt által létrehozott tranzakció id-k, hogy pontosan (soft delete-elt
@@ -75,7 +81,7 @@ class TransactionE2ETest {
                 "e2etx@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
-        LoginRequest loginRequest = new LoginRequest("e2eTxUser", "password123");
+        LoginRequestDto loginRequest = new LoginRequestDto("e2eTxUser", "password123");
         ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login",
                 HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
@@ -85,6 +91,7 @@ class TransactionE2ETest {
         this.authCookie = setCookieHeader.split(";")[0];
 
         this.user = userRepository.findByUsername("e2eTxUser");
+        this.wallet = walletRepository.findByUserId(this.user.getId()).get(0);
 
         this.headers = new HttpHeaders();
         this.headers.setContentType(MediaType.APPLICATION_JSON);
@@ -96,6 +103,7 @@ class TransactionE2ETest {
         transactionDetailRepository.deleteAllInBatch();
         createdTransactionIds.forEach(id -> transactionRepository.hardDeleteTransaction(id));
         createdTransactionIds.clear();
+        walletRepository.delete(this.wallet);
         userRepository.delete(this.user);
     }
 
@@ -107,7 +115,7 @@ class TransactionE2ETest {
         TransactionDetailCreateDto detail = new TransactionDetailCreateDto(price, "teszt", null, null,
                 List.of());
         TransactionCreateRequest request = new TransactionCreateRequest(name, null, type, date, List.of(detail),
-                List.of());
+                List.of(), this.wallet.getId());
 
         restTemplate.postForEntity("/transaction", new HttpEntity<>(request, headers), Void.class);
 
@@ -138,7 +146,7 @@ class TransactionE2ETest {
                 null, null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Updated", null,
                 TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 1, 1), List.of(updatedDetail, updatedDetail2),
-                List.of());
+                List.of(), this.wallet.getId());
 
         ResponseEntity<Void> updateResponse = restTemplate.exchange("/transaction/" + id, HttpMethod.PUT,
                 new HttpEntity<>(updateRequest, headers), Void.class);
@@ -180,7 +188,7 @@ class TransactionE2ETest {
                 null,
                 null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Doesn't matter", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of());
+                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), this.wallet.getId());
 
         ResponseEntity<Void> response = restTemplate.exchange("/transaction/999999", HttpMethod.PUT,
                 new HttpEntity<>(updateRequest, headers), Void.class);

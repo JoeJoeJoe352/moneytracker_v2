@@ -15,3 +15,5 @@ konténerbe belépni: docker exec -it *név*(dev-backend) sh
 
 
 Ha docker compose -f docker-compose.dev.yml down -v paranccsal a volume is törlődik. A következő induláskor ezért nem biztos, hogy létezik már a db, amikor a spring elindul, ami hibát okoz
+
+tesztek futattása: npx ng test --include="**/xyz.spec.ts"

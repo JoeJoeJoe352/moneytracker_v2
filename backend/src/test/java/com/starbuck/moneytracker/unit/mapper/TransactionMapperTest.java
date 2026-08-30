@@ -190,13 +190,14 @@ class TransactionMapperTest {
     @Test
     void fromTransactionCreateRequest_mapsBasicFields() {
         TransactionCreateRequest request = new TransactionCreateRequest("groceries", new BigDecimal("-50.00"),
-                TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 3, 1), List.of(), List.of());
+                TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 3, 1), List.of(), List.of(), 1L);
 
         TransactionSaveCommand result = mapper.fromTransactionCreateRequest(request);
 
         assertEquals("groceries", result.getTransactionName());
         assertEquals(LocalDate.of(2026, 3, 1), result.getTransactionDate());
         assertEquals(TransactionTypeEnum.OUTCOME, result.getTransactionType());
+        assertEquals(1, result.getWalletId());
     }
 
     /**

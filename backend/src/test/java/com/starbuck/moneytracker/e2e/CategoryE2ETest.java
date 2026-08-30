@@ -32,13 +32,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.starbuck.moneytracker.dto.CategoryCreateDto;
 import com.starbuck.moneytracker.dto.CategoryResponseDto;
-import com.starbuck.moneytracker.dto.LoginRequest;
+import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
+import com.starbuck.moneytracker.repository.WalletRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
@@ -54,6 +55,9 @@ class CategoryE2ETest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private WalletRepository walletRepository;
+
     private String authCookie;
     private User user;
     private HttpHeaders headers;
@@ -68,7 +72,7 @@ class CategoryE2ETest {
                 "e2ecategory@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
-        LoginRequest loginRequest = new LoginRequest("e2eCategoryUser", "password123");
+        LoginRequestDto loginRequest = new LoginRequestDto("e2eCategoryUser", "password123");
         ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login", HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
                 });
@@ -87,6 +91,7 @@ class CategoryE2ETest {
     void cleanupCreatedData() {
         createdCategoryIds.forEach(id -> categoryRepository.findById(id).ifPresent(categoryRepository::delete));
         createdCategoryIds.clear();
+        walletRepository.deleteAll(walletRepository.findByUserId(this.user.getId()));
         userRepository.delete(this.user);
     }
 
@@ -179,7 +184,7 @@ class CategoryE2ETest {
     @Test
     void getCategories_doesNotReturnOtherUsersCategories() {
         User otherUser = new User("e2eOtherCategoryUser", "irrelevantEncodedPassword", "othercategory@email.com");
-        otherUser.setUuid();
+        otherUser.generateUuid();
         otherUser = userRepository.save(otherUser);
 
         Category otherUsersCategory = categoryRepository.save(new Category("OtherUsersCategory", otherUser, LangEnum.HU));

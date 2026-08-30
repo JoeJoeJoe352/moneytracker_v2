@@ -22,7 +22,7 @@ class TransactionCreateCommandTest {
     @Test
     void isATransactionSaveCommand() {
         var command = new TransactionCreateCommand("teszt", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
-                List.of(), List.of());
+                List.of(), List.of(), 1L);
 
         assertTrue(command instanceof TransactionSaveCommand);
     }
@@ -30,7 +30,7 @@ class TransactionCreateCommandTest {
     @Test
     void allowsEmptyDetailList() {
         var command = new TransactionCreateCommand("teszt", new BigDecimal("10"), LocalDate.now(),
-                TransactionTypeEnum.INCOME, List.of(), List.of());
+                TransactionTypeEnum.INCOME, List.of(), List.of(), 1L);
 
         assertEquals(0, command.getDetailCommands().size());
     }

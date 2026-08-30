@@ -29,5 +29,7 @@ public record TransactionCreateRequest(
     @NotNull(message = "TransactionDetails are mandatory")
     List<TransactionDetailCreateDto> transactionDetails,
 
-    List<Long> globalCategories
+    List<Long> globalCategories,
+
+    Long walletId
 ) {}
