@@ -26,7 +26,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @param userId
      * @return
      */
-    @Query("SELECT c FROM Category c WHERE (c.user.id = ?1 OR (c.user.id IS NULL AND c.lang = ?2)) AND c.status = 0")
+    @Query("SELECT c FROM Category c WHERE (c.user.id = ?1 OR (c.user.id IS NULL AND c.lang = ?2)) AND c.status = 0 ORDER BY c.id ASC")
     List<Category> findAllForUser(long userId, LangEnum lang);
 
     /**
