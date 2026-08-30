@@ -27,4 +27,5 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    baseline-version: 20260822  # meglévő migrációk a V20260822-ig már lefutottnak számítanak
     locations: classpath:db/migration  # Flyway migrációk helye
