@@ -13,6 +13,12 @@ import com.starbuck.moneytracker.entity.Wallet;
 @Component
 public class UserMapper {
 
+    private final WalletMapper walletMapper;
+
+    public UserMapper(WalletMapper walletMapper) {
+        this.walletMapper = walletMapper;
+    }
+
     /**
      * Átalakítja a usert dto-vá. Walletek azért jönnek paraméterből, hogy a hívó
      * felelőssége legyen olyan query-t lekérni, ahol biztos létezik
@@ -22,10 +28,7 @@ public class UserMapper {
      * @return
      */
     public UserDataResponseDto toDto(User user, List<Wallet> wallets) {
-        List<WalletResponseDto> walletDtos = wallets.stream()
-                .map((wallet) -> new WalletResponseDto(wallet.getId(), wallet.getName(), wallet.getCurrencyCode(),
-                        wallet.getType()))
-                .collect(Collectors.toList());
+        List<WalletResponseDto> walletDtos = walletMapper.toDtoList(wallets);
 
         return new UserDataResponseDto(user.getUsername(), walletDtos);
     }

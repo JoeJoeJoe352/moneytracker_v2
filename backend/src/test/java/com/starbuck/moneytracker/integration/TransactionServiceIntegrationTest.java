@@ -421,6 +421,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
         categoryRepo.delete(categorySaved);
         userRepo.delete(anotherUserSaved);
+        LocaleContextHolder.resetLocaleContext();
     }
 
     /**

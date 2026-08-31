@@ -73,11 +73,10 @@ public class CategoryServiceTest extends MySqlContainerTest {
     }
 
     @BeforeEach
-    void mockUserUtil() {
+    void beforeEach() {
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
-        // A tesztadatok végig LangEnum.HU-t használnak, de LocaleContextHolder.getLocale() a JVM
-        // alapértelmezett locale-jára esik vissza, ha nincs HTTP request kontextus. Explicit
-        // beállítás nélkül a teszt csak azon a gépen menne át, aminek a JVM-je magyar locale-ú.
+        // LocaleContextHolder.getLocale() a JVM alapértelmezett locale-jára esik
+        // vissza, ha nincs HTTP request kontextus, ezért van inkább beállítva itt
         LocaleContextHolder.setLocale(Locale.forLanguageTag("hu"));
     }
 
@@ -153,7 +152,8 @@ public class CategoryServiceTest extends MySqlContainerTest {
 
         var savedCategoryOwn = categoryService.createCategory(categoryCommand);
 
-        var savedCategoryNotOwned = categoryRepository.save(new Category("AnotherUserCategory", savedUser2, LangEnum.HU));
+        var savedCategoryNotOwned = categoryRepository
+                .save(new Category("AnotherUserCategory", savedUser2, LangEnum.HU));
 
         var savedCategoryCommon = categoryRepository.save(new Category("commonCategory", null, LangEnum.HU));
 
