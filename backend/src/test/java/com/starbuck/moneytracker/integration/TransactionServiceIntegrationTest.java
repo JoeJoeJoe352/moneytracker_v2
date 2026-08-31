@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.TransactionCreateCommand;
@@ -89,7 +91,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
     /**
      * @MockitoBean mockokat Spring minden teszt metódus után resetel, ezért
-     * a stubbolást minden teszt előtt újra be kell állítani
+     *              a stubbolást minden teszt előtt újra be kell állítani
      */
     @BeforeEach
     void mockUserUtil() {
@@ -112,7 +114,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         categoryRepo.save(category);
 
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
-                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), List.of(category.getId()),
+                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"),
+                List.of(category.getId()),
                 TransactionTypeEnum.INCOME);
         TransactionCreateCommand command = new TransactionCreateCommand("Test", null, LocalDate.of(2026, 6, 8),
                 TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.wallet.getId());
@@ -145,7 +148,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         Category category = new Category("simplekategória", this.user, LangEnum.HU);
         categoryRepo.save(category);
 
-        TransactionCreateCommand command = new TransactionCreateCommand("Test", new BigDecimal("500.00"), LocalDate.of(2026, 6, 8),
+        TransactionCreateCommand command = new TransactionCreateCommand("Test", new BigDecimal("500.00"),
+                LocalDate.of(2026, 6, 8),
                 TransactionTypeEnum.INCOME, List.of(), List.of(category.getId()), this.wallet.getId());
 
         // WHEN
@@ -178,10 +182,12 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         categoryRepo.save(category1);
 
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
-                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), List.of(category1.getId()),
+                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"),
+                List.of(category1.getId()),
                 TransactionTypeEnum.INCOME);
         TransactionCreateCommand createCommand = new TransactionCreateCommand("Test", null,
-                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.wallet.getId());
+                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(),
+                this.wallet.getId());
 
         // Van DB-ben elem mostmár
         Transaction createdTransaction = transactionService.createTransaction(createCommand);
@@ -196,7 +202,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
         // Detail2 beállításai - 2 kategória beállítva
         TransactionDetailSaveCommand updateDetailCommand2 = new TransactionDetailSaveCommand("update2",
-                new BigDecimal("0.5"), new BigDecimal("600.00"), List.of(category2.getId(), category1.getId()));
+                new BigDecimal("0.5"), new BigDecimal("600.00"),
+                List.of(category2.getId(), category1.getId()));
 
         TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("Update test", null,
                 LocalDate.of(2026, 7, 8), TransactionTypeEnum.OUTCOME,
@@ -249,8 +256,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
                 "tesztnév", new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
         TransactionCreateCommand command = new TransactionCreateCommand(
                 "hibásteszt", null,
-                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), 
-                22);//Nincs ilyen walletId -> entityNotFoundException
+                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(),
+                22);// Nincs ilyen walletId -> entityNotFoundException
 
         assertThrows(EntityNotFoundException.class, () -> {
             transactionService.createTransaction(command);
@@ -260,8 +267,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(0, transactionRepo.count());
         assertEquals(0, transactionDetailRepo.count());
     }
-
-
 
     /**
      * A user aktív tranzakcióinak összegét adja vissza
@@ -300,11 +305,14 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
      */
     @Test
     void sumAllExpenseForMonth_returnsOnlyCurrentMonthExpenses() {
-        Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth", TransactionTypeEnum.OUTCOME,
+        Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth",
+                TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-150), LocalDate.now());
-        Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth", TransactionTypeEnum.INCOME,
+        Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth",
+                TransactionTypeEnum.INCOME,
                 new BigDecimal(150), LocalDate.now());
-        Transaction expenseLastYear = this.persistSimpleTransaction("expenseLastYear", TransactionTypeEnum.OUTCOME,
+        Transaction expenseLastYear = this.persistSimpleTransaction("expenseLastYear",
+                TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-999), LocalDate.now().minusYears(1));
 
         BigDecimal result = transactionService.sumAllExpenseForMonth();
@@ -322,9 +330,11 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
      */
     @Test
     void sumAllIncomeForMonth_returnsOnlyCurrentMonthIncome() {
-        Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth", TransactionTypeEnum.INCOME,
+        Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth",
+                TransactionTypeEnum.INCOME,
                 new BigDecimal(250), LocalDate.now());
-        Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth", TransactionTypeEnum.OUTCOME,
+        Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth",
+                TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-250), LocalDate.now());
         Transaction incomeLastYear = this.persistSimpleTransaction("incomeLastYear", TransactionTypeEnum.INCOME,
                 new BigDecimal(999), LocalDate.now().minusYears(1));
@@ -365,6 +375,55 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     }
 
     /**
+     * Hibát dob, ha a zseb nem létezik
+     */
+    @Test
+    void updateTransaction_throwsWhenNotFoundWallet() {
+        // GIVEN
+        TransactionCreateCommand command = new TransactionCreateCommand("Test", new BigDecimal("500.00"),
+                LocalDate.of(2026, 6, 8),
+                TransactionTypeEnum.INCOME, List.of(), List.of(), this.wallet.getId());
+
+        Transaction saved = transactionService.createTransaction(command);
+
+        TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("Test2", new BigDecimal("500.00"),
+                LocalDate.of(2026, 6, 8),
+                TransactionTypeEnum.INCOME, List.of(), List.of(), 5L);
+        // WHEN
+        assertThrows(EntityNotFoundException.class, () -> {
+            transactionService.updateTransaction(saved.getId(), updateCommand);
+        });
+
+        this.deleteData(saved);
+    }
+
+    /**
+     * Hibát dob, ha a kategória nem létezik, vagy nem a useré
+     */
+    @Test
+    void updateTransaction_throwsWhenNotFoundCategory() {
+        // GIVEN
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("hu"));
+        User anotherUser = new User("anotheruser", "password", "another@user.com");
+        anotherUser.generateUuid();
+        var anotherUserSaved = userRepo.save(anotherUser);
+
+        var categorySaved = categoryRepo.save(new Category("cat2", anotherUserSaved, LangEnum.HU));
+
+        TransactionCreateCommand command = new TransactionCreateCommand("Test", new BigDecimal("500.00"),
+                LocalDate.of(2026, 6, 8),
+                TransactionTypeEnum.INCOME, List.of(), List.of(categorySaved.getId()), this.wallet.getId());
+
+        // WHEN
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.createTransaction(command);
+        });
+
+        categoryRepo.delete(categorySaved);
+        userRepo.delete(anotherUserSaved);
+    }
+
+    /**
      * Legfeljebb az utolsó 5 tranzakciót adja vissza, id szerint csökkenő
      * sorrendben
      */
@@ -372,7 +431,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     void getLastTransactions_returnsAtMostFiveNewestTransactions() {
         List<Transaction> created = new java.util.ArrayList<>();
         for (int i = 0; i < 6; i++) {
-            created.add(this.persistSimpleTransaction("last" + i, TransactionTypeEnum.INCOME, new BigDecimal(10),
+            created.add(this.persistSimpleTransaction("last" + i, TransactionTypeEnum.INCOME,
+                    new BigDecimal(10),
                     LocalDate.now()));
         }
 
@@ -395,7 +455,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         Transaction nonMatching = this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME,
                 new BigDecimal(1000), now);
 
-        List<Transaction> result = transactionService.getHistoryPageData(new TransactionFilter("groceries", now));
+        List<Transaction> result = transactionService
+                .getHistoryPageData(new TransactionFilter("groceries", now));
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());
