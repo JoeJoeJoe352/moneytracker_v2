@@ -7,6 +7,7 @@ import { WalletsListComponent } from './wallets-list-component';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WalletModalComponent } from './wallet-modal-component';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
+import { UserDataStore } from '../../shared/services/user-data-store';
 
 @Component({
     selector: 'app-wallets-page-component',
@@ -18,6 +19,7 @@ import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from '.
 export class WalletsPageComponent {
     private walletService = inject(WalletService);
     private translateService = inject(TranslateService);
+    private userData = inject(UserDataStore);
 
     private reloadWalletListTrigger = signal(0);
 
@@ -31,9 +33,13 @@ export class WalletsPageComponent {
         toObservable(this.reloadWalletListTrigger).pipe(
             tap(() => this.isWalletListLoading.set(true)),
             switchMap(() =>
-                this.walletService
-                    .listWallets()
-                    .pipe(tap(() => this.isWalletListLoading.set(false))),
+                this.walletService.listWallets().pipe(
+                    tap((wallets) => {
+                        this.isWalletListLoading.set(false);
+                        // store-t is befrissítjük mellékhatásként
+                        this.userData.setWallets(wallets); 
+                    }),
+                ),
             ),
         ),
         { initialValue: [] },

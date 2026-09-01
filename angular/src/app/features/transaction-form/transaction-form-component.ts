@@ -46,7 +46,7 @@ export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
     private translateService = inject(TranslateService);
-    private userData = inject(UserDataStore)
+    protected userData = inject(UserDataStore)
 
     /**
      * Form disabled-e (pl.: töltődéskor)

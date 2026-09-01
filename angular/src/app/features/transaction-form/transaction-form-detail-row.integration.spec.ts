@@ -61,6 +61,15 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
                                 type: WalletTypesEnum.default,
                                 currencyCode: CurrencyCodesEnum.huf,
                             }) as WalletDataInterface,
+                        getWallets: () =>
+                            [
+                                {
+                                    id: 1,
+                                    name: 'Test Wallet',
+                                    type: WalletTypesEnum.default,
+                                    currencyCode: CurrencyCodesEnum.huf,
+                                },
+                            ] as WalletDataInterface[],
                     },
                 },
             ],

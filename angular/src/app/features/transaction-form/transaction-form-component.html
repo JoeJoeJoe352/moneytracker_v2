@@ -1,31 +1,56 @@
 <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form transaction-form">
     <!-- Név -->
-    <div class="form-group mb-3">
-        <label for="transaction-name">{{ 'transaction.name' | translate }}</label>
-        <input
-            id="transaction-name"
-            type="text"
-            formControlName="name"
-            class="form-control"
-            autocomplete="name"
-        />
-        @if (name.invalid && name.touched) {
-            @if (name.hasError('required')) {
-                <div class="form-field-error">{{ 'transaction.name.required' | translate }}</div>
+    <div class="row">
+        <div class="col-sm-6 form-group mb-3">
+            <label for="transaction-name">{{ 'transaction.name' | translate }}</label>
+            <input
+                id="transaction-name"
+                type="text"
+                formControlName="name"
+                class="form-control"
+                autocomplete="name"
+            />
+            @if (name.invalid && name.touched) {
+                @if (name.hasError('required')) {
+                    <div class="form-field-error">
+                        {{ 'transaction.name.required' | translate }}
+                    </div>
+                }
+                @if (name.hasError('minlength')) {
+                    <div class="form-field-error">
+                        {{ 'transaction.name.minlength' | translate }}
+                    </div>
+                }
+                @if (name.hasError('maxlength')) {
+                    <div class="form-field-error">
+                        {{ 'transaction.name.maxlength' | translate }}
+                    </div>
+                }
             }
-            @if (name.hasError('minlength')) {
-                <div class="form-field-error">{{ 'transaction.name.minlength' | translate }}</div>
-            }
-            @if (name.hasError('maxlength')) {
-                <div class="form-field-error">{{ 'transaction.name.maxlength' | translate }}</div>
-            }
-        }
+        </div>
+        <div class="col-sm-6 form-group mb-3">
+            <label for="transaction-wallet">{{
+                'transaction.wallet' | translate
+            }}</label>
+            <select
+                id="transaction-wallet"
+                formControlName="walletId"
+                class="form-select"
+                [disabled]="isTransactionFormDisabled"
+                >
+                @for (item of userData.getWallets(); track $index) {
+                    <option [value]="item.id">{{ item.name }}</option>
+                }
+            </select>
+        </div>
     </div>
 
     <div class="row">
         <!-- Tranzakciótípus -->
         <div class="col-sm-6 form-group mb-3">
-            <label for="transaction-transactionType-bool">{{ 'transaction.type' | translate }}</label>
+            <label for="transaction-transactionType-bool">{{
+                'transaction.type' | translate
+            }}</label>
             <div>
                 <app-switch
                     id="transaction-transactionType-bool"
@@ -38,7 +63,9 @@
 
         <!-- Dátum -->
         <div class="col-sm-6 form-group mb-3">
-            <label class="d-block" for="transaction-date">{{ 'transaction.date' | translate }}</label>
+            <label class="d-block" for="transaction-date">{{
+                'transaction.date' | translate
+            }}</label>
             <ngxsmk-datepicker
                 id="transaction-date"
                 mode="single"
@@ -47,7 +74,9 @@
             />
             @if (transactionDate.invalid && transactionDate.touched) {
                 @if (transactionDate.hasError('required')) {
-                    <div class="form-field-error">{{ 'transaction.date.required' | translate }}</div>
+                    <div class="form-field-error">
+                        {{ 'transaction.date.required' | translate }}
+                    </div>
                 }
                 @if (transactionDate.hasError('invalidDate')) {
                     <div class="form-field-error">{{ 'transaction.date.invalid' | translate }}</div>
