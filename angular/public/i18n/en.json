@@ -101,6 +101,27 @@
       "total_price": "Total price"
     }
   },
+  "wallet": {
+    "create": "Create wallet",
+    "update": "Update wallet",
+    "delete": "Delete wallet",
+    "delete.confirm": "Are you sure you want to delete this wallet?",
+    "name": "Wallet name",
+    "name.required": "Wallet name is required!",
+    "name.minlength": "Wallet name must be at least 2 characters long!",
+    "name.maxlength": "Wallet name must be at most 50 characters long!",
+    "currency": "Currency",
+    "type_label": "Wallet type",
+    "type": {
+      "default": "Default",
+      "savings": "Savings"
+    }
+  },
+  "currency": {
+    "huf": "Forint",
+    "eur": "Euro",
+    "usd": "Dollar"
+  },
   "mainpage": {
     "total_balance": "Total balance",
     "create_transaction.button": "Create transaction",

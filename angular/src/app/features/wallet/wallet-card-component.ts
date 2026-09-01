@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { WalletDataInterface } from './interfaces';
 import { WalletDataUtil } from './wallet-data-util';
@@ -15,5 +15,5 @@ export class WalletCardComponent {
     protected readonly walletDataUtil = inject(WalletDataUtil);
 
     @Input({ required: true }) walletData!: WalletDataInterface;
-
+    @Output() cardClicked = new EventEmitter<number>();
 }

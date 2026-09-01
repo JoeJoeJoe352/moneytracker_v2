@@ -1,4 +1,10 @@
-<div class="wallet-card">
+<div
+    class="wallet-card"
+    role="button"
+    tabindex="0"
+    (click)="cardClicked.emit(walletData.id)"
+    (keydown.enter)="cardClicked.emit(walletData.id)"
+>
     <div class="wallet-flap">
         <span class="wallet-clasp"></span>
     </div>
