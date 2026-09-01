@@ -1,0 +1,25 @@
+<div class="wallet-card">
+    <div class="wallet-flap">
+        <span class="wallet-clasp"></span>
+    </div>
+
+    <div class="wallet-body">
+        <span class="wallet-type-badge">{{
+            walletDataUtil.getLangForWalletType(walletData.type) | translate
+        }}</span>
+
+        <div class="wallet-balance">
+            <span class="wallet-balance-amount">{{ 5000000 | number }}</span>
+            <span class="wallet-balance-currency">{{
+                walletDataUtil.getCurrencySymbolForCurrencyCode(walletData.currencyCode)
+            }}</span>
+        </div>
+
+        <div class="wallet-card-bottom">
+            <span class="wallet-name">{{ walletData.name }}</span>
+            <span class="wallet-currency-code">{{
+                walletDataUtil.getCurrencyTextForCurrencyCode(walletData.currencyCode) | translate
+            }}</span>
+        </div>
+    </div>
+</div>

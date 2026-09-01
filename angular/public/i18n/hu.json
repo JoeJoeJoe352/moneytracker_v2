@@ -101,6 +101,17 @@
       "total_price": "Teljes ár"
     }
   },
+  "wallet": {
+    "type": {
+      "default": "Alapértelmezett",
+      "saving": "Megtekarítás"
+    }
+  },
+  "currency": {
+    "huf": "Forint",
+    "eur": "Euro",
+    "usd": "Dollár"
+  },
   "mainpage": {
     "total_balance": "Összes pénz",
     "create_transaction.button": "Tranzakció létrehozása",
