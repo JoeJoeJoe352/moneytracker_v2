@@ -45,7 +45,8 @@
     "welcome": "Welcome",
     "transactions": "Transactions",
     "logout": "Log out",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "wallets": "Wallets"
   },
   "footer": {
     "home": "Home"

@@ -10,8 +10,8 @@ import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 import { UserDataStore } from '../../shared/services/user-data-store';
-import { CurrencyCodes, WalletTypes } from '../../shared/enums';
-import { WalletDataInterface } from '../auth/interfaces';
+import { WalletDataInterface } from '../wallet/interfaces';
+import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
 
 describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
     let fixture: ComponentFixture<TransactionFormComponent>;
@@ -58,8 +58,8 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
                             ({
                                 id: 1,
                                 name: 'Test Wallet',
-                                type: WalletTypes.default,
-                                currencyCode: CurrencyCodes.huf,
+                                type: WalletTypesEnum.default,
+                                currencyCode: CurrencyCodesEnum.huf,
                             }) as WalletDataInterface,
                     },
                 },

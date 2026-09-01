@@ -1,0 +1,10 @@
+<div>
+    <h1>{{"header.wallets" | translate}}</h1>
+    @if (isWalletListLoading()) {
+        <div class="text-center">
+            <div class="spinner-border" role="status"></div>
+        </div>
+    } @else {
+        <app-wallets-list-component [walletListData]="walletListData()" />
+    }
+</div>

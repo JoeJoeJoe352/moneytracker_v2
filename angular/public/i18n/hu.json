@@ -45,7 +45,8 @@
     "welcome": "Üdvözlünk",
     "transactions": "Tranzakciók",
     "logout": "Kijelentkezés",
-    "dashboard": "Főoldal"
+    "dashboard": "Főoldal",
+    "wallets": "Tárcák"
   },
   "footer": {
     "home": "Főoldal"

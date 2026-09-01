@@ -1,0 +1,10 @@
+<div class="wallet-list">
+    @for (wallet of walletListData; track wallet.id) {
+        <div class="wallet-item">
+            {{wallet.name}}
+            {{wallet.type}}
+            {{wallet.currencyCode}}
+            5000000Ft
+        </div>
+    }
+</div>

@@ -1,5 +1,6 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
-import { UserData, WalletDataInterface } from '../../features/auth/interfaces';
+import { UserData } from '../../features/auth/interfaces';
+import { WalletDataInterface } from '../../features/wallet/interfaces';
 
 @Injectable({
     providedIn: 'root',
