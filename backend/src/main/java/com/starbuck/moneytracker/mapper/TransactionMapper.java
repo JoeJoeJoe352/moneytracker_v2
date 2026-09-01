@@ -188,24 +188,27 @@ public class TransactionMapper {
     public TransactionUpdateCommand entityToCommand(Transaction transaction) {
         List<TransactionDetailSaveCommand> details = transaction.getTransactionDetails().stream()
                 .map((detail) -> {
-                    if (detail.getWeight() != null || detail.getUnitPrice() != null) {
-                        return new TransactionDetailSaveCommand(detail.getName(),
+                    if (detail.isComplexPriceMode()) {
+                        return new TransactionDetailSaveCommand(
+                                detail.getName(),
                                 detail.getWeight(),
                                 detail.getUnitPrice(),
                                 categoryIdsOf(detail));
                     }
-                    return new TransactionDetailSaveCommand(detail.getName(), detail.getPrice(),
-                            List.of(),
+                    return new TransactionDetailSaveCommand(
+                            detail.getName(),
+                            detail.getPrice(),
+                            categoryIdsOf(detail),
                             transaction.getTransactionType());
                 }).collect(Collectors.toList());
 
         return new TransactionUpdateCommand(
                 transaction.getName(),
-                transaction.getPriceSum(),
+                details.size() > 0 ? null : transaction.getPriceSum(),
                 transaction.getTransactionDate(),
                 transaction.getTransactionType(),
                 details,
-                List.of(),
+                List.of(), // van detail, ezért nem kell kategóriát átadni magán a tranzakción
                 transaction.getWallet().getId()); // TODO lehet, hogy nincs betöltve a wallet
     }
 
@@ -216,6 +219,9 @@ public class TransactionMapper {
      * @return
      */
     private List<Long> categoryIdsOf(TransactionDetail detail) {
+        if (detail.getCategoryLinks() == null) {
+            return List.of();
+        }
         return detail.getCategoryLinks().stream()
                 .map(categoryLink -> categoryLink.getCategory().getId())
                 .collect(Collectors.toList());
