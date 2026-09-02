@@ -93,7 +93,7 @@ export class MainPage {
                 walletData.currencyCode,
             );
 
-            return `${this.decimalPipe.transform(walletData.total, '4.0-5')} ${this.translateService.instant(currencyText)}`;
+            return `${this.decimalPipe.transform(walletData.total)} ${this.translateService.instant(currencyText)}`;
         }),
     );
 
