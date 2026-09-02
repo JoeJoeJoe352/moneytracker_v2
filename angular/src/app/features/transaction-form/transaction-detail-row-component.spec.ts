@@ -48,6 +48,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         component.isCategorySaveInProgress = false;
         component.isLastDetailRow = false;
         component.index = 0;
+        component.currencySymbol = 'Ft';
     });
 
     it('should show simple price input when detailIsComplexPriceMode is false, and hide weight/unitprice', () => {
@@ -79,6 +80,33 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         const totalPriceInput = suffixInputs[suffixInputs.length - 1];
         expect(Number(totalPriceInput.value)).toBe(600);
         expect(totalPriceInput.disabled).toBe(true);
+    });
+
+    it('should render the currencySymbol input in the simple price suffix', () => {
+        component.detail = buildDetailGroup({ detailIsComplexPriceMode: false });
+        component.currencySymbol = '€';
+
+        fixture.detectChanges();
+
+        const suffix = fixture.nativeElement.querySelector('.suffix');
+        expect(suffix.textContent.trim()).toBe('€');
+    });
+
+    it('should render the currencySymbol input in the unitprice and total-price suffixes when in complex price mode', () => {
+        component.detail = buildDetailGroup({
+            detailIsComplexPriceMode: true,
+            detailWeight: 2,
+            detailUnitPrice: 300,
+        });
+        component.currencySymbol = '$';
+
+        fixture.detectChanges();
+
+        const suffixes = fixture.nativeElement.querySelectorAll('.suffix');
+        const suffixTexts = Array.from(suffixes as NodeListOf<HTMLElement>).map((el) =>
+            el.textContent.trim(),
+        );
+        expect(suffixTexts).toEqual(['kg', '$/Kg', '$']);
     });
 
     it('should show a required error on the name field only after it becomes touched and invalid', () => {

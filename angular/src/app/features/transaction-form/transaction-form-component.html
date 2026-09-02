@@ -1,7 +1,7 @@
 <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form transaction-form">
-    <!-- Név -->
     <div class="row">
         <div class="col-sm-6 form-group mb-3">
+            <!-- Név -->
             <label for="transaction-name">{{ 'transaction.name' | translate }}</label>
             <input
                 id="transaction-name"
@@ -28,6 +28,7 @@
                 }
             }
         </div>
+        <!-- Wallet -->
         <div class="col-sm-6 form-group mb-3">
             <label for="transaction-wallet">{{
                 'transaction.wallet' | translate
@@ -37,9 +38,10 @@
                 formControlName="walletId"
                 class="form-select"
                 [disabled]="isTransactionFormDisabled"
+                (change)="onWalletChange($event)"
                 >
                 @for (item of userData.getWallets(); track $index) {
-                    <option [value]="item.id">{{ item.name }}</option>
+                    <option [value]="item.id">{{ item.name }} ({{ item.currencyCode }})</option>
                 }
             </select>
         </div>
@@ -109,7 +111,7 @@
                         class="form-control"
                         autocomplete="price"
                     />
-                    <span class="suffix">Ft</span>
+                    <span class="suffix">{{ selectedWalletsCurrency() }}</span>
                 </div>
                 @if (price.invalid && price.touched) {
                     @if (price.hasError('required')) {
@@ -152,6 +154,7 @@
                     [multiselectSettings]="multiselectSettings"
                     [isCategorySaveInProgress]="isCategorySaveInProgress"
                     [isLastDetailRow]="isLastDetailRow"
+                    [currencySymbol]="selectedWalletsCurrency()"
                     (categoryFilterChange)="onCategoryFilterChange($event)"
                     (categoryDropdownClick)="onCategoryDropdownClick($event)"
                     (categorySearchTextCleared)="categorySearchText.set('')"

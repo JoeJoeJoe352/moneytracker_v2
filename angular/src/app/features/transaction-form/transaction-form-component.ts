@@ -33,6 +33,7 @@ import {
 } from '../transaction/interfaces';
 import { validDate } from './valid-date-validator';
 import { UserDataStore } from '../../shared/services/user-data-store';
+import { WalletDataUtil } from '../wallet/wallet-data-util';
 
 @Component({
     selector: 'app-transaction-form-component',
@@ -52,6 +53,7 @@ export class TransactionFormComponent implements OnChanges {
     private transactionService = inject(TransactionService);
     private translateService = inject(TranslateService);
     protected userData = inject(UserDataStore);
+    protected walletUtil = inject(WalletDataUtil);
 
     /**
      * Form disabled-e (pl.: töltődéskor)
@@ -95,6 +97,15 @@ export class TransactionFormComponent implements OnChanges {
     protected categorySearchText = signal('');
 
     /**
+     * User által kiválasztott wallet
+     */
+    protected selectedWalletsCurrency = signal(
+        this.walletUtil.getCurrencySymbolForCurrencyCode(
+            this.userData.getDefaultWallet().currencyCode,
+        ),
+    );
+
+    /**
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
      */
     protected categoryData: Signal<DropdownInterface[]> = computed(() => {
@@ -119,6 +130,7 @@ export class TransactionFormComponent implements OnChanges {
                 // Nincs átadva paraméterül transaction (ngOnchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
                 return;
             }
+            this.setSelectedWalletSymbol(this.transaction.walletId);
             const convertedInputValues = this.transactionService.utils.convertDataToInput(
                 this.transaction,
             );
@@ -145,6 +157,31 @@ export class TransactionFormComponent implements OnChanges {
                 ),
             );
         }
+    }
+
+    /**
+     * Selectben lévő wallet váltáskor lefutó műveletek
+     * @param event 
+     */
+    protected onWalletChange(event: Event): void {
+        const walletId = Number((event.target as HTMLSelectElement).value);
+        this.setSelectedWalletSymbol(walletId);
+    }
+
+    /**
+     * Beállítja a kiválasztott wallet-hez tartozó pénznem szimbólumát
+     */
+    private setSelectedWalletSymbol(walletId: number): void {
+        const selectedWallet = this.userData
+            .getWallets()
+            .filter((wallet) => wallet.id === walletId)[0];
+        if (!selectedWallet) {
+            console.error('wallet not found in this transaction: ' + this.transaction);
+        }
+        const currencySymbol = this.walletUtil.getCurrencySymbolForCurrencyCode(
+            selectedWallet.currencyCode,
+        );
+        this.selectedWalletsCurrency.set(currencySymbol);
     }
 
     /**

@@ -69,6 +69,12 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
                                     type: WalletTypesEnum.default,
                                     currencyCode: CurrencyCodesEnum.huf,
                                 },
+                                {
+                                    id: 2,
+                                    name: 'Euro Wallet',
+                                    type: WalletTypesEnum.default,
+                                    currencyCode: CurrencyCodesEnum.eur,
+                                },
                             ] as WalletDataInterface[],
                     },
                 },
@@ -179,5 +185,23 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         firstDropdown.triggerEventHandler('click', { target: noFilteredDataButton });
 
         expect(addedCategory).toBe('tej');
+    });
+
+    it('should propagate the selected wallet currency symbol down to every detail row', () => {
+        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailRowComponent));
+
+        expect(
+            rows.map((row) => (row.componentInstance as TransactionDetailRowComponent).currencySymbol),
+        ).toEqual(['Ft', 'Ft']);
+
+        const walletSelect = fixture.nativeElement.querySelector('#transaction-wallet');
+        walletSelect.value = '2';
+        walletSelect.dispatchEvent(new Event('change'));
+        fixture.detectChanges();
+
+        const suffixes = fixture.nativeElement.querySelectorAll(
+            'app-transaction-detail-row-component .suffix',
+        );
+        expect(suffixes[0].textContent.trim()).toBe('€');
     });
 });

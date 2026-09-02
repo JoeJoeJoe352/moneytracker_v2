@@ -62,7 +62,7 @@
                         formControlName="detailPrice"
                         class="form-control"
                     />
-                    <span class="suffix">Ft</span>
+                    <span class="suffix">{{ currencySymbol }}</span>
                 </div>
 
                 @if (detail.get('detailPrice')?.invalid && detail.get('detailPrice')?.touched) {
@@ -107,7 +107,7 @@
                         formControlName="detailUnitPrice"
                         class="form-control"
                     />
-                    <span class="suffix">Ft/Kg</span>
+                    <span class="suffix">{{currencySymbol}}/Kg</span>
                 </div>
                 @if (
                     detail.get('detailUnitPrice')?.invalid && detail.get('detailUnitPrice')?.touched
@@ -137,7 +137,7 @@
                         class="form-control"
                         [disabled]="true"
                     />
-                    <span class="suffix">Ft</span>
+                    <span class="suffix">{{ currencySymbol }}</span>
                 </div>
             </div>
         }
