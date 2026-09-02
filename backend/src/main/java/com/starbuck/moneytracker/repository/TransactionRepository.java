@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
@@ -51,8 +52,20 @@ public interface TransactionRepository extends
      * @param userId
      * @return
      */
-    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.wallet.user.id = ?1 AND t.status = 0")
-    BigDecimal summarizeTotalMoneyForUser(long userId);
+    // @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.wallet.user.id = ?1
+    // AND t.status = 0")
+    @Query("""
+                SELECT new com.starbuck.moneytracker.dto.WalletSummaryDto(
+                    w.currencyCode,
+                    SUM(t.priceSum)
+                )
+                FROM Wallet w
+                LEFT JOIN w.transactions t
+                WHERE w.user.id = ?1 AND w.status = 0
+                GROUP BY w.id
+                ORDER BY w.id
+            """)
+    List<WalletSummaryDto> summarizeTotalMoneyForUser(long userId);
 
     /**
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt

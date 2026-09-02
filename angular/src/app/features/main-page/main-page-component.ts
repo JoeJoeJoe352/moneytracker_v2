@@ -1,12 +1,14 @@
-import { Component, computed, inject, Signal, signal } from '@angular/core';
+import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionsListComponent } from '../transaction/transactions-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
+import { WalletDataUtil } from '../wallet/wallet-data-util';
+import { WalletSummaryInterface } from '../transaction/interfaces';
 
 @Component({
     selector: 'app-main-page-component',
@@ -14,11 +16,14 @@ import { TransactionModalComponent } from '../transaction/transaction-modal';
     styleUrl: './main-page-component.scss',
     standalone: true,
     imports: [TransactionsListComponent, DecimalPipe, TranslatePipe, TransactionModalComponent],
-    providers: [TransactionModalStateService],
+    providers: [TransactionModalStateService, DecimalPipe],
 })
 export class MainPage {
     private transactionService = inject(TransactionService);
+    private translateService = inject(TranslateService);
+    private decimalPipe = inject(DecimalPipe);
     protected modal = inject(TransactionModalStateService);
+    protected walletUtils = inject(WalletDataUtil);
 
     /**
      * Újra kell-e tölteni az adatokat? Ha ez változik, akkor újra fogja tölteni a listát.
@@ -38,6 +43,11 @@ export class MainPage {
      * Összes pénz töltődik-e
      */
     protected isMoneySumLoading = signal(true);
+
+    /**
+     * Az összesített pénz, valutánként
+     */
+    protected moneySumSummarizedPerCurrency: WritableSignal<WalletSummaryInterface[]> = signal([]);
 
     constructor() {
         // Mentés/törlés után újratöltjük a listát és az összesítést
@@ -61,12 +71,30 @@ export class MainPage {
         toObservable(this.reloadMoneySumTrigger).pipe(
             tap(() => this.isMoneySumLoading.set(true)),
             switchMap(() =>
-                this.transactionService
-                    .getMoneySum()
-                    .pipe(tap(() => this.isMoneySumLoading.set(false))),
+                this.transactionService.getMoneySum().pipe(
+                    tap((walletData) => {
+                        this.isMoneySumLoading.set(false);
+                        this.moneySumSummarizedPerCurrency.set(
+                            this.walletUtils.summarizeSumPerCurrency(walletData.moneySum),
+                        );
+                    }),
+                ),
             ),
         ),
         { initialValue: null },
+    );
+
+    /**
+     * Az összesített pénz összege szöveges formában valutánként
+     */
+    protected walletSumAsString: Signal<string[]> = computed(() =>
+        this.moneySumSummarizedPerCurrency().map((walletData) => {
+            const currencyText = this.walletUtils.getCurrencyTextForCurrencyCode(
+                walletData.currencyCode,
+            );
+
+            return `${this.decimalPipe.transform(walletData.total, '4.0-5')} ${this.translateService.instant(currencyText)}`;
+        }),
     );
 
     /**

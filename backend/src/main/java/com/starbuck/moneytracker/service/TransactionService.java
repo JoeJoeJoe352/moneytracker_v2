@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.repository.CategoryRepository;
@@ -162,9 +163,16 @@ public class TransactionService {
      * 
      * @return BigDecimal
      */
-    public BigDecimal sumAllMoney() {
-        BigDecimal sum = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
-        return sum == null ? BigDecimal.ZERO : sum;
+    public List<WalletSummaryDto> sumAllMoney() {
+        var result = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
+
+        result.forEach(walletSummary -> {
+            if (walletSummary.getTotal() == null) {
+                walletSummary.setTotal(BigDecimal.ZERO);
+            }
+        });
+
+        return result;
     }
 
     /**

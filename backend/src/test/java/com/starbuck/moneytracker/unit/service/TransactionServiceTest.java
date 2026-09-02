@@ -445,34 +445,6 @@ class TransactionServiceTest {
     }
 
     /**
-     * Összegzi a user összes pénzét
-     */
-    @Test
-    void sumAllMoney_returnsSumFromRepository() {
-        User userInDB = new User(1l, "alma", "pass", "email");
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.summarizeTotalMoneyForUser(1l)).thenReturn(new BigDecimal("1234.56"));
-
-        BigDecimal result = transactionService.sumAllMoney();
-
-        assertEquals(new BigDecimal("1234.56"), result);
-    }
-
-    /**
-     * Ha még nincs egy tranzakciója sem a usernek, nullát ad vissza null helyett
-     */
-    @Test
-    void sumAllMoney_returnsZeroWhenRepositoryReturnsNull() {
-        User userInDB = new User(1l, "alma", "pass", "email");
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.summarizeTotalMoneyForUser(1l)).thenReturn(null);
-
-        BigDecimal result = transactionService.sumAllMoney();
-
-        assertEquals(BigDecimal.ZERO, result);
-    }
-
-    /**
      * Kiszámolja a havi kiadás összegét
      */
     @Test

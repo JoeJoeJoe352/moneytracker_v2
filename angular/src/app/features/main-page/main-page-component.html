@@ -21,15 +21,24 @@
             @if (isMoneySumLoading()) {
                 <div class="spinner-border" role="status"></div>
             } @else {
-                <div class="stat-value">{{ moneySum()?.moneySum | number }} Ft</div>
+                <div class="stat-value">
+                    @for (moneyString of walletSumAsString(); track $index) {
+                        <div>{{ moneyString }}</div>
+                    }
+                </div>
                 @if (balanceChangeThisMonth(); as change) {
-                    <div class="stat-trend" [class.positive]="change >= 0" [class.negative]="change < 0">
+                    <div
+                        class="stat-trend"
+                        [class.positive]="change >= 0"
+                        [class.negative]="change < 0"
+                    >
                         @if (change >= 0) {
                             <i class="bi bi-arrow-up-short"></i>
                         } @else {
                             <i class="bi bi-arrow-down-short"></i>
                         }
-                        {{ change | number }} Ft {{ 'mainpage.balance_change_this_month' | translate }}
+                        {{ change | number }} Ft
+                        {{ 'mainpage.balance_change_this_month' | translate }}
                     </div>
                 }
             }
@@ -48,7 +57,9 @@
             @if (isMoneySumLoading()) {
                 <div class="spinner-border" role="status"></div>
             } @else {
-                <div class="stat-value income">{{ moneySum()?.incomeSumThisMonth | number }} Ft</div>
+                <div class="stat-value income">
+                    {{ moneySum()?.incomeSumThisMonth | number }} Ft
+                </div>
             }
         </div>
     </div>
@@ -62,7 +73,9 @@
             @if (isMoneySumLoading()) {
                 <div class="spinner-border" role="status"></div>
             } @else {
-                <div class="stat-value expense">{{ moneySum()?.expenseSumThisMonth | number }} Ft</div>
+                <div class="stat-value expense">
+                    {{ moneySum()?.expenseSumThisMonth | number }} Ft
+                </div>
             }
         </div>
     </div>
