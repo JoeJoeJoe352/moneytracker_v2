@@ -25,7 +25,12 @@ import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-d
 import { DropdownInterface } from '../../shared/interfaces';
 import { TransactionDetailRowComponent } from './transaction-detail-row-component';
 import { TransactionService } from '../transaction/transaction-service';
-import { CategoryResponseInterface, DetailForm, NewTransaction, TransactionDataFromBackend, TransactionInputDefaultValuesWithDetails } from '../transaction/interfaces';
+import {
+    CategoryResponseInterface,
+    DetailForm,
+    NewTransaction,
+    TransactionDataFromBackend,
+} from '../transaction/interfaces';
 import { validDate } from './valid-date-validator';
 import { UserDataStore } from '../../shared/services/user-data-store';
 
@@ -34,19 +39,19 @@ import { UserDataStore } from '../../shared/services/user-data-store';
     templateUrl: './transaction-form-component.html',
     styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
     imports: [
-    ReactiveFormsModule,
-    NgxsmkDatepickerComponent,
-    SwitchComponent,
-    TranslatePipe,
-    NgMultiSelectDropDownModule,
-    TransactionDetailRowComponent,
-],
+        ReactiveFormsModule,
+        NgxsmkDatepickerComponent,
+        SwitchComponent,
+        TranslatePipe,
+        NgMultiSelectDropDownModule,
+        TransactionDetailRowComponent,
+    ],
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
     private translateService = inject(TranslateService);
-    protected userData = inject(UserDataStore)
+    protected userData = inject(UserDataStore);
 
     /**
      * Form disabled-e (pl.: töltődéskor)
@@ -102,16 +107,7 @@ export class TransactionFormComponent implements OnChanges {
     });
 
     constructor() {
-        this.transactionForm = this.buildForm({
-            name: '',
-            isIncome: false,
-            isComplexTransaction: false,
-            price: null,
-            transactionDate: null,
-            details: [],
-            categories: [],
-            walletId: this.userData.getDefaultWallet().id
-        });
+        this.transactionForm = this.createForm();
     }
 
     /**
@@ -139,6 +135,7 @@ export class TransactionFormComponent implements OnChanges {
                 categories: this.mapCategoryIdsToDropdownData(
                     convertedInputValues.categories ?? [],
                 ),
+                walletId: convertedInputValues.walletId,
             });
 
             this.transactionForm.setControl(
@@ -153,10 +150,10 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Létrehozza a formot a validációs adatokkal
      */
-    private buildForm(defaults: TransactionInputDefaultValuesWithDetails) {
+    private createForm() {
         return this.fb.nonNullable.group({
             name: [
-                defaults.name,
+                '',
                 {
                     validators: [
                         Validators.required,
@@ -165,17 +162,15 @@ export class TransactionFormComponent implements OnChanges {
                     ],
                 },
             ],
-            isIncome: new FormControl(defaults.isIncome),
-            isComplexTransaction: new FormControl(defaults.isComplexTransaction),
-            price: [defaults.price, { validators: [Validators.min(1)] }],
-            transactionDate: this.fb.control(defaults.transactionDate, {
+            isIncome: new FormControl(false),
+            isComplexTransaction: new FormControl(false),
+            price: [null, { validators: [Validators.min(1)] }],
+            transactionDate: this.fb.control(null, {
                 validators: [Validators.required, validDate],
             }),
-            walletId: new FormControl(defaults.walletId),
-            details: this.fb.array(defaults.details.map((detail) => this.generateNewRow(detail))),
-            categories: this.fb.control<DropdownInterface[]>(
-                this.mapCategoryIdsToDropdownData(defaults.categories ?? []),
-            ),
+            walletId: new FormControl(this.userData.getDefaultWallet().id),
+            details: this.fb.array([]),
+            categories: this.fb.control<DropdownInterface[]>([]),
         });
     }
 

@@ -92,7 +92,7 @@ public class TransactionService {
         Wallet wallet = walletRepo.getWalletById(updateCommand.getWalletId(), user.getId()).orElseThrow(
             () -> new EntityNotFoundException("Wallet doesn't exists")
         );
-        // TODO valamiért nem frissül be a wallet
+
         Transaction transaction = this.getTransactionByIdForActualUser(id);
         transaction.setName(updateCommand.getTransactionName());
         transaction.setTransactionDate(updateCommand.getTransactionDate());
