@@ -110,22 +110,14 @@ public class Transaction {
     }
 
     public Transaction(Long id, String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
-            BigDecimal priceSum,
-            int status) {
+            BigDecimal priceSum, int status, Wallet wallet) {
         this.id = id;
         this.name = name;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
         this.priceSum = priceSum;
         this.status = status;
-    }
-
-    public Transaction(String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
-            BigDecimal priceSum) {
-        this.name = name;
-        this.transactionDate = transactionDate;
-        this.transactionType = transactionType;
-        this.priceSum = priceSum;
+        this.wallet = wallet;
     }
 
     public Transaction(String name, LocalDate transactionDate, TransactionTypeEnum transactionType,

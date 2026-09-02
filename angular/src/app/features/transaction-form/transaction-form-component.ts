@@ -25,28 +25,35 @@ import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-d
 import { DropdownInterface } from '../../shared/interfaces';
 import { TransactionDetailRowComponent } from './transaction-detail-row-component';
 import { TransactionService } from '../transaction/transaction-service';
-import { CategoryResponseInterface, DetailForm, NewTransaction, TransactionDataFromBackend, TransactionInputDefaultValuesWithDetails } from '../transaction/interfaces';
+import {
+    CategoryResponseInterface,
+    DetailForm,
+    NewTransaction,
+    TransactionDataFromBackend,
+} from '../transaction/interfaces';
 import { validDate } from './valid-date-validator';
 import { UserDataStore } from '../../shared/services/user-data-store';
+import { WalletDataUtil } from '../wallet/wallet-data-util';
 
 @Component({
     selector: 'app-transaction-form-component',
     templateUrl: './transaction-form-component.html',
     styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
     imports: [
-    ReactiveFormsModule,
-    NgxsmkDatepickerComponent,
-    SwitchComponent,
-    TranslatePipe,
-    NgMultiSelectDropDownModule,
-    TransactionDetailRowComponent,
-],
+        ReactiveFormsModule,
+        NgxsmkDatepickerComponent,
+        SwitchComponent,
+        TranslatePipe,
+        NgMultiSelectDropDownModule,
+        TransactionDetailRowComponent,
+    ],
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
     private translateService = inject(TranslateService);
-    private userData = inject(UserDataStore)
+    protected userData = inject(UserDataStore);
+    protected walletUtil = inject(WalletDataUtil);
 
     /**
      * Form disabled-e (pl.: töltődéskor)
@@ -90,6 +97,15 @@ export class TransactionFormComponent implements OnChanges {
     protected categorySearchText = signal('');
 
     /**
+     * User által kiválasztott wallet
+     */
+    protected selectedWalletsCurrency = signal(
+        this.walletUtil.getCurrencySymbolForCurrencyCode(
+            this.userData.getDefaultWallet().currencyCode,
+        ),
+    );
+
+    /**
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
      */
     protected categoryData: Signal<DropdownInterface[]> = computed(() => {
@@ -102,16 +118,7 @@ export class TransactionFormComponent implements OnChanges {
     });
 
     constructor() {
-        this.transactionForm = this.buildForm({
-            name: '',
-            isIncome: false,
-            isComplexTransaction: false,
-            price: null,
-            transactionDate: null,
-            details: [],
-            categories: [],
-            walletId: this.userData.getDefaultWallet().id
-        });
+        this.transactionForm = this.createForm();
     }
 
     /**
@@ -123,6 +130,7 @@ export class TransactionFormComponent implements OnChanges {
                 // Nincs átadva paraméterül transaction (ngOnchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
                 return;
             }
+            this.setSelectedWalletSymbol(this.transaction.walletId);
             const convertedInputValues = this.transactionService.utils.convertDataToInput(
                 this.transaction,
             );
@@ -139,6 +147,7 @@ export class TransactionFormComponent implements OnChanges {
                 categories: this.mapCategoryIdsToDropdownData(
                     convertedInputValues.categories ?? [],
                 ),
+                walletId: convertedInputValues.walletId,
             });
 
             this.transactionForm.setControl(
@@ -151,12 +160,37 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
+     * Selectben lévő wallet váltáskor lefutó műveletek
+     * @param event 
+     */
+    protected onWalletChange(event: Event): void {
+        const walletId = Number((event.target as HTMLSelectElement).value);
+        this.setSelectedWalletSymbol(walletId);
+    }
+
+    /**
+     * Beállítja a kiválasztott wallet-hez tartozó pénznem szimbólumát
+     */
+    private setSelectedWalletSymbol(walletId: number): void {
+        const selectedWallet = this.userData
+            .getWallets()
+            .filter((wallet) => wallet.id === walletId)[0];
+        if (!selectedWallet) {
+            console.error('wallet not found in this transaction: ' + this.transaction);
+        }
+        const currencySymbol = this.walletUtil.getCurrencySymbolForCurrencyCode(
+            selectedWallet.currencyCode,
+        );
+        this.selectedWalletsCurrency.set(currencySymbol);
+    }
+
+    /**
      * Létrehozza a formot a validációs adatokkal
      */
-    private buildForm(defaults: TransactionInputDefaultValuesWithDetails) {
+    private createForm() {
         return this.fb.nonNullable.group({
             name: [
-                defaults.name,
+                '',
                 {
                     validators: [
                         Validators.required,
@@ -165,17 +199,15 @@ export class TransactionFormComponent implements OnChanges {
                     ],
                 },
             ],
-            isIncome: new FormControl(defaults.isIncome),
-            isComplexTransaction: new FormControl(defaults.isComplexTransaction),
-            price: [defaults.price, { validators: [Validators.min(1)] }],
-            transactionDate: this.fb.control(defaults.transactionDate, {
+            isIncome: new FormControl(false),
+            isComplexTransaction: new FormControl(false),
+            price: [null, { validators: [Validators.min(1)] }],
+            transactionDate: this.fb.control(null, {
                 validators: [Validators.required, validDate],
             }),
-            walletId: new FormControl(defaults.walletId),
-            details: this.fb.array(defaults.details.map((detail) => this.generateNewRow(detail))),
-            categories: this.fb.control<DropdownInterface[]>(
-                this.mapCategoryIdsToDropdownData(defaults.categories ?? []),
-            ),
+            walletId: new FormControl(this.userData.getDefaultWallet().id),
+            details: this.fb.array([]),
+            categories: this.fb.control<DropdownInterface[]>([]),
         });
     }
 

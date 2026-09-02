@@ -31,6 +31,7 @@ import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
+import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
@@ -74,8 +75,12 @@ class TransactionServiceTest {
 
     private AssertUtil assertUtil;
 
+    private Wallet defaultWallet;
+
     TransactionServiceTest() {
         this.assertUtil = new AssertUtil();
+        User user = new User("teszt", "qweqweqwe", "teszt@mail.com");
+        this.defaultWallet = new Wallet("Default Wallet", user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT);
     }
 
     @BeforeEach
@@ -97,8 +102,9 @@ class TransactionServiceTest {
         });
         Mockito.lenient().when(currentUser.getUser()).thenReturn(new User(1L, "name", "password", "email"));
         Mockito.lenient().when(walletRepo.getWalletById(anyLong(), anyLong()))
-                .thenReturn(Optional.of(new Wallet("wallet", new User(1L, "name", "password", "email"), null,
-                        WalletTypeEnum.DEFAULT)));
+                .thenReturn(Optional.of(
+                        new Wallet("wallet", new User(1L, "name", "password", "email"), null,
+                                WalletTypeEnum.DEFAULT)));
     }
 
     /**
@@ -212,7 +218,7 @@ class TransactionServiceTest {
         // Ezeket úgy kezeljük, mintha már a db-ben lennének
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal(100), 0);
+                new BigDecimal(100), 0, this.defaultWallet);
         TransactionDetail detailInDB = new TransactionDetail(1l, "detail1", new BigDecimal(100), null, null,
                 transactionInDB);
         transactionInDB.setTransactionDetails(List.of(detailInDB));
@@ -297,10 +303,10 @@ class TransactionServiceTest {
         // "Db-ben" lévő dolgok
         User userInDB = new User(1l, "alma", "pass", "email");
 
-        Transaction transactionInDB = new Transaction("multipleDetailedTransactionWithWeightAndUnitPrice",
-                LocalDate.now(),
-                TransactionTypeEnum.INCOME,
-                null);
+        Transaction transactionInDB = new Transaction();
+        transactionInDB.setName("multipleDetailedTransactionWithWeightAndUnitPrice");
+        transactionInDB.setTransactionDate(LocalDate.now());
+        transactionInDB.setTransactionType(TransactionTypeEnum.INCOME);
 
         TransactionDetail detail1inDb = new TransactionDetail("WeightesDetail1", new BigDecimal("0.5"),
                 new BigDecimal(300));
@@ -533,7 +539,7 @@ class TransactionServiceTest {
     void getTransactionByIdForActualUser_returnsTransactionWhenFound() {
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal(100), 0);
+                new BigDecimal(100), 0, this.defaultWallet);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(1l, 1l))
@@ -567,7 +573,7 @@ class TransactionServiceTest {
     void getLastTransactions_queriesWithLimitOfFiveAndNoFilter() {
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal(100), 0);
+                new BigDecimal(100), 0, this.defaultWallet);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelperDto.class)))
@@ -590,7 +596,7 @@ class TransactionServiceTest {
     void getHistoryPageData_queriesWithLimitOfThirtyAndGivenFilter() {
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal(100), 0);
+                new BigDecimal(100), 0, this.defaultWallet);
         TransactionFilter filter = new TransactionFilter("teszt", null);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);

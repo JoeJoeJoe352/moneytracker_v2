@@ -37,6 +37,10 @@ export class TransactionDetailRowComponent {
      * Ez az utolsó detail sor-e (törlés gomb letiltásához)
      */
     @Input({ required: true }) isLastDetailRow!: boolean;
+    /**
+     * A kiválasztott wallet-hez tartozó pénznem szimbóluma (Ft, €, $ stb.)
+     */
+    @Input({ required: true }) currencySymbol!: string;
 
     /**
      * A kategória dropdown keresőmezőjének szövege változott

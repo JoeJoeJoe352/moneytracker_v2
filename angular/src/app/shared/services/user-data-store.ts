@@ -1,5 +1,6 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
-import { UserData, WalletDataInterface } from '../../features/auth/interfaces';
+import { UserData } from '../../features/auth/interfaces';
+import { WalletDataInterface } from '../../features/wallet/interfaces';
 
 @Injectable({
     providedIn: 'root',
@@ -42,6 +43,7 @@ export class UserDataStore {
      */
     public loadUserData(userData: UserData): void {
         this.username.set(userData.username);
+
         this.wallets.set(userData.wallets);
         this.isLoaded.set(true);
     }
@@ -50,22 +52,29 @@ export class UserDataStore {
      * Guard a wallet lekérdezéshez
      */
     public getWallets(): WalletDataInterface[] {
-      const wallets = this.wallets();
-      if (!wallets) {
-        throw new Error("Wallets are not loaded")
-      }
-      return wallets;
+        const wallets = this.wallets();
+        if (!wallets) {
+            throw new Error('Wallets are not loaded');
+        }
+        return wallets;
     }
 
     /**
      * Visszaadja az alapértelmezett Walletet
      */
     public getDefaultWallet(): WalletDataInterface {
-      const firstWallet = this.getWallets().pop()
+        const firstWallet = this.getWallets()[0];
 
-      if (!firstWallet) {
-        throw new Error("No default wallet for user");
-      }
-      return firstWallet
+        if (!firstWallet) {
+            throw new Error('No default wallet for user');
+        }
+        return firstWallet;
+    }
+
+    /**
+     * Beállítja a wallet adatokat
+     */
+    public setWallets(wallets: WalletDataInterface[]): void {
+        this.wallets.set(wallets);
     }
 }

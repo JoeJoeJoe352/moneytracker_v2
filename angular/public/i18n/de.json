@@ -45,7 +45,8 @@
     "welcome": "Willkommen",
     "transactions": "Transaktionen",
     "logout": "Abmelden",
-    "dashboard": "Startseite"
+    "dashboard": "Startseite",
+    "wallets": "Wallets"
   },
   "footer": {
     "home": "Startseite"
@@ -99,6 +100,27 @@
       "complex_price_mode": "Menge und Einzelpreis angeben",
       "total_price": "Gesamtpreis"
     }
+  },
+  "wallet": {
+    "create": "Wallet erstellen",
+    "update": "Wallet bearbeiten",
+    "delete": "Wallet löschen",
+    "delete.confirm": "Möchtest du dieses Wallet wirklich löschen?",
+    "name": "Wallet-Name",
+    "name.required": "Der Wallet-Name ist erforderlich!",
+    "name.minlength": "Der Wallet-Name muss mindestens 2 Zeichen lang sein!",
+    "name.maxlength": "Der Wallet-Name darf höchstens 50 Zeichen lang sein!",
+    "currency": "Währung",
+    "type_label": "Wallet-Typ",
+    "type": {
+      "default": "Standard",
+      "savings": "Sparen"
+    }
+  },
+  "currency": {
+    "huf": "Forint",
+    "eur": "Euro",
+    "usd": "Dollar"
   },
   "mainpage": {
     "total_balance": "Gesamtguthaben",

@@ -8,8 +8,8 @@ import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 import { UserDataStore } from '../../shared/services/user-data-store';
-import { WalletDataInterface } from '../auth/interfaces';
-import { CurrencyCodes, WalletTypes } from '../../shared/enums';
+import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { WalletDataInterface } from '../wallet/interfaces';
 
 describe('TransactionFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionFormComponent>;
@@ -27,10 +27,24 @@ describe('TransactionFormComponent (Vitest)', () => {
                         getDefaultWallet: () => ({
                             id: 1,
                             name: 'Test Wallet',
-                            type: WalletTypes.default,
-                            currencyCode: CurrencyCodes.huf
+                            type: WalletTypesEnum.default,
+                            currencyCode: CurrencyCodesEnum.huf
 
                         }) as WalletDataInterface,
+                        getWallets: () => [
+                            {
+                                id: 1,
+                                name: 'Test Wallet',
+                                type: WalletTypesEnum.default,
+                                currencyCode: CurrencyCodesEnum.huf,
+                            },
+                            {
+                                id: 2,
+                                name: 'Euro Wallet',
+                                type: WalletTypesEnum.default,
+                                currencyCode: CurrencyCodesEnum.eur,
+                            },
+                        ] as WalletDataInterface[],
                     },
                 },
             ],
@@ -231,5 +245,79 @@ describe('TransactionFormComponent (Vitest)', () => {
         component.onCategoryDropdownClick({ target: noFilteredDataButton } as unknown as Event);
 
         expect(addedCategory).toBeUndefined();
+    });
+
+    it('should initialize the price suffix from the default wallet currency', () => {
+        fixture.detectChanges();
+
+        const priceSuffix = fixture.nativeElement.querySelector(
+            '.input-with-suffix .suffix',
+        );
+        expect(priceSuffix.textContent.trim()).toBe('Ft');
+    });
+
+    it('should update the price suffix when the wallet select changes', () => {
+        fixture.detectChanges();
+
+        const walletSelect = fixture.nativeElement.querySelector('#transaction-wallet');
+        walletSelect.value = walletSelect.options[1].value;
+        walletSelect.dispatchEvent(new Event('change'));
+        fixture.detectChanges();
+
+        const priceSuffix = fixture.nativeElement.querySelector(
+            '.input-with-suffix .suffix',
+        );
+        expect(priceSuffix.textContent.trim()).toBe('€');
+    });
+
+    it('should set selectedWalletsCurrency from the transaction wallet via ngOnChanges', () => {
+        const backendTransaction: TransactionDataFromBackend = {
+            id: 7,
+            name: 'Fizetés',
+            priceSum: 5000,
+            transactionType: TransactionTypeEnum.INCOME,
+            transactionDate: '2024-02-01',
+            isComplexTransaction: false,
+            walletId: 2,
+            transactionDetails: [
+                {
+                    name: 'sum',
+                    price: 5000,
+                    weight: null,
+                    unitPrice: null,
+                    isComplexPriceMode: false,
+                    categories: [],
+                },
+            ],
+        };
+        component.transaction = backendTransaction;
+
+        component.ngOnChanges({
+            transaction: {
+                currentValue: backendTransaction,
+                previousValue: null,
+                firstChange: true,
+                isFirstChange: () => true,
+            },
+        });
+        fixture.detectChanges();
+
+        const priceSuffix = fixture.nativeElement.querySelector(
+            '.input-with-suffix .suffix',
+        );
+        expect(priceSuffix.textContent.trim()).toBe('€');
+    });
+
+    it('should render the wallet options with their currency code and the price suffix with the selected currency symbol', () => {
+        fixture.detectChanges();
+
+        const options = fixture.nativeElement.querySelectorAll('#transaction-wallet option');
+        expect(options[0].textContent.trim()).toBe('Test Wallet (HUF)');
+        expect(options[1].textContent.trim()).toBe('Euro Wallet (EUR)');
+
+        const priceSuffix = fixture.nativeElement.querySelector(
+            '.input-with-suffix .suffix',
+        );
+        expect(priceSuffix.textContent.trim()).toBe('Ft');
     });
 });

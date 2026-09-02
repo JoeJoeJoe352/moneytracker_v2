@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.commands.UserLoginCommand;
@@ -27,7 +26,6 @@ import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.JwtService;
 import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
-import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,9 +43,6 @@ class UserServiceIntegrationTest extends MySqlContainerTest {
     @Autowired
     private JwtService jwtService;
 
-    @MockitoBean
-    private CurrentUserUtil currentUser;
-
     /**
      * Sikeres létrehozás esetén a jelszó titkosítva, uuid-vel ellátva
      * mentődik el
@@ -56,7 +51,7 @@ class UserServiceIntegrationTest extends MySqlContainerTest {
     void createUser_persistsEncodedPasswordAndUuidAndWallet() {
         // Ez accept-lang headerből jönne, de integrációs teszteknél nem használjuk,
         // ilyenkor viszont a gép nyelvét használná alapesetben, ezért inkább beállítom az angolt
-        LocaleContextHolder.setDefaultLocale(Locale.ENGLISH);
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
 
         UserCreateCommand command = new UserCreateCommand("integrationUser", "integration@email.com", "teszt");
         User saved = userService.createUser(command);
@@ -73,6 +68,7 @@ class UserServiceIntegrationTest extends MySqlContainerTest {
         assertEquals("Wallet", wallets.get(0).getName());
 
         deleteUserAndWallet(saved);
+        LocaleContextHolder.resetLocaleContext();
     }
 
     /**

@@ -4,7 +4,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.4);
-  z-index: 1;
+  z-index: 2; // 2, mert tárca listaoldalon a tárca előtere a backdrop előtt van
 }
 
 .navbar {

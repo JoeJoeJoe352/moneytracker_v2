@@ -23,6 +23,14 @@ export const routes: Routes = [
         canActivate: [authGuard],
     },
     {
+        path: 'wallets',
+        loadComponent: () =>
+            import('./features/wallet/wallets-page-component').then(
+                (m) => m.WalletsPageComponent,
+            ),
+        canActivate: [authGuard],
+    },
+    {
         path: '**',
         loadComponent: () => import('./features/error/error-page-component').then((m) => m.ErrorPage),
     },

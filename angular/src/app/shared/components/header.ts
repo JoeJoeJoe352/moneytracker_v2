@@ -37,6 +37,7 @@ export class Header {
      */
     protected authenticatedLinkList: LinkInterface[] = [
         { url: '/transactions', langKey: 'header.transactions' },
+        { url: '/wallets', langKey: 'header.wallets' },
     ];
 
     /**

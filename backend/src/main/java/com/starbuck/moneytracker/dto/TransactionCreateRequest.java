@@ -31,5 +31,6 @@ public record TransactionCreateRequest(
 
     List<Long> globalCategories,
 
+    @NotNull
     Long walletId
 ) {}

@@ -3,6 +3,7 @@ import { TransactionService } from './transaction-service';
 import { _, TranslateService } from '@ngx-translate/core';
 import { NewTransaction } from './interfaces';
 
+// TODO ez törölhető, csak egy helyen vannak használva ezek a függvények és nem is kell több
 @Injectable({ providedIn: 'root' })
 export class TransactionActionService {
     private transactionService = inject(TransactionService);
@@ -37,7 +38,7 @@ export class TransactionActionService {
 
     /**
      * Elment egy tranzakciót
-     * 
+     *
      * @param payload           Tranzakciós adatok
      * @param transactionId     Tranzakció azonosítója
      * @param isDisabled        egy signal, ami a formot disabled állapotra állítja

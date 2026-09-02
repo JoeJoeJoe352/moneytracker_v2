@@ -45,7 +45,8 @@
     "welcome": "Üdvözlünk",
     "transactions": "Tranzakciók",
     "logout": "Kijelentkezés",
-    "dashboard": "Főoldal"
+    "dashboard": "Főoldal",
+    "wallets": "Tárcák"
   },
   "footer": {
     "home": "Főoldal"
@@ -79,6 +80,7 @@
     "category": {
       "add": "Új kategória hozzáadásához kattints ide!"
     },
+    "wallet": "Tárca",
 
     "detail": {
       "title": "Tranzakció részletei",
@@ -99,6 +101,32 @@
       "complex_price_mode": "Mennyiség és egységár megadása",
       "total_price": "Teljes ár"
     }
+  },
+  "wallet": {
+    "create": "Tárca létrehozása",
+    "update": "Tárca módosítása",
+    "delete": "Tárca törlése",
+    "delete.confirm": "Biztosan törölni szeretnéd ezt a tárcát?",
+    "name": "Tárca neve",
+    "name.required": "A tárca nevének megadása kötelező!",
+    "name.minlength": "A tárca nevének legalább 2 karakter hosszúnak kell lennie!",
+    "name.maxlength": "A tárca nevének legfeljebb 50 karakter hosszúnak kell lennie!",
+    "currency": "Pénznem",
+    "type_label": "Tárca típusa",
+    "type": {
+      "default": "Alapértelmezett",
+      "savings": "Megtakarítás",
+
+      "description": {
+        "default": "Alapértelmezett típus, amelyet a mindennapi kiadásokhoz használhatsz.",
+        "savings": "Megtakarítás típus, amelyet hosszú távú célokra használhatsz, például lakásvásárlásra vagy utazásra."
+      }
+    }
+  },
+  "currency": {
+    "huf": "Forint",
+    "eur": "Euro",
+    "usd": "Dollár"
   },
   "mainpage": {
     "total_balance": "Összes pénz",

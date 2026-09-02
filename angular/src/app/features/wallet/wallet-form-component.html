@@ -1,0 +1,71 @@
+<form [formGroup]="walletForm" (ngSubmit)="onSubmit()" class="form wallet-form">
+    <div class="form-group mb-3">
+        <label for="wallet-name">{{ 'wallet.name' | translate }}</label>
+        <input
+            id="wallet-name"
+            type="text"
+            formControlName="name"
+            class="form-control"
+            autocomplete="off"
+        />
+        @if (name.invalid && name.touched) {
+            @if (name.hasError('required')) {
+                <div class="form-field-error">{{ 'wallet.name.required' | translate }}</div>
+            }
+            @if (name.hasError('minlength')) {
+                <div class="form-field-error">{{ 'wallet.name.minlength' | translate }}</div>
+            }
+            @if (name.hasError('maxlength')) {
+                <div class="form-field-error">{{ 'wallet.name.maxlength' | translate }}</div>
+            }
+        }
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6 form-group mb-3">
+            <label for="wallet-currency">{{ 'wallet.currency' | translate }}</label>
+            <select id="wallet-currency" formControlName="currencyCode" class="form-select">
+                @for (currency of currencyOptions; track currency) {
+                    <option [value]="currency">
+                        {{ 'currency.' + currency.toLowerCase() | translate }}
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-sm-6 form-group mb-3">
+            <label for="wallet-type">{{ 'wallet.type_label' | translate }}</label>
+            <select id="wallet-type" formControlName="walletType" class="form-select">
+                @for (type of walletTypeOptions; track type) {
+                    <option [value]="type">
+                        {{ 'wallet.type.' + type.toLowerCase() | translate }}
+                    </option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <p class="form-description text-justify ">
+        {{ getDescriptionTranslateKeyForWalletType() | translate }}
+    </p>
+
+    <div class="form-actions">
+        <button
+            type="submit"
+            [disabled]="walletForm.invalid || isFormDisabled"
+            class="btn btn-primary-green me-2"
+        >
+            {{ isEditMode ? ('wallet.update' | translate) : ('wallet.create' | translate) }}
+        </button>
+        @if (isEditMode && wallet) {
+            <button
+                type="button"
+                [disabled]="isFormDisabled"
+                class="btn btn-primary-red"
+                (click)="deleted.emit(wallet.id)"
+            >
+                {{ 'wallet.delete' | translate }}
+            </button>
+        }
+    </div>
+</form>

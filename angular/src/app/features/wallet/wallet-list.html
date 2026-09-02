@@ -1,0 +1,13 @@
+<div class="wallet-list">
+    @for (item of walletListData(); track item.id) {
+        <div
+            class="wallet-list-item"
+        >
+            <div class="wallet-list-item-name">{{ item.name }}</div>
+            <div class="wallet-list-item-balance">
+                {{ item.currencyCode }}
+            </div>
+        </div>
+
+    }
+</div>
