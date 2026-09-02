@@ -70,7 +70,7 @@ public class TransactionController {
         return new MoneySumResponseDto(
                 this.transactionService.sumAllMoney(),
                 this.transactionService.sumAllIncomeForMonth(),
-                this.transactionService.sumAllExpenseForMonth().abs());
+                this.transactionService.sumAllExpenseForMonth());
     }
 
     /**

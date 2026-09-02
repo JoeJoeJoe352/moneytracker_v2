@@ -2,7 +2,6 @@ package com.starbuck.moneytracker.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -88,11 +87,10 @@ public class TransactionService {
      */
     @Transactional
     public void updateTransaction(Long id, TransactionSaveCommand updateCommand) {
-        User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ  NEM KELL MAJD USERID
+        User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
 
         Wallet wallet = walletRepo.getWalletById(updateCommand.getWalletId(), user.getId()).orElseThrow(
-            () -> new EntityNotFoundException("Wallet doesn't exists")
-        );
+                () -> new EntityNotFoundException("Wallet doesn't exists"));
 
         Transaction transaction = this.getTransactionByIdForActualUser(id);
         transaction.setName(updateCommand.getTransactionName());
@@ -164,7 +162,7 @@ public class TransactionService {
      * @return BigDecimal
      */
     public List<WalletSummaryDto> sumAllMoney() {
-        var result = this.transactionRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
+        var result = this.walletRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
 
         result.forEach(walletSummary -> {
             if (walletSummary.getTotal() == null) {
@@ -177,34 +175,38 @@ public class TransactionService {
 
     /**
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
-     * 
-     * @return BigDecimal
+     * Pozitív értékkel tér vissza (értelmetlen az, hogy negatív előjeles kiadás)
      */
-    public BigDecimal sumAllExpenseForMonth() {
-        return this.summarizeForMonth(TransactionTypeEnum.OUTCOME);
+    public List<WalletSummaryDto> sumAllExpenseForMonth() {
+        var result = this.summarizeForMonth(TransactionTypeEnum.OUTCOME);
+        result.forEach(walletSummary -> {
+            walletSummary.setTotal(walletSummary.getTotal().abs());
+        });
+        return result;
     }
 
     /**
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi bevétele
      * volt
-     * 
-     * @return BigDecimal
      */
-    public BigDecimal sumAllIncomeForMonth() {
+    public List<WalletSummaryDto> sumAllIncomeForMonth() {
         return this.summarizeForMonth(TransactionTypeEnum.INCOME);
     }
 
     /**
      * Összegzi a user adott típusú tranzakcióit a hónapra
-     * 
-     * @param type
-     * @return
      */
-    private BigDecimal summarizeForMonth(TransactionTypeEnum type) {
+    private List<WalletSummaryDto> summarizeForMonth(TransactionTypeEnum type) {
         Long userId = currentUser.getUser().getId();
 
-        return Optional.ofNullable(
-                transactionRepo.summarizeTransactionPricesForMonthAndType(userId, type)).orElse(BigDecimal.ZERO);
+        var result = transactionRepo.summarizeTransactionPricesForMonthAndType(userId, type);
+
+        result.forEach(walletSummary -> {
+            if (walletSummary.getTotal() == null) {
+                walletSummary.setTotal(BigDecimal.ZERO);
+            }
+        });
+        return result;
     }
 
     /**

@@ -8,14 +8,21 @@ import { TransactionModalStateService } from '../transaction/transaction-modal-s
 import { TransactionsListComponent } from '../transaction/transactions-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
-import { WalletSummaryInterface } from '../transaction/interfaces';
+import { MoneySumInterface, WalletSummaryInterface } from '../transaction/interfaces';
+import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
 
 @Component({
     selector: 'app-main-page-component',
     templateUrl: './main-page-component.html',
     styleUrl: './main-page-component.scss',
     standalone: true,
-    imports: [TransactionsListComponent, DecimalPipe, TranslatePipe, TransactionModalComponent],
+    imports: [
+        TransactionsListComponent,
+        DecimalPipe,
+        TranslatePipe,
+        TransactionModalComponent,
+        CurrencySymbolPipe,
+    ],
     providers: [TransactionModalStateService, DecimalPipe],
 })
 export class MainPage {
@@ -47,7 +54,8 @@ export class MainPage {
     /**
      * Az összesített pénz, valutánként
      */
-    protected moneySumSummarizedPerCurrency: WritableSignal<WalletSummaryInterface[]> = signal([]);
+    protected moneySumSummarizedPerCurrency: WritableSignal<MoneySumInterface | null> =
+        signal(null);
 
     constructor() {
         // Mentés/törlés után újratöltjük a listát és az összesítést
@@ -74,9 +82,15 @@ export class MainPage {
                 this.transactionService.getMoneySum().pipe(
                     tap((walletData) => {
                         this.isMoneySumLoading.set(false);
-                        this.moneySumSummarizedPerCurrency.set(
-                            this.walletUtils.summarizeSumPerCurrency(walletData.moneySum),
-                        );
+                        this.moneySumSummarizedPerCurrency.set({
+                            moneySum: this.walletUtils.summarizeSumPerCurrency(walletData.moneySum),
+                            expenseSumThisMonth: this.walletUtils.summarizeSumPerCurrency(
+                                walletData.expenseSumThisMonth,
+                            ),
+                            incomeSumThisMonth: this.walletUtils.summarizeSumPerCurrency(
+                                walletData.incomeSumThisMonth,
+                            ),
+                        });
                     }),
                 ),
             ),
@@ -85,23 +99,27 @@ export class MainPage {
     );
 
     /**
-     * Az összesített pénz összege szöveges formában valutánként
-     */
-    protected walletSumAsString: Signal<string[]> = computed(() =>
-        this.moneySumSummarizedPerCurrency().map((walletData) => {
-            const currencyText = this.walletUtils.getCurrencyTextForCurrencyCode(
-                walletData.currencyCode,
-            );
-
-            return `${this.decimalPipe.transform(walletData.total)} ${this.translateService.instant(currencyText)}`;
-        }),
-    );
-
-    /**
      * Az egyenleg nettó változása ebben a hónapban
      */
-    protected balanceChangeThisMonth: Signal<number | null> = computed(() => {
-        const sum = this.moneySum();
-        return sum ? sum.incomeSumThisMonth - sum.expenseSumThisMonth : null;
+    protected balanceChangeThisMonth: Signal<WalletSummaryInterface[]> = computed(() => {
+        const income = this.moneySumSummarizedPerCurrency()?.incomeSumThisMonth;
+        const expense = this.moneySumSummarizedPerCurrency()?.expenseSumThisMonth;
+        if (!income || !expense) {
+            return [];
+        }
+
+        const currencyCodes = new Set([
+            ...income.map((item) => item.currencyCode),
+            ...expense.map((item) => item.currencyCode),
+        ]);
+
+        return Array.from(currencyCodes).map((currencyCode) => {
+            const incomeTotal =
+                income.find((item) => item.currencyCode === currencyCode)?.total ?? 0;
+            const expenseTotal =
+                expense.find((item) => item.currencyCode === currencyCode)?.total ?? 0;
+
+            return { currencyCode, total: incomeTotal - expenseTotal };
+        });
     });
 }

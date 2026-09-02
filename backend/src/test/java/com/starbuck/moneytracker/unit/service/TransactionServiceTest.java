@@ -445,66 +445,6 @@ class TransactionServiceTest {
     }
 
     /**
-     * Kiszámolja a havi kiadás összegét
-     */
-    @Test
-    void sumAllExpenseForMonth_returnsSumForOutcomeType() {
-        User userInDB = new User(1l, "alma", "pass", "email");
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.summarizeTransactionPricesForMonthAndType(1l, TransactionTypeEnum.OUTCOME))
-                .thenReturn(new BigDecimal("-300.00"));
-
-        BigDecimal result = transactionService.sumAllExpenseForMonth();
-
-        assertEquals(new BigDecimal("-300.00"), result);
-    }
-
-    /**
-     * Ha nincs kiadás a hónapban, nullát ad vissza null helyett
-     */
-    @Test
-    void sumAllExpenseForMonth_returnsZeroWhenRepositoryReturnsNull() {
-        User userInDB = new User(1l, "alma", "pass", "email");
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.summarizeTransactionPricesForMonthAndType(1l, TransactionTypeEnum.OUTCOME))
-                .thenReturn(null);
-
-        BigDecimal result = transactionService.sumAllExpenseForMonth();
-
-        assertEquals(BigDecimal.ZERO, result);
-    }
-
-    /**
-     * Kiszámolja a havi bevétel összegét
-     */
-    @Test
-    void sumAllIncomeForMonth_returnsSumForIncomeType() {
-        User userInDB = new User(1l, "alma", "pass", "email");
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.summarizeTransactionPricesForMonthAndType(1l, TransactionTypeEnum.INCOME))
-                .thenReturn(new BigDecimal("500.00"));
-
-        BigDecimal result = transactionService.sumAllIncomeForMonth();
-
-        assertEquals(new BigDecimal("500.00"), result);
-    }
-
-    /**
-     * Ha nincs bevétel a hónapban, nullát ad vissza null helyett
-     */
-    @Test
-    void sumAllIncomeForMonth_returnsZeroWhenRepositoryReturnsNull() {
-        User userInDB = new User(1l, "alma", "pass", "email");
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.summarizeTransactionPricesForMonthAndType(1l, TransactionTypeEnum.INCOME))
-                .thenReturn(null);
-
-        BigDecimal result = transactionService.sumAllIncomeForMonth();
-
-        assertEquals(BigDecimal.ZERO, result);
-    }
-
-    /**
      * Visszaadja az adott id-jú tranzakciót, ha a userhez tartozik
      */
     @Test

@@ -101,8 +101,8 @@ export interface TransactionDetailsDataFromBackend {
 }
 
 export interface MoneySumInterface {
-    incomeSumThisMonth: number;
-    expenseSumThisMonth: number;
+    incomeSumThisMonth: WalletSummaryInterface[];
+    expenseSumThisMonth: WalletSummaryInterface[];
     moneySum: WalletSummaryInterface[];
 }
 

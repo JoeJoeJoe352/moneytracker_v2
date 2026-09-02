@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.Wallet;
 
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
@@ -18,4 +19,24 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
      */
     @Query("SELECT w FROM Wallet w WHERE w.user.id = ?1 AND w.status = 0 ORDER BY w.id ASC")
     List<Wallet> findByUserId(long userId);
+
+    /**
+     * Visszatér a user összes pénzével, walletenként
+     * Lehet null, hogyha még nincs neki tranzakciója adott walleten
+     * 
+     * @param userId
+     * @return
+     */
+    @Query("""
+                SELECT new com.starbuck.moneytracker.dto.WalletSummaryDto(
+                    w.currencyCode,
+                    SUM(t.priceSum)
+                )
+                FROM Wallet w
+                LEFT JOIN w.transactions t
+                WHERE w.user.id = ?1 AND w.status = 0
+                GROUP BY w.id
+                ORDER BY w.id
+            """)
+    List<WalletSummaryDto> summarizeTotalMoneyForUser(long userId);
 }

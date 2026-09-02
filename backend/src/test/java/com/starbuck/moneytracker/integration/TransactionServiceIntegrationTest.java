@@ -282,8 +282,10 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         Transaction expense = this.persistSimpleTransaction("expense", TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-200), LocalDate.now(), this.wallet);
 
-        var savedEuroWallet = walletRepo.save(new Wallet("Euro tárca", this.user, CurrencyEnum.EUR, WalletTypeEnum.DEFAULT));
-        var savedEmptyWallet = walletRepo.save(new Wallet("Üres tárca", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        var savedEuroWallet = walletRepo
+                .save(new Wallet("Euro tárca", this.user, CurrencyEnum.EUR, WalletTypeEnum.DEFAULT));
+        var savedEmptyWallet = walletRepo
+                .save(new Wallet("Üres tárca", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
         Transaction incomeEur = this.persistSimpleTransaction("income", TransactionTypeEnum.INCOME,
                 new BigDecimal(1000), LocalDate.now(), savedEuroWallet);
         // WHEN
@@ -311,23 +313,40 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
      */
     @Test
     void sumAllExpenseForMonth_returnsOnlyCurrentMonthExpenses() {
+        // Given
+        var secondWallet = walletRepo.save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        var emptyWallet = walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+
         Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth",
                 TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-150), LocalDate.now(), this.wallet);
+                new BigDecimal(-200), LocalDate.now(), this.wallet);
         Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth",
                 TransactionTypeEnum.INCOME,
                 new BigDecimal(150), LocalDate.now(), this.wallet);
+        // Egy tranzakció tavalyról
         Transaction expenseLastYear = this.persistSimpleTransaction("expenseLastYear",
                 TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-999), LocalDate.now().minusYears(1), this.wallet);
+        // Egy tranzakció másik wallethoz
+        Transaction transactionForAnotherWallet = this.persistSimpleTransaction("anotherWallet",
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-150), LocalDate.now(), secondWallet);
 
-        BigDecimal result = transactionService.sumAllExpenseForMonth();
+        // When
+        List<WalletSummaryDto> result = transactionService.sumAllExpenseForMonth();
+        assertEquals(3, result.size());
 
-        assertEquals(new BigDecimal("-150.00"), result);
+        // Mindig pozitív számmal tér vissza
+        assertEquals(new BigDecimal("200.00"), result.get(0).getTotal());
+        assertEquals(new BigDecimal("150.00"), result.get(1).getTotal());
+        assertEquals(new BigDecimal("0"), result.get(2).getTotal());
 
         this.deleteData(expenseThisMonth);
         this.deleteData(incomeThisMonth);
         this.deleteData(expenseLastYear);
+        this.deleteData(transactionForAnotherWallet);
+        this.walletRepo.delete(secondWallet);
+        this.walletRepo.delete(emptyWallet);
     }
 
     /**
@@ -336,22 +355,37 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
      */
     @Test
     void sumAllIncomeForMonth_returnsOnlyCurrentMonthIncome() {
+        // Given
+        var secondWallet = walletRepo.save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        var emptyWallet = walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+
         Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth",
                 TransactionTypeEnum.INCOME,
-                new BigDecimal(250), LocalDate.now(), this.wallet);
+                new BigDecimal(300), LocalDate.now(), this.wallet);
         Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth",
                 TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-250), LocalDate.now(), this.wallet);
         Transaction incomeLastYear = this.persistSimpleTransaction("incomeLastYear", TransactionTypeEnum.INCOME,
                 new BigDecimal(999), LocalDate.now().minusYears(1), this.wallet);
+        // Egy tranzakció másik wallethoz
+        Transaction transactionForAnotherWallet = this.persistSimpleTransaction("anotherWallet",
+                TransactionTypeEnum.INCOME,
+                new BigDecimal(150), LocalDate.now(), secondWallet);
+        // When
+        List<WalletSummaryDto> result = transactionService.sumAllIncomeForMonth();
+        assertEquals(3, result.size());
 
-        BigDecimal result = transactionService.sumAllIncomeForMonth();
+        // Mindig pozitív számmal tér vissza
+        assertEquals(new BigDecimal("300.00"), result.get(0).getTotal());
+        assertEquals(new BigDecimal("150.00"), result.get(1).getTotal());
+        assertEquals(new BigDecimal("0"), result.get(2).getTotal());
 
-        assertEquals(new BigDecimal("250.00"), result);
-
+        this.deleteData(transactionForAnotherWallet);
         this.deleteData(incomeThisMonth);
         this.deleteData(expenseThisMonth);
         this.deleteData(incomeLastYear);
+        this.walletRepo.delete(secondWallet);
+        this.walletRepo.delete(emptyWallet);
     }
 
     /**

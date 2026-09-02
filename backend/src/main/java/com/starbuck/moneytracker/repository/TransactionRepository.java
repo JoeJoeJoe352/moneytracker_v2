@@ -46,35 +46,26 @@ public interface TransactionRepository extends
     }
 
     /**
-     * Visszatér a user összes pénzével.
-     * Lehet null, hogyha még nincs neki tranzakciója
+     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
      * 
      * @param userId
      * @return
      */
-    // @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.wallet.user.id = ?1
-    // AND t.status = 0")
     @Query("""
                 SELECT new com.starbuck.moneytracker.dto.WalletSummaryDto(
                     w.currencyCode,
                     SUM(t.priceSum)
                 )
                 FROM Wallet w
-                LEFT JOIN w.transactions t
-                WHERE w.user.id = ?1 AND w.status = 0
+                LEFT JOIN w.transactions t ON
+                    YEAR(t.transactionDate) = YEAR(CURDATE()) AND
+                    MONTH(t.transactionDate) = MONTH(CURDATE()) AND
+                    t.transactionType = ?2
+                WHERE w.user.id = ?1
                 GROUP BY w.id
                 ORDER BY w.id
             """)
-    List<WalletSummaryDto> summarizeTotalMoneyForUser(long userId);
-
-    /**
-     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
-     * 
-     * @param userId
-     * @return
-     */
-    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.wallet.user.id = ?1 AND t.status = 0 AND YEAR(t.transactionDate) = YEAR(CURDATE()) AND MONTH(t.transactionDate) = MONTH(CURDATE()) AND t.transactionType = ?2")
-    BigDecimal summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
+    List<WalletSummaryDto> summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
 
     /**
      * Id alapján lekéri a tranzakciós adatokat
