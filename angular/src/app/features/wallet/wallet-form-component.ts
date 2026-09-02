@@ -39,15 +39,21 @@ export class WalletFormComponent implements OnInit {
                 currencyCode: this.wallet.currencyCode,
                 walletType: this.wallet.type,
             });
-            // Pénznemet létrehozás után nem lehet módosítani
+            // Egyenlőre nem akarom lekezelni mi lenne a tárcában szereplő tranzakciókkal, ha valutát váltana
             this.walletForm.controls.currencyCode.disable();
         }
     }
 
+    /**
+     * Meglévő walletet szerkesztünk-e
+     */
     protected get isEditMode(): boolean {
         return this.wallet !== null;
     }
 
+    /**
+     * Form adatainak elküldése
+     */
     onSubmit(): void {
         if (this.walletForm.invalid) {
             this.walletForm.markAllAsTouched();
@@ -67,7 +73,25 @@ export class WalletFormComponent implements OnInit {
         );
     }
 
+    /**
+     * Visszaadja a nyelvi kulcsot, amely a wallet típusának leírását tartalmazza
+     */
+    protected getDescriptionTranslateKeyForWalletType(): string {
+        switch (this.walletType.value) {
+            case WalletTypesEnum.default:
+                return 'wallet.type.description.default';
+            case WalletTypesEnum.savings:
+                return 'wallet.type.description.savings';
+            default:
+                throw Error('No description for the type: ' + this.walletType.value);
+        }
+    }
+
     get name() {
         return this.walletForm.controls.name;
+    }
+
+    get walletType() {
+        return this.walletForm.controls.walletType;
     }
 }

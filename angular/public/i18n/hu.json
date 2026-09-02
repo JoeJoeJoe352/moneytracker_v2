@@ -115,7 +115,12 @@
     "type_label": "Tárca típusa",
     "type": {
       "default": "Alapértelmezett",
-      "savings": "Megtakarítás"
+      "savings": "Megtakarítás",
+
+      "description": {
+        "default": "Alapértelmezett típus, amelyet a mindennapi kiadásokhoz használhatsz.",
+        "savings": "Megtakarítás típus, amelyet hosszú távú célokra használhatsz, például lakásvásárlásra vagy utazásra."
+      }
     }
   },
   "currency": {

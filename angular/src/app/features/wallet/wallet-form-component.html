@@ -45,11 +45,15 @@
         </div>
     </div>
 
+    <p class="form-description text-justify ">
+        {{ getDescriptionTranslateKeyForWalletType() | translate }}
+    </p>
+
     <div class="form-actions">
         <button
             type="submit"
             [disabled]="walletForm.invalid || isFormDisabled"
-            class="btn btn-primary-green"
+            class="btn btn-primary-green me-2"
         >
             {{ isEditMode ? ('wallet.update' | translate) : ('wallet.create' | translate) }}
         </button>
