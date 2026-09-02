@@ -4,8 +4,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { WalletsPageComponent } from './wallets-page-component';
-import { WalletsListComponent } from './wallets-list-component';
-import { WalletModalComponent } from './wallet-modal-component';
 import { WalletService } from './wallet-service';
 import { WalletDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
