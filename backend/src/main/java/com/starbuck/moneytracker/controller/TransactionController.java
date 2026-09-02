@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 
-import com.starbuck.moneytracker.commands.TransactionCreateCommand;
-import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
@@ -42,7 +41,7 @@ public class TransactionController {
     @PostMapping(path = "/transaction")
     @ResponseStatus(HttpStatus.CREATED)
     public void createTransaction(@Valid @RequestBody TransactionCreateRequest request) {
-        TransactionCreateCommand transaction = transactionMapper.fromTransactionCreateRequest(request);
+        TransactionSaveCommand transaction = transactionMapper.fromTransactionSaveRequest(request);
 
         this.transactionService.createTransaction(transaction);
     }
@@ -56,7 +55,7 @@ public class TransactionController {
     @PutMapping(path = "/transaction/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable Long id) {
-        TransactionUpdateCommand transaction = transactionMapper.fromTransactionUpdateRequest(request);
+        TransactionSaveCommand transaction = transactionMapper.fromTransactionSaveRequest(request);
 
         this.transactionService.updateTransaction(id, transaction);
     }

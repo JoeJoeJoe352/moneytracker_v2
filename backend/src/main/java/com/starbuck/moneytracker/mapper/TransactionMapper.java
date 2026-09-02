@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
@@ -88,7 +89,8 @@ public class TransactionMapper {
                 entity.getTransactionDate(),
                 entity.getTransactionType(),
                 entity.isComplexTransaction(),
-                detailDto);
+                detailDto,
+                entity.getWallet().getId());
 
         return dto;
     }
@@ -134,7 +136,7 @@ public class TransactionMapper {
      * @param request
      * @return
      */
-    public TransactionUpdateCommand fromTransactionUpdateRequest(@NonNull TransactionCreateRequest request) {
+    public TransactionSaveCommand fromTransactionSaveRequest(@NonNull TransactionCreateRequest request) {
         List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(
                 request.transactionDetails(),
                 request.transactionType());

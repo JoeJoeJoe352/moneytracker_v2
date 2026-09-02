@@ -9,10 +9,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
-import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
@@ -64,7 +62,7 @@ public class TransactionService {
      * Tranzakció létrehozása
      */
     @Transactional
-    public Transaction createTransaction(TransactionCreateCommand createCommand) {
+    public Transaction createTransaction(TransactionSaveCommand createCommand) {
         User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
         Wallet wallet = walletRepo.getWalletById(createCommand.getWalletId(), user.getId()).orElseThrow(
                 () -> new EntityNotFoundException("Wallet doesn't exists"));
@@ -88,13 +86,13 @@ public class TransactionService {
      * @param updateCommand
      */
     @Transactional
-    public void updateTransaction(Long id, TransactionUpdateCommand updateCommand) {
+    public void updateTransaction(Long id, TransactionSaveCommand updateCommand) {
         User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ  NEM KELL MAJD USERID
 
         Wallet wallet = walletRepo.getWalletById(updateCommand.getWalletId(), user.getId()).orElseThrow(
             () -> new EntityNotFoundException("Wallet doesn't exists")
         );
-
+        // TODO valamiért nem frissül be a wallet
         Transaction transaction = this.getTransactionByIdForActualUser(id);
         transaction.setName(updateCommand.getTransactionName());
         transaction.setTransactionDate(updateCommand.getTransactionDate());
