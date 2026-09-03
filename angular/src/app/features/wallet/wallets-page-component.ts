@@ -36,8 +36,15 @@ export class WalletsPageComponent {
                 this.walletService.listWallets().pipe(
                     tap((wallets) => {
                         this.isWalletListLoading.set(false);
-                        // store-t is befrissítjük mellékhatásként
-                        this.userData.setWallets(wallets); 
+                        // store-t is befrissítjük mellékhatásként, a sum nélkül
+                        this.userData.setWallets(
+                            wallets.map((wallet) => ({
+                                id: wallet.id,
+                                name: wallet.name,
+                                currencyCode: wallet.currencyCode,
+                                type: wallet.type,
+                            })),
+                        );
                     }),
                 ),
             ),

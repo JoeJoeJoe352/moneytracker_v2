@@ -21,17 +21,31 @@
             @if (isMoneySumLoading()) {
                 <div class="spinner-border" role="status"></div>
             } @else {
-                <div class="stat-value">{{ moneySum()?.moneySum | number }} Ft</div>
-                @if (balanceChangeThisMonth(); as change) {
-                    <div class="stat-trend" [class.positive]="change >= 0" [class.negative]="change < 0">
-                        @if (change >= 0) {
-                            <i class="bi bi-arrow-up-short"></i>
-                        } @else {
-                            <i class="bi bi-arrow-down-short"></i>
+                <div class="stat-value">
+                    @for (sum of moneySumSummarizedPerCurrency()?.moneySum; track $index) {
+                        <div>{{ sum.total | number }}{{ sum.currencyCode | currencySymbol }}</div>
+                    }
+                </div>
+                <div>
+                    @if (balanceChangeThisMonth(); as changes) {
+                        @for (change of changes; track $index) {
+                            <div
+                                class="stat-trend"
+                                [class.positive]="change.total >= 0"
+                                [class.negative]="change.total < 0"
+                            >
+                                @if (change.total >= 0) {
+                                    <i class="bi bi-arrow-up-short"></i>
+                                } @else {
+                                    <i class="bi bi-arrow-down-short"></i>
+                                }
+                                {{ change.total | number
+                                }}{{ change.currencyCode | currencySymbol }}
+                                {{ 'mainpage.balance_change_this_month' | translate }}
+                            </div>
                         }
-                        {{ change | number }} Ft {{ 'mainpage.balance_change_this_month' | translate }}
-                    </div>
-                }
+                    }
+                </div>
             }
             <button class="btn btn-green-hollow btn-sm align-self-start" (click)="modal.open(null)">
                 + {{ 'mainpage.create_transaction.button' | translate }}
@@ -48,7 +62,16 @@
             @if (isMoneySumLoading()) {
                 <div class="spinner-border" role="status"></div>
             } @else {
-                <div class="stat-value income">{{ moneySum()?.incomeSumThisMonth | number }} Ft</div>
+                <div class="stat-value income">
+                    @for (
+                        income of moneySumSummarizedPerCurrency()?.incomeSumThisMonth;
+                        track $index
+                    ) {
+                        <div>
+                            {{ income.total | number }}{{ income.currencyCode | currencySymbol }}
+                        </div>
+                    }
+                </div>
             }
         </div>
     </div>
@@ -62,7 +85,16 @@
             @if (isMoneySumLoading()) {
                 <div class="spinner-border" role="status"></div>
             } @else {
-                <div class="stat-value expense">{{ moneySum()?.expenseSumThisMonth | number }} Ft</div>
+                <div class="stat-value expense">
+                    @for (
+                        expense of moneySumSummarizedPerCurrency()?.expenseSumThisMonth;
+                        track $index
+                    ) {
+                        <div>
+                            {{ expense.total | number }}{{ expense.currencyCode | currencySymbol }}
+                        </div>
+                    }
+                </div>
             }
         </div>
     </div>

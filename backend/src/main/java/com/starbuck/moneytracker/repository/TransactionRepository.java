@@ -1,6 +1,5 @@
 package com.starbuck.moneytracker.repository;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
@@ -45,23 +45,26 @@ public interface TransactionRepository extends
     }
 
     /**
-     * Visszatér a user összes pénzével.
-     * Lehet null, hogyha még nincs neki tranzakciója
-     * 
-     * @param userId
-     * @return
-     */
-    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.wallet.user.id = ?1 AND t.status = 0")
-    BigDecimal summarizeTotalMoneyForUser(long userId);
-
-    /**
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
      * 
      * @param userId
      * @return
      */
-    @Query("SELECT SUM(t.priceSum) FROM Transaction t WHERE t.wallet.user.id = ?1 AND t.status = 0 AND YEAR(t.transactionDate) = YEAR(CURDATE()) AND MONTH(t.transactionDate) = MONTH(CURDATE()) AND t.transactionType = ?2")
-    BigDecimal summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
+    @Query("""
+                SELECT new com.starbuck.moneytracker.dto.WalletSummaryDto(
+                    w.currencyCode,
+                    COALESCE(SUM(t.priceSum), 0)
+                )
+                FROM Wallet w
+                LEFT JOIN w.transactions t ON
+                    YEAR(t.transactionDate) = YEAR(CURDATE()) AND
+                    MONTH(t.transactionDate) = MONTH(CURDATE()) AND
+                    t.transactionType = ?2
+                WHERE w.user.id = ?1
+                GROUP BY w.id
+                ORDER BY w.id
+            """)
+    List<WalletSummaryDto> summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
 
     /**
      * Id alapján lekéri a tranzakciós adatokat

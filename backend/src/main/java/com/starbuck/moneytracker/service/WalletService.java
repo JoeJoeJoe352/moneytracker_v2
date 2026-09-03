@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
+import com.starbuck.moneytracker.dto.WalletListResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
@@ -83,10 +84,10 @@ public class WalletService {
     /**
      * Visszatér a user tárcáival
      *
-     * @return
+     * Kilistázza a felhasználó walletjait
      */
-    public List<Wallet> listWalletsForUser() {
-        return walletRepo.findByUserId(userUtil.getUser().getId());
+    public List<WalletListResponseDto> listWalletsForUser() {
+        return walletRepo.listWalletsWithSumByUserId(userUtil.getUser().getId());
     }
 
     /**

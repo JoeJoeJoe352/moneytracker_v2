@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { WalletSummaryInterface } from '../transaction/interfaces';
 
 @Injectable({
     providedIn: 'root',
@@ -52,5 +53,28 @@ export class WalletDataUtil {
                 console.error('Unknown currency code const: ' + currencyCode);
                 return '';
         }
+    }
+
+    /**
+     * Összegzi valutánként a walleteken lévő pénzt, hogy minden pénznem csak egyszer szerepeljen
+     */
+    public summarizeSumPerCurrency(
+        walletSummary: WalletSummaryInterface[],
+    ): WalletSummaryInterface[] {
+        const resultArray: WalletSummaryInterface[] = [];
+
+        walletSummary.forEach((walletData) => {
+            const existingItem = resultArray.find(
+                (item) => item.currencyCode === walletData.currencyCode,
+            );
+            
+            if (existingItem) {
+                existingItem.total += walletData.total;
+            } else {
+                resultArray.push({ ...walletData });
+            }
+        });
+
+        return resultArray;
     }
 }

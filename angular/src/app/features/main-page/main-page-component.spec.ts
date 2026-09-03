@@ -9,6 +9,8 @@ import { TransactionService } from '../transaction/transaction-service';
 import { CategoryService } from '../transaction/category-service';
 import { MoneySumInterface } from '../transaction/interfaces';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
+import { CurrencyCodesEnum } from '../../shared/enums';
+import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
 
 @Component({
     selector: 'app-transactions-list-component',
@@ -75,6 +77,7 @@ describe('MainPage (Vitest)', () => {
                     StubTransactionModalComponent,
                     DecimalPipe,
                     TranslatePipe,
+                    CurrencySymbolPipe,
                 ],
             },
         });
@@ -89,7 +92,11 @@ describe('MainPage (Vitest)', () => {
         expect(fixture.nativeElement.querySelector('.balance-card .spinner-border')).toBeTruthy();
         expect(fixture.nativeElement.querySelector('.balance-card .stat-value')).toBeNull();
 
-        getMoneySum$.next({ moneySum: 15000, incomeSumThisMonth: 5000, expenseSumThisMonth: 2000 });
+        getMoneySum$.next({
+            moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 15000 }],
+            incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 5000 }],
+            expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 2000 }],
+        });
         fixture.detectChanges();
 
         expect(fixture.nativeElement.querySelector('.balance-card .spinner-border')).toBeNull();
@@ -103,7 +110,11 @@ describe('MainPage (Vitest)', () => {
     });
 
     it('should render the balance trend as positive when income exceeds expense this month', () => {
-        getMoneySum$.next({ moneySum: 3000, incomeSumThisMonth: 5000, expenseSumThisMonth: 2000 });
+        getMoneySum$.next({
+            moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 3000 }],
+            incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 5000 }],
+            expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 2000 }],
+        });
         fixture.detectChanges();
 
         const trend = fixture.nativeElement.querySelector('.stat-trend');
@@ -114,7 +125,11 @@ describe('MainPage (Vitest)', () => {
     });
 
     it('should render the balance trend as negative when expense exceeds income this month', () => {
-        getMoneySum$.next({ moneySum: -1000, incomeSumThisMonth: 1000, expenseSumThisMonth: 2000 });
+        getMoneySum$.next({
+            moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: -1000 }],
+            incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 1000 }],
+            expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 2000 }],
+        });
         fixture.detectChanges();
 
         const trend = fixture.nativeElement.querySelector('.stat-trend');
@@ -124,7 +139,11 @@ describe('MainPage (Vitest)', () => {
     });
 
     it('should open the transaction modal when the create-transaction button is clicked', () => {
-        getMoneySum$.next({ moneySum: 0, incomeSumThisMonth: 0, expenseSumThisMonth: 0 });
+        getMoneySum$.next({
+            moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+        });
         fixture.detectChanges();
 
         expect(fixture.nativeElement.querySelector('app-create-transaction-modal')).toBeNull();
@@ -137,7 +156,11 @@ describe('MainPage (Vitest)', () => {
     });
 
     it('should refetch only the money sum when the transaction list reports a change', () => {
-        getMoneySum$.next({ moneySum: 0, incomeSumThisMonth: 0, expenseSumThisMonth: 0 });
+        getMoneySum$.next({
+            moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+        });
         fixture.detectChanges();
         expect(getMoneySumSpy).toHaveBeenCalledTimes(1);
 
@@ -152,7 +175,11 @@ describe('MainPage (Vitest)', () => {
     });
 
     it('should refetch both the money sum and bump the list reload trigger when the modal reports a save/delete', () => {
-        getMoneySum$.next({ moneySum: 0, incomeSumThisMonth: 0, expenseSumThisMonth: 0 });
+        getMoneySum$.next({
+            moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+        });
         fixture.detectChanges();
         expect(getMoneySumSpy).toHaveBeenCalledTimes(1);
 

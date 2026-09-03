@@ -1,5 +1,6 @@
 import { FormControl } from '@angular/forms';
 import { DropdownInterface } from '../../shared/interfaces';
+import { CurrencyCodesEnum } from '../../shared/enums';
 
 /**
  * Detail form elemei
@@ -100,9 +101,14 @@ export interface TransactionDetailsDataFromBackend {
 }
 
 export interface MoneySumInterface {
-    incomeSumThisMonth: number;
-    expenseSumThisMonth: number;
-    moneySum: number;
+    incomeSumThisMonth: WalletSummaryInterface[];
+    expenseSumThisMonth: WalletSummaryInterface[];
+    moneySum: WalletSummaryInterface[];
+}
+
+export interface WalletSummaryInterface {
+    currencyCode: CurrencyCodesEnum;
+    total: number;
 }
 
 export interface CategorySaveRequestInterface {

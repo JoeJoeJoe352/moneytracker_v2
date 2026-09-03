@@ -13,6 +13,7 @@ public record TransactionResponseDto(
     LocalDate transactionDate,
     TransactionTypeEnum transactionType,
     boolean isComplexTransaction,
-    List<TransactionDetailResponseDto> transactionDetails
+    List<TransactionDetailResponseDto> transactionDetails,
+    WalletResponseDto wallet
 ) {
 }

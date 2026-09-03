@@ -76,6 +76,7 @@ describe('WalletFormComponent (Vitest)', () => {
             name: 'Fő tárca',
             currencyCode: CurrencyCodesEnum.usd,
             type: WalletTypesEnum.default,
+            sum: 0,
         };
 
         beforeEach(() => setup(existingWallet));

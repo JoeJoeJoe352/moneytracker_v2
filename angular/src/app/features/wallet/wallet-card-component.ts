@@ -3,13 +3,14 @@ import { DecimalPipe } from '@angular/common';
 import { WalletDataInterface } from './interfaces';
 import { WalletDataUtil } from './wallet-data-util';
 import { TranslatePipe } from '@ngx-translate/core';
+import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
 
 @Component({
     selector: 'app-wallet-card-component',
     templateUrl: './wallet-card-component.html',
     styleUrl: './wallet-card-component.scss',
     standalone: true,
-    imports: [DecimalPipe, TranslatePipe],
+    imports: [DecimalPipe, TranslatePipe, CurrencySymbolPipe],
 })
 export class WalletCardComponent {
     protected readonly walletDataUtil = inject(WalletDataUtil);

@@ -3,6 +3,8 @@ package com.starbuck.moneytracker.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
@@ -19,11 +21,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
+import com.starbuck.moneytracker.dto.WalletListResponseDto;
+import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.WalletService;
@@ -41,6 +47,9 @@ public class WalletServiceTest extends MySqlContainerTest {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    TransactionRepository transactionRepo;
 
     @Autowired
     WalletRepository walletRepo;
@@ -116,27 +125,52 @@ public class WalletServiceTest extends MySqlContainerTest {
         var wallet1 = walletService.createWallet(command1);
         var command2 = new CreateWalletCommand("HufWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user);
         var wallet2 = walletService.createWallet(command2);
+        var command3 = new CreateWalletCommand("Huf2Wallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user);
+        var wallet3 = walletService.createWallet(command3);
 
         // Másik user tárcája
         var anotherUser = new User("anotherWalletUser", "password", "another-wallet@user.com");
         anotherUser.generateUuid();
         var savedAnotherUser = userRepository.save(anotherUser);
-        var wallet3 = walletService.createDefaultWallet(savedAnotherUser);
+        var wallet4 = walletService.createDefaultWallet(savedAnotherUser);
 
+        var transaction1AfterSave = transactionRepo
+                .save(new Transaction("transaction1", LocalDate.now(), TransactionTypeEnum.INCOME,
+                        new BigDecimal(200), wallet2));
+        var transaction2AfterSave = transactionRepo
+                .save(new Transaction("transaction2", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+                        new BigDecimal(-50), wallet2));
+        var transaction3AfterSave = transactionRepo
+                .save(new Transaction("transaction3", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+                        new BigDecimal(-50), wallet3));
         // When
-        List<Wallet> wallets = walletService.listWalletsForUser();
+        List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
 
         // Then
-        assertEquals(2, wallets.size());
+        assertEquals(3, wallets.size());
 
-        assertEquals("UsdWallet", wallets.get(0).getName());
-        assertEquals(this.user.getId(), wallets.get(0).getUser().getId());
-        assertEquals("HufWallet", wallets.get(1).getName());
-        assertEquals(this.user.getId(), wallets.get(1).getUser().getId());
+        assertEquals("UsdWallet", wallets.get(0).name());
+        assertEquals(CurrencyEnum.USD, wallets.get(0).currencyCode());
+        assertEquals(WalletTypeEnum.SAVINGS, wallets.get(0).type());
+        assertEquals(new BigDecimal("0.00"), wallets.get(0).sum());
 
+        assertEquals("HufWallet", wallets.get(1).name());
+        assertEquals(CurrencyEnum.HUF, wallets.get(1).currencyCode());
+        assertEquals(WalletTypeEnum.DEFAULT, wallets.get(1).type());
+        assertEquals(new BigDecimal("150.00"), wallets.get(1).sum());
+
+        assertEquals("Huf2Wallet", wallets.get(2).name());
+        assertEquals(CurrencyEnum.HUF, wallets.get(2).currencyCode());
+        assertEquals(WalletTypeEnum.DEFAULT, wallets.get(2).type());
+        assertEquals(new BigDecimal("-50.00"), wallets.get(2).sum());
+
+        transactionRepo.hardDeleteTransaction(transaction1AfterSave.getId());
+        transactionRepo.hardDeleteTransaction(transaction2AfterSave.getId());
+        transactionRepo.hardDeleteTransaction(transaction3AfterSave.getId());
         walletRepo.delete(wallet1);
         walletRepo.delete(wallet2);
         walletRepo.delete(wallet3);
+        walletRepo.delete(wallet4);
         userRepository.delete(savedAnotherUser);
     }
 

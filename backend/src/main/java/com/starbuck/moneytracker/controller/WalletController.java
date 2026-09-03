@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletCreateDto;
+import com.starbuck.moneytracker.dto.WalletListResponseDto;
 import com.starbuck.moneytracker.dto.WalletResponseDto;
 import com.starbuck.moneytracker.dto.WalletUpdateDto;
 import com.starbuck.moneytracker.mapper.WalletMapper;
@@ -40,10 +41,8 @@ public class WalletController {
      * @return
      */
     @GetMapping(path = "/wallet")
-    public List<WalletResponseDto> listWallets() {
-        var wallets = walletService.listWalletsForUser();
-
-        return walletMapper.toDtoList(wallets);
+    public List<WalletListResponseDto> listWallets() {
+        return walletService.listWalletsForUser();
     }
 
     /**

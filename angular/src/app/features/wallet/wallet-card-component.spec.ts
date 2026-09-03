@@ -14,6 +14,7 @@ describe('WalletCardComponent (Vitest)', () => {
         name: 'Napi költés',
         currencyCode: CurrencyCodesEnum.huf,
         type: WalletTypesEnum.default,
+        sum: 550,
     };
 
     beforeEach(async () => {
@@ -32,6 +33,9 @@ describe('WalletCardComponent (Vitest)', () => {
 
         expect(fixture.nativeElement.querySelector('.wallet-name').textContent.trim()).toBe(
             'Napi költés',
+        );
+        expect(fixture.nativeElement.querySelector('.wallet-balance-amount').textContent.trim()).toBe(
+            '550',
         );
         expect(
             fixture.nativeElement.querySelector('.wallet-balance-currency').textContent.trim(),

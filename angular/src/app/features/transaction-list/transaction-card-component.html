@@ -18,9 +18,12 @@
                 [class.income]="isIncome()"
                 [class.outcome]="!isIncome()"
             >
-                {{ transaction.priceSum | number }}
+                {{ transaction.priceSum | number }}{{ transaction.wallet.currencyCode | currencySymbol}}
             </div>
-            <div class="transaction-name">{{ transaction.name }}</div>
+            <div class="d-flex">
+                <div class="transaction-name me-1">{{ transaction.name }}</div>
+                <div class="wallet-name">({{ transaction.wallet.name }})</div>
+            </div>
             @if (categoriesAsString()) {
                 <div class="transaction-categories">{{ categoriesAsString() }}</div>
             }

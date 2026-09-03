@@ -3,6 +3,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import TransactionListComponent from './transaction-list-component';
 import TransactionCardComponent from './transaction-card-component';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
+import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+
+const sampleWallet = {
+    id: 1,
+    name: 'Napi költés',
+    currencyCode: CurrencyCodesEnum.huf,
+    type: WalletTypesEnum.default,
+};
 
 describe('TransactionListComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionListComponent>;
@@ -41,8 +49,8 @@ describe('TransactionListComponent (Vitest)', () => {
         component.isTransactionListLoading = false;
         component.title = null;
         component.transactions = [
-            { id: 1, name: 'tranzakció1', priceSum: 100, transactionType: 'INCOME', transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [] },
-            { id: 2, name: 'tranzakció2', priceSum: -200, transactionType: 'OUTCOME', transactionDate: '2024-01-02', isComplexTransaction: true, transactionDetails: [] },
+            { id: 1, name: 'tranzakció1', priceSum: 100, transactionType: 'INCOME', transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [], wallet: sampleWallet },
+            { id: 2, name: 'tranzakció2', priceSum: -200, transactionType: 'OUTCOME', transactionDate: '2024-01-02', isComplexTransaction: true, transactionDetails: [], wallet: sampleWallet },
         ];
 
         fixture.detectChanges();
@@ -56,7 +64,7 @@ describe('TransactionListComponent (Vitest)', () => {
 
         component.isTransactionListLoading = false;
         component.transactions = [
-            { id: 5, name: 'tranzakció5', priceSum: 100, transactionType: 'INCOME', transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [] },
+            { id: 5, name: 'tranzakció5', priceSum: 100, transactionType: 'INCOME', transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [], wallet: sampleWallet },
         ];
 
         fixture.detectChanges();

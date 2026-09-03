@@ -1,24 +1,36 @@
-import { Component, computed, inject, Signal, signal } from '@angular/core';
+import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionsListComponent } from '../transaction/transactions-component';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
+import { WalletDataUtil } from '../wallet/wallet-data-util';
+import { MoneySumInterface, WalletSummaryInterface } from '../transaction/interfaces';
+import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
 
 @Component({
     selector: 'app-main-page-component',
     templateUrl: './main-page-component.html',
     styleUrl: './main-page-component.scss',
     standalone: true,
-    imports: [TransactionsListComponent, DecimalPipe, TranslatePipe, TransactionModalComponent],
-    providers: [TransactionModalStateService],
+    imports: [
+        TransactionsListComponent,
+        DecimalPipe,
+        TranslatePipe,
+        TransactionModalComponent,
+        CurrencySymbolPipe,
+    ],
+    providers: [TransactionModalStateService, DecimalPipe],
 })
 export class MainPage {
     private transactionService = inject(TransactionService);
+    private translateService = inject(TranslateService);
+    private decimalPipe = inject(DecimalPipe);
     protected modal = inject(TransactionModalStateService);
+    protected walletUtils = inject(WalletDataUtil);
 
     /**
      * Újra kell-e tölteni az adatokat? Ha ez változik, akkor újra fogja tölteni a listát.
@@ -38,6 +50,12 @@ export class MainPage {
      * Összes pénz töltődik-e
      */
     protected isMoneySumLoading = signal(true);
+
+    /**
+     * Az összesített pénz, valutánként
+     */
+    protected moneySumSummarizedPerCurrency: WritableSignal<MoneySumInterface | null> =
+        signal(null);
 
     constructor() {
         // Mentés/törlés után újratöltjük a listát és az összesítést
@@ -61,9 +79,20 @@ export class MainPage {
         toObservable(this.reloadMoneySumTrigger).pipe(
             tap(() => this.isMoneySumLoading.set(true)),
             switchMap(() =>
-                this.transactionService
-                    .getMoneySum()
-                    .pipe(tap(() => this.isMoneySumLoading.set(false))),
+                this.transactionService.getMoneySum().pipe(
+                    tap((walletData) => {
+                        this.isMoneySumLoading.set(false);
+                        this.moneySumSummarizedPerCurrency.set({
+                            moneySum: this.walletUtils.summarizeSumPerCurrency(walletData.moneySum),
+                            expenseSumThisMonth: this.walletUtils.summarizeSumPerCurrency(
+                                walletData.expenseSumThisMonth,
+                            ),
+                            incomeSumThisMonth: this.walletUtils.summarizeSumPerCurrency(
+                                walletData.incomeSumThisMonth,
+                            ),
+                        });
+                    }),
+                ),
             ),
         ),
         { initialValue: null },
@@ -72,8 +101,25 @@ export class MainPage {
     /**
      * Az egyenleg nettó változása ebben a hónapban
      */
-    protected balanceChangeThisMonth: Signal<number | null> = computed(() => {
-        const sum = this.moneySum();
-        return sum ? sum.incomeSumThisMonth - sum.expenseSumThisMonth : null;
+    protected balanceChangeThisMonth: Signal<WalletSummaryInterface[]> = computed(() => {
+        const income = this.moneySumSummarizedPerCurrency()?.incomeSumThisMonth;
+        const expense = this.moneySumSummarizedPerCurrency()?.expenseSumThisMonth;
+        if (!income || !expense) {
+            return [];
+        }
+
+        const currencyCodes = new Set([
+            ...income.map((item) => item.currencyCode),
+            ...expense.map((item) => item.currencyCode),
+        ]);
+
+        return Array.from(currencyCodes).map((currencyCode) => {
+            const incomeTotal =
+                income.find((item) => item.currencyCode === currencyCode)?.total ?? 0;
+            const expenseTotal =
+                expense.find((item) => item.currencyCode === currencyCode)?.total ?? 0;
+
+            return { currencyCode, total: incomeTotal - expenseTotal };
+        });
     });
 }

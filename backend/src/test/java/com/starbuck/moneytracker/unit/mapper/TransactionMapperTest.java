@@ -9,7 +9,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
@@ -28,10 +32,20 @@ import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
+import com.starbuck.moneytracker.mapper.WalletMapper;
 
+@ExtendWith(MockitoExtension.class)
 class TransactionMapperTest {
 
-    private final TransactionMapper mapper = new TransactionMapper();
+    @InjectMocks
+    private WalletMapper walletMapper;
+
+    private TransactionMapper mapper;
+
+    @BeforeEach
+    void setUp() {
+        mapper = new TransactionMapper(walletMapper);
+    }
 
     private Wallet defaultWallet;
 
@@ -78,6 +92,11 @@ class TransactionMapperTest {
         assertEquals(new BigDecimal("100.00"), detailDto.price());
         assertFalse(detailDto.isComplexPriceMode());
         assertTrue(detailDto.categories().isEmpty());
+
+        var walletDto = dto.wallet();
+        assertEquals("Default Wallet", walletDto.name());
+        assertEquals(CurrencyEnum.HUF, walletDto.currencyCode());
+        assertEquals(WalletTypeEnum.DEFAULT, walletDto.type());
     }
 
     /**
@@ -204,7 +223,7 @@ class TransactionMapperTest {
         TransactionCreateRequest request = new TransactionCreateRequest("groceries", new BigDecimal("-50.00"),
                 TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 3, 1), List.of(), List.of(), 1L);
 
-        TransactionSaveCommand result = mapper.fromTransactionCreateRequest(request);
+        TransactionSaveCommand result = mapper.fromTransactionSaveRequest(request);
 
         assertEquals("groceries", result.getTransactionName());
         assertEquals(LocalDate.of(2026, 3, 1), result.getTransactionDate());

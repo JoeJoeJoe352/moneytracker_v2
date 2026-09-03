@@ -6,6 +6,14 @@ import TransactionListComponent from './transaction-list-component';
 import TransactionCardComponent from './transaction-card-component';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 import { TransactionListElementData } from './interfaces';
+import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+
+const sampleWallet = {
+    id: 1,
+    name: 'Napi költés',
+    currencyCode: CurrencyCodesEnum.huf,
+    type: WalletTypesEnum.default,
+};
 
 describe('TransactionList + TransactionCard integration (Vitest)', () => {
     let fixture: ComponentFixture<TransactionListComponent>;
@@ -34,6 +42,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
                 transactionDate: '2024-01-10',
                 isComplexTransaction: false,
                 transactionDetails: [],
+                wallet: sampleWallet,
             },
             {
                 id: 2,
@@ -52,6 +61,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
                         isComplexPriceMode: false,
                     },
                 ],
+                wallet: sampleWallet,
             },
         ] as TransactionListElementData[];
 
@@ -64,13 +74,13 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
 
         const firstPrice = cards[0].querySelector('.transaction-price');
         expect(firstPrice.classList.contains('income')).toBe(true);
-        expect(firstPrice.textContent.trim()).toBe('500,000');
+        expect(firstPrice.textContent.trim()).toBe('500,000Ft');
         expect(cards[0].querySelector('.transaction-name').textContent.trim()).toBe('Fizetés');
         expect(cards[0].querySelector('.transaction-categories')).toBe(null);
 
         const secondPrice = cards[1].querySelector('.transaction-price');
         expect(secondPrice.classList.contains('outcome')).toBe(true);
-        expect(secondPrice.textContent.trim()).toBe('-1,000');
+        expect(secondPrice.textContent.trim()).toBe('-1,000Ft');
         expect(cards[1].querySelector('.transaction-name').textContent.trim()).toBe('Bevásárlás');
         expect(cards[1].querySelector('.transaction-categories').textContent.trim()).toBe(
             'élelmiszer, nasi',
@@ -89,6 +99,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
                 transactionDate: '2024-01-01',
                 isComplexTransaction: false,
                 transactionDetails: [],
+                wallet: sampleWallet,
             },
             {
                 id: 20,
@@ -98,6 +109,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
                 transactionDate: '2024-01-02',
                 isComplexTransaction: false,
                 transactionDetails: [],
+                wallet: sampleWallet,
             },
         ];
 
@@ -126,6 +138,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
                 transactionDate: '2024-01-01',
                 isComplexTransaction: false,
                 transactionDetails: [],
+                wallet: sampleWallet,
             },
         ];
 

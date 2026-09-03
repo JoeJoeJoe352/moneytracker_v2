@@ -1,11 +1,11 @@
 package com.starbuck.moneytracker.dto;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 public record MoneySumResponseDto(
-    BigDecimal moneySum,
-    BigDecimal incomeSumThisMonth,
-    BigDecimal expenseSumThisMonth
+    List<WalletSummaryDto> moneySum,
+    List<WalletSummaryDto> incomeSumThisMonth,
+    List<WalletSummaryDto> expenseSumThisMonth
 ) {
 
 }
