@@ -1,3 +1,5 @@
+import { WalletDataInterfaceWithoutSum } from "../wallet/interfaces";
+
 /**
  * Egy, a listában szereplő elem adatai
  */
@@ -9,6 +11,7 @@ export interface TransactionListElementData {
     transactionType: string;
     isComplexTransaction: boolean;
     transactionDetails: TransactionDetailListElementData[];
+    wallet: WalletDataInterfaceWithoutSum
 }
 
 /**

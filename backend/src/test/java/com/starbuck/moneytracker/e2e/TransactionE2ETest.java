@@ -213,9 +213,9 @@ class TransactionE2ETest extends MySqlContainerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         MoneySumResponseDto sums = response.getBody();
-        assertEquals(new BigDecimal("600.00"), sums.moneySum());
-        assertEquals(new BigDecimal("1000.00"), sums.incomeSumThisMonth());
-        assertEquals(new BigDecimal("400.00"), sums.expenseSumThisMonth());
+        assertEquals(new BigDecimal("600.00"), sums.moneySum().get(0).getTotal());
+        assertEquals(new BigDecimal("1000.00"), sums.incomeSumThisMonth().get(0).getTotal());
+        assertEquals(new BigDecimal("400.00"), sums.expenseSumThisMonth().get(0).getTotal());
     }
 
     // ---- GET /transaction/last ----

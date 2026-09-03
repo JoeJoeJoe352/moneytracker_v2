@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
-import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
@@ -22,6 +21,12 @@ import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 @Component
 public class TransactionMapper {
+
+    private final WalletMapper walletMapper;
+
+    public TransactionMapper(WalletMapper walletMapper) {
+        this.walletMapper = walletMapper;
+    }
 
     /**
      * Átalakít egy tranzakciót DTO-ra
@@ -48,6 +53,8 @@ public class TransactionMapper {
                 })
                 .collect(Collectors.toList());
 
+        var walletDto = walletMapper.toDto(entity.getWallet());
+        
         TransactionResponseDto dto = new TransactionResponseDto(
                 entity.getId(),
                 entity.getName(),
@@ -55,7 +62,8 @@ public class TransactionMapper {
                 entity.getTransactionDate(),
                 entity.getTransactionType(),
                 entity.isComplexTransaction(),
-                detailDto);
+                detailDto,
+                walletDto);
 
         return dto;
     }
@@ -105,29 +113,6 @@ public class TransactionMapper {
         return entities.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Átalakít egy tranzakció DTO-t egy tranzakció létrehozó commandra
-     * 
-     * @param request
-     * @return
-     */
-    public TransactionCreateCommand fromTransactionCreateRequest(@NonNull TransactionCreateRequest request) {
-        List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(
-                request.transactionDetails(),
-                request.transactionType());
-
-        TransactionCreateCommand command = new TransactionCreateCommand(
-                request.name(),
-                request.globalPrice(),
-                request.transactionDate(),
-                request.transactionType(),
-                detailCommands,
-                request.globalCategories(),
-                request.walletId());
-
-        return command;
     }
 
     /**
