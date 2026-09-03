@@ -14,6 +14,7 @@ import { CategoryService } from './category-service';
 import { TransactionListElementData } from '../transaction-list/interfaces';
 import { TransactionTypeEnum } from './transaction-type-enum';
 import { TransactionModalStateService } from './transaction-modal-state-service';
+import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
 
 @Component({
     selector: 'app-create-transaction-modal',
@@ -40,6 +41,12 @@ const sampleTransactions: TransactionListElementData[] = [
         transactionDate: '2024-01-10',
         isComplexTransaction: false,
         transactionDetails: [],
+        wallet: {
+            id: 1,
+            name: 'Napi költés',
+            currencyCode: CurrencyCodesEnum.huf,
+            type: WalletTypesEnum.default,
+        },
     },
 ];
 

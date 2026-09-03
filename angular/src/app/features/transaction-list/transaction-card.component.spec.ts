@@ -3,6 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import TransactionCardComponent from './transaction-card-component';
 import { DecimalPipe } from '@angular/common';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
+import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
+import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
 
 describe('TransactionCardComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionCardComponent>;
@@ -10,7 +12,7 @@ describe('TransactionCardComponent (Vitest)', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TransactionCardComponent, DecimalPipe],
+            imports: [TransactionCardComponent, DecimalPipe, CurrencySymbolPipe],
         }).compileComponents();
 
         fixture = TestBed.createComponent(TransactionCardComponent);
@@ -36,6 +38,12 @@ describe('TransactionCardComponent (Vitest)', () => {
                     isComplexPriceMode: false,
                 },
             ],
+            wallet: {
+                id: 1,
+                name: 'Napi költés',
+                currencyCode: CurrencyCodesEnum.huf,
+                type: WalletTypesEnum.default,
+            },
         };
 
         // WHEN
@@ -45,10 +53,13 @@ describe('TransactionCardComponent (Vitest)', () => {
         const priceEl = fixture.nativeElement.querySelector('.transaction-price');
         expect(priceEl.classList.contains('income')).toBe(true);
         expect(priceEl.classList.contains('outcome')).toBe(false);
-        expect(priceEl.textContent.trim()).toBe('500,000');
+        expect(priceEl.textContent.trim()).toBe('500,000Ft');
 
         const name = fixture.nativeElement.querySelector('.transaction-name');
         expect(name.textContent.trim()).toBe('Fizetés');
+
+        const walletName = fixture.nativeElement.querySelector('.wallet-name');
+        expect(walletName.textContent.trim()).toBe('(Napi költés)');
 
         const date = fixture.nativeElement.querySelector('.transaction-date');
         expect(date.textContent.trim()).toBe('2024-01-10');
@@ -90,6 +101,12 @@ describe('TransactionCardComponent (Vitest)', () => {
                     isComplexPriceMode: true,
                 },
             ],
+            wallet: {
+                id: 2,
+                name: 'Közös',
+                currencyCode: CurrencyCodesEnum.eur,
+                type: WalletTypesEnum.default,
+            },
         };
 
         // WHEN
@@ -99,10 +116,13 @@ describe('TransactionCardComponent (Vitest)', () => {
         const priceEl = fixture.nativeElement.querySelector('.transaction-price');
         expect(priceEl.classList.contains('outcome')).toBe(true);
         expect(priceEl.classList.contains('income')).toBe(false);
-        expect(priceEl.textContent.trim()).toBe('-1,000');
+        expect(priceEl.textContent.trim()).toBe('-1,000€');
 
         const name = fixture.nativeElement.querySelector('.transaction-name');
         expect(name.textContent.trim()).toBe('Bevásárlás');
+
+        const walletName = fixture.nativeElement.querySelector('.wallet-name');
+        expect(walletName.textContent.trim()).toBe('(Közös)');
 
         const date = fixture.nativeElement.querySelector('.transaction-date');
         expect(date.textContent.trim()).toBe('2024-01-11');
