@@ -59,6 +59,7 @@ describe('WalletModalComponent (Vitest)', () => {
             name: 'Tárca',
             currencyCode: CurrencyCodesEnum.huf,
             type: WalletTypesEnum.savings,
+            sum: 0,
         };
         component.wallet = wallet;
         component.isDataInitializing = false;

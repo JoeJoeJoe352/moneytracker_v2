@@ -1,10 +1,15 @@
-import { CurrencyCodesEnum, WalletTypesEnum } from "../../shared/enums";
+import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
 
-export interface WalletDataInterface {
+// Store-ban használt interface, store-ban nem akarjuk tárolni a wallet összegét
+export interface WalletDataInterfaceWithoutSum {
     id: number;
     name: string;
     currencyCode: CurrencyCodesEnum;
     type: WalletTypesEnum;
+}
+
+export interface WalletDataInterface extends WalletDataInterfaceWithoutSum {
+    sum: number;
 }
 
 export interface WalletCreateRequest {

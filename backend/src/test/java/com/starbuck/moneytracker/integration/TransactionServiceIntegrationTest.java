@@ -298,7 +298,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(CurrencyEnum.EUR, result.get(1).getCurrencyCode());
         assertEquals(new BigDecimal("1000.00"), result.get(1).getTotal());
         assertEquals(CurrencyEnum.HUF, result.get(2).getCurrencyCode());
-        assertEquals(BigDecimal.ZERO, result.get(2).getTotal());
+        assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
 
         this.deleteData(income);
         this.deleteData(expense);
@@ -339,7 +339,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         // Mindig pozitív számmal tér vissza
         assertEquals(new BigDecimal("200.00"), result.get(0).getTotal());
         assertEquals(new BigDecimal("150.00"), result.get(1).getTotal());
-        assertEquals(new BigDecimal("0"), result.get(2).getTotal());
+        assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
 
         this.deleteData(expenseThisMonth);
         this.deleteData(incomeThisMonth);
@@ -378,7 +378,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         // Mindig pozitív számmal tér vissza
         assertEquals(new BigDecimal("300.00"), result.get(0).getTotal());
         assertEquals(new BigDecimal("150.00"), result.get(1).getTotal());
-        assertEquals(new BigDecimal("0"), result.get(2).getTotal());
+        assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
 
         this.deleteData(transactionForAnotherWallet);
         this.deleteData(incomeThisMonth);

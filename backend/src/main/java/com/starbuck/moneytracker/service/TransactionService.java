@@ -158,19 +158,9 @@ public class TransactionService {
 
     /**
      * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
-     * 
-     * @return BigDecimal
      */
     public List<WalletSummaryDto> sumAllMoney() {
-        var result = this.walletRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
-
-        result.forEach(walletSummary -> {
-            if (walletSummary.getTotal() == null) {
-                walletSummary.setTotal(BigDecimal.ZERO);
-            }
-        });
-
-        return result;
+        return this.walletRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
     }
 
     /**
@@ -199,14 +189,7 @@ public class TransactionService {
     private List<WalletSummaryDto> summarizeForMonth(TransactionTypeEnum type) {
         Long userId = currentUser.getUser().getId();
 
-        var result = transactionRepo.summarizeTransactionPricesForMonthAndType(userId, type);
-
-        result.forEach(walletSummary -> {
-            if (walletSummary.getTotal() == null) {
-                walletSummary.setTotal(BigDecimal.ZERO);
-            }
-        });
-        return result;
+        return transactionRepo.summarizeTransactionPricesForMonthAndType(userId, type);
     }
 
     /**

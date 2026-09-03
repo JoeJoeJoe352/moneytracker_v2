@@ -1,6 +1,5 @@
 package com.starbuck.moneytracker.repository;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +53,7 @@ public interface TransactionRepository extends
     @Query("""
                 SELECT new com.starbuck.moneytracker.dto.WalletSummaryDto(
                     w.currencyCode,
-                    SUM(t.priceSum)
+                    COALESCE(SUM(t.priceSum), 0)
                 )
                 FROM Wallet w
                 LEFT JOIN w.transactions t ON

@@ -35,6 +35,7 @@ const sampleWallet: WalletDataInterface = {
     name: 'Napi költés',
     currencyCode: CurrencyCodesEnum.huf,
     type: WalletTypesEnum.default,
+    sum: 0,
 };
 
 describe('WalletsPageComponent (Vitest)', () => {

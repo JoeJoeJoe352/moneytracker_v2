@@ -15,9 +15,9 @@
         }}</span>
 
         <div class="wallet-balance">
-            <span class="wallet-balance-amount">{{ 5000000 | number }}</span>
+            <span class="wallet-balance-amount">{{ walletData.sum | number }}</span>
             <span class="wallet-balance-currency">{{
-                walletDataUtil.getCurrencySymbolForCurrencyCode(walletData.currencyCode)
+                walletData.currencyCode | currencySymbol
             }}</span>
         </div>
 
