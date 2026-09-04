@@ -1,7 +1,7 @@
 import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { _, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-import { LANGUAGE_DE, LANGUAGE_EN, LANGUAGE_HU } from '../utils/language-util';
+import { SupportedLangEnum } from '../enums';
 
 @Component({
     selector: 'app-language-switcher',
@@ -34,15 +34,15 @@ export class LanguageSwitcherComponent {
     protected languageData: Signal<{ id: string; name: string }[]> = computed(() => {
         return [
             {
-                id: LANGUAGE_HU,
+                id: SupportedLangEnum.hu,
                 name: this.translateService.instant(_('language.hu')),
             },
             {
-                id: LANGUAGE_EN,
+                id: SupportedLangEnum.en,
                 name: this.translateService.instant(_('language.en')),
             },
             {
-                id: LANGUAGE_DE,
+                id: SupportedLangEnum.de,
                 name: this.translateService.instant(_('language.de')),
             },
         ];

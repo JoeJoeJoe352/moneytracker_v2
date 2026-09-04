@@ -4,9 +4,9 @@ import localeEn from '@angular/common/locales/en';
 import localeDe from '@angular/common/locales/de';
 import localeHu from '@angular/common/locales/hu';
 import { TranslateService } from '@ngx-translate/core';
-import { CurrencyCodesEnum } from '../enums';
+import { CurrencyCodesEnum, SupportedLangEnum } from '../enums';
 import { WalletDataUtil } from '../../features/wallet/wallet-data-util';
-import { LANGUAGE_EN, LANGUAGE_TO_LOCALE } from '../utils/language-util';
+import { LANGUAGE_TO_LOCALE } from '../utils/language-util';
 
 registerLocaleData(localeEn);
 registerLocaleData(localeDe);
@@ -27,7 +27,7 @@ export class CurrencyFormatPipe implements PipeTransform {
     public transform(amount: number, currencyCode: CurrencyCodesEnum): string {
         // A CLDR pénznem-adatai a szimbólum pozícióját (elé/mögé) és az ezres elválasztókat a UI nyelvéhez (nem a pénznemhez) igazítják
         const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
-        const locale = LANGUAGE_TO_LOCALE[lang ?? ''] ?? LANGUAGE_TO_LOCALE[LANGUAGE_EN];
+        const locale = LANGUAGE_TO_LOCALE[lang ?? ''] ?? LANGUAGE_TO_LOCALE[SupportedLangEnum.en];
         // Az Angular locale-adatai csak a locale "saját" pénznemének szimbólumát ismerik (pl. hu -> Ft), a többihez az ISO kódot adnak vissza
         // (pl. hu locale-ban EUR -> "EUR", nem "€") - ezért a szimbólumot a WalletDataUtil-ból vesszük
         const symbol = this.walletUtils.getCurrencySymbolForCurrencyCode(currencyCode);
