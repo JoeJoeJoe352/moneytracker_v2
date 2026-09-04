@@ -23,7 +23,7 @@
             } @else {
                 <div class="stat-value">
                     @for (sum of moneySumSummarizedPerCurrency()?.moneySum; track $index) {
-                        <div>{{ sum.total | number }}{{ sum.currencyCode | currencySymbol }}</div>
+                        <div>{{ sum.total | currencyFormat: sum.currencyCode }}</div>
                     }
                 </div>
                 <div>
@@ -39,8 +39,7 @@
                                 } @else {
                                     <i class="bi bi-arrow-down-short"></i>
                                 }
-                                {{ change.total | number
-                                }}{{ change.currencyCode | currencySymbol }}
+                                {{ change.total | currencyFormat: change.currencyCode }}
                                 {{ 'mainpage.balance_change_this_month' | translate }}
                             </div>
                         }
@@ -68,7 +67,7 @@
                         track $index
                     ) {
                         <div>
-                            {{ income.total | number }}{{ income.currencyCode | currencySymbol }}
+                            {{ income.total | currencyFormat: income.currencyCode }}
                         </div>
                     }
                 </div>
@@ -91,7 +90,7 @@
                         track $index
                     ) {
                         <div>
-                            {{ expense.total | number }}{{ expense.currencyCode | currencySymbol }}
+                            {{ expense.total | currencyFormat: expense.currencyCode }}
                         </div>
                     }
                 </div>

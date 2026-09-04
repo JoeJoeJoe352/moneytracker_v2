@@ -1,16 +1,15 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { WalletDataInterface } from './interfaces';
 import { WalletDataUtil } from './wallet-data-util';
 import { TranslatePipe } from '@ngx-translate/core';
-import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
+import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 
 @Component({
     selector: 'app-wallet-card-component',
     templateUrl: './wallet-card-component.html',
     styleUrl: './wallet-card-component.scss',
     standalone: true,
-    imports: [DecimalPipe, TranslatePipe, CurrencySymbolPipe],
+    imports: [TranslatePipe, CurrencyFormatPipe],
 })
 export class WalletCardComponent {
     protected readonly walletDataUtil = inject(WalletDataUtil);

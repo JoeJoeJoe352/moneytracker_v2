@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { WalletCardComponent } from './wallet-card-component';
 import { WalletDataInterface } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
@@ -23,32 +23,32 @@ describe('WalletCardComponent (Vitest)', () => {
             providers: [provideTranslateService()],
         }).compileComponents();
 
+        // hu locale-ban a pénznem szimbóluma az összeg mögé kerül (pl. "550 Ft")
+        TestBed.inject(TranslateService).use('hu');
+
         fixture = TestBed.createComponent(WalletCardComponent);
         component = fixture.componentInstance;
         component.walletData = wallet;
     });
 
-    it('should render the wallet name and currency symbol', () => {
+    it('should render the wallet name and currency amount with the currency symbol as a suffix', () => {
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('.wallet-name').textContent.trim()).toBe(
+        expect(fixture.nativeElement.querySelector('.wallet-name').textContent.replace(/\s+/g, ' ').trim()).toBe(
             'Napi költés',
         );
-        expect(fixture.nativeElement.querySelector('.wallet-balance-amount').textContent.trim()).toBe(
-            '550',
+        expect(fixture.nativeElement.querySelector('.wallet-balance-amount').textContent.replace(/\s+/g, ' ').trim()).toBe(
+            '550 Ft',
         );
-        expect(
-            fixture.nativeElement.querySelector('.wallet-balance-currency').textContent.trim(),
-        ).toBe('Ft');
     });
 
     it('should render the euro symbol for an EUR wallet', () => {
         component.walletData = { ...wallet, currencyCode: CurrencyCodesEnum.eur };
         fixture.detectChanges();
 
-        expect(
-            fixture.nativeElement.querySelector('.wallet-balance-currency').textContent.trim(),
-        ).toBe('€');
+        expect(fixture.nativeElement.querySelector('.wallet-balance-amount').textContent.replace(/\s+/g, ' ').trim()).toBe(
+            '550 €',
+        );
     });
 
     it('should emit cardClicked with the wallet id when clicked', () => {

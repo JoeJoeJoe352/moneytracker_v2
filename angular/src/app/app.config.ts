@@ -10,7 +10,7 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AuthService } from './features/auth/auth-service';
 import { UserDataStore } from './shared/services/user-data-store';
 import { LanguageInterceptor } from './language-interceptor';
-import { LANGUAGE_EN } from './shared/components/language-switch-component';
+import { LANGUAGE_EN } from './shared/utils/language-util';
 
 export const appConfig: ApplicationConfig = {
     providers: [

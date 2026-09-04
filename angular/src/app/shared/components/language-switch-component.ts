@@ -1,10 +1,7 @@
 import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { _, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
-
-export const LANGUAGE_HU = 'hu';
-export const LANGUAGE_EN = 'en';
-export const LANGUAGE_DE = 'de';
+import { LANGUAGE_DE, LANGUAGE_EN, LANGUAGE_HU } from '../utils/language-util';
 
 @Component({
     selector: 'app-language-switcher',

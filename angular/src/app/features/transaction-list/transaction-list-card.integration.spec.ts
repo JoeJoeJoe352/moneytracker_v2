@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import TransactionListComponent from './transaction-list-component';
 import TransactionCardComponent from './transaction-card-component';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
@@ -24,6 +24,8 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
             imports: [TransactionListComponent],
             providers: [provideTranslateService()],
         }).compileComponents();
+
+        TestBed.inject(TranslateService).use('hu');
 
         fixture = TestBed.createComponent(TransactionListComponent);
         component = fixture.componentInstance;
@@ -74,13 +76,13 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
 
         const firstPrice = cards[0].querySelector('.transaction-price');
         expect(firstPrice.classList.contains('income')).toBe(true);
-        expect(firstPrice.textContent.trim()).toBe('500,000Ft');
+        expect(firstPrice.textContent.replace(/\s+/g, ' ').trim()).toBe('500 000 Ft');
         expect(cards[0].querySelector('.transaction-name').textContent.trim()).toBe('Fizetés');
         expect(cards[0].querySelector('.transaction-categories')).toBe(null);
 
         const secondPrice = cards[1].querySelector('.transaction-price');
         expect(secondPrice.classList.contains('outcome')).toBe(true);
-        expect(secondPrice.textContent.trim()).toBe('-1,000Ft');
+        expect(secondPrice.textContent.replace(/\s+/g, ' ').trim()).toBe('-1 000 Ft');
         expect(cards[1].querySelector('.transaction-name').textContent.trim()).toBe('Bevásárlás');
         expect(cards[1].querySelector('.transaction-categories').textContent.trim()).toBe(
             'élelmiszer, nasi',

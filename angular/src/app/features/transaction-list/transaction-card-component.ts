@@ -1,14 +1,13 @@
 import { Component, computed, Input, Signal } from '@angular/core';
 import { TransactionListElementData } from './interfaces';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
-import { DecimalPipe } from '@angular/common';
-import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
+import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 
 @Component({
     selector: 'app-transaction-card',
     templateUrl: './transaction-card-component.html',
     styleUrl: './transaction-card-component.scss',
-    imports: [DecimalPipe, CurrencySymbolPipe],
+    imports: [CurrencyFormatPipe],
 })
 export default class TransactionCardComponent {
     /**

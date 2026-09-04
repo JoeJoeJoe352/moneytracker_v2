@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import TransactionCardComponent from './transaction-card-component';
-import { DecimalPipe } from '@angular/common';
 import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
-import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
 
 describe('TransactionCardComponent (Vitest)', () => {
@@ -12,8 +11,12 @@ describe('TransactionCardComponent (Vitest)', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TransactionCardComponent, DecimalPipe, CurrencySymbolPipe],
+            imports: [TransactionCardComponent],
+            providers: [provideTranslateService()],
         }).compileComponents();
+
+        // hu locale-ban a pénznem szimbóluma az összeg mögé kerül (pl. "500 000 Ft")
+        TestBed.inject(TranslateService).use('hu');
 
         fixture = TestBed.createComponent(TransactionCardComponent);
         component = fixture.componentInstance;
@@ -53,7 +56,7 @@ describe('TransactionCardComponent (Vitest)', () => {
         const priceEl = fixture.nativeElement.querySelector('.transaction-price');
         expect(priceEl.classList.contains('income')).toBe(true);
         expect(priceEl.classList.contains('outcome')).toBe(false);
-        expect(priceEl.textContent.trim()).toBe('500,000Ft');
+        expect(priceEl.textContent.replace(/\s+/g, ' ').trim()).toBe('500 000 Ft');
 
         const name = fixture.nativeElement.querySelector('.transaction-name');
         expect(name.textContent.trim()).toBe('Fizetés');
@@ -116,7 +119,7 @@ describe('TransactionCardComponent (Vitest)', () => {
         const priceEl = fixture.nativeElement.querySelector('.transaction-price');
         expect(priceEl.classList.contains('outcome')).toBe(true);
         expect(priceEl.classList.contains('income')).toBe(false);
-        expect(priceEl.textContent.trim()).toBe('-1,000€');
+        expect(priceEl.textContent.replace(/\s+/g, ' ').trim()).toBe('-1 000 €');
 
         const name = fixture.nativeElement.querySelector('.transaction-name');
         expect(name.textContent.trim()).toBe('Bevásárlás');

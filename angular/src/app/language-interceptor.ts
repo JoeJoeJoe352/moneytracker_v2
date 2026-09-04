@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { LANGUAGE_EN } from './shared/components/language-switch-component';
+import { LANGUAGE_EN } from './shared/utils/language-util';
 
 /**
  * Beállítja az oldal nyelvét
