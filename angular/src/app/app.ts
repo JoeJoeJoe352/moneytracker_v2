@@ -4,7 +4,9 @@ import { Header } from './shared/components/header';
 import { Footer } from './shared/components/footer';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { LANGUAGE_DE, LANGUAGE_EN, LANGUAGE_HU } from './shared/components/language-switch-component';
+import { SUPPORTED_LANGS } from './shared/utils/language-util';
+import { SupportedLangEnum } from './shared/enums';
+
 @Component({
     selector: 'app-root',
     imports: [RouterOutlet, Header, Footer, ReactiveFormsModule],
@@ -16,12 +18,12 @@ export class App {
     private translate = inject(TranslateService);
 
     constructor() {
-        this.translate.addLangs([LANGUAGE_HU, LANGUAGE_EN, LANGUAGE_DE]);
+        this.translate.addLangs(SUPPORTED_LANGS);
 
         let fallBackLang = this.translate.getFallbackLang();
         if (fallBackLang === null) {
             console.error('Please set the fallback lang');
-            fallBackLang = LANGUAGE_EN;
+            fallBackLang = SupportedLangEnum.en;
         }
 
         const lang = localStorage.getItem('lang') ?? fallBackLang;

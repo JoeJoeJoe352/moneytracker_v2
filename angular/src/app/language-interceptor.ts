@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { LANGUAGE_EN } from './shared/components/language-switch-component';
+import { SupportedLangEnum } from './shared/enums';
 
 /**
  * Beállítja az oldal nyelvét
@@ -9,7 +9,7 @@ export const LanguageInterceptor: HttpInterceptorFn = (req, next) => {
 
     if (lang === null) {
         console.error('Lang is not set in localStorage when the interceptor activated');
-        lang = LANGUAGE_EN;
+        lang = SupportedLangEnum.en;
         localStorage.setItem('lang', lang);
     }
 

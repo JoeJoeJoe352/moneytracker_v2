@@ -10,7 +10,7 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AuthService } from './features/auth/auth-service';
 import { UserDataStore } from './shared/services/user-data-store';
 import { LanguageInterceptor } from './language-interceptor';
-import { LANGUAGE_EN } from './shared/components/language-switch-component';
+import { SupportedLangEnum } from './shared/enums';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -27,7 +27,7 @@ export const appConfig: ApplicationConfig = {
                 prefix: './i18n/',
                 suffix: '.json',
             }),
-            fallbackLang: LANGUAGE_EN,
+            fallbackLang: SupportedLangEnum.en,
         }),
         provideAppInitializer(() => initApp(inject(AuthService), inject(UserDataStore))),
     ],

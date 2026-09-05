@@ -3,14 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Subject, of } from 'rxjs';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
-import { DecimalPipe } from '@angular/common';
 import { MainPage } from './main-page-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { CategoryService } from '../transaction/category-service';
 import { MoneySumInterface } from '../transaction/interfaces';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { CurrencyCodesEnum } from '../../shared/enums';
-import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
+import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 
 @Component({
     selector: 'app-transactions-list-component',
@@ -75,9 +74,8 @@ describe('MainPage (Vitest)', () => {
                 imports: [
                     StubTransactionsListComponent,
                     StubTransactionModalComponent,
-                    DecimalPipe,
                     TranslatePipe,
-                    CurrencySymbolPipe,
+                    CurrencyFormatPipe,
                 ],
             },
         });

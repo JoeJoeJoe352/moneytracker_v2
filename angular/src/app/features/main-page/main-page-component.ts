@@ -9,7 +9,7 @@ import { TransactionsListComponent } from '../transaction/transactions-component
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
 import { MoneySumInterface, WalletSummaryInterface } from '../transaction/interfaces';
-import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
+import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 
 @Component({
     selector: 'app-main-page-component',
@@ -18,10 +18,9 @@ import { CurrencySymbolPipe } from '../../shared/pipes/currency-symbol-pipe';
     standalone: true,
     imports: [
         TransactionsListComponent,
-        DecimalPipe,
         TranslatePipe,
         TransactionModalComponent,
-        CurrencySymbolPipe,
+        CurrencyFormatPipe,
     ],
     providers: [TransactionModalStateService, DecimalPipe],
 })

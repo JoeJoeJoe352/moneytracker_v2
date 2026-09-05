@@ -8,3 +8,9 @@ export enum CurrencyCodesEnum {
     eur = 'EUR',
     usd = 'USD',
 }
+
+export enum SupportedLangEnum {
+    hu = "hu",
+    en = "en",
+    de = "de",
+}
