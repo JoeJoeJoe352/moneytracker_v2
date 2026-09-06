@@ -31,7 +31,7 @@ describe('TransactionListComponent (Vitest)', () => {
         component.transactions = [];
         fixture.detectChanges();
 
-        const spinner = fixture.nativeElement.querySelector('.spinner-border');
+        const spinner = fixture.nativeElement.querySelector('mat-spinner');
         expect(spinner).toBeTruthy();
     });
 
@@ -41,7 +41,7 @@ describe('TransactionListComponent (Vitest)', () => {
         component.transactions = [];
         fixture.detectChanges();
 
-        const titleEl = fixture.nativeElement.querySelector('.title');
+        const titleEl = fixture.nativeElement.querySelector('[mat-card-title]');
         expect(titleEl.textContent.trim()).toBe('Tranzakciók');
     });
 
