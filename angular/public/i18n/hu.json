@@ -152,5 +152,8 @@
     "hu": "Magyar",
     "de": "Német",
     "en": "Angol"
+  },
+  "etc": {
+    "datepicker.format": "YYYY. MM. DD."
   }
 }

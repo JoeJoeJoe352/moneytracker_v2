@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { signal } from '@angular/core';
 import { TransactionFormComponent } from './transaction-form-component';
 import { TransactionDetailRowComponent } from './transaction-detail-row-component';
@@ -50,6 +51,7 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
             imports: [TransactionFormComponent],
             providers: [
                 provideTranslateService(),
+                provideNativeDateAdapter(),
                 { provide: TransactionService, useValue: { utils: new TransactionUtils() } },
                 {
                     provide: UserDataStore,

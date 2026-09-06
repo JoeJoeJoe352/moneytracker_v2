@@ -35,13 +35,13 @@
 
             <!-- Transaction date -->
             <div class="form-group mb-3">
-                <label for="date">{{ 'transaction_page.filter.date' | translate }}</label>
-                <ngxsmk-datepicker
-                    id="date"
-                    mode="single"
-                    formControlName="date"
-                    [placeholder]="'transaction_page.filter.date.placeholder' | translate"
-                />
+                <mat-form-field>
+                    <mat-label>{{ 'transaction_page.filter.date' | translate }}</mat-label>
+                    <input id="date" matInput [matDatepicker]="date" formControlName="date" />
+                    <mat-hint>{{ "etc.datepicker.format" | translate}}</mat-hint>
+                    <mat-datepicker-toggle matIconSuffix [for]="date" />
+                    <mat-datepicker #date />
+                </mat-form-field>
             </div>
 
             <button
@@ -53,6 +53,7 @@
             </button>
 
             <button
+                id="clear-filters"
                 type="button"
                 [disabled]="isTransactionListLoading()"
                 class="btn btn-green-hollow"

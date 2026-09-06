@@ -86,6 +86,8 @@ body {
     }
 }
 
+// OVERRIDES
+
 // mat-slide-toggle "on-off" színtéma (szürke = ki, kék = be)
 .mat-slide-toggle-on-off {
     --mat-slide-toggle-selected-track-color: #{$moneytracker-blue};
@@ -105,7 +107,7 @@ body {
     --mat-slide-toggle-unselected-focus-handle-color: #{$moneytracker-white};
     --mat-slide-toggle-unselected-pressed-handle-color: #{$moneytracker-white};
 }
-// bevétel/kieadás színtéma
+// mat-slide-toggle "bevétel-kiadás" színtéma (zöld = bevétel, piros = kiadás)
 .mat-slide-toggle-income-expense {
     --mat-slide-toggle-selected-track-color: #{$moneytracker-green};
     --mat-slide-toggle-selected-hover-track-color: #{$moneytracker-green};
@@ -123,47 +125,6 @@ body {
     --mat-slide-toggle-unselected-hover-handle-color: #{$moneytracker-white};
     --mat-slide-toggle-unselected-focus-handle-color: #{$moneytracker-white};
     --mat-slide-toggle-unselected-pressed-handle-color: #{$moneytracker-white};
-}
-
-// OVERRIDES
-
-// datepicker felülírás. Mivel ezek konstans felülírások, muszáj színkódot használnom
-ngxsmk-datepicker,
-.ngxsmk-popover-container,
-.ngxsmk-backdrop {
-    --datepicker-primary-color: #3ba43f !important;
-    --datepicker-shadow-focus: #3ba43f !important;
-    --datepicker-primary-contrast: #ffffff !important;
-    --datepicker-range-background: #dbeafe !important;
-    --datepicker-background: #ffffff !important;
-    --datepicker-text-color: var(--bs-body-color) !important;
-    --datepicker-subtle-text-color: #6b7280 !important;
-    --datepicker-border-color: #d1d5db !important;
-    --datepicker-hover-background: #f3f4f6 !important;
-    --ngxsmk-space-md: 0.375rem !important;
-    --ngxsmk-space-lg: 0.75rem !important;
-    --datepicker-shadow-md: 0 !important;
-}
-
-.ngxsmk-input-group:hover,
-.ngxsmk-input-group:focus-within {
-    border-color: var(--datepicker-border-color) !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-// kis javítás a datepickeren, tablet nézetben a clear és close gombokon el volt csúszva a szöveg
-.ngxsmk-footer {
-    button {
-        @media (min-width: 768px) and (max-width: 1023px) {
-            padding: 0 28px !important;
-        }
-    }
-}
-
-// input mező magasságának csökkentése
-.ngxsmk-input-group {
-    height: 38px;
 }
 
 .btn-green-hollow {

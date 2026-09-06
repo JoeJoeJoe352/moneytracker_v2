@@ -146,5 +146,8 @@
     "hu": "Ungarn",
     "de": "Deutsch",
     "en": "Englisch"
+  },
+  "etc": {
+    "datepicker.format": "DD.MM.YYYY."
   }
 }

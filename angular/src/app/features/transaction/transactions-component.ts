@@ -14,11 +14,13 @@ import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { TransactionService } from '../transaction/transaction-service';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import TransactionListComponent from '../transaction-list/transaction-list-component';
 import { TransactionListElementData } from '../transaction-list/interfaces';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 interface FilterFormInterface {
     name: FormControl<string>;
@@ -39,8 +41,10 @@ interface FilterData {
         TransactionModalComponent,
         TransactionListComponent,
         ReactiveFormsModule,
-        NgxsmkDatepickerComponent,
         TranslatePipe,
+        MatDatepickerModule,
+        MatInputModule,
+        MatFormFieldModule,
     ],
     providers: [TransactionModalStateService],
 })

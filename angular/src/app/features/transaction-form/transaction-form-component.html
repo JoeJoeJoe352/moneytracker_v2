@@ -68,12 +68,21 @@
             <label class="d-block" for="transaction-date">{{
                 'transaction.date' | translate
             }}</label>
-            <ngxsmk-datepicker
-                id="transaction-date"
-                mode="single"
-                formControlName="transactionDate"
-                [placeholder]="'transaction.date.placeholder' | translate"
-            />
+            <mat-form-field>
+                <mat-label>
+                    {{ 'transaction.date' | translate }}
+                </mat-label>
+                <input
+                    id="transaction-date"
+                    matInput
+                    [matDatepicker]="transactionDatePicker"
+                    formControlName="transactionDate"
+                    [placeholder]="'transaction.date.placeholder' | translate"
+                />
+                <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="transactionDatePicker" />
+                <mat-datepicker #transactionDatePicker />
+            </mat-form-field>
             @if (transactionDate.invalid && transactionDate.touched) {
                 @if (transactionDate.hasError('required')) {
                     <div class="form-field-error">

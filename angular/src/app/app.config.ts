@@ -1,5 +1,6 @@
 import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 import { routes } from './app.routes';
 import { initApp } from './app.initializer';
@@ -16,6 +17,7 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
         provideRouter(routes),
+        provideNativeDateAdapter(),
         provideHttpClient(
             withInterceptors([
                 CredentialsInterceptor, 

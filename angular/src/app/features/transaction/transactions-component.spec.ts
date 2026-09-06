@@ -5,7 +5,10 @@ import { of, throwError } from 'rxjs';
 import { provideTranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import TransactionListComponent from '../transaction-list/transaction-list-component';
 import { TransactionsListComponent } from './transactions-component';
@@ -77,6 +80,7 @@ describe('TransactionsListComponent (Vitest)', () => {
             imports: [TransactionsListComponent],
             providers: [
                 provideTranslateService(),
+                provideNativeDateAdapter(),
                 { provide: TransactionService, useValue: transactionServiceMock },
                 {
                     provide: CategoryService,
@@ -98,7 +102,9 @@ describe('TransactionsListComponent (Vitest)', () => {
                     StubTransactionModalComponent,
                     TransactionListComponent,
                     ReactiveFormsModule,
-                    NgxsmkDatepickerComponent,
+                    MatDatepickerModule,
+                    MatInputModule,
+                    MatFormFieldModule,
                     TranslatePipe,
                 ],
             },
@@ -181,7 +187,7 @@ describe('TransactionsListComponent (Vitest)', () => {
         fixture.detectChanges();
         expect(component['filterForm'].value.name).toBe('kávé');
 
-        const clearButton = fixture.nativeElement.querySelectorAll('form button')[1];
+        const clearButton = fixture.nativeElement.querySelector('#clear-filters');
         clearButton.click();
         fixture.detectChanges();
 

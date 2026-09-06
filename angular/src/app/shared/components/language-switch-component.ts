@@ -2,6 +2,7 @@ import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { _, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { SupportedLangEnum } from '../enums';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
     selector: 'app-language-switcher',
@@ -20,6 +21,7 @@ import { SupportedLangEnum } from '../enums';
 })
 export class LanguageSwitcherComponent {
     private translateService = inject(TranslateService);
+    private dateAdapter = inject(DateAdapter)
 
     /**
      * Aktuális nyelv
@@ -61,5 +63,6 @@ export class LanguageSwitcherComponent {
 
         localStorage.setItem('lang', currentLangString);
         this.translateService.use(currentLangString);
+        this.dateAdapter.setLocale(currentLangString);
     }
 }
