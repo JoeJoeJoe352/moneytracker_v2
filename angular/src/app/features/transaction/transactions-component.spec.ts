@@ -8,6 +8,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCardModule } from '@angular/material/card';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import TransactionListComponent from '../transaction-list/transaction-list-component';
@@ -105,6 +106,7 @@ describe('TransactionsListComponent (Vitest)', () => {
                     MatDatepickerModule,
                     MatInputModule,
                     MatFormFieldModule,
+                    MatCardModule,
                     TranslatePipe,
                 ],
             },

@@ -1,9 +1,32 @@
-@use "../../shared/variables.scss" as *;
+@use '../../shared/variables.scss' as *;
 
-.green-block {
-    background-color: $moneytracker-green;
-    margin: 15px 0;
-    padding: 15px;
+.filter-card {
+    margin-bottom: 12px;
+    --mat-card-elevated-container-color: #{$moneytracker-green};
     color: $moneytracker-white;
-    border-radius: $border-radius;
+
+    .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 12px;
+
+        .filter {
+            @media (max-width: 521px) {
+                width: 100%;
+            }
+        }
+    }
+
+    .filter-submit {
+        margin-right: 0.5rem;
+
+        --mat-button-filled-container-color: #{$moneytracker-white};
+        --mat-button-filled-label-text-color: #{$moneytracker-green};
+    }
+
+    .filter-clear {
+        --mat-button-outlined-outline-color: #{$moneytracker-white};
+        --mat-button-outlined-label-text-color: #{$moneytracker-white};
+    }
 }
