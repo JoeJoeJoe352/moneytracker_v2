@@ -1,4 +1,4 @@
-<div class="transaction-card-wrapper">
+<mat-card class="transaction-card-wrapper">
     <div class="transaction-card">
         <div
             class="transaction-icon-badge"
@@ -20,8 +20,8 @@
             >
                 {{ transaction.priceSum | currencyFormat: transaction.wallet.currencyCode }}
             </div>
-            <div class="d-flex">
-                <div class="transaction-name me-1">{{ transaction.name }}</div>
+            <div class="transaction-base-data">
+                <div class="transaction-name">{{ transaction.name }}</div>
                 <div class="wallet-name">({{ transaction.wallet.name }})</div>
             </div>
             @if (categoriesAsString()) {
@@ -33,4 +33,4 @@
             <div class="transaction-date">{{ transaction.transactionDate }}</div>
         </div>
     </div>
-</div>
+</mat-card>

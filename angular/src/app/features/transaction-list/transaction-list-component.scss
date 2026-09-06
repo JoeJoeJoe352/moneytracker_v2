@@ -1,6 +1,8 @@
 @use '../../shared/variables.scss' as *;
 
 .transaction-list {
+    border-radius: 20px;
+    overflow: hidden;
 
     .spinner {
         display: flex;
