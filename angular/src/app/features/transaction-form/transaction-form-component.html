@@ -30,16 +30,14 @@
         </div>
         <!-- Wallet -->
         <div class="col-sm-6 form-group mb-3">
-            <label for="transaction-wallet">{{
-                'transaction.wallet' | translate
-            }}</label>
+            <label for="transaction-wallet">{{ 'transaction.wallet' | translate }}</label>
             <select
                 id="transaction-wallet"
                 formControlName="walletId"
                 class="form-select"
                 [disabled]="isTransactionFormDisabled"
                 (change)="onWalletChange($event)"
-                >
+            >
                 @for (item of userData.getWallets(); track $index) {
                     <option [value]="item.id">{{ item.name }} ({{ item.currencyCode }})</option>
                 }
@@ -53,13 +51,15 @@
             <label for="transaction-transactionType-bool">{{
                 'transaction.type' | translate
             }}</label>
-            <div>
-                <app-switch
+            <div class="d-flex align-items-center gap-2">
+                <span>{{ 'transaction.expense' | translate }}</span>
+                <mat-slide-toggle
+                    class="mat-slide-toggle-income-expense"
                     id="transaction-transactionType-bool"
                     formControlName="isIncome"
-                    [labelBefore]="'transaction.expense' | translate"
-                    [labelAfter]="'transaction.income' | translate"
+                    hideIcon
                 />
+                <span>{{ 'transaction.income' | translate }}</span>
             </div>
         </div>
 
@@ -88,14 +88,15 @@
     </div>
 
     <!-- részletek mutatása/elrejtése kapcsoló -->
-    <div class="form-group mb-3 detail-toggle-row">
-        <app-switch
-            theme="on-off"
+    <div class="form-group mb-3 detail-toggle-row d-flex align-items-center gap-2">
+        <span>{{ 'transaction.hide_details' | translate }}</span>
+        <mat-slide-toggle
+            class="mat-slide-toggle-on-off"
             formControlName="isComplexTransaction"
             id="transaction-show-details"
-            [labelBefore]="'transaction.hide_details' | translate"
-            [labelAfter]="'transaction.show_details' | translate"
+            hideIcon
         />
+        <span>{{ 'transaction.show_details' | translate }}</span>
     </div>
 
     <!-- Ár -->

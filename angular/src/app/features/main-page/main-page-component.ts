@@ -1,7 +1,7 @@
 import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
@@ -26,8 +26,6 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 })
 export class MainPage {
     private transactionService = inject(TransactionService);
-    private translateService = inject(TranslateService);
-    private decimalPipe = inject(DecimalPipe);
     protected modal = inject(TransactionModalStateService);
     protected walletUtils = inject(WalletDataUtil);
 

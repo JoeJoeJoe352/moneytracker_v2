@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, Signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
-import { SwitchComponent } from '../../shared/components/switch.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { DropdownInterface } from '../../shared/interfaces';
 import { DetailForm } from '../transaction/interfaces';
 
@@ -10,7 +10,7 @@ import { DetailForm } from '../transaction/interfaces';
     selector: 'app-transaction-detail-row-component',
     templateUrl: './transaction-detail-row-component.html',
     styleUrl: './transaction-detail-row-component.scss',
-    imports: [ReactiveFormsModule, TranslatePipe, NgMultiSelectDropDownModule, SwitchComponent],
+    imports: [ReactiveFormsModule, TranslatePipe, NgMultiSelectDropDownModule, MatSlideToggleModule],
 })
 export class TransactionDetailRowComponent {
     /**

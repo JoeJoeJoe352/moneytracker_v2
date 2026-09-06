@@ -37,14 +37,15 @@
 
     <!-- Ár / unitprice és weight mutatása -->
     <div class="form-group mb-3 mt-3">
-        <div>
-            <app-switch
-                theme="on-off"
+        <div class="d-flex align-items-center gap-2">
+            <span>{{ 'transaction.detail.simple_price_mode' | translate }}</span>
+            <mat-slide-toggle
+                class="mat-slide-toggle-on-off"
                 formControlName="detailIsComplexPriceMode"
                 id="transaction-is-complex-price-mode-{{ index }}"
-                [labelBefore]="'transaction.detail.simple_price_mode' | translate"
-                [labelAfter]="'transaction.detail.complex_price_mode' | translate"
+                hideIcon
             />
+            <span>{{ 'transaction.detail.complex_price_mode' | translate }}</span>
         </div>
     </div>
 

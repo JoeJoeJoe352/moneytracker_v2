@@ -19,7 +19,7 @@ import {
     Validators,
 } from '@angular/forms';
 import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
-import { SwitchComponent } from '../../shared/components/switch.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { DropdownInterface } from '../../shared/interfaces';
@@ -42,7 +42,7 @@ import { WalletDataUtil } from '../wallet/wallet-data-util';
     imports: [
         ReactiveFormsModule,
         NgxsmkDatepickerComponent,
-        SwitchComponent,
+        MatSlideToggleModule,
         TranslatePipe,
         NgMultiSelectDropDownModule,
         TransactionDetailRowComponent,

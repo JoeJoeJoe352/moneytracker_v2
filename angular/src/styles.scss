@@ -6,6 +6,7 @@
 @use '@angular/material' as mat;
 @use 'bootstrap-icons/font/bootstrap-icons';
 @use './app/shared/variables.scss' as *;
+@use './app/styles/moneytracker-colors' as colors;
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
 html {
@@ -13,8 +14,8 @@ html {
     @include mat.theme(
         (
             color: (
-                primary: mat.$azure-palette,
-                tertiary: mat.$blue-palette,
+                primary: colors.$primary-palette,
+                tertiary: colors.$tertiary-palette,
             ),
             typography: Roboto,
             density: 0,
@@ -83,6 +84,45 @@ body {
         transform: translateY(-1px);
         box-shadow: $shadow-sm;
     }
+}
+
+// mat-slide-toggle "on-off" színtéma (szürke = ki, kék = be)
+.mat-slide-toggle-on-off {
+    --mat-slide-toggle-selected-track-color: #{$moneytracker-blue};
+    --mat-slide-toggle-selected-hover-track-color: #{$moneytracker-blue};
+    --mat-slide-toggle-selected-focus-track-color: #{$moneytracker-blue};
+    --mat-slide-toggle-selected-pressed-track-color: #{$moneytracker-blue};
+    --mat-slide-toggle-selected-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-selected-hover-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-selected-focus-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-selected-pressed-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-unselected-track-color: #{$moneytracker-grey};
+    --mat-slide-toggle-unselected-hover-track-color: #{$moneytracker-grey};
+    --mat-slide-toggle-unselected-focus-track-color: #{$moneytracker-grey};
+    --mat-slide-toggle-unselected-pressed-track-color: #{$moneytracker-grey};
+    --mat-slide-toggle-unselected-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-unselected-hover-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-unselected-focus-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-unselected-pressed-handle-color: #{$moneytracker-white};
+}
+// bevétel/kieadás színtéma
+.mat-slide-toggle-income-expense {
+    --mat-slide-toggle-selected-track-color: #{$moneytracker-green};
+    --mat-slide-toggle-selected-hover-track-color: #{$moneytracker-green};
+    --mat-slide-toggle-selected-focus-track-color: #{$moneytracker-green};
+    --mat-slide-toggle-selected-pressed-track-color: #{$moneytracker-green};
+    --mat-slide-toggle-selected-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-selected-hover-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-selected-focus-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-selected-pressed-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-unselected-track-color: #{$moneytracker-red};
+    --mat-slide-toggle-unselected-hover-track-color: #{$moneytracker-red};
+    --mat-slide-toggle-unselected-focus-track-color: #{$moneytracker-red};
+    --mat-slide-toggle-unselected-pressed-track-color: #{$moneytracker-red};
+    --mat-slide-toggle-unselected-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-unselected-hover-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-unselected-focus-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-unselected-pressed-handle-color: #{$moneytracker-white};
 }
 
 // OVERRIDES
