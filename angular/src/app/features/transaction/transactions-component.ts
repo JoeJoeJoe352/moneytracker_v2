@@ -11,10 +11,9 @@ import {
     SimpleChanges,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { TransactionService } from '../transaction/transaction-service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import TransactionListComponent from '../transaction-list/transaction-list-component';
@@ -57,7 +56,6 @@ export class TransactionsListComponent implements OnInit, OnChanges {
      * Ha ez az érték változik, a lista újratöltődik (pl. ha a szülő komponensben jött létre új tranzakció)
      */
     @Input() reloadTrigger = 0;
-
     /**
      * Akkor emitál, amikor a listában lévő valamelyik tranzakció változott (létrejött/módosult/törlődött),
      * hogy a szülő komponens is tudja frissíteni a saját adatait (pl. összesítés)
@@ -83,22 +81,22 @@ export class TransactionsListComponent implements OnInit, OnChanges {
      */
     private latestParams = new URLSearchParams();
 
-    constructor() {
-        this.dataFromQuery.set(this.getInitialDataFromQueryParams());
-    }
-
     ngOnInit(): void {
         // A route query változára  újratöltjük a listát
         this.route.queryParams
-            .pipe(takeUntilDestroyed(this.destroyRef))
+            .pipe(takeUntilDestroyed(this.destroyRef)) // amíg a komponens meg nem szűnik
             .subscribe((queryParams) => {
-                this.latestParams = new URLSearchParams(queryParams as Record<string, string>);
-                this.loadTransactionHistory(this.latestParams);
+                this.latestParams = new URLSearchParams(queryParams as Params);
+                // A kezdeti értékből állítjuk be a szűrő form kezdőértékeit
+                if (this.dataFromQuery() === null) {
+                    this.dataFromQuery.set(this.toFilterData(this.latestParams));
+                }
+                this.loadTransactionHistory();
             });
 
         // Mentés/törlés után újratöltjük a listát, és jelezzük a szülő komponensnek is
         this.modal.changed.subscribe(() => {
-            this.loadTransactionHistory(this.latestParams);
+            this.loadTransactionHistory();
             this.transactionsChanged.emit();
         });
     }
@@ -106,7 +104,7 @@ export class TransactionsListComponent implements OnInit, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         // A szülő komponensben létrejött új tranzakció után újratöltjük a listát
         if (changes['reloadTrigger'] && !changes['reloadTrigger'].firstChange) {
-            this.loadTransactionHistory(this.latestParams);
+            this.loadTransactionHistory();
         }
     }
 
@@ -134,60 +132,42 @@ export class TransactionsListComponent implements OnInit, OnChanges {
     /**
      * Tranzakciók letöltése a backendről, a kártyás listához
      */
-    loadTransactionHistory(params: URLSearchParams): void {
+    loadTransactionHistory(): void {
         this.isTransactionListLoading.set(true);
 
-        if (!this.isHistoryMode) {
-            this.transactionService.getLastTransactions().subscribe({
-                next: (response) => {
-                    this.isTransactionListLoading.set(false);
-                    this.transactionListData.set(response);
-                },
-                error: (response) => {
-                    console.error('unknown error during last transaction listing!', response);
-                    this.isTransactionListLoading.set(false);
-                },
-            });
-            return;
-        }
+        const apiObserver = this.isHistoryMode
+            ? this.transactionService.getTransactionHistory(this.latestParams)
+            : this.transactionService.getLastTransactions();
 
-        this.transactionService.getTransactionHistory(params).subscribe({
+        apiObserver.subscribe({
             next: (response) => {
                 this.isTransactionListLoading.set(false);
                 this.transactionListData.set(response);
             },
             error: (response) => {
-                console.error('unknown error during transaction history listing!', response);
+                console.error('unknown error during last transaction listing!', response);
                 this.isTransactionListLoading.set(false);
             },
         });
+        return;
     }
 
     /**
-     * Query paraméterekből kiszedi a szűrőfeltételeket, amik be vannak állítva
+     * URLSearchParams-ból kiszedi a szűrőfeltételeket, amik be vannak állítva
      */
-    private getInitialDataFromQueryParams(): FilterData {
+    private toFilterData(params: URLSearchParams): FilterData {
+        const date = params.get('date');
+
         return {
-            name: this.getQueryParam<string>('name') ?? '',
-            date: this.getQueryParam<Date>('date', (v) => new Date(v)),
+            name: params.get('name') ?? '',
+            date: date ? new Date(date) : null,
         };
-    }
-
-    /**
-     * Queryből lekéri a megfelelő kulcsú értéket
-     * @param   key         kulcs, amit le akarunk kérni
-     * @param   transform   az érték transformációja, ha nem stringben szeretnénk (opcionális)
-     * @returns T
-     */
-    private getQueryParam<T>(key: string, transform?: (queryValue: string) => T): T | null {
-        const value = this.route.snapshot.queryParams[key];
-        return value !== undefined ? (transform ? transform(value) : (value as T)) : null;
     }
 
     /**
      * Szűrőfeltételekből létrehoz egy, a router.navigate queryParams opciójának megfelelő objektumot
      */
-    private toQueryParams(data: FilterData): Record<string, string> {
+    private toQueryParams(data: FilterData): Params {
         const params: Record<string, string> = {};
 
         if (data.name) {
