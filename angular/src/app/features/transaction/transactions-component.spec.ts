@@ -1,18 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { of, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { provideTranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import TransactionListComponent from '../transaction-list/transaction-list-component';
 import { TransactionsListComponent } from './transactions-component';
+import { TransactionFilter } from './transaction-filter-component';
 import { TransactionService } from './transaction-service';
 import { CategoryService } from './category-service';
 import { TransactionListElementData } from '../transaction-list/interfaces';
@@ -63,6 +59,7 @@ describe('TransactionsListComponent (Vitest)', () => {
         getTransactionById: ReturnType<typeof vi.fn>;
     };
     let routerMock: { navigate: ReturnType<typeof vi.fn> };
+    let queryParamsSubject: BehaviorSubject<Record<string, string>>;
 
     function setup(options: {
         isHistoryMode?: boolean;
@@ -76,6 +73,7 @@ describe('TransactionsListComponent (Vitest)', () => {
             getTransactionById: vi.fn(() => of(null)),
         };
         routerMock = { navigate: vi.fn() };
+        queryParamsSubject = new BehaviorSubject<Record<string, string>>(options.queryParams ?? {});
 
         TestBed.configureTestingModule({
             imports: [TransactionsListComponent],
@@ -93,7 +91,10 @@ describe('TransactionsListComponent (Vitest)', () => {
                 { provide: Router, useValue: routerMock },
                 {
                     provide: ActivatedRoute,
-                    useValue: { snapshot: { queryParams: options.queryParams ?? {} } },
+                    useValue: {
+                        snapshot: { queryParams: options.queryParams ?? {} },
+                        queryParams: queryParamsSubject,
+                    },
                 },
             ],
         });
@@ -102,11 +103,7 @@ describe('TransactionsListComponent (Vitest)', () => {
                 imports: [
                     StubTransactionModalComponent,
                     TransactionListComponent,
-                    ReactiveFormsModule,
-                    MatDatepickerModule,
-                    MatInputModule,
-                    MatFormFieldModule,
-                    MatCardModule,
+                    TransactionFilter,
                     TranslatePipe,
                 ],
             },
@@ -144,27 +141,16 @@ describe('TransactionsListComponent (Vitest)', () => {
             queryParams: { name: 'kávé' },
         });
 
-        expect(component['filterForm'].value.name).toBe('kávé');
+        const nameInput = fixture.nativeElement.querySelector('#name');
+        expect(nameInput.value).toBe('kávé');
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
         const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
         expect(params.get('name')).toBe('kávé');
     });
 
-    it('should navigate merging the used filter params into the URL after a successful history fetch', () => {
-        setup({ isHistoryMode: true, needSearchField: true, queryParams: { name: 'kávé' } });
-
-        expect(routerMock.navigate).toHaveBeenCalledWith(
-            [],
-            expect.objectContaining({
-                queryParamsHandling: 'merge',
-                queryParams: expect.objectContaining({ name: 'kávé' }),
-            }),
-        );
-    });
-
-    it('should reload the history with the current form value when the filter form is submitted', () => {
+    it('should navigate with the entered filter values, replacing (not merging) the query params, when the filter form is submitted', () => {
         setup({ isHistoryMode: true, needSearchField: true });
-        transactionServiceMock.getTransactionHistory.mockClear();
+        routerMock.navigate.mockClear();
 
         const nameInput = fixture.nativeElement.querySelector('#name');
         nameInput.value = 'tej';
@@ -173,29 +159,51 @@ describe('TransactionsListComponent (Vitest)', () => {
         const form = fixture.nativeElement.querySelector('form');
         form.dispatchEvent(new Event('submit'));
 
+        expect(routerMock.navigate).toHaveBeenCalledWith(
+            [],
+            expect.objectContaining({ queryParams: { name: 'tej' } }),
+        );
+        expect(routerMock.navigate).not.toHaveBeenCalledWith(
+            [],
+            expect.objectContaining({ queryParamsHandling: 'merge' }),
+        );
+    });
+
+    it('should reload the history whenever the route query params change (e.g. after the filter navigates)', () => {
+        setup({ isHistoryMode: true, needSearchField: true });
+        transactionServiceMock.getTransactionHistory.mockClear();
+
+        queryParamsSubject.next({ name: 'tej' });
+
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
         const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
         expect(params.get('name')).toBe('tej');
     });
 
-    it('should reset the form, clear the query params and reload when clearInputs is called', () => {
-        setup({ isHistoryMode: true, needSearchField: true });
+    it('should reset the form and navigate with empty query params when clearInputs is called', () => {
+        setup({ isHistoryMode: true, needSearchField: true, queryParams: { name: 'kávé' } });
         transactionServiceMock.getTransactionHistory.mockClear();
         routerMock.navigate.mockClear();
 
         const nameInput = fixture.nativeElement.querySelector('#name');
-        nameInput.value = 'kávé';
-        nameInput.dispatchEvent(new Event('input'));
-        fixture.detectChanges();
-        expect(component['filterForm'].value.name).toBe('kávé');
+        expect(nameInput.value).toBe('kávé');
 
         const clearButton = fixture.nativeElement.querySelector('#clear-filters');
         clearButton.click();
         fixture.detectChanges();
 
-        expect(component['filterForm'].value.name).toBe('');
-        expect(routerMock.navigate).toHaveBeenCalledWith([], { queryParams: {} });
+        expect(nameInput.value).toBe('');
+        expect(routerMock.navigate).toHaveBeenCalledWith(
+            [],
+            expect.objectContaining({ queryParams: {} }),
+        );
+
+        // a router.navigate mockolt, ezért a valós navigáció eredményét (a route queryParams
+        // frissülését) itt szimuláljuk, hogy a reaktív újratöltést is leteszteljük
+        queryParamsSubject.next({});
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
+        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
+        expect(params.get('name')).toBeNull();
     });
 
     it('should reload the list once when reloadTrigger changes after the initial render', () => {

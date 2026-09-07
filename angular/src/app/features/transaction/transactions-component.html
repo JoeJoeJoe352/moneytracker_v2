@@ -17,59 +17,12 @@
 }
 
 @if (needSearchField) {
-    <mat-card class="filter-card">
-        <mat-card-header>
-            <h2 mat-card-title>{{ 'transaction_page.filter.submit' | translate }}</h2>
-        </mat-card-header>
-        <mat-card-content>
-            <!-- filter form -->
-            <form [formGroup]="filterForm" (ngSubmit)="loadTransactionHistory()">
-                <!-- Tranzakció név -->
-                <div class="filter-row">
-                    <mat-form-field appearance="fill" class="filter">
-                        <mat-label>{{ 'transaction_page.filter.name' | translate }}</mat-label>
-                        <input
-                            matInput
-                            id="name"
-                            type="text"
-                            formControlName="name"
-                            autocomplete="name"
-                            [readonly]="isTransactionListLoading()"
-                        />
-                    </mat-form-field>
-
-                    <!-- Tranzakció dátuma -->
-                    <mat-form-field appearance="fill" class="filter">
-                        <mat-label>{{ 'transaction_page.filter.date' | translate }}</mat-label>
-                        <input id="date" matInput [matDatepicker]="date" formControlName="date" />
-                        <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
-                        <mat-datepicker-toggle matIconSuffix [for]="date" />
-                        <mat-datepicker #date />
-                    </mat-form-field>
-                </div>
-
-                <button
-                    mat-flat-button
-                    type="submit"
-                    [disabled]="isTransactionListLoading()"
-                    class="filter-submit"
-                >
-                    {{ 'transaction_page.filter.submit' | translate }}
-                </button>
-
-                <button
-                    mat-stroked-button
-                    id="clear-filters"
-                    type="button"
-                    [disabled]="isTransactionListLoading()"
-                    class="filter-clear"
-                    (click)="clearInputs()"
-                >
-                    {{ 'transaction_page.filter.clear' | translate }}
-                </button>
-            </form>
-        </mat-card-content>
-    </mat-card>
+    <app-transaction-filter
+        [defaultData]="dataFromQuery()"
+        [isTransactionListLoading]="isTransactionListLoading"
+        (filterSubmit)="onFilterSubmit($event)"
+        (resetForm)="clearInputs()"
+    />
 }
 
 <app-transaction-list
