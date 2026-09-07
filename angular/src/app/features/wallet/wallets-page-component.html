@@ -1,30 +1,30 @@
-<div>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>{{ "header.wallets" | translate }}</h1>
-        <button type="button" class="btn btn-primary-green" (click)="openWalletModal(null)">
+<h1>{{ 'header.wallets' | translate }}</h1>
+<mat-card appearance="outlined">
+    <mat-card-actions [align]="'end'">
+        <button matButton="filled" type="button" (click)="openWalletModal(null)">
             {{ 'wallet.create' | translate }}
         </button>
-    </div>
+    </mat-card-actions>
+    <mat-card-content>
+        @if (isWalletListLoading()) {
+            <div class="text-center">
+                <mat-spinner />
+            </div>
+        } @else {
+            <app-wallets-list-component
+                [walletListData]="walletListData()"
+                (walletCardClicked)="openWalletModal($event)"
+            />
+        }
+    </mat-card-content>
+</mat-card>
 
-    @if (isWalletListLoading()) {
-        <div class="text-center">
-            <div class="spinner-border" role="status"></div>
-        </div> 
-    } @else {
-        <app-wallets-list-component
-            [walletListData]="walletListData()"
-            (walletCardClicked)="openWalletModal($event)"
-        />
-    }
-
-    @if (isWalletModalOpen()) {
-        <app-wallet-modal-component
-            [wallet]="selectedWalletData()"
-            [isFormDisabled]="isWalletFormDisabled()"
-            [isDataInitializing]="isWalletDataLoading()"
-            (closeModal)="closeWalletModal()"
-            (saved)="onWalletSaved($event)"
-            (deleted)="onWalletDeleted($event)"
-        />
-    }
-</div>
+@if (isWalletModalOpen()) {
+    <app-wallet-modal-component
+        [wallet]="selectedWalletData()"
+        [isFormDisabled]="isWalletFormDisabled()"
+        (closeModal)="closeWalletModal()"
+        (saved)="onWalletSaved($event)"
+        (deleted)="onWalletDeleted($event)"
+    />
+}

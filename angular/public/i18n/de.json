@@ -105,6 +105,7 @@
     "create": "Wallet erstellen",
     "update": "Wallet bearbeiten",
     "delete": "Wallet löschen",
+    "cancel": "Abbrechen",
     "delete.confirm": "Möchtest du dieses Wallet wirklich löschen?",
     "name": "Wallet-Name",
     "name.required": "Der Wallet-Name ist erforderlich!",

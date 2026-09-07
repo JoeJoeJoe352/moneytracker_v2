@@ -3,17 +3,37 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+
+export interface WalletFormInputInterface {
+    wallet: WalletDataInterface | null;
+    isFormDisabled: boolean;
+}
 
 @Component({
     selector: 'app-wallet-form-component',
     templateUrl: './wallet-form-component.html',
-    styleUrls: ['../../shared/components/form-style.scss'],
+    styleUrls: ['../../shared/components/form-style.scss', './wallet-form-component.scss'],
     standalone: true,
-    imports: [ReactiveFormsModule, TranslatePipe],
+    imports: [
+        ReactiveFormsModule,
+        TranslatePipe,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule
+    ],
 })
 export class WalletFormComponent implements OnInit {
     private fb = inject(FormBuilder);
-
+    data = inject<WalletFormInputInterface>(MAT_DIALOG_DATA);
     /**
      * Ha meg van adva, akkor a form szerkesztő módban nyílik, egyébként létrehozó módban
      */
@@ -47,7 +67,7 @@ export class WalletFormComponent implements OnInit {
     /**
      * Meglévő walletet szerkesztünk-e
      */
-    protected get isEditMode(): boolean {
+    protected isEditMode(): this is { wallet: WalletDataInterface } {
         return this.wallet !== null;
     }
 
@@ -63,7 +83,7 @@ export class WalletFormComponent implements OnInit {
         const value = this.walletForm.getRawValue();
 
         this.saved.emit(
-            this.isEditMode
+            this.isEditMode()
                 ? { name: value.name, walletType: value.walletType }
                 : {
                       name: value.name,

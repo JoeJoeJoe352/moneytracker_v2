@@ -6,9 +6,17 @@
             [class.outcome]="!isIncome()"
         >
             @if (isIncome()) {
-                <i class="bi bi-arrow-up-short"></i>
+                <mat-icon
+                    aria-hidden="false"
+                    aria-label="Income"
+                    fontIcon="arrow_upward"
+                ></mat-icon>
             } @else {
-                <i class="bi bi-arrow-down-short"></i>
+                <mat-icon
+                    aria-hidden="false"
+                    aria-label="expense"
+                    fontIcon="arrow_downward"
+                ></mat-icon>
             }
         </div>
 

@@ -11,18 +11,12 @@ import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from '.
             [title]="wallet ? ('wallet.update' | translate) : ('wallet.create' | translate)"
             (closeModal)="closeModal.emit()"
         >
-            @if (isDataInitializing) {
-                <div class="text-center">
-                    <div class="spinner-border" role="status"></div>
-                </div>
-            } @else {
-                <app-wallet-form-component
-                    [wallet]="wallet"
-                    [isFormDisabled]="isFormDisabled"
-                    (saved)="saved.emit($event)"
-                    (deleted)="deleted.emit($event)"
-                />
-            }
+            <app-wallet-form-component
+                [wallet]="wallet"
+                [isFormDisabled]="isFormDisabled"
+                (saved)="saved.emit($event)"
+                (deleted)="deleted.emit($event)"
+            />
         </app-base-modal>
     `,
     standalone: true,
@@ -31,7 +25,6 @@ import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from '.
 export class WalletModalComponent {
     @Input() wallet: WalletDataInterface | null = null;
     @Input({ required: true }) isFormDisabled!: boolean;
-    @Input({ required: true }) isDataInitializing!: boolean;
 
     @Output() closeModal = new EventEmitter<void>();
     @Output() saved = new EventEmitter<WalletCreateRequest | WalletUpdateRequest>();

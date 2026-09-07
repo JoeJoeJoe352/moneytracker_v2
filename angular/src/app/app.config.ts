@@ -18,6 +18,7 @@ import { UserDataStore } from './shared/services/user-data-store';
 import { LanguageInterceptor } from './language-interceptor';
 import { SupportedLangEnum } from './shared/enums';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS } from '@angular/material/progress-spinner';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -27,6 +28,10 @@ export const appConfig: ApplicationConfig = {
         {
             provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
             useValue: { appearance: 'outline' },
+        },
+        {
+            provide: MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS,
+            useValue: { diameter: 50 },
         },
         provideHttpClient(withInterceptors([CredentialsInterceptor, LanguageInterceptor])),
         provideTranslateService({

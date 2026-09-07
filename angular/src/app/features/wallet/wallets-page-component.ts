@@ -8,23 +8,35 @@ import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WalletModalComponent } from './wallet-modal-component';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
 import { UserDataStore } from '../../shared/services/user-data-store';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { MatButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
 
 @Component({
     selector: 'app-wallets-page-component',
     templateUrl: './wallets-page-component.html',
     styleUrl: './wallets-page-component.scss',
     standalone: true,
-    imports: [WalletsListComponent, TranslatePipe, WalletModalComponent],
+    imports: [
+        WalletsListComponent,
+        TranslatePipe,
+        WalletModalComponent,
+        MatProgressSpinner,
+        MatCardModule,
+        MatButton,
+    ],
 })
 export class WalletsPageComponent {
     private walletService = inject(WalletService);
     private translateService = inject(TranslateService);
     private userData = inject(UserDataStore);
+    readonly dialog = inject(MatDialog);
 
     private reloadWalletListTrigger = signal(0);
 
     protected isWalletListLoading = signal(false);
-    protected isWalletDataLoading = signal(false);
     protected isWalletModalOpen = signal(false);
     protected isWalletFormDisabled = signal(false);
     protected selectedWalletData: WritableSignal<WalletDataInterface | null> = signal(null);
@@ -56,8 +68,19 @@ export class WalletsPageComponent {
      * Megnyitja a wallet létrehozó/szerkesztő modalt. Ha van id, akkor szerkesztés, egyébként létrehozás
      */
     protected openWalletModal(walletData: WalletDataInterface | null): void {
-        this.selectedWalletData.set(walletData);
-        this.isWalletModalOpen.set(true);
+        this.dialog.open(WalletFormComponent, {
+            height: '400px',
+            width: '500px',
+            data: {
+                wallet: walletData,
+                isFormDisabled: true,
+            } as WalletFormInputInterface,
+        });
+
+        //dialogRef.afterClosed().subscribe((result) => {});
+
+        //this.selectedWalletData.set(walletData);
+        //this.isWalletModalOpen.set(true);
     }
 
     /**

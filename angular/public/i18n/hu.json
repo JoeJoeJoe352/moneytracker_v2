@@ -106,6 +106,7 @@
     "create": "Tárca létrehozása",
     "update": "Tárca módosítása",
     "delete": "Tárca törlése",
+    "cancel": "Mégse",
     "delete.confirm": "Biztosan törölni szeretnéd ezt a tárcát?",
     "name": "Tárca neve",
     "name.required": "A tárca nevének megadása kötelező!",

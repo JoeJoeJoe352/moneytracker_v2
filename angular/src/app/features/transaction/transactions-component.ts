@@ -19,6 +19,7 @@ import { TransactionModalStateService } from '../transaction/transaction-modal-s
 import TransactionListComponent from '../transaction-list/transaction-list-component';
 import { TransactionListElementData } from '../transaction-list/interfaces';
 import { TransactionFilter } from './transaction-filter-component';
+import { MatCardModule } from "@angular/material/card";
 
 export interface FilterData {
     name: string;
@@ -30,11 +31,12 @@ export interface FilterData {
     templateUrl: './transactions-component.html',
     standalone: true,
     imports: [
-        TransactionModalComponent,
-        TransactionListComponent,
-        TranslatePipe,
-        TransactionFilter,
-    ],
+    TransactionModalComponent,
+    TransactionListComponent,
+    TranslatePipe,
+    TransactionFilter,
+    MatCardModule
+],
     providers: [TransactionModalStateService],
 })
 export class TransactionsListComponent implements OnInit, OnChanges {
