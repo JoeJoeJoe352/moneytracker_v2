@@ -18,13 +18,3 @@
         }
     </mat-card-content>
 </mat-card>
-
-@if (isWalletModalOpen()) {
-    <app-wallet-modal-component
-        [wallet]="selectedWalletData()"
-        [isFormDisabled]="isWalletFormDisabled()"
-        (closeModal)="closeWalletModal()"
-        (saved)="onWalletSaved($event)"
-        (deleted)="onWalletDeleted($event)"
-    />
-}

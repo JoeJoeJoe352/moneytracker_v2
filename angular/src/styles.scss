@@ -131,6 +131,21 @@ body {
     --mat-slide-toggle-unselected-pressed-handle-color: #{$moneytracker-white};
 }
 
+// piros (veszély) mat-button szín, pl. törlés gombokhoz. mat-flat-button, mat-stroked-button és
+// mat-button (basic) mindegyikre hat, mert mindhárom label/outline/state-layer tokenjét felülírja
+.mat-button-danger {
+    --mat-button-filled-container-color: #{$moneytracker-red};
+    --mat-button-filled-label-text-color: #{$moneytracker-white};
+    --mat-button-filled-state-layer-color: #{$moneytracker-white};
+
+    --mat-button-outlined-outline-color: #{$moneytracker-red};
+    --mat-button-outlined-label-text-color: #{$moneytracker-red};
+    --mat-button-outlined-state-layer-color: #{$moneytracker-red};
+
+    --mat-button-text-label-text-color: #{$moneytracker-red};
+    --mat-button-text-state-layer-color: #{$moneytracker-red};
+}
+
 .btn-green-hollow {
     color: $moneytracker-green;
     background-color: $moneytracker-white;

@@ -149,6 +149,12 @@
     "en": "English"
   },
   "etc": {
-    "datepicker.format": "MM/DD/YYYY."
+    "datepicker.format": "MM/DD/YYYY.",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete-success": "Successfully deleted!",
+    "save-success": "Successfully saved!",
+    "general-error": "An unexpected error occurred, please try again later!"
   }
 }

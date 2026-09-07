@@ -48,24 +48,24 @@
         </p>
     </mat-dialog-content>
 
-    <mat-dialog-actions align="end">
+    <mat-dialog-actions [align]="'end'">
         @if (isEditMode()) {
             <button
-                mat-stroked-button
+                mat-flat-button
                 type="button"
-                color="warn"
-                [disabled]="isFormDisabled"
+                class="mat-button-danger"
+                [disabled]="data.isFormDisabled()"
                 (click)="deleted.emit(wallet.id)"
             >
                 {{ 'wallet.delete' | translate }}
             </button>
         }
 
-        <button mat-stroked-button type="button" mat-dialog-close [disabled]="isFormDisabled">
+        <button mat-stroked-button type="button" mat-dialog-close [disabled]="data.isFormDisabled()">
             {{ 'wallet.cancel' | translate }}
         </button>
 
-        <button mat-flat-button type="submit" [disabled]="walletForm.invalid || isFormDisabled">
+        <button mat-flat-button type="submit" [disabled]="walletForm.invalid || data.isFormDisabled()">
             {{ isEditMode() ? ('wallet.update' | translate) : ('wallet.create' | translate) }}
         </button>
     </mat-dialog-actions>

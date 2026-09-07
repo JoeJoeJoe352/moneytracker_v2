@@ -19,6 +19,7 @@ import { LanguageInterceptor } from './language-interceptor';
 import { SupportedLangEnum } from './shared/enums';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS } from '@angular/material/progress-spinner';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -32,6 +33,10 @@ export const appConfig: ApplicationConfig = {
         {
             provide: MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS,
             useValue: { diameter: 50 },
+        },
+        {
+            provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
+            useValue: { duration: 2500 },
         },
         provideHttpClient(withInterceptors([CredentialsInterceptor, LanguageInterceptor])),
         provideTranslateService({

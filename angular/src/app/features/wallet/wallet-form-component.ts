@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, OnInit, Output, Signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 
 export interface WalletFormInputInterface {
     wallet: WalletDataInterface | null;
-    isFormDisabled: boolean;
+    isFormDisabled: Signal<boolean>;
 }
 
 @Component({
@@ -28,23 +28,23 @@ export interface WalletFormInputInterface {
         MatInputModule,
         MatSelectModule,
         MatButtonModule,
-        MatDialogModule
+        MatDialogModule,
     ],
 })
 export class WalletFormComponent implements OnInit {
-    private fb = inject(FormBuilder);
-    data = inject<WalletFormInputInterface>(MAT_DIALOG_DATA);
+    private readonly fb = inject(FormBuilder);
+    protected readonly currencyOptions = Object.values(CurrencyCodesEnum);
+    protected readonly walletTypeOptions = Object.values(WalletTypesEnum);
+
+    public data = inject<WalletFormInputInterface>(MAT_DIALOG_DATA);
+
     /**
      * Ha meg van adva, akkor a form szerkesztő módban nyílik, egyébként létrehozó módban
      */
-    @Input() wallet: WalletDataInterface | null = null;
-    @Input({ required: true }) isFormDisabled!: boolean;
+    protected wallet: WalletDataInterface | null = null;
 
-    @Output() saved = new EventEmitter<WalletCreateRequest | WalletUpdateRequest>();
     @Output() deleted = new EventEmitter<number>();
-
-    protected readonly currencyOptions = Object.values(CurrencyCodesEnum);
-    protected readonly walletTypeOptions = Object.values(WalletTypesEnum);
+    @Output() saved = new EventEmitter<WalletCreateRequest | WalletUpdateRequest>();
 
     protected walletForm = this.fb.nonNullable.group({
         name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
@@ -53,13 +53,14 @@ export class WalletFormComponent implements OnInit {
     });
 
     ngOnInit(): void {
+        this.wallet = this.data.wallet;
         if (this.wallet) {
             this.walletForm.patchValue({
                 name: this.wallet.name,
                 currencyCode: this.wallet.currencyCode,
                 walletType: this.wallet.type,
             });
-            // Egyenlőre nem akarom lekezelni mi lenne a tárcában szereplő tranzakciókkal, ha valutát váltana
+            // Mert egyenlőre nem akarom lekezelni mi lenne a tárcában szereplő tranzakciókkal, ha valutát váltana
             this.walletForm.controls.currencyCode.disable();
         }
     }

@@ -149,6 +149,12 @@
     "en": "Englisch"
   },
   "etc": {
-    "datepicker.format": "DD.MM.YYYY."
+    "datepicker.format": "DD.MM.YYYY.",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "delete-success": "Erfolgreich gelöscht!",
+    "save-success": "Erfolgreich gespeichert!",
+    "general-error": "Ein unerwarteter Fehler ist aufgetreten, bitte versuche es später erneut!"
   }
 }

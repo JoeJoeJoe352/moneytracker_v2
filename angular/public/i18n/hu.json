@@ -155,6 +155,12 @@
     "en": "Angol"
   },
   "etc": {
-    "datepicker.format": "YYYY. MM. DD."
+    "datepicker.format": "YYYY. MM. DD.",
+    "confirm": "Megerősítés",
+    "cancel": "Mégse",
+    "close": "Bezárás",
+    "delete-success": "Sikeres törlés!",
+    "save-success": "Sikeres mentés!",
+    "general-error": "Váratlan hiba történt, kérlek próbáld újra később!"
   }
 }

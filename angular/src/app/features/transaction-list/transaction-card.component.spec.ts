@@ -73,8 +73,8 @@ describe('TransactionCardComponent (Vitest)', () => {
         const badge = fixture.nativeElement.querySelector('.transaction-icon-badge');
         expect(badge.classList.contains('income')).toBe(true);
 
-        const badgeClass = fixture.nativeElement.querySelector('.transaction-icon-badge i');
-        expect(badgeClass.classList.contains('bi-arrow-up-short')).toBe(true);
+        const badgeIcon = fixture.nativeElement.querySelector('.transaction-icon-badge mat-icon');
+        expect(badgeIcon.getAttribute('fontIcon')).toBe('arrow_upward');
     });
 
     it('should render outcome transaction correctly. Categories and ', () => {
@@ -136,8 +136,8 @@ describe('TransactionCardComponent (Vitest)', () => {
         const badge = fixture.nativeElement.querySelector('.transaction-icon-badge');
         expect(badge.classList.contains('outcome')).toBe(true);
 
-        const badgeClass = fixture.nativeElement.querySelector('.transaction-icon-badge i');
-        expect(badgeClass.classList.contains('bi-arrow-down-short')).toBe(true);
+        const badgeIcon = fixture.nativeElement.querySelector('.transaction-icon-badge mat-icon');
+        expect(badgeIcon.getAttribute('fontIcon')).toBe('arrow_downward');
     });
 
 });
