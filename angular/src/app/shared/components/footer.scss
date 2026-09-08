@@ -4,7 +4,34 @@ footer {
     background-color: $moneytracker-green;
     margin-top: 12px;
 
-    .text-body-secondary {
-        color: $moneytracker-white !important;
+    .footer-content {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 1rem 1.5rem;
+    }
+
+    .copyright {
+        margin: 0;
+        color: $moneytracker-white;
+    }
+
+    .footer-links {
+        display: flex;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    mat-divider {
+        --mat-divider-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .footer-link {
+        --mat-button-text-label-text-color: #{$moneytracker-white};
+        --mat-button-text-state-layer-color: #{$moneytracker-white};
     }
 }
