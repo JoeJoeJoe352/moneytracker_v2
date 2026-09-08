@@ -115,4 +115,10 @@
             color: #ffd7d7;
         }
     }
+
+    .stat-action-button {
+        --mat-button-outlined-outline-color: #{$moneytracker-white};
+        --mat-button-outlined-label-text-color: #{$moneytracker-white};
+        --mat-button-outlined-state-layer-color: #{$moneytracker-white};
+    }
 }

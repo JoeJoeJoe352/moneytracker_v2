@@ -12,6 +12,10 @@ import { MoneySumInterface, WalletSummaryInterface } from '../transaction/interf
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 import { StatCardComponent } from './stat-card-component';
 import { TransactionTypeEnum } from '../../shared/enums';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-main-page-component',
@@ -24,6 +28,10 @@ import { TransactionTypeEnum } from '../../shared/enums';
         TransactionModalComponent,
         CurrencyFormatPipe,
         StatCardComponent,
+        MatCard,
+        MatIcon,
+        MatProgressSpinner,
+        MatButton,
     ],
     providers: [TransactionModalStateService, DecimalPipe],
 })

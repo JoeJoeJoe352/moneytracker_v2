@@ -13,13 +13,19 @@
 }
 <div class="row g-3">
     <div class="col-md-4">
-        <div class="stat-card balance-card">
+        <mat-card class="stat-card balance-card">
             <div class="stat-card-header">
-                <span class="stat-icon-badge"><i class="bi bi-wallet2"></i></span>
+                <span class="stat-icon-badge">
+                    <mat-icon
+                        aria-hidden="false"
+                        aria-label="Balance"
+                        fontIcon="account_balance_wallet"
+                    ></mat-icon>
+                </span>
                 <div class="stat-label">{{ 'mainpage.total_balance' | translate }}</div>
             </div>
             @if (isMoneySumLoading()) {
-                <div class="spinner-border" role="status"></div>
+                <mat-spinner />
             } @else {
                 <div class="stat-value">
                     @for (sum of moneySumSummarizedPerCurrency()?.moneySum; track $index) {
@@ -35,9 +41,17 @@
                                 [class.negative]="change.total < 0"
                             >
                                 @if (change.total >= 0) {
-                                    <i class="bi bi-arrow-up-short"></i>
+                                    <mat-icon
+                                        aria-hidden="false"
+                                        aria-label="Increase"
+                                        fontIcon="arrow_upward"
+                                    ></mat-icon>
                                 } @else {
-                                    <i class="bi bi-arrow-down-short"></i>
+                                    <mat-icon
+                                        aria-hidden="false"
+                                        aria-label="Decrease"
+                                        fontIcon="arrow_downward"
+                                    ></mat-icon>
                                 }
                                 {{ change.total | currencyFormat: change.currencyCode }}
                                 {{ 'mainpage.balance_change_this_month' | translate }}
@@ -46,10 +60,15 @@
                     }
                 </div>
             }
-            <button class="btn btn-green-hollow btn-sm align-self-start" (click)="modal.open(null)">
+            <button
+                matButton="outlined"
+                type="button"
+                class="stat-action-button align-self-start"
+                (click)="modal.open(null)"
+            >
                 + {{ 'mainpage.create_transaction.button' | translate }}
             </button>
-        </div>
+        </mat-card>
     </div>
 
     <div class="col-md-4">
