@@ -1,14 +1,11 @@
-import { Component, EventEmitter, inject, Output, WritableSignal } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormField, MatLabel, MatError, MatInputModule } from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { LoginRequestData } from './interfaces';
-
-export interface LoginDialogData {
-    isloading: WritableSignal<boolean>;
-}
+import { isLoadingInterface, LoginRequestData } from './interfaces';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
     selector: 'app-login-component',
@@ -18,15 +15,13 @@ export interface LoginDialogData {
         ReactiveFormsModule,
         TranslatePipe,
         MatDialogModule,
-        MatFormField,
-        MatLabel,
-        MatError,
+        MatFormFieldModule,
         MatButton,
         MatInputModule,
     ],
 })
 export class LoginComponent {
-    protected data = inject<LoginDialogData>(MAT_DIALOG_DATA);
+    protected isLoading = inject<isLoadingInterface>(MAT_DIALOG_DATA).isloading;
     @Output() login = new EventEmitter<LoginRequestData>();
 
     private readonly fb = inject(FormBuilder);

@@ -44,6 +44,7 @@
                 <h2>{{ 'welcome.register' | translate }}</h2>
             </mat-card-subtitle>
         </mat-card-content>
+        
         <mat-card-actions>
             <p>
                 <button mat-stroked-button (click)="openRegisterModal()">
@@ -53,10 +54,6 @@
                     {{ 'welcome.login.title' | translate }}
                 </button>
             </p>
-
-            @if (isRegisterModalOpen()) {
-                <app-register-modal (closeModal)="closeRegisterModal()" />
-            }
         </mat-card-actions>
     }
 </mat-card>

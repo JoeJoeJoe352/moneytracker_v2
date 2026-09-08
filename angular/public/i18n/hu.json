@@ -20,7 +20,8 @@
     "password": "Jelszó",
     "submit": "Bejelentkezés",
     "username.required-error": "A felhasználónév megadása kötelező!",
-    "password.required-error": "A jelszó megadása kötelező!"
+    "password.required-error": "A jelszó megadása kötelező!",
+    "success": "Sikeres bejelentkezés"
   },
   "register": {
     "username": "Felhasználónév",
@@ -39,7 +40,9 @@
     "password_again.required-error": "A jelszó megerősítése kötelező!",
     "password_again.minlength-error": "A jelszó megerősítésének legalább 6 karakter hosszúnak kell lennie!",
     "password_again.mismatch-error": "A jelszavak nem egyeznek!",
-    "submit": "Regisztráció"
+    "submit": "Regisztráció",
+    "success": "Sikeres regisztráció",
+    "title": "Regisztráció"
   },
   "header": {
     "welcome": "Üdvözlünk",

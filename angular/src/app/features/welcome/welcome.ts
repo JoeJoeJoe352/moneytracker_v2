@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { RegisterModalComponent } from '../auth/register-modal';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -8,11 +7,12 @@ import { AuthActionService } from '../auth/auth-action-service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
+import { RegisterComponent } from '../auth/register-component';
 
 @Component({
     selector: 'app-welcome',
     templateUrl: './welcome.html',
-    imports: [RegisterModalComponent, TranslatePipe, MatCardModule, MatButtonModule],
+    imports: [TranslatePipe, MatCardModule, MatButtonModule],
     standalone: true,
 })
 export class Welcome {
@@ -21,9 +21,14 @@ export class Welcome {
     private readonly router = inject(Router);
     protected readonly userData = inject(UserDataStore);
 
-    protected isRegisterModalOpen = signal(false);
+    /**
+     * Töltődés alatt van-e valamelyik form
+     */
     protected isloading = signal(false);
 
+    /**
+     * Login modal felnyitása
+     */
     openLoginModal() {
         const dialogRef = this.dialog.open(LoginComponent, {
             width: '500px',
@@ -40,11 +45,22 @@ export class Welcome {
         );
     }
 
+    /**
+     * Regisztrációs modal felnyitása
+     */
     openRegisterModal() {
-        this.isRegisterModalOpen.set(true);
-    }
+        const dialogRef = this.dialog.open(RegisterComponent, {
+            width: '500px',
+            data: {
+                isloading: this.isloading,
+            },
+        });
 
-    closeRegisterModal() {
-        this.isRegisterModalOpen.set(false);
+        dialogRef.componentInstance.register.subscribe((payload) =>
+            this.actionService.register(payload, this.isloading, () => {
+                dialogRef.close();
+                this.router.navigate(['/']);
+            }),
+        );
     }
 }
