@@ -2,9 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserDataStore } from '../../shared/services/user-data-store';
-import { UserData } from './interfaces';
-
-
+import { LoginRequestData, UserData } from './interfaces';
 
 export interface GeneralResponse {
     message: string;
@@ -32,8 +30,8 @@ export class AuthService {
      * @param password
      * @returns Observable
      */
-    login(username: string, password: string): Observable<GeneralResponse> {
-        return this.http.post<GeneralResponse>('/api/auth/login', { username, password });
+    login(requestData: LoginRequestData): Observable<GeneralResponse> {
+        return this.http.post<GeneralResponse>('/api/auth/login', requestData);
     }
 
     /**

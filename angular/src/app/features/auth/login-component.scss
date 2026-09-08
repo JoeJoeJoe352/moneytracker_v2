@@ -1,0 +1,15 @@
+.login-form {
+    mat-dialog-content {
+        min-height: 125px;
+    }
+
+    .login-form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        mat-form-field {
+            flex: 1 1 200px;
+        }
+    }
+}

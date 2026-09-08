@@ -1,47 +1,42 @@
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form">
-    <!-- username -->
-    <div class="form-group mb-3">
-        <label for="username">{{ 'login.username' | translate }}</label>
-        <input
-            id="username"
-            type="text"
-            formControlName="username"
-            class="form-control"
-            autocomplete="username"
-            [ngClass]="isUsernameFieldHasError || hasUserLoginError ? 'form-input-error' : ''"
-            [readonly]="isLoading()"
-        />
+<h2 mat-dialog-title>{{ 'login.title' | translate }}</h2>
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+    <mat-dialog-content>
+        <div class="login-form-row">
+            <!-- username -->
+            <mat-form-field>
+                <mat-label>
+                    {{ 'login.username' | translate }}
+                </mat-label>
+                <input matInput id="username" type="text" formControlName="username" />
+                @if (isUsernameFieldHasError) {
+                    <mat-error>
+                        {{ 'login.username.required-error' | translate }}
+                    </mat-error>
+                }
+            </mat-form-field>
 
-        @if (isUsernameFieldHasError) {
-            <div class="form-field-error">{{ 'login.username.required-error' | translate }}</div>
-        }
-    </div>
+            <!-- password -->
+            <mat-form-field>
+                <mat-label>
+                    {{ 'login.password' | translate }}
+                </mat-label>
+                <input matInput id="password" type="password" formControlName="password" />
 
-    <!-- password -->
-    <div class="form-group mb-3">
-        <label for="password">{{ 'login.password' | translate }}</label>
-        <input
-            id="password"
-            type="password"
-            formControlName="password"
-            class="form-control"
-            autocomplete="current-password"
-            [ngClass]="isPasswordFieldHasError || hasUserLoginError ? 'form-input-error' : ''"
-            [readonly]="isLoading()"
-        />
+                @if (isPasswordFieldHasError) {
+                    <mat-error>
+                        {{ 'login.password.required-error' | translate }}
+                    </mat-error>
+                }
+            </mat-form-field>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-stroked-button type="button" mat-dialog-close>
+            {{ 'etc.cancel' | translate }}
+        </button>
 
-        @if (isPasswordFieldHasError) {
-            <div class="form-field-error">{{ 'login.password.required-error' | translate }}</div>
-        }
-    </div>
-
-    <button type="submit" [disabled]="isLoading()" class="btn btn-primary-green">
-        {{ 'login.submit' | translate }}
-    </button>
-
-    <!-- Print of general error -->
-
-    @if (backendErrorMsg() !== '') {
-        <div class="mb-3 form-field-error">{{ backendErrorMsg() }}</div>
-    }
+        <button mat-flat-button type="submit" [disabled]="data.isloading()">
+            {{ 'login.submit' | translate }}
+        </button>
+    </mat-dialog-actions>
 </form>

@@ -1,45 +1,39 @@
-import { Component, EventEmitter, inject, Output, signal, WritableSignal } from '@angular/core';
+import { Component, EventEmitter, inject, Output, WritableSignal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgClass } from '@angular/common';
-import { AuthService } from './auth-service';
-import { UserDataStore } from '../../shared/services/user-data-store';
-import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatFormField, MatLabel, MatError, MatInputModule } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
+import { LoginRequestData } from './interfaces';
 
-const ERROR_LEVEL_NONE = 0;
-const ERROR_LEVEL_USER_ERROR = 1;
-const ERROR_LEVEL_SYSTEM_ERROR = 2;
+export interface LoginDialogData {
+    isloading: WritableSignal<boolean>;
+}
 
 @Component({
     selector: 'app-login-component',
     templateUrl: './login-component.html',
-    imports: [ReactiveFormsModule, NgClass, TranslatePipe],
-    styleUrls: ['../../shared/components/form-style.scss'],
+    styleUrl: './login-component.scss',
+    imports: [
+        ReactiveFormsModule,
+        TranslatePipe,
+        MatDialogModule,
+        MatFormField,
+        MatLabel,
+        MatError,
+        MatButton,
+        MatInputModule,
+    ],
 })
 export class LoginComponent {
-    @Output() closeModal = new EventEmitter<void>();
+    protected data = inject<LoginDialogData>(MAT_DIALOG_DATA);
+    @Output() login = new EventEmitter<LoginRequestData>();
 
-    private fb = inject(FormBuilder);
-    private authService = inject(AuthService);
-    private userDataStore = inject(UserDataStore);
-    private router = inject(Router);
+    private readonly fb = inject(FormBuilder);
 
-    loginForm: FormGroup;
-    /**
-     * Error message from backend when login fails
-     */
-    backendErrorMsg: WritableSignal<string> = signal('');
-    /**
-     * Is the form loading?
-     */
-    isLoading: WritableSignal<boolean> = signal(false);
-    /**
-     * Error level
-     */
-    errorLevel: WritableSignal<number> = signal(ERROR_LEVEL_NONE);
+    protected loginForm: FormGroup;
 
     constructor() {
-        // AuthService injektálva van a komponensben, mert @Inject annotációs dekorátorral van ellátva, így a DI konténer tudja, hogy létre kell hoznia egy példányt belőle, és át kell adnia a konstruktorban.
         this.loginForm = this.fb.nonNullable.group({
             username: ['', Validators.required],
             password: ['', Validators.required],
@@ -47,36 +41,15 @@ export class LoginComponent {
     }
 
     /**
-     * Submit login form data to backend
+     * Login adatok küldése
      */
     onSubmit(): void {
         if (this.loginForm.invalid) {
             return;
         }
-        // reactive element in zoneless mode, so we need to manually set the signals
-        this.backendErrorMsg.set('');
-        this.isLoading.set(true);
-        this.errorLevel.set(ERROR_LEVEL_NONE);
+
         const { username, password } = this.loginForm.getRawValue();
-        this.authService.login(username, password).subscribe({
-            next: () => {
-                this.isLoading.set(false);
-                this.userDataStore.loadUserData(username);
-                this.router.navigate(['/']);
-                this.closeModal.emit();
-            },
-            error: (response) => {
-                if (response.status === 401) {
-                    this.errorLevel.set(ERROR_LEVEL_USER_ERROR);
-                    this.backendErrorMsg.set(response.error.message);
-                } else {
-                    this.errorLevel.set(ERROR_LEVEL_SYSTEM_ERROR);
-                    console.error('Ismeretlen hiba történt a bejelentkezés során!', response);
-                    this.backendErrorMsg.set('Unknown error happened, please try again later');
-                }
-                this.isLoading.set(false);
-            },
-        });
+        this.login.emit({ username: username, password: password });
     }
 
     /**
@@ -96,13 +69,5 @@ export class LoginComponent {
             this.loginForm.controls['password'].touched &&
             this.loginForm.controls['password'].hasError('required')
         );
-    }
-
-    /**
-     * Check if there is an user error from backend.
-     * It modify the apperance of form elements in the html
-     */
-    get hasUserLoginError(): boolean {
-        return this.errorLevel() === ERROR_LEVEL_USER_ERROR;
     }
 }

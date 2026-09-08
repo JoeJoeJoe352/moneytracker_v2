@@ -133,7 +133,7 @@ export class TransactionModalStateService {
     /**
      * Tranzakció létrehozó/szerkesztő modal felnyitása
      *
-     * @param {number | null} id -> ha null, akkor új tranzakció nyilik fel, ha szám, akkor adott id-jű tranzakció
+     * @param {number | null} id. Ha null, akkor új tranzakció nyilik fel, ha szám, akkor adott id-jű tranzakció
      */
     public open(id: number | null): void {
         this.selectedTransactionIdTrigger.set(id);
