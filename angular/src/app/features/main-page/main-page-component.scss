@@ -1,6 +1,10 @@
 @use '../../shared/variables.scss' as *;
 
 .stat-card {
+    // a saját háttér/lekerekítés/árnyék felülírja a mat-card alapértelmezett megjelenéséért
+    --mat-card-elevated-container-shape: #{$border-radius-lg};
+    --mat-card-elevated-container-elevation: none;
+
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -51,7 +55,8 @@
 }
 
 .stat-value {
-    font-size: 1.75rem;
+    font-size: 25px;
+    line-height: 30px;
     font-weight: 700;
 
     &.income {
