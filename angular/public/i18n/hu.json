@@ -139,7 +139,8 @@
     "balance_change_this_month": "ebben a hónapban",
     "total_income": "Bevétel ebben a hónapban",
     "total_expenses": "Kiadás ebben a hónapban",
-    "last_transactions": "Legutóbbi tranzakciók"
+    "last_transactions": "Legutóbbi tranzakciók",
+    "stat.no_data": "Nincs megjeleníthető érték ebben a hónapban"
   },
   "transaction_page": {
     "title": "Tranzakcióim",

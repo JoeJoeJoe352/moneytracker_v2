@@ -10,6 +10,8 @@ import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
 import { MoneySumInterface, WalletSummaryInterface } from '../transaction/interfaces';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
+import { StatCardComponent } from './stat-card-component';
+import { TransactionTypeEnum } from '../../shared/enums';
 
 @Component({
     selector: 'app-main-page-component',
@@ -21,6 +23,7 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
         TranslatePipe,
         TransactionModalComponent,
         CurrencyFormatPipe,
+        StatCardComponent,
     ],
     providers: [TransactionModalStateService, DecimalPipe],
 })
@@ -29,6 +32,7 @@ export class MainPage {
     protected modal = inject(TransactionModalStateService);
     protected walletUtils = inject(WalletDataUtil);
 
+    protected transactionType = TransactionTypeEnum
     /**
      * Újra kell-e tölteni az adatokat? Ha ez változik, akkor újra fogja tölteni a listát.
      * Azért számot növelünk és nem boolean értéket, mert ha gyorsan hívódik egymás után,

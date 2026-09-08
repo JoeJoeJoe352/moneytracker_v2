@@ -7,9 +7,8 @@ import { TransactionFormComponent } from './transaction-form-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
-import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 import { UserDataStore } from '../../shared/services/user-data-store';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
 import { WalletDataInterface } from '../wallet/interfaces';
 
 describe('TransactionFormComponent (Vitest)', () => {

@@ -5,7 +5,7 @@ import {
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
 } from './interfaces';
-import { TransactionTypeEnum } from './transaction-type-enum';
+import { TransactionTypeEnum } from '../../shared/enums';
 
 @Injectable({
     providedIn: 'root',

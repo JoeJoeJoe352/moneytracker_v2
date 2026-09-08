@@ -1,6 +1,6 @@
 import { FormControl } from '@angular/forms';
 import { DropdownInterface } from '../../shared/interfaces';
-import { CurrencyCodesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum } from '../../shared/enums';
 
 /**
  * Detail form elemei
@@ -58,7 +58,7 @@ export interface TransactionDataForBackend {
     globalCategories: number[] | null;
     name: string;
     transactionDate: string;
-    transactionType: string;
+    transactionType: TransactionTypeEnum;
     transactionDetails: TransactionDetailsDataForBackend[];
     walletId: number;
 }
@@ -82,7 +82,7 @@ export interface TransactionDataFromBackend {
     name: string;
     priceSum: number;
     transactionDate: string;
-    transactionType: string;
+    transactionType: TransactionTypeEnum;
     isComplexTransaction: boolean;
     transactionDetails: TransactionDetailsDataFromBackend[];
     walletId: number;

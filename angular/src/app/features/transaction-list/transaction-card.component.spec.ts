@@ -2,8 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import TransactionCardComponent from './transaction-card-component';
-import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
 
 describe('TransactionCardComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionCardComponent>;

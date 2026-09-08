@@ -1,0 +1,27 @@
+<div class="stat-card">
+    <div class="stat-card-header">
+        <span class="stat-icon-badge" [class.green]="isIncome()" [class.red]="!isIncome()">
+            @if (isIncome()) {
+                <i class="bi bi-arrow-up-short"></i>
+            } @else {
+                <i class="bi bi-arrow-down-short"></i>
+            }
+        </span>
+        <div class="stat-label">
+            {{ getCardTitle() | translate }}
+        </div>
+    </div>
+    @if (isMoneySumLoading()) {
+        <div class="spinner-border" role="status"></div>
+    } @else if (walletSummaries.length > 0) {
+        <div class="stat-value income" [class.income]="isIncome()" [class.expense]="!isIncome()">
+            @for (summary of walletSummaries; track $index) {
+                <div>
+                    {{ summary.total | currencyFormat: summary.currencyCode }}
+                </div>
+            }
+        </div>
+    } @else {
+        {{ 'mainpage.stat.no_data' | translate }}
+    }
+</div>
