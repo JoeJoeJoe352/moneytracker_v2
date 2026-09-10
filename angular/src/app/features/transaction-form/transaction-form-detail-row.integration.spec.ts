@@ -7,6 +7,7 @@ import { signal } from '@angular/core';
 import { MatSelect } from '@angular/material/select';
 import { TransactionFormComponent } from './transaction-form-component';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
+import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
@@ -175,16 +176,12 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         expect(component.details.at(1).controls.detailPrice.disabled).toBe(false);
     });
 
-    it('should forward category-related outputs from a detail row up to the form component, driving categoryAdded', () => {
+    it('should forward categoryAdded from a detail row up to the form component', () => {
         let addedCategory: string | undefined;
         component.categoryAdded.subscribe((name) => (addedCategory = name));
 
-        const firstDropdown = fixture.debugElement.query(By.css('ng-multiselect-dropdown'));
-        firstDropdown.triggerEventHandler('onFilterChange', 'tej');
-
-        const noFilteredDataButton = document.createElement('div');
-        noFilteredDataButton.classList.add('no-filtered-data');
-        firstDropdown.triggerEventHandler('click', { target: noFilteredDataButton });
+        const firstCategorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent));
+        firstCategorySelect.triggerEventHandler('categoryAdded', 'tej');
 
         expect(addedCategory).toBe('tej');
     });

@@ -5,6 +5,7 @@ import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { signal } from '@angular/core';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
+import { CategorySelectComponent } from './category-select-component';
 import { DetailForm } from '../transaction/interfaces';
 import { DropdownInterface } from '../../shared/interfaces';
 
@@ -40,11 +41,6 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         fixture = TestBed.createComponent(TransactionDetailFormComponent);
         component = fixture.componentInstance;
         component.categoryData = signal<DropdownInterface[]>([]);
-        component.multiselectSettings = signal({
-            singleSelection: false,
-            idField: 'item_id',
-            textField: 'item_text',
-        });
         component.isCategorySaveInProgress = false;
         component.isLastDetailRow = false;
         component.index = 0;
@@ -159,25 +155,16 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         expect(emitted).toBe(true);
     });
 
-    it('should forward category dropdown events (filter change, click, dropdown close) to its outputs', () => {
+    it('should forward categoryAdded from the category select up to its own output', () => {
         component.detail = buildDetailGroup();
         fixture.detectChanges();
 
-        const dropdown = fixture.debugElement.query(By.css('ng-multiselect-dropdown'));
+        let addedCategory: string | undefined;
+        component.categoryAdded.subscribe((name) => (addedCategory = name));
 
-        let filterChangeValue: unknown;
-        component.categoryFilterChange.subscribe((v) => (filterChangeValue = v));
-        dropdown.triggerEventHandler('onFilterChange', 'kenyér');
-        expect(filterChangeValue).toBe('kenyér');
+        const categorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent));
+        categorySelect.triggerEventHandler('categoryAdded', 'kenyér');
 
-        let clickEmitted = false;
-        component.categoryDropdownClick.subscribe(() => (clickEmitted = true));
-        dropdown.triggerEventHandler('click', new Event('click'));
-        expect(clickEmitted).toBe(true);
-
-        let closedEmitted = false;
-        component.categorySearchTextCleared.subscribe(() => (closedEmitted = true));
-        dropdown.triggerEventHandler('onDropDownClose', undefined);
-        expect(closedEmitted).toBe(true);
+        expect(addedCategory).toBe('kenyér');
     });
 });

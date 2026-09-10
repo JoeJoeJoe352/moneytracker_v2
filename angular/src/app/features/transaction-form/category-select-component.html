@@ -1,0 +1,35 @@
+<mat-form-field class="category-select">
+    <mat-label>{{ 'transaction.categories' | translate }}</mat-label>
+    <mat-chip-grid #chipGrid [disabled]="disabled">
+        @for (category of selected(); track category.item_id) {
+            <mat-chip-row (removed)="remove(category)">
+                {{ category.item_text }}
+                <button
+                    matChipRemove
+                    type="button"
+                    [attr.aria-label]="'remove ' + category.item_text"
+                >
+                    <mat-icon fontIcon="cancel"></mat-icon>
+                </button>
+            </mat-chip-row>
+        }
+        <input
+            #categoryInput
+            [placeholder]="'transaction.categories.add' | translate"
+            [matChipInputFor]="chipGrid"
+            [matAutocomplete]="auto"
+            [formControl]="searchControl"
+            [matChipInputAddOnBlur]="false"
+        />
+    </mat-chip-grid>
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="optionSelected($event)">
+        @for (option of filteredOptions(); track option.item_id) {
+            <mat-option [value]="option">{{ option.item_text }}</mat-option>
+        }
+        @if (showAddOption()) {
+            <mat-option [value]="addNewOption" [disabled]="disabled">
+                {{ 'transaction.category.add' | translate }}
+            </mat-option>
+        }
+    </mat-autocomplete>
+</mat-form-field>

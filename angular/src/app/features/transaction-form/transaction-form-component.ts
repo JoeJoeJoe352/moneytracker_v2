@@ -25,10 +25,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { TranslatePipe } from '@ngx-translate/core';
 import { DropdownInterface } from '../../shared/interfaces';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
+import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction/transaction-service';
 import {
     CategoryResponseInterface,
@@ -54,14 +54,13 @@ import { WalletDataUtil } from '../wallet/wallet-data-util';
         MatIconModule,
         MatSlideToggleModule,
         TranslatePipe,
-        NgMultiSelectDropDownModule,
         TransactionDetailFormComponent,
+        CategorySelectComponent,
     ],
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
-    private translateService = inject(TranslateService);
     protected userData = inject(UserDataStore);
     protected walletUtil = inject(WalletDataUtil);
 
@@ -99,12 +98,6 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakciós form
      */
     protected transactionForm: FormGroup;
-
-    /**
-     * A kategória dropdown keresőmezőjébe gépelt szöveg
-     * todo üres stringre állítani, ha user hozzáad elemet
-     */
-    protected categorySearchText = signal('');
 
     /**
      * User által kiválasztott wallet
@@ -146,8 +139,8 @@ export class TransactionFormComponent implements OnChanges {
             );
 
             // A meglévő form kontrollokat frissítjük a friss adatokkal, nem hozunk létre új FormGroup-ot,
-            // mert az újra létrehozná a 'categories' kontrollt is, amitől az ng-multiselect-dropdown
-            // "no FormControl instance attached" hibát dobna
+            // mert az újra létrehozná a 'categories' kontrollt is, ami elveszítené a category-select
+            // komponens ControlValueAccessor-ral való kapcsolatát
             this.transactionForm.patchValue({
                 name: convertedInputValues.name,
                 isIncome: convertedInputValues.isIncome,
@@ -238,43 +231,6 @@ export class TransactionFormComponent implements OnChanges {
             return;
         }
         this.saved.emit(this.transactionForm.value);
-    }
-
-    /**
-     * A kategória dropdown keresőmezőjének szövege változott
-     */
-    onCategoryFilterChange(filterItem: unknown): void {
-        this.categorySearchText.set(filterItem as string);
-    }
-    /**
-     * MultiselectSettings beállításai
-     */
-    protected multiselectSettings: Signal<IDropdownSettings> = computed(() => {
-        return {
-            singleSelection: false,
-            idField: 'item_id',
-            textField: 'item_text',
-            itemsShowLimit: 3,
-            allowSearchFilter: true,
-            noFilteredDataAvailablePlaceholderText: this.translateService.instant(
-                'transaction.category.add',
-            ),
-            enableCheckAll: false,
-        };
-    });
-
-    /**
-     * A kategória dropdown "nincs találat" sorára kattintás lekezelése (ez jelenik meg gombként, ha nincs találat)
-     */
-    onCategoryDropdownClick(event: Event): void {
-        // kattintás esetén csak akkor ad hozzá elemet, hogyha a "nincs ilyen elem" gombra kattint
-        if ((event.target as HTMLElement).closest('.no-filtered-data')) {
-            const name = this.categorySearchText().trim();
-            if (!name || this.isCategorySaveInProgress) {
-                return;
-            }
-            this.categoryAdded.emit(name);
-        }
     }
 
     /**

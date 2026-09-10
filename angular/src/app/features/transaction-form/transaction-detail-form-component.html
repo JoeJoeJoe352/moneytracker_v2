@@ -10,18 +10,11 @@
             }
         </mat-form-field>
         <div class="detail-categories">
-            <label for="detail-categories-{{ index }}">{{
-                'transaction.categories' | translate
-            }}</label>
-            <ng-multiselect-dropdown
-                [placeholder]="'transaction.categories.add' | translate"
-                [settings]="multiselectSettings()"
-                [disabled]="isCategorySaveInProgress"
-                [data]="categoryData()"
+            <app-category-select
                 formControlName="categories"
-                (onFilterChange)="categoryFilterChange.emit($event)"
-                (click)="categoryDropdownClick.emit($event)"
-                (onDropDownClose)="categorySearchTextCleared.emit()"
+                [categoryData]="categoryData"
+                [disabled]="isCategorySaveInProgress"
+                (categoryAdded)="categoryAdded.emit($event)"
             />
         </div>
     </div>

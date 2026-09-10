@@ -113,18 +113,11 @@
                 }
             </mat-form-field>
             <div class="categories-field">
-                <label for="transaction-categories">{{
-                    'transaction.categories' | translate
-                }}</label>
-                <ng-multiselect-dropdown
-                    [placeholder]="'transaction.categories.add' | translate"
-                    [settings]="multiselectSettings()"
-                    [disabled]="isCategorySaveInProgress"
-                    [data]="categoryData()"
+                <app-category-select
                     formControlName="categories"
-                    (onFilterChange)="onCategoryFilterChange($event)"
-                    (click)="onCategoryDropdownClick($event)"
-                    (onDropDownClose)="categorySearchText.set('')"
+                    [categoryData]="categoryData"
+                    [disabled]="isCategorySaveInProgress"
+                    (categoryAdded)="categoryAdded.emit($event)"
                 />
             </div>
         </div>
@@ -137,13 +130,10 @@
                     [detail]="detail"
                     [index]="$index"
                     [categoryData]="categoryData"
-                    [multiselectSettings]="multiselectSettings"
                     [isCategorySaveInProgress]="isCategorySaveInProgress"
                     [isLastDetailRow]="isLastDetailRow"
                     [currencySymbol]="selectedWalletsCurrency()"
-                    (categoryFilterChange)="onCategoryFilterChange($event)"
-                    (categoryDropdownClick)="onCategoryDropdownClick($event)"
-                    (categorySearchTextCleared)="categorySearchText.set('')"
+                    (categoryAdded)="categoryAdded.emit($event)"
                     (rowDeleted)="deleteRow($index)"
                 />
             }

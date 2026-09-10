@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output, Signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DropdownInterface } from '../../shared/interfaces';
 import { DetailForm } from '../transaction/interfaces';
+import { CategorySelectComponent } from './category-select-component';
 
 @Component({
     selector: 'app-transaction-detail-form-component',
@@ -17,12 +17,12 @@ import { DetailForm } from '../transaction/interfaces';
     imports: [
         ReactiveFormsModule,
         TranslatePipe,
-        NgMultiSelectDropDownModule,
         MatSlideToggleModule,
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
         MatIconModule,
+        CategorySelectComponent,
     ],
 })
 export class TransactionDetailFormComponent {
@@ -39,10 +39,6 @@ export class TransactionDetailFormComponent {
      */
     @Input({ required: true }) categoryData!: Signal<DropdownInterface[]>;
     /**
-     * MultiselectSettings beállításai
-     */
-    @Input({ required: true }) multiselectSettings!: Signal<IDropdownSettings>;
-    /**
      * Kategória mentése folyamatban van-e
      */
     @Input({ required: true }) isCategorySaveInProgress!: boolean;
@@ -56,17 +52,9 @@ export class TransactionDetailFormComponent {
     @Input({ required: true }) currencySymbol!: string;
 
     /**
-     * A kategória dropdown keresőmezőjének szövege változott
+     * Új kategóriát szeretne a user hozzáadni a listájához
      */
-    @Output() categoryFilterChange = new EventEmitter<unknown>();
-    /**
-     * A kategória dropdown-ra kattintott a user
-     */
-    @Output() categoryDropdownClick = new EventEmitter<Event>();
-    /**
-     * A kategória dropdown bezáródott, a keresőszöveget törölni kell
-     */
-    @Output() categorySearchTextCleared = new EventEmitter<void>();
+    @Output() categoryAdded = new EventEmitter<string>();
     /**
      * A sor törlés gombjára kattintott a user
      */

@@ -6,6 +6,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { signal } from '@angular/core';
 import { TransactionFormComponent } from './transaction-form-component';
+import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
@@ -217,37 +218,16 @@ describe('TransactionFormComponent (Vitest)', () => {
         expect(component.details.length).toBe(1); // utolsó sor nem törölhető
     });
 
-    it('should emit categoryAdded only when the "no filtered data" button is clicked with a non-empty search text', () => {
+    it('should forward categoryAdded from the category select up to its own output', () => {
         fixture.detectChanges();
 
         let addedCategory: string | undefined;
         component.categoryAdded.subscribe((name) => (addedCategory = name));
 
-        const otherTarget = document.createElement('div');
-        component.onCategoryDropdownClick({ target: otherTarget } as unknown as Event);
-        expect(addedCategory).toBeUndefined();
-
-        const noFilteredDataButton = document.createElement('div');
-        noFilteredDataButton.classList.add('no-filtered-data');
-        component.onCategoryFilterChange('Új kategória');
-        component.onCategoryDropdownClick({ target: noFilteredDataButton } as unknown as Event);
+        const categorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent));
+        categorySelect.triggerEventHandler('categoryAdded', 'Új kategória');
 
         expect(addedCategory).toBe('Új kategória');
-    });
-
-    it('should not emit categoryAdded when a category save is already in progress', () => {
-        fixture.detectChanges();
-        component.isCategorySaveInProgress = true;
-
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
-
-        component.onCategoryFilterChange('Új kategória');
-        const noFilteredDataButton = document.createElement('div');
-        noFilteredDataButton.classList.add('no-filtered-data');
-        component.onCategoryDropdownClick({ target: noFilteredDataButton } as unknown as Event);
-
-        expect(addedCategory).toBeUndefined();
     });
 
     it('should initialize the price suffix from the default wallet currency', () => {
