@@ -1,47 +1,44 @@
 <header>
     @if (menuOpen) {
         <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
-        <div class="navbar-backdrop" (click)="menuOpen = false"></div>
+        <div class="header-backdrop" (click)="menuOpen = false"></div>
     }
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container">
-            <a class="navbar-brand" routerLink="/">
+    <mat-toolbar>
+        <div class="header-bar">
+            <a class="header-brand" routerLink="/">
                 <div class="logo-wrapper">
                     <img src="assets/images/logo-color.svg" alt="logo" />
                     The Moneytracker
                 </div>
             </a>
-            <button class="navbar-toggler" type="button" (click)="toggleMenu()">
-                <span class="navbar-toggler-icon"></span>
+            <button
+                mat-icon-button
+                class="menu-toggle"
+                type="button"
+                aria-label="Menu"
+                (click)="toggleMenu()"
+            >
+                <mat-icon fontIcon="menu"></mat-icon>
             </button>
             <!-- TODO legyen a tartalom felett, ne tolja lentebb a tartalmat, ha a menü nyitva van -->
-            <div
-                class="collapse navbar-collapse"
-                id="navbarSupportedContent" 
-                [class.show]="menuOpen"
-            >
-                <ul class="navbar-nav">
-                    <app-header-link-list
-                        [linkList]="publicLinkList"
-                        class="d-flex flex-column flex-lg-row"
-                    />
+            <div class="header-nav" [class.open]="menuOpen">
+                <ul class="header-links">
+                    <app-header-link-list [linkList]="publicLinkList" />
 
                     @if (userData.isUserLogged()) {
-                        <app-header-link-list
-                            [linkList]="authenticatedLinkList"
-                            class="d-flex flex-column flex-lg-row"
-                        />
+                        <app-header-link-list [linkList]="authenticatedLinkList" />
                     }
                 </ul>
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <div class="header-actions">
                     @if (userData.isUserLogged()) {
-                        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
-                        <a class="nav-link" (click)="logout()">{{ 'header.logout' | translate }}</a>
+                        <button matButton="text" type="button" class="header-link" (click)="logout()">
+                            {{ 'header.logout' | translate }}
+                        </button>
                     }
                     <app-language-switcher />
                     <!-- TODO ide jöhet a login és signup gomb, else ágban -->
-                </ul>
+                </div>
             </div>
         </div>
-    </nav>
+    </mat-toolbar>
 </header>

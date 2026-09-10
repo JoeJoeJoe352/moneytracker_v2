@@ -5,14 +5,25 @@ import { UserDataStore } from '../services/user-data-store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LinkInterface } from '../interfaces';
 import { HeaderLinkListComponent } from './header-link-list-component';
-import { FormsModule } from '@angular/forms';
 import { LanguageSwitcherComponent } from './language-switch-component';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-header',
     templateUrl: 'header.html',
     styleUrl: './header.scss',
-    imports: [RouterLink, TranslatePipe, HeaderLinkListComponent, FormsModule, LanguageSwitcherComponent],
+    imports: [
+        RouterLink,
+        TranslatePipe,
+        HeaderLinkListComponent,
+        LanguageSwitcherComponent,
+        MatToolbar,
+        MatButton,
+        MatIconButton,
+        MatIcon,
+    ],
 })
 export class Header {
     private authService = inject(AuthService);
