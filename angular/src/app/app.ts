@@ -6,7 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { SUPPORTED_LANGS } from './shared/utils/language-util';
 import { SupportedLangEnum } from './shared/enums';
-import { DateAdapter } from '@angular/material/core';
+import { LanguageService, LOCALSTORAGE_KEY_LANG } from './shared/services/translate-service';
 
 @Component({
     selector: 'app-root',
@@ -17,8 +17,8 @@ import { DateAdapter } from '@angular/material/core';
 export class App {
     protected readonly title = signal('Moneytracker');
     private translate = inject(TranslateService);
-    private dateAdapter = inject(DateAdapter);
-    
+    private languageService = inject(LanguageService);
+
     constructor() {
         this.translate.addLangs(SUPPORTED_LANGS);
 
@@ -28,8 +28,7 @@ export class App {
             fallBackLang = SupportedLangEnum.en;
         }
 
-        const lang = localStorage.getItem('lang') ?? fallBackLang;
-        this.translate.use(lang);
-        this.dateAdapter.setLocale(lang);
+        const lang = localStorage.getItem(LOCALSTORAGE_KEY_LANG) ?? fallBackLang;
+        this.languageService.setLanguage(lang);
     }
 }

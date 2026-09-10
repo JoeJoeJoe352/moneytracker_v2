@@ -1,27 +1,37 @@
 import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { _, TranslateService } from '@ngx-translate/core';
-import { FormsModule } from '@angular/forms';
 import { SupportedLangEnum } from '../enums';
-import { DateAdapter } from '@angular/material/core';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { LanguageService } from '../services/translate-service';
 
 @Component({
     selector: 'app-language-switcher',
     standalone: true,
     template: `
-        <select class="form-control" (change)="switchLanguage()" [(ngModel)]="currentLanguage">
+        <button mat-icon-button [matMenuTriggerFor]="languageMenu" type="button" aria-label="Language">
+            <mat-icon fontIcon="language"></mat-icon>
+        </button>
+        <mat-menu #languageMenu="matMenu">
             @for (language of languageData(); track $index) {
-                <option [value]="language.id">
+                <button
+                    mat-menu-item
+                    type="button"
+                    [class.active]="language.id === currentLanguage()"
+                    (click)="switchLanguage(language.id)"
+                >
                     {{ language.name }}
-                </option>
+                </button>
             }
-        </select>
+        </mat-menu>
     `,
 
-    imports: [FormsModule],
+    imports: [MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger],
 })
 export class LanguageSwitcherComponent {
     private translateService = inject(TranslateService);
-    private dateAdapter = inject(DateAdapter)
+    private languageService = inject(LanguageService)
 
     /**
      * Aktuális nyelv
@@ -52,17 +62,12 @@ export class LanguageSwitcherComponent {
     /**
      * Jelenlegi nyelv megváltoztatása
      */
-    protected switchLanguage(): void {
-        const currentLangString = this.currentLanguage();
-        if (!currentLangString) {
-            throw new Error('Lang is not set! ' + currentLangString);
-        }
-        if (currentLangString === this.translateService.currentLang()) {
+    protected switchLanguage(lang: string): void {
+        if (lang === this.translateService.currentLang()) {
             return;
         }
-
-        localStorage.setItem('lang', currentLangString);
-        this.translateService.use(currentLangString);
-        this.dateAdapter.setLocale(currentLangString);
+        console.log(lang)
+        this.languageService.setLanguage(lang)
+        this.currentLanguage.set(lang);
     }
 }

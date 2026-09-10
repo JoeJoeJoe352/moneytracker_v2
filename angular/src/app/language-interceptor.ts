@@ -1,16 +1,15 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { SupportedLangEnum } from './shared/enums';
+import { LOCALSTORAGE_KEY_LANG } from './shared/services/translate-service';
 
 /**
- * Beállítja az oldal nyelvét
+ * Beállítja a requestek nyelvi headerjét
  */
 export const LanguageInterceptor: HttpInterceptorFn = (req, next) => {
-    let lang = localStorage.getItem('lang'); // lehet a translateService még nincs betöltve itt
+    const lang = localStorage.getItem(LOCALSTORAGE_KEY_LANG); // lehet a translateService még nincs betöltve itt
 
     if (lang === null) {
-        console.error('Lang is not set in localStorage when the interceptor activated');
-        lang = SupportedLangEnum.en;
-        localStorage.setItem('lang', lang);
+        // Ez elvileg nem történhet meg, ezért nem dolgunk itt a nyelvet beállítani
+        throw new Error('Lang is not set in localStorage when the interceptor activated');
     }
 
     const modified = req.clone({
