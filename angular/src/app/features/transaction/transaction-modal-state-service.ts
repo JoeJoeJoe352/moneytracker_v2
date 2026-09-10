@@ -32,9 +32,10 @@ export class TransactionModalStateService {
      */
     private selectedTransactionIdTrigger = signal<number | null>(null);
     /**
-     * Kategórialistát újra kell-e tölteni. Minden új kategória mentéskor
+     * Kategórialista aktuális állapota. Modal megnyitásakor töltődik be, új kategória mentésekor
+     * pedig kiegészül a szerverről visszakapott új elemmel (nem tölti újra a teljes listát)
      */
-    private reloadCategoryDataTrigger = signal(0);
+    private categoriesSignal = signal<CategoryResponseInterface[]>([]);
     /**
      * Kategória lista betöltődött-e már?
      */
@@ -65,6 +66,21 @@ export class TransactionModalStateService {
         effect(() => {
             this.isModalDataInitializing.set(!this.areAllModalDependenciesLoaded());
         });
+
+        this.categoryService.listCategories().subscribe({
+            next: (categories) => {
+                this.categoriesSignal.set(categories);
+                this.isCategoriesLoaded.set(true);
+            },
+            error: (err) => {
+                console.error('Problem with loading the categories' + err);
+                this.snackBar.open(
+                    this.translateService.instant(_('etc.general-error')),
+                    this.translateService.instant(_('etc.close')),
+                );
+                this.isCategoriesLoaded.set(true);
+            },
+        });
     }
 
     /**
@@ -80,16 +96,9 @@ export class TransactionModalStateService {
     );
 
     /**
-     * Kategóriák listája. Modal megnyitásakor és új kategória mentésekor töltődik újra
+     * Kategóriák listája. Modal megnyitásakor töltődik be
      */
-    public categories = toSignal(
-        toObservable(this.reloadCategoryDataTrigger).pipe(
-            tap(() => this.isCategoriesLoaded.set(false)),
-            switchMap(() => this.categoryService.listCategories()),
-            tap(() => this.isCategoriesLoaded.set(true)),
-        ),
-        { initialValue: [] },
-    );
+    public categories = this.categoriesSignal.asReadonly();
 
     /**
      * Tranzakció akkor van betöltött állapotban, ha nincs kiválasztva egy sem, vagy ki van választva és be is vannak töltve az adatai
@@ -184,7 +193,7 @@ export class TransactionModalStateService {
     }
 
     /**
-     * Hozzáad egy új kategóriát és újratölti a kategórialistát.
+     * Hozzáad egy új kategóriát és beszúrja a kategórialistába
      * Observable-ből lekérhető az új kategória adatai
      */
     public saveCategory = (categoryName: string): Observable<CategoryResponseInterface> => {
@@ -192,8 +201,8 @@ export class TransactionModalStateService {
 
         return this.categoryService.saveCategory({ name: categoryName }).pipe(
             tap({
-                next: () => {
-                    this.reloadCategoryDataTrigger.update((value) => value + 1);
+                next: (category) => {
+                    this.categoriesSignal.update((categories) => [...categories, category]);
                     this.isAddingCategoryInProgress.set(false);
                 },
                 error: (err) => {

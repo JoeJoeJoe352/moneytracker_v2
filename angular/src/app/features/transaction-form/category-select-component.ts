@@ -127,8 +127,8 @@ export class CategorySelectComponent implements ControlValueAccessor {
             if (name && !this.disabled) {
                 this.addCategoryCallback(name).subscribe({ 
                     next: (category) => {
-                        // új kategóriát nem adjuk hozzá a categoryData tömbbe, mert újra fog töltődni a lista úgyis
-                        // ez nem okoz gondot, mert addig is meg fog jelenni a listában és menthető lesz
+                        // új kategóriát nem adjuk hozzá a categoryData tömbbe, mert az a szülő state
+                        // service-ben úgyis kiegészül vele, és onnan input-ként visszaérkezik ide is
                         const newCategoryAsDropdownInterface = {item_id: category.id, item_text: category.name} as DropdownInterface
                         this.selected.update((categories) => [...categories, newCategoryAsDropdownInterface]);
                         this.emitChange();
