@@ -2,10 +2,8 @@ import {
     Component,
     computed,
     ElementRef,
-    EventEmitter,
     forwardRef,
     Input,
-    Output,
     Signal,
     signal,
     ViewChild,
@@ -25,6 +23,8 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DropdownInterface } from '../../shared/interfaces';
+import { Observable } from 'rxjs';
+import { CategoryResponseInterface } from '../transaction/interfaces';
 
 /**
  * Kiválasztott érték az "új kategória hozzáadása" opcióhoz, hogy megkülönböztethető legyen
@@ -64,10 +64,7 @@ export class CategorySelectComponent implements ControlValueAccessor {
      */
     @Input() disabled = false;
 
-    /**
-     * Új kategóriát szeretne a user hozzáadni a listájához
-     */
-    @Output() categoryAdded = new EventEmitter<string>();
+    @Input() addCategoryCallback!: (name: string) => Observable<CategoryResponseInterface>;
 
     private searchText = signal('');
 
@@ -128,7 +125,15 @@ export class CategorySelectComponent implements ControlValueAccessor {
             }
             const name = this.categoryInput.nativeElement.value.trim();
             if (name && !this.disabled) {
-                this.categoryAdded.emit(name);
+                this.addCategoryCallback(name).subscribe({ 
+                    next: (category) => {
+                        // új kategóriát nem adjuk hozzá a categoryData tömbbe, mert újra fog töltődni a lista úgyis
+                        // ez nem okoz gondot, mert addig is meg fog jelenni a listában és menthető lesz
+                        const newCategoryAsDropdownInterface = {item_id: category.id, item_text: category.name} as DropdownInterface
+                        this.selected.update((categories) => [...categories, newCategoryAsDropdownInterface]);
+                        this.emitChange();
+                    },
+                });
             }
         } else {
             this.selected.update((categories) => [...categories, value]);
@@ -136,9 +141,8 @@ export class CategorySelectComponent implements ControlValueAccessor {
         }
 
         this.searchControl.setValue('');
-        // a matChipInputFor-ral kombinált input megjelenített értéke nem szinkronizálódik
-        // megbízhatóan a FormControl-ból, ezért explicit módon is töröljük (ez a hivatalos
-        // Angular Material chips+autocomplete minta is)
+        // Az input megjelenített értéke nem szinkronizálódik a FormControl-ból (matChipInputFor miatt),
+        // ezért kézzel is töröljük
         if (this.categoryInput) {
             this.categoryInput.nativeElement.value = '';
         }

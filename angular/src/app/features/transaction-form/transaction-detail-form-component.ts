@@ -7,8 +7,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DropdownInterface } from '../../shared/interfaces';
-import { DetailForm } from '../transaction/interfaces';
+import { CategoryResponseInterface, DetailForm } from '../transaction/interfaces';
 import { CategorySelectComponent } from './category-select-component';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-transaction-detail-form-component',
@@ -51,12 +52,10 @@ export class TransactionDetailFormComponent {
      */
     @Input({ required: true }) currencySymbol!: string;
 
-    /**
-     * Új kategóriát szeretne a user hozzáadni a listájához
-     */
-    @Output() categoryAdded = new EventEmitter<string>();
+    @Input() addCategoryCallback!: (name: string) => Observable<CategoryResponseInterface>;
     /**
      * A sor törlés gombjára kattintott a user
      */
     @Output() rowDeleted = new EventEmitter<void>();
+
 }

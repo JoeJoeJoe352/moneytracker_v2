@@ -39,27 +39,28 @@ import {
 import { validDate } from './valid-date-validator';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
-import { MatDialogContent, MatDialogActions } from "@angular/material/dialog";
+import { MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-transaction-form-component',
     templateUrl: './transaction-form-component.html',
     styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
     imports: [
-    ReactiveFormsModule,
-    MatDatepickerModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSlideToggleModule,
-    TranslatePipe,
-    TransactionDetailFormComponent,
-    CategorySelectComponent,
-    MatDialogContent,
-    MatDialogActions
-],
+        ReactiveFormsModule,
+        MatDatepickerModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSlideToggleModule,
+        TranslatePipe,
+        TransactionDetailFormComponent,
+        CategorySelectComponent,
+        MatDialogContent,
+        MatDialogActions,
+    ],
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
@@ -84,6 +85,7 @@ export class TransactionFormComponent implements OnChanges {
      */
     @Input({ required: true }) isCategorySaveInProgress!: boolean;
 
+    @Input() addCategoryCallback!: (name: string) => Observable<CategoryResponseInterface>;
     /**
      * Mentés gombra kattintott a user
      */
@@ -92,10 +94,6 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakció törlés gombra kattintott a user
      */
     @Output() deleted = new EventEmitter<number>();
-    /**
-     * Új kategóriát szeretne a user hozzáadni a listájához
-     */
-    @Output() categoryAdded = new EventEmitter<string>();
 
     /**
      * Tranzakciós form

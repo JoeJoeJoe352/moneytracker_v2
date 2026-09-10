@@ -14,7 +14,7 @@
                 formControlName="categories"
                 [categoryData]="categoryData"
                 [disabled]="isCategorySaveInProgress"
-                (categoryAdded)="categoryAdded.emit($event)"
+                [addCategoryCallback]="addCategoryCallback"
             />
         </div>
     </div>

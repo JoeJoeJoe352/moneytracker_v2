@@ -13,9 +13,9 @@
         [isTransactionFormDisabled]="data.isTransactionFormDisabled()"
         [categoryList]="data.categories"
         [transaction]="data.transaction()"
+        [addCategoryCallback]="data.addCategoryCallback"
         (deleted)="deleteTransactionRequested.emit($event)"
         (saved)="saved.emit($event)"
-        (categoryAdded)="categoryAdded.emit($event)"
         [isCategorySaveInProgress]="data.isCategorySaveInProgress()"
     />
 }

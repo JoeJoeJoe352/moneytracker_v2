@@ -10,6 +10,7 @@ import {
     TransactionDataFromBackend,
 } from './interfaces';
 import { TransactionFormComponent } from '../transaction-form/transaction-form-component';
+import { Observable } from 'rxjs';
 
 export interface TransactionModalInputInterface {
     transaction: Signal<TransactionDataFromBackend | null>;
@@ -17,6 +18,7 @@ export interface TransactionModalInputInterface {
     isTransactionFormDisabled: Signal<boolean>;
     isCategorySaveInProgress: Signal<boolean>;
     isDataInitializing: Signal<boolean>;
+    addCategoryCallback: (categoryName: string) => Observable<CategoryResponseInterface>;
 }
 
 @Component({

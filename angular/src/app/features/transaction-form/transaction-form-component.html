@@ -126,7 +126,7 @@
                         formControlName="categories"
                         [categoryData]="categoryData"
                         [disabled]="isCategorySaveInProgress"
-                        (categoryAdded)="categoryAdded.emit($event)"
+                        [addCategoryCallback]="addCategoryCallback"
                     />
                 </div>
             </div>
@@ -142,7 +142,7 @@
                         [isCategorySaveInProgress]="isCategorySaveInProgress"
                         [isLastDetailRow]="isLastDetailRow"
                         [currencySymbol]="selectedWalletsCurrency()"
-                        (categoryAdded)="categoryAdded.emit($event)"
+                        [addCategoryCallback]="addCategoryCallback"
                         (rowDeleted)="deleteRow($index)"
                     />
                 }
