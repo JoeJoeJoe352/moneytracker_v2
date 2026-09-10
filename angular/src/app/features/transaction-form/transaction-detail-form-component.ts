@@ -3,6 +3,10 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { DropdownInterface } from '../../shared/interfaces';
 import { DetailForm } from '../transaction/interfaces';
 
@@ -10,7 +14,16 @@ import { DetailForm } from '../transaction/interfaces';
     selector: 'app-transaction-detail-form-component',
     templateUrl: './transaction-detail-form-component.html',
     styleUrl: './transaction-detail-form-component.scss',
-    imports: [ReactiveFormsModule, TranslatePipe, NgMultiSelectDropDownModule, MatSlideToggleModule],
+    imports: [
+        ReactiveFormsModule,
+        TranslatePipe,
+        NgMultiSelectDropDownModule,
+        MatSlideToggleModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+    ],
 })
 export class TransactionDetailFormComponent {
     /**

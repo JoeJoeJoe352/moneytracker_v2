@@ -22,6 +22,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { DropdownInterface } from '../../shared/interfaces';
@@ -46,6 +49,9 @@ import { WalletDataUtil } from '../wallet/wallet-data-util';
         MatDatepickerModule,
         MatInputModule,
         MatFormFieldModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
         MatSlideToggleModule,
         TranslatePipe,
         NgMultiSelectDropDownModule,
@@ -165,10 +171,8 @@ export class TransactionFormComponent implements OnChanges {
 
     /**
      * Selectben lévő wallet váltáskor lefutó műveletek
-     * @param event 
      */
-    protected onWalletChange(event: Event): void {
-        const walletId = Number((event.target as HTMLSelectElement).value);
+    protected onWalletChange(walletId: number): void {
         this.setSelectedWalletSymbol(walletId);
     }
 

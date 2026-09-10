@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
 import { signal } from '@angular/core';
 import { TransactionFormComponent } from './transaction-form-component';
 import { TransactionService } from '../transaction/transaction-service';
@@ -159,7 +161,7 @@ describe('TransactionFormComponent (Vitest)', () => {
 
     it('should show the delete button only for an existing transaction, and emit its id on click', () => {
         fixture.detectChanges();
-        expect(fixture.nativeElement.querySelector('.btn-primary-red')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.mat-button-danger')).toBeNull();
 
         const backendTransaction: TransactionDataFromBackend = {
             id: 42,
@@ -194,7 +196,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         let deletedId: number | undefined;
         component.deleted.subscribe((id) => (deletedId = id));
 
-        const deleteButton = fixture.nativeElement.querySelector('.btn-primary-red');
+        const deleteButton = fixture.nativeElement.querySelector('.mat-button-danger');
         expect(deleteButton).toBeTruthy();
         deleteButton.click();
 
@@ -251,23 +253,18 @@ describe('TransactionFormComponent (Vitest)', () => {
     it('should initialize the price suffix from the default wallet currency', () => {
         fixture.detectChanges();
 
-        const priceSuffix = fixture.nativeElement.querySelector(
-            '.input-with-suffix .suffix',
-        );
+        const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('Ft');
     });
 
     it('should update the price suffix when the wallet select changes', () => {
         fixture.detectChanges();
 
-        const walletSelect = fixture.nativeElement.querySelector('#transaction-wallet');
-        walletSelect.value = walletSelect.options[1].value;
-        walletSelect.dispatchEvent(new Event('change'));
+        const walletSelect = fixture.debugElement.query(By.directive(MatSelect));
+        walletSelect.triggerEventHandler('selectionChange', { value: 2 });
         fixture.detectChanges();
 
-        const priceSuffix = fixture.nativeElement.querySelector(
-            '.input-with-suffix .suffix',
-        );
+        const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('€');
     });
 
@@ -303,22 +300,19 @@ describe('TransactionFormComponent (Vitest)', () => {
         });
         fixture.detectChanges();
 
-        const priceSuffix = fixture.nativeElement.querySelector(
-            '.input-with-suffix .suffix',
-        );
+        const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('€');
     });
 
     it('should render the wallet options with their currency code and the price suffix with the selected currency symbol', () => {
         fixture.detectChanges();
 
-        const options = fixture.nativeElement.querySelectorAll('#transaction-wallet option');
-        expect(options[0].textContent.trim()).toBe('Test Wallet (HUF)');
-        expect(options[1].textContent.trim()).toBe('Euro Wallet (EUR)');
+        const walletSelect = fixture.debugElement.query(By.directive(MatSelect))
+            .componentInstance as MatSelect;
+        const optionTexts = walletSelect.options.map((option) => option.viewValue.trim());
+        expect(optionTexts).toEqual(['Test Wallet (HUF)', 'Euro Wallet (EUR)']);
 
-        const priceSuffix = fixture.nativeElement.querySelector(
-            '.input-with-suffix .suffix',
-        );
+        const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('Ft');
     });
 });

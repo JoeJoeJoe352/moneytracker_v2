@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { signal } from '@angular/core';
+import { MatSelect } from '@angular/material/select';
 import { TransactionFormComponent } from './transaction-form-component';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { TransactionService } from '../transaction/transaction-service';
@@ -120,14 +121,14 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         fixture.detectChanges();
 
         expect(
-            fixture.nativeElement.querySelectorAll('app-transaction-detail-row-component').length,
+            fixture.nativeElement.querySelectorAll('app-transaction-detail-form-component').length,
         ).toBe(3);
         expect(component.details.length).toBe(3);
     });
 
     it('should remove a detail row when its own delete button is clicked', () => {
         const deleteButtons = fixture.nativeElement.querySelectorAll(
-            'app-transaction-detail-row-component .btn-primary-red',
+            'app-transaction-detail-form-component .mat-button-danger',
         );
         expect(deleteButtons.length).toBe(2);
 
@@ -135,20 +136,20 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         fixture.detectChanges();
 
         expect(
-            fixture.nativeElement.querySelectorAll('app-transaction-detail-row-component').length,
+            fixture.nativeElement.querySelectorAll('app-transaction-detail-form-component').length,
         ).toBe(1);
         expect(fixture.nativeElement.querySelector('#detail-name-0').value).toBe('Tej');
     });
 
     it("should disable every row's delete button once only one detail row remains", () => {
         const deleteButtons = fixture.nativeElement.querySelectorAll(
-            'app-transaction-detail-row-component .btn-primary-red',
+            'app-transaction-detail-form-component .mat-button-danger',
         );
         deleteButtons[0].click();
         fixture.detectChanges();
 
         const remainingDeleteButton = fixture.nativeElement.querySelector(
-            'app-transaction-detail-row-component .btn-primary-red',
+            'app-transaction-detail-form-component .mat-button-danger',
         );
         expect(remainingDeleteButton.disabled).toBe(true);
     });
@@ -195,13 +196,12 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
             rows.map((row) => (row.componentInstance as TransactionDetailFormComponent).currencySymbol),
         ).toEqual(['Ft', 'Ft']);
 
-        const walletSelect = fixture.nativeElement.querySelector('#transaction-wallet');
-        walletSelect.value = '2';
-        walletSelect.dispatchEvent(new Event('change'));
+        const walletSelect = fixture.debugElement.query(By.directive(MatSelect));
+        walletSelect.triggerEventHandler('selectionChange', { value: 2 });
         fixture.detectChanges();
 
         const suffixes = fixture.nativeElement.querySelectorAll(
-            'app-transaction-detail-row-component .suffix',
+            'app-transaction-detail-form-component [matTextSuffix]',
         );
         expect(suffixes[0].textContent.trim()).toBe('€');
     });

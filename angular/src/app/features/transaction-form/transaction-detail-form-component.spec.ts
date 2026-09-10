@@ -76,7 +76,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         expect(weightInput.value).toBe('2');
         expect(unitPriceInput.value).toBe('300');
 
-        const suffixInputs = fixture.nativeElement.querySelectorAll('.input-with-suffix input');
+        const suffixInputs = fixture.nativeElement.querySelectorAll('mat-form-field input');
         const totalPriceInput = suffixInputs[suffixInputs.length - 1];
         expect(Number(totalPriceInput.value)).toBe(600);
         expect(totalPriceInput.disabled).toBe(true);
@@ -88,7 +88,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture.detectChanges();
 
-        const suffix = fixture.nativeElement.querySelector('.suffix');
+        const suffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(suffix.textContent.trim()).toBe('€');
     });
 
@@ -102,7 +102,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture.detectChanges();
 
-        const suffixes = fixture.nativeElement.querySelectorAll('.suffix');
+        const suffixes = fixture.nativeElement.querySelectorAll('[matTextSuffix]');
         const suffixTexts = Array.from(suffixes as NodeListOf<HTMLElement>).map((el) =>
             el.textContent.trim(),
         );
@@ -117,12 +117,12 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         component.detail.controls.detailName.updateValueAndValidity();
 
         fixture.detectChanges();
-        expect(fixture.nativeElement.querySelector('.form-field-error')).toBeNull();
+        expect(fixture.nativeElement.querySelector('mat-error')).toBeNull();
 
         component.detail.controls.detailName.markAsTouched();
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('.form-field-error')).toBeTruthy();
+        expect(fixture.nativeElement.querySelector('mat-error')).toBeTruthy();
     });
 
     it('should disable the delete button when isLastDetailRow is true', () => {
@@ -131,7 +131,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture.detectChanges();
 
-        const button = fixture.nativeElement.querySelector('button.btn-primary-red');
+        const button = fixture.nativeElement.querySelector('button.mat-button-danger');
         expect(button.disabled).toBe(true);
     });
 
@@ -141,7 +141,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture.detectChanges();
 
-        const button = fixture.nativeElement.querySelector('button.btn-primary-red');
+        const button = fixture.nativeElement.querySelector('button.mat-button-danger');
         expect(button.disabled).toBe(false);
     });
 
@@ -153,7 +153,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         let emitted = false;
         component.rowDeleted.subscribe(() => (emitted = true));
 
-        const button = fixture.nativeElement.querySelector('button.btn-primary-red');
+        const button = fixture.nativeElement.querySelector('button.mat-button-danger');
         button.click();
 
         expect(emitted).toBe(true);

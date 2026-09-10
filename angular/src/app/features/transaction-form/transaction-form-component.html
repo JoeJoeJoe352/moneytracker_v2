@@ -1,57 +1,44 @@
 <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="form transaction-form">
-    <div class="row">
-        <div class="col-sm-6 form-group mb-3">
-            <!-- Név -->
-            <label for="transaction-name">{{ 'transaction.name' | translate }}</label>
-            <input
-                id="transaction-name"
-                type="text"
-                formControlName="name"
-                class="form-control"
-                autocomplete="name"
-            />
+    <div class="form-row">
+        <!-- Név -->
+        <mat-form-field>
+            <mat-label>{{ 'transaction.name' | translate }}</mat-label>
+            <input id="transaction-name" matInput type="text" formControlName="name" autocomplete="name" />
             @if (name.invalid && name.touched) {
                 @if (name.hasError('required')) {
-                    <div class="form-field-error">
-                        {{ 'transaction.name.required' | translate }}
-                    </div>
+                    <mat-error>{{ 'transaction.name.required' | translate }}</mat-error>
                 }
                 @if (name.hasError('minlength')) {
-                    <div class="form-field-error">
-                        {{ 'transaction.name.minlength' | translate }}
-                    </div>
+                    <mat-error>{{ 'transaction.name.minlength' | translate }}</mat-error>
                 }
                 @if (name.hasError('maxlength')) {
-                    <div class="form-field-error">
-                        {{ 'transaction.name.maxlength' | translate }}
-                    </div>
+                    <mat-error>{{ 'transaction.name.maxlength' | translate }}</mat-error>
                 }
             }
-        </div>
+        </mat-form-field>
         <!-- Wallet -->
-        <div class="col-sm-6 form-group mb-3">
-            <label for="transaction-wallet">{{ 'transaction.wallet' | translate }}</label>
-            <select
+        <mat-form-field>
+            <mat-label>{{ 'transaction.wallet' | translate }}</mat-label>
+            <mat-select
                 id="transaction-wallet"
                 formControlName="walletId"
-                class="form-select"
                 [disabled]="isTransactionFormDisabled"
-                (change)="onWalletChange($event)"
+                (selectionChange)="onWalletChange($event.value)"
             >
                 @for (item of userData.getWallets(); track $index) {
-                    <option [value]="item.id">{{ item.name }} ({{ item.currencyCode }})</option>
+                    <mat-option [value]="item.id">{{ item.name }} ({{ item.currencyCode }})</mat-option>
                 }
-            </select>
-        </div>
+            </mat-select>
+        </mat-form-field>
     </div>
 
-    <div class="row">
+    <div class="form-row">
         <!-- Tranzakciótípus -->
-        <div class="col-sm-6 form-group mb-3">
+        <div class="toggle-field">
             <label for="transaction-transactionType-bool">{{
                 'transaction.type' | translate
             }}</label>
-            <div class="d-flex align-items-center gap-2">
+            <div class="toggle-field-control">
                 <span>{{ 'transaction.expense' | translate }}</span>
                 <mat-slide-toggle
                     class="mat-slide-toggle-income-expense"
@@ -64,10 +51,7 @@
         </div>
 
         <!-- Dátum -->
-        <div class="col-sm-6 form-group mb-3">
-            <label class="d-block" for="transaction-date">{{
-                'transaction.date' | translate
-            }}</label>
+        <div class="date-field">
             <mat-form-field>
                 <mat-label>
                     {{ 'transaction.date' | translate }}
@@ -82,22 +66,20 @@
                 <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
                 <mat-datepicker-toggle matIconSuffix [for]="transactionDatePicker" />
                 <mat-datepicker #transactionDatePicker />
+                @if (transactionDate.invalid && transactionDate.touched) {
+                    @if (transactionDate.hasError('required')) {
+                        <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>
+                    }
+                    @if (transactionDate.hasError('invalidDate')) {
+                        <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
+                    }
+                }
             </mat-form-field>
-            @if (transactionDate.invalid && transactionDate.touched) {
-                @if (transactionDate.hasError('required')) {
-                    <div class="form-field-error">
-                        {{ 'transaction.date.required' | translate }}
-                    </div>
-                }
-                @if (transactionDate.hasError('invalidDate')) {
-                    <div class="form-field-error">{{ 'transaction.date.invalid' | translate }}</div>
-                }
-            }
         </div>
     </div>
 
     <!-- részletek mutatása/elrejtése kapcsoló -->
-    <div class="form-group mb-3 detail-toggle-row d-flex align-items-center gap-2">
+    <div class="toggle-field detail-toggle-row">
         <span>{{ 'transaction.hide_details' | translate }}</span>
         <mat-slide-toggle
             class="mat-slide-toggle-on-off"
@@ -110,33 +92,27 @@
 
     <!-- Ár -->
     @if (!isComplexTransaction.value) {
-        <div class="row mb-3">
-            <div class="col-sm-4 form-group mb-3 mb-sm-0">
-                <label for="transaction-price">{{ 'transaction.price' | translate }}</label>
-                <div class="input-with-suffix">
-                    <input
-                        id="transaction-price"
-                        type="number"
-                        formControlName="price"
-                        class="form-control"
-                        autocomplete="price"
-                    />
-                    <span class="suffix">{{ selectedWalletsCurrency() }}</span>
-                </div>
+        <div class="form-row">
+            <mat-form-field class="price-field">
+                <mat-label>{{ 'transaction.price' | translate }}</mat-label>
+                <input
+                    id="transaction-price"
+                    matInput
+                    type="number"
+                    formControlName="price"
+                    autocomplete="price"
+                />
+                <span matTextSuffix>{{ selectedWalletsCurrency() }}</span>
                 @if (price.invalid && price.touched) {
                     @if (price.hasError('required')) {
-                        <div class="form-field-error">
-                            {{ 'transaction.price.required' | translate }}
-                        </div>
+                        <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
                     }
                     @if (price.hasError('min')) {
-                        <div class="form-field-error">
-                            {{ 'transaction.price.min' | translate }}
-                        </div>
+                        <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
                     }
                 }
-            </div>
-            <div class="col-sm-8 form-group">
+            </mat-form-field>
+            <div class="categories-field">
                 <label for="transaction-categories">{{
                     'transaction.categories' | translate
                 }}</label>
@@ -172,19 +148,15 @@
                 />
             }
             <div class="detail-add-row">
-                <button type="button" class="btn btn-primary-green" (click)="addRow()">
-                    <i class="bi bi-database-add"></i>
+                <button mat-mini-fab type="button" color="primary" (click)="addRow()">
+                    <mat-icon fontIcon="add"></mat-icon>
                 </button>
             </div>
         </div>
     }
 
     <div class="form-actions">
-        <button
-            type="submit"
-            [disabled]="transactionForm.invalid || isTransactionFormDisabled"
-            class="btn btn-primary-green"
-        >
+        <button mat-flat-button type="submit" [disabled]="transactionForm.invalid || isTransactionFormDisabled">
             {{
                 isExistingTransaction()
                     ? ('transaction.update' | translate)
@@ -193,9 +165,10 @@
         </button>
         @if (isExistingTransaction()) {
             <button
+                mat-flat-button
                 type="button"
+                class="mat-button-danger"
                 [disabled]="isTransactionFormDisabled"
-                class="btn btn-primary-red"
                 (click)="deleted.emit(transaction.id)"
             >
                 {{ 'transaction.delete' | translate }}
