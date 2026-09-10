@@ -5,7 +5,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { signal } from '@angular/core';
 import { TransactionFormComponent } from './transaction-form-component';
-import { TransactionDetailRowComponent } from './transaction-detail-row-component';
+import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
@@ -101,13 +101,13 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
     });
 
     it('should render one real detail row component per detail form group, correctly bound', () => {
-        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailRowComponent));
+        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailFormComponent));
 
         expect(rows.length).toBe(2);
-        expect((rows[0].componentInstance as TransactionDetailRowComponent).detail).toBe(
+        expect((rows[0].componentInstance as TransactionDetailFormComponent).detail).toBe(
             component.details.at(0),
         );
-        expect((rows[1].componentInstance as TransactionDetailRowComponent).detail).toBe(
+        expect((rows[1].componentInstance as TransactionDetailFormComponent).detail).toBe(
             component.details.at(1),
         );
         expect(fixture.nativeElement.querySelector('#detail-name-0').value).toBe('Kenyér');
@@ -189,10 +189,10 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
     });
 
     it('should propagate the selected wallet currency symbol down to every detail row', () => {
-        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailRowComponent));
+        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailFormComponent));
 
         expect(
-            rows.map((row) => (row.componentInstance as TransactionDetailRowComponent).currencySymbol),
+            rows.map((row) => (row.componentInstance as TransactionDetailFormComponent).currencySymbol),
         ).toEqual(['Ft', 'Ft']);
 
         const walletSelect = fixture.nativeElement.querySelector('#transaction-wallet');

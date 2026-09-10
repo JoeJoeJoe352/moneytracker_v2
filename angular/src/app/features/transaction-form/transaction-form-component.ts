@@ -25,7 +25,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { DropdownInterface } from '../../shared/interfaces';
-import { TransactionDetailRowComponent } from './transaction-detail-row-component';
+import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { TransactionService } from '../transaction/transaction-service';
 import {
     CategoryResponseInterface,
@@ -49,7 +49,7 @@ import { WalletDataUtil } from '../wallet/wallet-data-util';
         MatSlideToggleModule,
         TranslatePipe,
         NgMultiSelectDropDownModule,
-        TransactionDetailRowComponent,
+        TransactionDetailFormComponent,
     ],
 })
 export class TransactionFormComponent implements OnChanges {

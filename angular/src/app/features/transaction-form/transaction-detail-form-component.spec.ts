@@ -4,13 +4,13 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { signal } from '@angular/core';
-import { TransactionDetailRowComponent } from './transaction-detail-row-component';
+import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { DetailForm } from '../transaction/interfaces';
 import { DropdownInterface } from '../../shared/interfaces';
 
 describe('TransactionDetailRowComponent (Vitest)', () => {
-    let fixture: ComponentFixture<TransactionDetailRowComponent>;
-    let component: TransactionDetailRowComponent;
+    let fixture: ComponentFixture<TransactionDetailFormComponent>;
+    let component: TransactionDetailFormComponent;
     const fb = new FormBuilder();
 
     function buildDetailGroup(overrides: Partial<{
@@ -33,11 +33,11 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TransactionDetailRowComponent],
+            imports: [TransactionDetailFormComponent],
             providers: [provideTranslateService()],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TransactionDetailRowComponent);
+        fixture = TestBed.createComponent(TransactionDetailFormComponent);
         component = fixture.componentInstance;
         component.categoryData = signal<DropdownInterface[]>([]);
         component.multiselectSettings = signal({

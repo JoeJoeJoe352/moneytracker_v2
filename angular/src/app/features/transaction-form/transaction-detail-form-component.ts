@@ -7,12 +7,12 @@ import { DropdownInterface } from '../../shared/interfaces';
 import { DetailForm } from '../transaction/interfaces';
 
 @Component({
-    selector: 'app-transaction-detail-row-component',
-    templateUrl: './transaction-detail-row-component.html',
-    styleUrl: './transaction-detail-row-component.scss',
+    selector: 'app-transaction-detail-form-component',
+    templateUrl: './transaction-detail-form-component.html',
+    styleUrl: './transaction-detail-form-component.scss',
     imports: [ReactiveFormsModule, TranslatePipe, NgMultiSelectDropDownModule, MatSlideToggleModule],
 })
-export class TransactionDetailRowComponent {
+export class TransactionDetailFormComponent {
     /**
      * A sorhoz tartozó FormGroup (a szülő details FormArray-jének egy eleme)
      */
