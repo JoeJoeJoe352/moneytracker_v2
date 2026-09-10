@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>
+    {{ (data.transaction() ? 'transaction.update' : 'transaction.create') | translate }}
+</h2>
+
+@if (data.isDataInitializing()) {
+    <mat-dialog-content>
+        <div class="text-center">
+            <mat-spinner />
+        </div>
+    </mat-dialog-content>
+} @else {
+    <app-transaction-form-component
+        [isTransactionFormDisabled]="data.isTransactionFormDisabled()"
+        [categoryList]="data.categories"
+        [transaction]="data.transaction()"
+        (deleted)="deleteTransactionRequested.emit($event)"
+        (saved)="saved.emit($event)"
+        (categoryAdded)="categoryAdded.emit($event)"
+        [isCategorySaveInProgress]="data.isCategorySaveInProgress()"
+    />
+}

@@ -1,19 +1,9 @@
-@if (modal.isTransactionModalOpen()) {
-    <app-create-transaction-modal
-        [isTransactionFormDisabled]="modal.isTransactionFormDisabled()"
-        [categories]="modal.categories"
-        [transaction]="modal.transactionData()"
-        [isCategorySaveInProgress]="modal.isAddingCategoryInProgress()"
-        [isDataInitializing]="modal.isModalDataInitializing"
-        (closeModal)="modal.close()"
-        (deleteTransactionRequested)="modal.confirmDeletion($event)"
-        (saved)="modal.save($event)"
-        (categoryAdded)="modal.saveCategory($event)"
-    />
-}
-
 @if (isHistoryMode) {
-    <h1>{{ 'transaction_page.title' | translate }}</h1>
+    <mat-card class="title-card">
+        <mat-card-header>
+            <h1 mat-card-title>{{ 'transaction_page.title' | translate }}</h1>
+        </mat-card-header>
+    </mat-card>
 }
 
 @if (needSearchField) {

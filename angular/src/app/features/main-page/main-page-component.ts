@@ -6,7 +6,6 @@ import { switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionsListComponent } from '../transaction/transactions-component';
-import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
 import { MoneySumInterface, WalletSummaryInterface } from '../transaction/interfaces';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
@@ -25,7 +24,6 @@ import { MatButton } from '@angular/material/button';
     imports: [
         TransactionsListComponent,
         TranslatePipe,
-        TransactionModalComponent,
         CurrencyFormatPipe,
         StatCardComponent,
         MatCard,

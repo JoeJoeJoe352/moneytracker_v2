@@ -1,47 +1,41 @@
-import { Component, EventEmitter, Input, Output, Signal } from '@angular/core';
-import { BaseModal } from '../../shared/components/modal/base-modal';
+import { Component, EventEmitter, inject, Output, Signal } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { TranslatePipe } from '@ngx-translate/core';
 import {
     CategoryResponseInterface,
     NewTransaction,
     TransactionDataFromBackend,
 } from './interfaces';
-import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionFormComponent } from '../transaction-form/transaction-form-component';
+
+export interface TransactionModalInputInterface {
+    transaction: Signal<TransactionDataFromBackend | null>;
+    categories: Signal<CategoryResponseInterface[]>;
+    isTransactionFormDisabled: Signal<boolean>;
+    isCategorySaveInProgress: Signal<boolean>;
+    isDataInitializing: Signal<boolean>;
+}
 
 @Component({
     selector: 'app-create-transaction-modal',
-    template: `
-        <app-base-modal [title]="'transaction.create' | translate" (closeModal)="closeModal.emit()">
-            @if (isDataInitializing()) {
-                <div class="text-center">
-                    <div class="spinner-border" role="status"></div>
-                </div>
-            } @else {
-                <app-transaction-form-component
-                    [isTransactionFormDisabled]="isTransactionFormDisabled"
-                    [categoryList]="categories"
-                    [transaction]="transaction"
-                    (deleted)="deleteTransactionRequested.emit($event)"
-                    (saved)="saved.emit($event)"
-                    (categoryAdded)="categoryAdded.emit($event)"
-                    [isCategorySaveInProgress]="isCategorySaveInProgress"
-                />
-            }
-        </app-base-modal>
-    `,
-    imports: [BaseModal, TransactionFormComponent, TranslatePipe],
+    templateUrl: './transaction-modal.html',
+    styleUrl: './transaction-modal.scss',
+    standalone: true,
+    imports: [
+        TransactionFormComponent,
+        TranslatePipe,
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        MatIconModule,
+        MatButtonModule,
+    ],
 })
 export class TransactionModalComponent {
-    @Input() transaction: TransactionDataFromBackend | null = null;
-    @Input({ required: true }) categories!: Signal<CategoryResponseInterface[]>;
-    @Input({ required: true }) isTransactionFormDisabled!: boolean;
-    @Input({ required: true }) isCategorySaveInProgress!: boolean;
-    /**
-     * Töltődnek-e a formhoz szükséges adatok. Addig megjelenik a modal, csak töltőikon lesz
-     */
-    @Input({ required: true }) isDataInitializing!: Signal<boolean>;
+    public data = inject<TransactionModalInputInterface>(MAT_DIALOG_DATA);
 
-    @Output() closeModal = new EventEmitter<void>();
     @Output() deleteTransactionRequested = new EventEmitter<number>();
     @Output() saved = new EventEmitter<NewTransaction>();
     @Output() categoryAdded = new EventEmitter<string>();

@@ -39,24 +39,27 @@ import {
 import { validDate } from './valid-date-validator';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
+import { MatDialogContent, MatDialogActions } from "@angular/material/dialog";
 
 @Component({
     selector: 'app-transaction-form-component',
     templateUrl: './transaction-form-component.html',
     styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
     imports: [
-        ReactiveFormsModule,
-        MatDatepickerModule,
-        MatInputModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        MatSlideToggleModule,
-        TranslatePipe,
-        TransactionDetailFormComponent,
-        CategorySelectComponent,
-    ],
+    ReactiveFormsModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSlideToggleModule,
+    TranslatePipe,
+    TransactionDetailFormComponent,
+    CategorySelectComponent,
+    MatDialogContent,
+    MatDialogActions
+],
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);

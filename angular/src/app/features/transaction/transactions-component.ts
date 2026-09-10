@@ -11,7 +11,6 @@ import {
     SimpleChanges,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { TransactionService } from '../transaction/transaction-service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -29,14 +28,9 @@ export interface FilterData {
 @Component({
     selector: 'app-transactions-list-component',
     templateUrl: './transactions-component.html',
+    styleUrl: './transactions-component.scss',
     standalone: true,
-    imports: [
-    TransactionModalComponent,
-    TransactionListComponent,
-    TranslatePipe,
-    TransactionFilter,
-    MatCardModule
-],
+    imports: [TransactionListComponent, TranslatePipe, TransactionFilter, MatCardModule],
     providers: [TransactionModalStateService],
 })
 export class TransactionsListComponent implements OnInit, OnChanges {

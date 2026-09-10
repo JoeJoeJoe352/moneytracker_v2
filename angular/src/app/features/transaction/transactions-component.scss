@@ -1,0 +1,7 @@
+@use '../../shared/variables.scss' as *;
+
+.title-card {
+    margin-bottom: 12px;
+    --mat-card-elevated-container-color: #{$moneytracker-green};
+    color: $moneytracker-white;
+}

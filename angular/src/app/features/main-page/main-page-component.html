@@ -1,16 +1,3 @@
-@if (modal.isTransactionModalOpen()) {
-    <app-create-transaction-modal
-        [transaction]="modal.transactionData()"
-        [categories]="modal.categories"
-        [isTransactionFormDisabled]="modal.isTransactionFormDisabled()"
-        [isCategorySaveInProgress]="modal.isAddingCategoryInProgress()"
-        [isDataInitializing]="modal.isModalDataInitializing"
-        (closeModal)="modal.close()"
-        (deleteTransactionRequested)="modal.confirmDeletion($event)"
-        (saved)="modal.save($event)"
-        (categoryAdded)="modal.saveCategory($event)"
-    />
-}
 <div class="row g-3">
     <div class="col-md-4">
         <mat-card class="stat-card balance-card">

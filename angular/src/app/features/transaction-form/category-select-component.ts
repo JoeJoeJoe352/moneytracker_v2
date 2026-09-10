@@ -10,10 +10,18 @@ import {
     signal,
     ViewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormControl } from '@angular/forms';
+import {
+    ControlValueAccessor,
+    NG_VALUE_ACCESSOR,
+    ReactiveFormsModule,
+    FormControl,
+} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import {
+    MatAutocompleteModule,
+    MatAutocompleteSelectedEvent,
+} from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DropdownInterface } from '../../shared/interfaces';
@@ -61,17 +69,28 @@ export class CategorySelectComponent implements ControlValueAccessor {
      */
     @Output() categoryAdded = new EventEmitter<string>();
 
-    /**
-     * Az "új kategória hozzáadása" opció értéke az autocomplete-ban (public, hogy tesztelhető legyen)
-     */
-    readonly addNewOption = ADD_NEW_OPTION;
+    private searchText = signal('');
+
+    private onChange: (value: DropdownInterface[]) => void = () => undefined;
+
+    private onTouched: () => void = () => undefined;
 
     protected searchControl = new FormControl('', { nonNullable: true });
 
     protected selected = signal<DropdownInterface[]>([]);
 
-    private searchText = signal('');
+    /**
+     * Az "új kategória hozzáadása" opció értéke az autocomplete-ban (public, hogy tesztelhető legyen)
+     */
+    public readonly addNewOption = ADD_NEW_OPTION;
 
+    constructor() {
+        this.searchControl.valueChanges.subscribe((value) => this.searchText.set(value));
+    }
+
+    /**
+     * Opciók a selecthez
+     */
     protected filteredOptions: Signal<DropdownInterface[]> = computed(() => {
         const search = this.searchText().trim().toLowerCase();
         const selectedIds = new Set(this.selected().map((category) => category.item_id));
@@ -80,6 +99,10 @@ export class CategorySelectComponent implements ControlValueAccessor {
             .filter((category) => category.item_text.toLowerCase().includes(search));
     });
 
+    /**
+     * Megjelenjen-e az új opció hozzáadása gomb. Az összes elem listáját kell nézni ilyenkor,
+     * nehogy fel tudja venni a user ugyanazt, amit már egyszer kiválasztott
+     */
     protected showAddOption: Signal<boolean> = computed(() => {
         const search = this.searchText().trim();
         if (!search) {
@@ -90,34 +113,6 @@ export class CategorySelectComponent implements ControlValueAccessor {
         );
     });
 
-    private onChange: (value: DropdownInterface[]) => void = () => undefined;
-    private onTouched: () => void = () => undefined;
-
-    constructor() {
-        this.searchControl.valueChanges.subscribe((value) => this.searchText.set(value));
-    }
-
-    writeValue(value: DropdownInterface[] | null): void {
-        this.selected.set(value ?? []);
-    }
-
-    registerOnChange(fn: (value: DropdownInterface[]) => void): void {
-        this.onChange = fn;
-    }
-
-    registerOnTouched(fn: () => void): void {
-        this.onTouched = fn;
-    }
-
-    setDisabledState(isDisabled: boolean): void {
-        this.disabled = isDisabled;
-        if (isDisabled) {
-            this.searchControl.disable();
-        } else {
-            this.searchControl.enable();
-        }
-    }
-
     /**
      * Autocomplete-ban kiválasztott elem lekezelése: vagy egy meglévő kategóriát választ ki
      * a user, vagy az "új kategória hozzáadása" opciót
@@ -126,7 +121,12 @@ export class CategorySelectComponent implements ControlValueAccessor {
         const value = event.option.value as DropdownInterface | typeof ADD_NEW_OPTION;
 
         if (value === ADD_NEW_OPTION) {
-            const name = this.searchText().trim();
+            // nyers input adatokból olvassuk ki, mert a this.searchText()-be ilyenkor a symbol kerül be
+            // (mert a formcontrol-ba az kerül)
+            if (!this.categoryInput) {
+                throw new Error('Categoryinput not exists');
+            }
+            const name = this.categoryInput.nativeElement.value.trim();
             if (name && !this.disabled) {
                 this.categoryAdded.emit(name);
             }
@@ -157,5 +157,28 @@ export class CategorySelectComponent implements ControlValueAccessor {
     private emitChange(): void {
         this.onChange(this.selected());
         this.onTouched();
+    }
+
+    // ControlValueAccessor implementációk
+
+    writeValue(value: DropdownInterface[] | null): void {
+        this.selected.set(value ?? []);
+    }
+
+    registerOnChange(fn: (value: DropdownInterface[]) => void): void {
+        this.onChange = fn;
+    }
+
+    registerOnTouched(fn: () => void): void {
+        this.onTouched = fn;
+    }
+
+    setDisabledState(isDisabled: boolean): void {
+        this.disabled = isDisabled;
+        if (isDisabled) {
+            this.searchControl.disable();
+        } else {
+            this.searchControl.enable();
+        }
     }
 }
