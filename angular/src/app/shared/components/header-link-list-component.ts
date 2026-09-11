@@ -1,26 +1,49 @@
 import { Component, Input } from '@angular/core';
 import { LinkInterface } from '../interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
-import { RouterLink } from '@angular/router';
-import { MatButton } from '@angular/material/button';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-header-link-list',
     template: `
         @for (linkItem of this.linkList; track $index) {
             <li>
-                <a matButton="text" class="header-link" [routerLink]="linkItem.url">{{
-                    linkItem.langKey | translate
-                }}</a>
+                <a
+                    class="nav-link"
+                    [routerLink]="linkItem.url"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: linkItem.url === '/' }"
+                >
+                    <mat-icon [fontIcon]="linkItem.icon"></mat-icon>
+                    {{ linkItem.langKey | translate }}
+                </a>
             </li>
         }
     `,
-    imports: [TranslatePipe, RouterLink, MatButton],
+    imports: [TranslatePipe, RouterLink, RouterLinkActive, MatIcon],
     styles: `
         @use '../variables.scss' as *;
-        .header-link {
-            --mat-button-text-label-text-color: #{$moneytracker-white};
-            --mat-button-text-state-layer-color: #{$moneytracker-white};
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 1rem;
+            border-radius: $border-radius-lg;
+            color: $moneytracker-white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: $transition-base;
+
+            &:hover:not(.active) {
+                background: rgba($moneytracker-green, 0.1);
+            }
+
+            &.active {
+                background: $moneytracker-green;
+                color: $moneytracker-white;
+            }
         }
     `,
 })

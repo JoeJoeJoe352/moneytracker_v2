@@ -8,4 +8,5 @@ export interface DropdownInterface {
 export interface LinkInterface {
     url: string;
     langKey: string;
+    icon: string;
 }

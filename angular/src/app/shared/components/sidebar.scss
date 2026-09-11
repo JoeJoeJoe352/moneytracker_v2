@@ -3,79 +3,73 @@
 .sidebar-wrapper {
     background-color: $moneytracker-green;
     height: 100%;
+    padding: 1rem;
+    display: flex;
+}
 
-    .sidebar {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
+.sidebar-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid $moneytracker-green;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-sm;
+    padding: 1rem;
 
-        li {
-            text-decoration: none;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            color: $moneytracker-white;
-            text-decoration: none;
-        }
-
-        .logo-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: $moneytracker-white;
-            border-radius: 20px;
-            padding: 5px 10px;
-            color: $moneytracker-black;
-
-            img {
-                height: 25px;
-            }
-        }
+    li {
+        text-decoration: none;
     }
 }
 
-mat-toolbar {
-    background: transparent;
-    box-shadow: none;
-    height: auto;
-    padding: 0 0.5rem 1rem;
-    flex: 1 1 auto;
-    --mat-toolbar-container-background-color: transparent;
-    --mat-toolbar-container-text-color: #{$moneytracker-white};
-}
-
-.sidebar-nav {
+.brand {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem 1rem;
+    color: $moneytracker-black;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+
+    background: $moneytracker-white;
+    border-radius: 20px;
+    padding: 5px 10px;
+    color: $moneytracker-black;
+
+    img {
+        height: 25px;
+    }
 }
 
 .sidebar-links {
     display: flex;
     flex-direction: column;
+    gap: 0.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.sidebar-actions {
+.sidebar-footer {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
     margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid $moneytracker-form-grey;
 
-    button {
+    .sidebar-footer-text {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: $moneytracker-white;
+        font-size: 0.9rem;
+    }
+
+    .logout-btn {
+        flex: 0 0 auto;
         color: $moneytracker-white;
     }
-}
-
-.sidebar-link {
-    --mat-button-text-label-text-color: #{$moneytracker-white};
-    --mat-button-text-state-layer-color: #{$moneytracker-white};
 }
