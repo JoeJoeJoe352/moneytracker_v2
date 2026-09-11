@@ -48,6 +48,27 @@ body {
     --bs-box-shadow-sm: #{$shadow-sm};
     --bs-box-shadow: #{$shadow};
     --bs-box-shadow-lg: #{$shadow-lg};
+
+    // Slider méretek felülírása
+    // Alap M3 track-height 32px, itt 20px-re kicsinyítve (0.625x skála).
+    --mat-slide-toggle-track-height: 20px;
+    --mat-slide-toggle-track-width: 33px;
+    --mat-slide-toggle-track-outline-width: 1.25px;
+    --mat-slide-toggle-selected-track-outline-width: 1.25px;
+    --mat-slide-toggle-disabled-unselected-track-outline-width: 1.25px;
+    --mat-slide-toggle-unselected-handle-size: 10px;
+    --mat-slide-toggle-selected-handle-size: 15px;
+    --mat-slide-toggle-with-icon-handle-size: 15px;
+    --mat-slide-toggle-pressed-handle-size: 17.5px;
+    --mat-slide-toggle-selected-icon-size: 10px;
+    --mat-slide-toggle-unselected-icon-size: 10px;
+    --mat-slide-toggle-state-layer-size: 25px;
+    --mat-slide-toggle-unselected-handle-horizontal-margin: 0 5px;
+    --mat-slide-toggle-selected-handle-horizontal-margin: 0 15px;
+    --mat-slide-toggle-unselected-pressed-handle-horizontal-margin: 0 1.25px;
+    --mat-slide-toggle-selected-pressed-handle-horizontal-margin: 0 13.75px;
+    --mat-slide-toggle-unselected-with-icon-handle-horizontal-margin: 0 2.5px;
+    --mat-slide-toggle-selected-with-icon-handle-horizontal-margin: 0 15px;
 }
 
 html {

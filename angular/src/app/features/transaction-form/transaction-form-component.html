@@ -112,7 +112,6 @@
                         'transaction.show_details' | translate
                     }}</span>
                 </div>
-                <mat-hint>{{ 'transaction.detail_state.hint' | translate }}</mat-hint>
             </div>
         </div>
 
@@ -152,7 +151,6 @@
         } @else {
             <!-- Tranzakció részletei -->
             <div class="detail-inputs">
-                <h4 class="detail-inputs-title">{{ 'transaction.detail.title' | translate }}</h4>
                 @for (detail of details.controls; track detail) {
                     <app-transaction-detail-form-component
                         [detail]="detail"

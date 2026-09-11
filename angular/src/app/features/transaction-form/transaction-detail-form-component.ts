@@ -10,6 +10,7 @@ import { DropdownInterface } from '../../shared/interfaces';
 import { CategoryResponseInterface, DetailForm } from '../transaction/interfaces';
 import { CategorySelectComponent } from './category-select-component';
 import { Observable } from 'rxjs';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
     selector: 'app-transaction-detail-form-component',
@@ -24,6 +25,7 @@ import { Observable } from 'rxjs';
         MatButtonModule,
         MatIconModule,
         CategorySelectComponent,
+        MatCardModule,
     ],
 })
 export class TransactionDetailFormComponent {
@@ -57,5 +59,4 @@ export class TransactionDetailFormComponent {
      * A sor törlés gombjára kattintott a user
      */
     @Output() rowDeleted = new EventEmitter<void>();
-
 }

@@ -1,5 +1,9 @@
 @use '../../shared/variables.scss' as *;
 
+.detail-card {
+    margin-bottom: 12px;
+}
+
 .detail-rows {
     background-color: #fafafa;
     border: 1px solid #eef0f1;
@@ -11,10 +15,28 @@
     }
 }
 
-.detail-row-top {
+.detail-row {
     display: flex;
     gap: 0.75rem;
     align-items: flex-start;
+    width: 100%;
+
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    mat-form-field,
+    .toggle-field,
+    .date-field {
+        flex: 1 1 220px;
+    }
+
+    .price-field {
+        flex: 1 1 160px;
+    }
+
+    .categories-field {
+        flex: 2 1 320px;
+    }
 }
 
 .detail-categories {

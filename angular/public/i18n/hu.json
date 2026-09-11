@@ -55,6 +55,8 @@
     "home": "Főoldal"
   },
   "transaction": {
+    "create": "Tranzakció létrehozása",
+    "update": "Tranzakció módosítása",
     "save": "Mentés",
     "delete": "Törlés",
     "delete.confirm": "Biztosan törölni szeretnéd a tranzakciót?",
@@ -77,9 +79,8 @@
     "expense": "Kiadás",
     "income": "Bevétel",
     "detail_state_label": "Rögzítés módja",
-    "hide_details": "Egy összeg",
-    "show_details": "Tételes",
-    "detail_state.hint": "Tételes rögzítésnél tételenként adhatsz meg összeget és kategóriát",
+    "hide_details": "Egyösszegben",
+    "show_details": "Tételenként",
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
     "category": {
@@ -99,12 +100,13 @@
       "delete.last-one-error": "Utolsó tétel nem törölhető",
       "delete_row.tooltip": "Tétel törlése",
       "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek.",
-      "weight": "Súly",
-      "weight.min": "A súlynak nagyobbnak kell lennie, mint nulla!",
+      "amount": "Mennyiség",
+      "amount.min": "A mennyiségnek nagyobbnak kell lennie, mint nulla!",
       "unit_price": "Egységár",
       "unit_price.min": "Az egységárnak nagyobbnak kell lennie, mint nulla!",
-      "simple_price_mode": "Ár megadása",
-      "complex_price_mode": "Mennyiség és egységár megadása",
+      "price_mode.label": "Árképzés típusa",
+      "simple_price_mode": "Teljes ár",
+      "complex_price_mode": "Mennyiség és egységár",
       "total_price": "Teljes ár"
     }
   },
