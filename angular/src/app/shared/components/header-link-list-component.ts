@@ -28,20 +28,21 @@ import { MatIcon } from '@angular/material/icon';
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 6px;
             padding: 0.65rem 1rem;
             border-radius: $border-radius-lg;
             color: $moneytracker-white;
             text-decoration: none;
             font-weight: 500;
             transition: $transition-base;
+            margin-bottom: 6px;
 
             &:hover:not(.active) {
-                background: rgba($moneytracker-green, 0.1);
+                background: $moneytracker-darker-green;
             }
 
             &.active {
-                background: $moneytracker-green;
+                background: $moneytracker-darker-green;
                 color: $moneytracker-white;
             }
         }
