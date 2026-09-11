@@ -24,9 +24,7 @@ html {
 }
 
 body {
-    // Default the application to a light color theme. This can be changed to
-    // `dark` to enable the dark color theme, or to `light dark` to defer to the
-    // user's system settings.
+    // Default the application to a light color theme
     color-scheme: light;
 
     // Set a default background, font and text colors for the application using
@@ -36,7 +34,6 @@ body {
     color: var(--mat-sys-on-surface);
     font: var(--mat-sys-body-medium);
 
-    // Reset the user agent margin.
     margin: 0;
     height: 100%;
 }
@@ -55,16 +52,6 @@ body {
 
 html {
     height: 100%;
-}
-
-body {
-    // Default the application to a light color theme. This can be changed to
-    // `dark` to enable the dark color theme, or to `light dark` to defer to the
-    // user's system settings.
-    color-scheme: light;
-
-    // Reset the user agent margin.
-    margin: 0;
 }
 
 // Modern feel: consistent hover motion on interactive controls.
@@ -86,8 +73,18 @@ body {
     }
 }
 
+// Általános class-ok
+
 .text-center {
     text-align: center;
+}
+
+.red-text {
+    color: $moneytracker-red;
+}
+
+.green-text {
+    color: $moneytracker-green;
 }
 
 // OVERRIDES

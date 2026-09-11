@@ -64,6 +64,7 @@
     "name.minlength": "Der Transaktionsname muss mindestens 3 Zeichen lang sein!",
     "name.maxlength": "Der Transaktionsname darf höchstens 50 Zeichen lang sein!",
     "type": "Transaktionstyp",
+    "type.hint": "Dies bestimmt das Vorzeichen der Transaktion",
     "price": "Betrag",
     "price.required": "Der Betrag ist erforderlich!",
     "price.min": "Der Betrag muss größer als null sein!",
@@ -73,13 +74,15 @@
     "date.invalid": "Das Datum ist ungültig!",
     "expense": "Ausgabe",
     "income": "Einnahme",
-    "hide_details": "Transaktionsbetrag angeben",
-    "show_details": "Posten auflisten",
+    "detail_state_label": "Posten auflisten",
+    "hide_details": "Aus",
+    "show_details": "Ein",
     "categories": "Kategorien",
     "categories.add": "Kategorien hinzufügen",
     "category": {
       "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!"
     },
+    "wallet.hint": "Die Transaktion wird damit verknüpft",
 
     "detail": {
       "title": "Transaktionsdetails",

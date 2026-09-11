@@ -119,7 +119,6 @@ export class CategorySelectComponent implements ControlValueAccessor {
 
         if (value === ADD_NEW_OPTION) {
             // nyers input adatokból olvassuk ki, mert a this.searchText()-be ilyenkor a symbol kerül be
-            // (mert a formcontrol-ba az kerül)
             if (!this.categoryInput) {
                 throw new Error('Categoryinput not exists');
             }
@@ -127,8 +126,7 @@ export class CategorySelectComponent implements ControlValueAccessor {
             if (name && !this.disabled) {
                 this.addCategoryCallback(name).subscribe({ 
                     next: (category) => {
-                        // új kategóriát nem adjuk hozzá a categoryData tömbbe, mert az a szülő state
-                        // service-ben úgyis kiegészül vele, és onnan input-ként visszaérkezik ide is
+                        // note: új kategóriát a szülő state service-ben adjuk hozzá
                         const newCategoryAsDropdownInterface = {item_id: category.id, item_text: category.name} as DropdownInterface
                         this.selected.update((categories) => [...categories, newCategoryAsDropdownInterface]);
                         this.emitChange();

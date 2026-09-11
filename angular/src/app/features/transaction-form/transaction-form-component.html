@@ -23,6 +23,8 @@
                     }
                 }
             </mat-form-field>
+        </div>
+        <div class="form-row">
             <!-- Wallet -->
             <mat-form-field>
                 <mat-label>{{ 'transaction.wallet' | translate }}</mat-label>
@@ -38,26 +40,8 @@
                         >
                     }
                 </mat-select>
+                <mat-hint>{{ 'transaction.wallet.hint' | translate }}</mat-hint>
             </mat-form-field>
-        </div>
-
-        <div class="form-row">
-            <!-- Tranzakciótípus -->
-            <div class="toggle-field">
-                <label for="transaction-transactionType-bool">{{
-                    'transaction.type' | translate
-                }}</label>
-                <div class="toggle-field-control">
-                    <span>{{ 'transaction.expense' | translate }}</span>
-                    <mat-slide-toggle
-                        class="mat-slide-toggle-income-expense"
-                        id="transaction-transactionType-bool"
-                        formControlName="isIncome"
-                        hideIcon
-                    />
-                    <span>{{ 'transaction.income' | translate }}</span>
-                </div>
-            </div>
 
             <!-- Dátum -->
             <div class="date-field">
@@ -87,16 +71,44 @@
             </div>
         </div>
 
-        <!-- részletek mutatása/elrejtése kapcsoló -->
-        <div class="toggle-field detail-toggle-row">
-            <span>{{ 'transaction.hide_details' | translate }}</span>
-            <mat-slide-toggle
-                class="mat-slide-toggle-on-off"
-                formControlName="isComplexTransaction"
-                id="transaction-show-details"
-                hideIcon
-            />
-            <span>{{ 'transaction.show_details' | translate }}</span>
+        <div class="form-row toggler-row">
+            <!-- Tranzakciótípus -->
+            <div class="toggle-field">
+                <label for="transaction-transactionType-bool">{{
+                    'transaction.type' | translate
+                }}</label>
+                <div class="toggle-field-control">
+                    <span [class.red-text]="!isIncome.value">{{
+                        'transaction.expense' | translate
+                    }}</span>
+                    <mat-slide-toggle
+                        class="mat-slide-toggle-income-expense"
+                        id="transaction-transactionType-bool"
+                        formControlName="isIncome"
+                        hideIcon
+                    />
+                    <span [class.green-text]="isIncome.value">{{
+                        'transaction.income' | translate
+                    }}</span>
+                </div>
+                <mat-hint>{{ 'transaction.type.hint' | translate }}</mat-hint>
+            </div>
+            <!-- részletek mutatása/elrejtése kapcsoló -->
+            <div class="toggle-field">
+                <label for="transaction-show-details">{{
+                    'transaction.detail_state_label' | translate
+                }}</label>
+                <div class="toggle-field-control">
+                    <span>{{ 'transaction.hide_details' | translate }}</span>
+                    <mat-slide-toggle
+                        class="mat-slide-toggle-on-off"
+                        formControlName="isComplexTransaction"
+                        id="transaction-show-details"
+                        (change)="handleIsComplexTransactionToggle()"
+                    />
+                    <span>{{ 'transaction.show_details' | translate }}</span>
+                </div>
+            </div>
         </div>
 
         <!-- Ár -->
@@ -155,29 +167,35 @@
         }
     </mat-dialog-content>
     <mat-dialog-actions>
-        <div class="form-actions">
+        <button
+            mat-stroked-button
+            type="button"
+            mat-dialog-close
+            [disabled]="isTransactionFormDisabled"
+        >
+            {{ 'etc.close' | translate }}
+        </button>
+        <button
+            mat-flat-button
+            type="submit"
+            [disabled]="transactionForm.invalid || isTransactionFormDisabled"
+        >
+            {{
+                isExistingTransaction()
+                    ? ('transaction.update' | translate)
+                    : ('transaction.create' | translate)
+            }}
+        </button>
+        @if (isExistingTransaction()) {
             <button
                 mat-flat-button
-                type="submit"
-                [disabled]="transactionForm.invalid || isTransactionFormDisabled"
+                type="button"
+                class="mat-button-danger"
+                [disabled]="isTransactionFormDisabled"
+                (click)="deleted.emit(transaction.id)"
             >
-                {{
-                    isExistingTransaction()
-                        ? ('transaction.update' | translate)
-                        : ('transaction.create' | translate)
-                }}
+                {{ 'transaction.delete' | translate }}
             </button>
-            @if (isExistingTransaction()) {
-                <button
-                    mat-flat-button
-                    type="button"
-                    class="mat-button-danger"
-                    [disabled]="isTransactionFormDisabled"
-                    (click)="deleted.emit(transaction.id)"
-                >
-                    {{ 'transaction.delete' | translate }}
-                </button>
-            }
-        </div>
+        }
     </mat-dialog-actions>
 </form>

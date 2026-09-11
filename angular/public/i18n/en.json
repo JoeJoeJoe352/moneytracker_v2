@@ -64,6 +64,7 @@
     "name.minlength": "Transaction name must be at least 3 characters long!",
     "name.maxlength": "Transaction name must be at most 50 characters long!",
     "type": "Transaction type",
+    "type.hint": "This determines the transaction's sign",
     "price": "Amount",
     "price.required": "Amount is required!",
     "price.min": "Amount must be greater than zero!",
@@ -73,13 +74,15 @@
     "date.invalid": "Date is invalid!",
     "expense": "Expense",
     "income": "Income",
-    "hide_details": "Enter transaction amount",
-    "show_details": "List items",
+    "detail_state_label": "List items",
+    "hide_details": "Off",
+    "show_details": "On",
     "categories": "Categories",
     "categories.add": "Add categories",
     "category": {
       "add": "Click here to add a new category!"
     },
+    "wallet.hint": "The transaction will be linked to this",
 
     "detail": {
       "title": "Transaction details",

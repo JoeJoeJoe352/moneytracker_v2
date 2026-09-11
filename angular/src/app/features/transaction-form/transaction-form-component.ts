@@ -39,7 +39,7 @@ import {
 import { validDate } from './valid-date-validator';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
-import { MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -58,8 +58,7 @@ import { Observable } from 'rxjs';
         TranslatePipe,
         TransactionDetailFormComponent,
         CategorySelectComponent,
-        MatDialogContent,
-        MatDialogActions,
+        MatDialogModule,
     ],
 })
 export class TransactionFormComponent implements OnChanges {
@@ -331,6 +330,15 @@ export class TransactionFormComponent implements OnChanges {
                 weightControl.disable({ emitEvent: false });
             }
         });
+    }
+
+    /**
+     * Komplex tranzakció kapcsoló állításakor létrehoz egy új üres sort, hogyha nincs (default nincs, vagy ha törölte a user a sort)
+     */
+    protected handleIsComplexTransactionToggle() {
+        if (this.isComplexTransaction.value && this.details.length === 0) {
+            this.addRow();
+        }
     }
 
     // Getters
