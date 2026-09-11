@@ -1,16 +1,6 @@
 <header>
-    @if (menuOpen) {
-        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus-->
-        <div class="header-backdrop" (click)="menuOpen = false"></div>
-    }
     <mat-toolbar>
         <div class="header-bar">
-            <a class="header-brand" routerLink="/">
-                <div class="logo-wrapper">
-                    <img src="assets/images/logo-color.svg" alt="logo" />
-                    The Moneytracker
-                </div>
-            </a>
             <button
                 mat-icon-button
                 class="menu-toggle"
@@ -20,25 +10,6 @@
             >
                 <mat-icon fontIcon="menu"></mat-icon>
             </button>
-            <!-- TODO legyen a tartalom felett, ne tolja lentebb a tartalmat, ha a menü nyitva van -->
-            <div class="header-nav" [class.open]="menuOpen">
-                <ul class="header-links">
-                    <app-header-link-list [linkList]="publicLinkList" />
-
-                    @if (userData.isUserLogged()) {
-                        <app-header-link-list [linkList]="authenticatedLinkList" />
-                    }
-                </ul>
-                <div class="header-actions">
-                    @if (userData.isUserLogged()) {
-                        <button matButton="text" type="button" class="header-link" (click)="logout()">
-                            {{ 'header.logout' | translate }}
-                        </button>
-                    }
-                    <app-language-switcher />
-                    <!-- TODO ide jöhet a login és signup gomb, else ágban -->
-                </div>
-            </div>
         </div>
     </mat-toolbar>
 </header>

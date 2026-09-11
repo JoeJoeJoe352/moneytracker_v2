@@ -1,0 +1,35 @@
+<div class="sidebar-wrapper">
+    <div class="sidebar">
+        <a class="brand" routerLink="/">
+            <div class="logo-wrapper">
+                <img src="assets/images/logo-color.svg" alt="logo" />
+                The Moneytracker
+            </div>
+        </a>
+        <mat-toolbar>
+            <div class="sidebar-nav" [class.open]="menuOpen">
+                <ul class="sidebar-links">
+                    <app-header-link-list [linkList]="publicLinkList" />
+
+                    @if (userData.isUserLogged()) {
+                        <app-header-link-list [linkList]="authenticatedLinkList" />
+                    }
+                </ul>
+                <div class="sidebar-actions">
+                    @if (userData.isUserLogged()) {
+                        <button
+                            matButton="text"
+                            type="button"
+                            class="sidebar-link"
+                            (click)="logout()"
+                        >
+                            {{ 'header.logout' | translate }}
+                        </button>
+                    }
+                    <app-language-switcher />
+                    <!-- TODO ide jöhet a login és signup gomb, else ágban -->
+                </div>
+            </div>
+        </mat-toolbar>
+    </div>
+</div>

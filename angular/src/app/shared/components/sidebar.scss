@@ -1,0 +1,81 @@
+@use '../variables.scss' as *;
+
+.sidebar-wrapper {
+    background-color: $moneytracker-green;
+    height: 100%;
+
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+
+        li {
+            text-decoration: none;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: $moneytracker-white;
+            text-decoration: none;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: $moneytracker-white;
+            border-radius: 20px;
+            padding: 5px 10px;
+            color: $moneytracker-black;
+
+            img {
+                height: 25px;
+            }
+        }
+    }
+}
+
+mat-toolbar {
+    background: transparent;
+    box-shadow: none;
+    height: auto;
+    padding: 0 0.5rem 1rem;
+    flex: 1 1 auto;
+    --mat-toolbar-container-background-color: transparent;
+    --mat-toolbar-container-text-color: #{$moneytracker-white};
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 1rem;
+}
+
+.sidebar-links {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-top: auto;
+
+    button {
+        color: $moneytracker-white;
+    }
+}
+
+.sidebar-link {
+    --mat-button-text-label-text-color: #{$moneytracker-white};
+    --mat-button-text-state-layer-color: #{$moneytracker-white};
+}

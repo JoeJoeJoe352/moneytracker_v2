@@ -1,121 +1,21 @@
 @use '../variables.scss' as *;
 
-$header-breakpoint: 992px;
-
-.header-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 2; // 2, mert tárca listaoldalon a tárca előtere a backdrop előtt van
-}
-
 mat-toolbar {
-  position: relative;
-  z-index: 2;
-  height: auto;
-  padding: 0;
-  box-shadow: $shadow-sm;
-  --mat-toolbar-container-background-color: #{$moneytracker-green};
-  --mat-toolbar-container-text-color: #{$moneytracker-white};
-}
+    position: relative;
+    z-index: 2;
+    height: auto;
+    padding: 0;
+    box-shadow: $shadow-sm;
+    --mat-toolbar-container-background-color: #{$moneytracker-white};
 
-.header-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  width: 100%;
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 0.5rem 1.5rem;
-}
-
-.header-brand {
-  display: flex;
-  align-items: center;
-  color: $moneytracker-white;
-  text-decoration: none;
-}
-
-.logo-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: $moneytracker-white;
-  border-radius: 20px;
-  padding: 5px 10px;
-  color: $moneytracker-black;
-
-  img {
-    height: 25px;
-  }
-}
-
-.menu-toggle {
-  color: $moneytracker-white;
-}
-
-.header-nav {
-  display: none;
-  flex-basis: 100%;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.5rem;
-  padding-top: 0.5rem;
-
-  &.open {
-    display: flex;
-  }
-}
-
-.header-links {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  // az app-header-link-list host eleme ne törje meg a flex sort - a benne
-  // lévő <li>-k így közvetlen flex gyerekei lesznek a .header-links-nek
-  app-header-link-list {
-    display: contents;
-  }
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.header-link {
-  --mat-button-text-label-text-color: #{$moneytracker-white};
-  --mat-button-text-state-layer-color: #{$moneytracker-white};
-}
-
-@media (min-width: $header-breakpoint) {
-  .header-bar {
-    flex-wrap: nowrap;
-  }
-
-  .menu-toggle {
-    display: none;
-  }
-
-  .header-nav {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-basis: auto;
-    width: auto;
-    padding-top: 0;
-  }
-
-  .header-links {
-    flex-direction: row;
-  }
-
-  .header-actions {
-    margin-left: auto;
-  }
+    .header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 0.5rem 1.5rem;
+    }
 }

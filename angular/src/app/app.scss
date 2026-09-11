@@ -1,6 +1,27 @@
-// Emiatt fejléc fent és lábléc mindig lent lesz
-.app-body {
-  min-height: 100vh;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+// Emiatt lábléc mindig lent lesz, ha túl kicsi a content, akkor is
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.app-shell-sidebar {
+    flex: 0 0 auto;
+    width: 240px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+// A jobb oldali oszlop: felül a header, alatta a tartalom
+.app-shell-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-shell-content {
+    flex: 1 1 auto;
+    padding: 12px
 }

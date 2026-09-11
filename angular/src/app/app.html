@@ -1,7 +1,9 @@
-<div class="app-body">
-    <app-header/>
-    <div class="container mt-3">
-        <router-outlet />
+<div class="app-shell">
+    <app-sidebar class="app-shell-sidebar" />
+    <div class="app-shell-main">
+        <app-header class="app-shell-header" />
+        <main class="app-shell-content">
+            <router-outlet />
+        </main>
     </div>
-    <app-footer/>
 </div>
