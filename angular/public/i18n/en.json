@@ -74,9 +74,10 @@
     "date.invalid": "Date is invalid!",
     "expense": "Expense",
     "income": "Income",
-    "detail_state_label": "List items",
-    "hide_details": "Off",
-    "show_details": "On",
+    "detail_state_label": "Recording mode",
+    "hide_details": "Single amount",
+    "show_details": "Itemized",
+    "detail_state.hint": "With itemized recording, you can enter an amount and category for each item",
     "categories": "Categories",
     "categories.add": "Add categories",
     "category": {

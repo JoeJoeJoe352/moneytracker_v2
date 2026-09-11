@@ -31,7 +31,6 @@
                 <mat-select
                     id="transaction-wallet"
                     formControlName="walletId"
-                    [disabled]="isTransactionFormDisabled"
                     (selectionChange)="onWalletChange($event.value)"
                 >
                     @for (item of userData.getWallets(); track $index) {
@@ -99,15 +98,20 @@
                     'transaction.detail_state_label' | translate
                 }}</label>
                 <div class="toggle-field-control">
-                    <span>{{ 'transaction.hide_details' | translate }}</span>
+                    <span [class.active-text]="!isComplexTransaction.value">{{
+                        'transaction.hide_details' | translate
+                    }}</span>
                     <mat-slide-toggle
                         class="mat-slide-toggle-on-off"
                         formControlName="isComplexTransaction"
                         id="transaction-show-details"
                         (change)="handleIsComplexTransactionToggle()"
                     />
-                    <span>{{ 'transaction.show_details' | translate }}</span>
+                    <span [class.active-text]="isComplexTransaction.value">{{
+                        'transaction.show_details' | translate
+                    }}</span>
                 </div>
+                <mat-hint>{{ 'transaction.detail_state.hint' | translate }}</mat-hint>
             </div>
         </div>
 
@@ -158,7 +162,7 @@
                         (rowDeleted)="deleteRow($index)"
                     />
                 }
-                <div class="detail-add-row">
+                <div class="detail-add-row" #detailAddButton>
                     <button mat-mini-fab type="button" color="primary" (click)="addRow()">
                         <mat-icon fontIcon="add"></mat-icon>
                     </button>

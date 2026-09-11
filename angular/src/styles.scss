@@ -87,6 +87,10 @@ html {
     color: $moneytracker-green;
 }
 
+.active-text {
+    font-weight: 600;
+}
+
 // OVERRIDES
 
 // mat-slide-toggle "on-off" színtéma (szürke = ki, kék = be)

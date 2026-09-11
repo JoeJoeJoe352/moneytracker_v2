@@ -74,9 +74,10 @@
     "date.invalid": "Das Datum ist ungültig!",
     "expense": "Ausgabe",
     "income": "Einnahme",
-    "detail_state_label": "Posten auflisten",
-    "hide_details": "Aus",
-    "show_details": "Ein",
+    "detail_state_label": "Erfassungsart",
+    "hide_details": "Einzelbetrag",
+    "show_details": "Posten",
+    "detail_state.hint": "Bei der Posten-Erfassung kannst du Betrag und Kategorie für jeden Posten einzeln angeben",
     "categories": "Kategorien",
     "categories.add": "Kategorien hinzufügen",
     "category": {

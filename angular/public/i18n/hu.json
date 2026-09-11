@@ -77,9 +77,10 @@
     "date.invalid": "A dátum érvénytelen!",
     "expense": "Kiadás",
     "income": "Bevétel",
-    "detail_state_label": "Tételek felsorolása",
-    "hide_details": "Ki",
-    "show_details": "Be",
+    "detail_state_label": "Rögzítés módja",
+    "hide_details": "Egy összeg",
+    "show_details": "Tételes",
+    "detail_state.hint": "Tételes rögzítésnél tételenként adhatsz meg összeget és kategóriát",
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
     "category": {
