@@ -55,9 +55,8 @@
     "home": "Főoldal"
   },
   "transaction": {
-    "create": "Tranzakció létrehozása",
-    "update": "Tranzakció módosítása",
-    "delete": "Tranzakció törlése",
+    "save": "Mentés",
+    "delete": "Törlés",
     "delete.confirm": "Biztosan törölni szeretnéd a tranzakciót?",
     "delete.error": "Hiba történt a tranzakció törlése közben!",
     "update.error": "Hiba történt a tranzakció módosítása közben!",

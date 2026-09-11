@@ -73,18 +73,18 @@
         <div class="form-row toggler-row">
             <!-- Tranzakciótípus -->
             <div class="toggle-field">
-                <label for="transaction-transactionType-bool">{{
-                    'transaction.type' | translate
-                }}</label>
+                <mat-label>
+                    {{ 'transaction.type' | translate }}
+                </mat-label>
                 <div class="toggle-field-control">
                     <span [class.red-text]="!isIncome.value">{{
                         'transaction.expense' | translate
                     }}</span>
                     <mat-slide-toggle
+                        hideIcon
                         class="mat-slide-toggle-income-expense"
                         id="transaction-transactionType-bool"
                         formControlName="isIncome"
-                        hideIcon
                     />
                     <span [class.green-text]="isIncome.value">{{
                         'transaction.income' | translate
@@ -94,14 +94,15 @@
             </div>
             <!-- részletek mutatása/elrejtése kapcsoló -->
             <div class="toggle-field">
-                <label for="transaction-show-details">{{
-                    'transaction.detail_state_label' | translate
-                }}</label>
+                <mat-label>
+                    {{ 'transaction.detail_state_label' | translate }}
+                </mat-label>
                 <div class="toggle-field-control">
                     <span [class.active-text]="!isComplexTransaction.value">{{
                         'transaction.hide_details' | translate
                     }}</span>
                     <mat-slide-toggle
+                        hideIcon
                         class="mat-slide-toggle-on-off"
                         formControlName="isComplexTransaction"
                         id="transaction-show-details"
@@ -137,6 +138,8 @@
                         }
                     }
                 </mat-form-field>
+            </div>
+            <div class="form-row">
                 <div class="categories-field">
                     <app-category-select
                         formControlName="categories"
@@ -184,11 +187,7 @@
             type="submit"
             [disabled]="transactionForm.invalid || isTransactionFormDisabled"
         >
-            {{
-                isExistingTransaction()
-                    ? ('transaction.update' | translate)
-                    : ('transaction.create' | translate)
-            }}
+            {{ 'transaction.save' | translate }}
         </button>
         @if (isExistingTransaction()) {
             <button
