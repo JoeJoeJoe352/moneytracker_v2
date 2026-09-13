@@ -7,11 +7,13 @@
 }
 
 .mobile-menu-open {
-    top: calc($header-height);
-    width: 100%;
-    position: absolute;
-    z-index: 3;
-    height: calc(100vh - $header-height);
+    @media (max-width: 768px) {
+        top: calc($header-height);
+        width: 100%;
+        position: absolute;
+        z-index: 3;
+        height: calc(100vh - $header-height);
+    }
 }
 
 .mobile-menu-closed {

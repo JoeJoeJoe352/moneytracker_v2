@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { Header } from './shared/components/header';
@@ -42,5 +42,13 @@ export class App {
 
     protected toggleMobileMenu() {
         this.isMobileMenuOpen.set(!this.isMobileMenuOpen());
+    }
+
+    /**
+     * Esc gomb listener, mi történjen, ha esc-t nyom a user
+     */
+    @HostListener('document:keydown.escape')
+    protected onEsc() {
+        this.isMobileMenuOpen.set(false);
     }
 }
