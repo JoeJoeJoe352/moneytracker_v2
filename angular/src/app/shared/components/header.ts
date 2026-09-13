@@ -2,12 +2,13 @@ import { Component, HostListener } from '@angular/core';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { LanguageSwitcherComponent } from './language-switch-component';
 
 @Component({
     selector: 'app-header',
     templateUrl: 'header.html',
     styleUrl: './header.scss',
-    imports: [MatToolbar, MatIconButton, MatIcon],
+    imports: [MatToolbar, MatIconButton, MatIcon, LanguageSwitcherComponent],
 })
 export class Header {
     /**
