@@ -44,6 +44,10 @@ export class App {
         this.isMobileMenuOpen.set(!this.isMobileMenuOpen());
     }
 
+    protected closeMobileMenu() {
+        this.isMobileMenuOpen.set(false);
+    }
+
     /**
      * Esc gomb listener, mi történjen, ha esc-t nyom a user
      */

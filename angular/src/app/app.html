@@ -1,4 +1,12 @@
 <div class="app-shell">
+    <button
+        type="button"
+        class="mobile-menu-backdrop"
+        [class.mobile-menu-backdrop-open]="isMobileMenuOpen()"
+        [tabIndex]="isMobileMenuOpen() ? 0 : -1"
+        aria-label="Menü bezárása"
+        (click)="closeMobileMenu()"
+    ></button>
     <app-sidebar
         class="app-shell-sidebar"
         [class.mobile-menu-open]="isMobileMenuOpen()"
