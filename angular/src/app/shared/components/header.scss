@@ -3,19 +3,18 @@
 mat-toolbar {
     position: relative;
     z-index: 2;
-    height: auto;
+    height: $header-height;
     padding: 0;
+    justify-content: end;
     box-shadow: $shadow-sm;
     --mat-toolbar-container-background-color: #{$moneytracker-white};
 
     .header-bar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: end;
         flex-wrap: wrap;
         width: 100%;
         max-width: 1140px;
-        margin: 0 auto;
-        padding: 0.5rem 1.5rem;
     }
 }

@@ -10,7 +10,12 @@ import { LanguageService } from '../services/translate-service';
     selector: 'app-language-switcher',
     standalone: true,
     template: `
-        <button mat-icon-button [matMenuTriggerFor]="languageMenu" type="button" aria-label="Language">
+        <button
+            mat-icon-button
+            [matMenuTriggerFor]="languageMenu"
+            type="button"
+            aria-label="Language"
+        >
             <mat-icon fontIcon="language"></mat-icon>
         </button>
         <mat-menu #languageMenu="matMenu">
@@ -26,12 +31,11 @@ import { LanguageService } from '../services/translate-service';
             }
         </mat-menu>
     `,
-
     imports: [MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger],
 })
 export class LanguageSwitcherComponent {
     private translateService = inject(TranslateService);
-    private languageService = inject(LanguageService)
+    private languageService = inject(LanguageService);
 
     /**
      * Aktuális nyelv
@@ -59,6 +63,7 @@ export class LanguageSwitcherComponent {
             },
         ];
     });
+    
     /**
      * Jelenlegi nyelv megváltoztatása
      */
@@ -66,8 +71,8 @@ export class LanguageSwitcherComponent {
         if (lang === this.translateService.currentLang()) {
             return;
         }
-        console.log(lang)
-        this.languageService.setLanguage(lang)
+        
+        this.languageService.setLanguage(lang);
         this.currentLanguage.set(lang);
     }
 }

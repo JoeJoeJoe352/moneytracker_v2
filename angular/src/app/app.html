@@ -1,7 +1,11 @@
 <div class="app-shell">
-    <app-sidebar class="app-shell-sidebar" />
+    <app-sidebar
+        class="app-shell-sidebar"
+        [class.mobile-menu-open]="isMobileMenuOpen()"
+        [class.mobile-menu-closed]="!isMobileMenuOpen()"
+    />
     <div class="app-shell-main">
-        <app-header class="app-shell-header" />
+        <app-header class="app-shell-header" (mobileMenuToggled)="toggleMobileMenu()" />
         <main class="app-shell-content">
             <router-outlet />
         </main>

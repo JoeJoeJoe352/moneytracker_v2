@@ -1,16 +1,19 @@
 <header>
     <mat-toolbar>
         <div class="header-bar">
-            <button
-                mat-icon-button
-                class="menu-toggle"
-                type="button"
-                aria-label="Menu"
-                (click)="toggleMenu()"
-            >
-                <mat-icon fontIcon="menu"></mat-icon>
-            </button>
-            <app-language-switcher/>
+            <app-language-switcher />
+
+            <div class="mobile-menu-button">
+                <button
+                    mat-icon-button
+                    class="menu-toggle"
+                    type="button"
+                    aria-label="Menu"
+                    (click)="toggleMenu()"
+                >
+                    <mat-icon fontIcon="menu"></mat-icon>
+                </button>
+            </div>
         </div>
     </mat-toolbar>
 </header>

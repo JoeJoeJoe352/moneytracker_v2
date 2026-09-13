@@ -6,7 +6,7 @@
 
 .app-shell-sidebar {
     flex: 0 0 auto;
-    width: 300px;
+    width: 15%;
     position: sticky;
     top: 0;
     height: 100vh;
@@ -23,5 +23,5 @@
 
 .app-shell-content {
     flex: 1 1 auto;
-    padding: 12px
+    padding: 12px;
 }

@@ -7,6 +7,13 @@
 @use './app/shared/variables.scss' as *;
 @use './app/styles/moneytracker-colors' as colors;
 
+// 100vh és 100%-os magasságú elemek + paddingja esetén ne menjen túl 100%-on
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 html {
     height: 100%;
     @include mat.theme(
@@ -25,9 +32,11 @@ body {
     // Default the application to a light color theme
     color-scheme: light;
 
-    // Set a default background, font and text colors for the application using
-    // Angular Material's system-level CSS variables. Learn more about these
-    // variables at https://material.angular.dev/guide/system-variables
+    // Elrejti a láthatatlan Material touch-target-eket (pl. a fejléc jobb szélén lévő
+    // ikon gomb), amik pár px-szel túlnyúlhatnak a viewport szélén és felesleges
+    // horizontális scrollbart okoznak, ami elveszi a függőleges helyet 100vh-s elemektől
+    overflow-x: hidden;
+
     background-color: var(--mat-sys-surface);
     color: var(--mat-sys-on-surface);
     font: var(--mat-sys-body-medium);
@@ -37,9 +46,8 @@ body {
 }
 
 :root {
-    // Slider méretek felülírása
-    // Alap M3 track-height 32px, itt 20px-re kicsinyítve (0.625x skála).
-    --mat-slide-toggle-track-height: 20px;
+    // Slider méretek felülírása (0.625x skála).
+    --mat-slide-toggle-track-height: 20px; // eredetileg ez 32px
     --mat-slide-toggle-track-width: 33px;
     --mat-slide-toggle-track-outline-width: 1.25px;
     --mat-slide-toggle-selected-track-outline-width: 1.25px;
@@ -63,7 +71,6 @@ html {
     height: 100%;
 }
 
-// Modern feel: consistent hover motion on interactive controls.
 .btn,
 .transaction-card-wrapper,
 .stat-card {
@@ -141,8 +148,7 @@ html {
     --mat-slide-toggle-unselected-pressed-handle-color: #{$moneytracker-white};
 }
 
-// piros (veszély) mat-button szín, pl. törlés gombokhoz. mat-flat-button, mat-stroked-button és
-// mat-button (basic) mindegyikre hat, mert mindhárom label/outline/state-layer tokenjét felülírja
+// piros (veszély) mat-button szín
 .mat-button-danger {
     --mat-button-filled-container-color: #{$moneytracker-red};
     --mat-button-filled-label-text-color: #{$moneytracker-white};
@@ -154,101 +160,4 @@ html {
 
     --mat-button-text-label-text-color: #{$moneytracker-red};
     --mat-button-text-state-layer-color: #{$moneytracker-red};
-}
-
-.btn-green-hollow {
-    color: $moneytracker-green;
-    background-color: $moneytracker-white;
-    border-color: $moneytracker-white;
-
-    &:hover {
-        color: $moneytracker-white;
-        background-color: $moneytracker-darker-green;
-        border-color: $moneytracker-grey;
-    }
-
-    &:focus-visible {
-        color: $moneytracker-white;
-        background-color: $moneytracker-darkest-green;
-        border-color: $moneytracker-grey;
-        //box-shadow: 130, 138, 145; // lehet még kell
-    }
-
-    &:active {
-        color: $moneytracker-white !important;
-        background-color: $moneytracker-darkest-green !important;
-        border-color: $moneytracker-grey !important;
-    }
-
-    &:disabled {
-        color: $moneytracker-white;
-        background-color: $moneytracker-grey;
-        border-color: $moneytracker-grey;
-    }
-}
-
-.btn-secondary-green {
-    font-weight: bold;
-    background-color: $moneytracker-secondary-color;
-}
-
-.btn-primary-green {
-    color: $moneytracker-white;
-    background-color: $moneytracker-green;
-    border-color: $moneytracker-white;
-
-    &:hover {
-        color: $moneytracker-white;
-        background-color: $moneytracker-darker-green;
-        border-color: $moneytracker-grey;
-    }
-
-    &:focus-visible {
-        color: $moneytracker-white;
-        background-color: $moneytracker-secondary-color;
-        border-color: $moneytracker-grey;
-        //box-shadow: 130, 138, 145; // lehet még kell
-    }
-
-    &:active {
-        color: $moneytracker-white !important;
-        background-color: $moneytracker-darkest-green !important;
-        border-color: $moneytracker-grey !important;
-    }
-
-    &:disabled {
-        color: $moneytracker-white;
-        background-color: darkslategray;
-        border-color: darkslategray;
-    }
-}
-
-.btn-primary-red {
-    color: $moneytracker-white;
-    background-color: $moneytracker-red;
-    border-color: $moneytracker-red;
-
-    &:hover {
-        color: $moneytracker-white;
-        background-color: $moneytracker-darker-red;
-        border-color: $moneytracker-darker-red;
-    }
-
-    &:focus-visible {
-        color: $moneytracker-white;
-        background-color: $moneytracker-darker-red;
-        border-color: $moneytracker-darker-red;
-    }
-
-    &:active {
-        color: $moneytracker-white !important;
-        background-color: $moneytracker-darkest-red !important;
-        border-color: $moneytracker-darkest-red !important;
-    }
-
-    &:disabled {
-        color: $moneytracker-white;
-        background-color: darkslategray;
-        border-color: darkslategray;
-    }
 }

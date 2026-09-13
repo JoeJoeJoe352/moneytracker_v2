@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { Header } from './shared/components/header';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -11,13 +12,16 @@ import { Sidebar } from './shared/components/sidebar';
 @Component({
     selector: 'app-root',
     templateUrl: './app.html',
-    styleUrl: './app.scss',
+    styleUrls: ['./app.scss', './shared/components/mobile-menu.scss'],
     imports: [RouterOutlet, Header, ReactiveFormsModule, Sidebar],
 })
 export class App {
     protected readonly title = signal('Moneytracker');
     private translate = inject(TranslateService);
     private languageService = inject(LanguageService);
+    private router = inject(Router);
+
+    protected isMobileMenuOpen = signal(false);
 
     constructor() {
         this.translate.addLangs(SUPPORTED_LANGS);
@@ -30,5 +34,13 @@ export class App {
 
         const lang = localStorage.getItem(LOCALSTORAGE_KEY_LANG) ?? fallBackLang;
         this.languageService.setLanguage(lang);
+
+        this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
+            this.isMobileMenuOpen.set(false);
+        });
+    }
+
+    protected toggleMobileMenu() {
+        this.isMobileMenuOpen.set(!this.isMobileMenuOpen());
     }
 }

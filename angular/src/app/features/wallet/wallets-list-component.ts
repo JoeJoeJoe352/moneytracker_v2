@@ -5,7 +5,7 @@ import { WalletCardComponent } from './wallet-card-component';
 @Component({
     selector: 'app-wallets-list-component',
     template: `
-        <div class="d-flex card-list flex-wrap column-gap-3 row-gap-3 justify-content-center">
+        <div class="wallet-list">
             @for (wallet of walletListData; track wallet.id) {
                 <app-wallet-card-component
                     [walletData]="wallet"
@@ -14,6 +14,7 @@ import { WalletCardComponent } from './wallet-card-component';
             }
         </div>
     `,
+    styleUrl: './wallets-list-component.scss',
     imports: [WalletCardComponent],
     standalone: true,
 })

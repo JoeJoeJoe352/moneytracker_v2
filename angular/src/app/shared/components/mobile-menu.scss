@@ -1,0 +1,21 @@
+@use '../variables.scss' as *;
+
+.mobile-menu-button {
+    @media (min-width: 768px) {
+        display: none;
+    }
+}
+
+.mobile-menu-open {
+    top: calc($header-height);
+    width: 100%;
+    position: absolute;
+    z-index: 3;
+    height: calc(100vh - $header-height);
+}
+
+.mobile-menu-closed {
+    @media (max-width: 768px) {
+        display: none;
+    }
+}

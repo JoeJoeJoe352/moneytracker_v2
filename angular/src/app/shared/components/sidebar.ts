@@ -5,7 +5,6 @@ import { UserDataStore } from '../services/user-data-store';
 import { LinkInterface } from '../interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 import { HeaderLinkListComponent } from './header-link-list-component';
-import { LanguageSwitcherComponent } from './language-switch-component';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 
@@ -17,7 +16,6 @@ import { MatIcon } from '@angular/material/icon';
         RouterLink,
         TranslatePipe,
         HeaderLinkListComponent,
-        LanguageSwitcherComponent,
         MatIconButton,
         MatIcon,
     ],
