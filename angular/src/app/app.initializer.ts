@@ -3,11 +3,6 @@ import { UserDataStore } from './shared/services/user-data-store';
 
 export function initApp(authService: AuthService, userDataStore: UserDataStore) {
     return new Promise<void>((resolve) => {
-        if (!userDataStore.isUserLogged()) {
-            resolve();
-            return;
-        }
-
         authService.authenticateUser().subscribe({
             next: (userData) => {
                 userDataStore.loadUserData(userData);
@@ -15,7 +10,8 @@ export function initApp(authService: AuthService, userDataStore: UserDataStore) 
             },
             error: (error) => {
                 userDataStore.resetData();
-                if (error.status !== 401) {
+                // 403 a válasz, ha nem jó a jwt token
+                if (error.status !== 403) {
                     console.error('unknown error during authcheck!', error);
                 }
                 resolve();
