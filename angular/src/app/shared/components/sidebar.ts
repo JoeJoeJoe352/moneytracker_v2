@@ -99,6 +99,7 @@ export class Sidebar {
         dialogRef.componentInstance.login.subscribe((payload) =>
             this.actionService.login(payload, this.isloading, () => {
                 dialogRef.close();
+                this.router.navigate(['/']);
             }),
         );
     };

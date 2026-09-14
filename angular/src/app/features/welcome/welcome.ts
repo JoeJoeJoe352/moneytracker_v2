@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
     templateUrl: './welcome.html',
     styles: `
         .logo {
+            max-height: 450px;
             max-width: stretch;
         }
     `,
