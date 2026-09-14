@@ -6,10 +6,11 @@
         </a>
 
         <ul class="sidebar-links">
-            <app-header-link-list [linkList]="publicLinkList" />
-
-            @if (userData.isUserLogged()) {
-                <app-header-link-list [linkList]="authenticatedLinkList" />
+            @for (linkItem of linkList(); track $index) {
+                <app-header-link-list
+                    [linkData]="linkItem"
+                    (clicked)="linkItem.action ? linkItem.action() : null"
+                />
             }
         </ul>
 

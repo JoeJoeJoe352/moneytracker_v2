@@ -37,6 +37,9 @@ body {
     // horizontális scrollbart okoznak, ami elveszi a függőleges helyet 100vh-s elemektől
     overflow-x: hidden;
 
+    // A body/html sosem görget, a tartalom görgetését az .app-shell-content végzi.
+    overflow-y: hidden;
+
     background-color: var(--mat-sys-surface);
     color: var(--mat-sys-on-surface);
     font: var(--mat-sys-body-medium);

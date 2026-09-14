@@ -10,9 +10,7 @@
     "faster": "Gyorsabban tudsz félretenni — látod, hol tudsz okosan optimalizálni.",
     "security": "Biztonságot és szabadságot ad — pontosan tudod, hogy megengedhetsz-e valamit magadnak.",
     "goals": "Segít elérni hosszú távú célokat — lakás, utazás, tartalék, bármi, ami fontos.",
-    "register": "A folytatáshoz regisztrálj, vagy lépj be!",
-    "register.title": "Regisztráció",
-    "login.title": "Bejelentkezés"
+    "register": "A folytatáshoz regisztrálj, vagy lépj be!"
   },
   "login": {
     "title": "Bejelentkezés",
@@ -48,8 +46,11 @@
     "welcome": "Üdvözlünk",
     "transactions": "Tranzakciók",
     "logout": "Kijelentkezés",
+    "logout.success": "Sikeres kijelentkezés",
     "dashboard": "Főoldal",
-    "wallets": "Tárcák"
+    "wallets": "Tárcák",
+    "register": "Regisztráció",
+    "login": "Bejelentkezés"
   },
   "footer": {
     "home": "Főoldal"
