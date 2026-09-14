@@ -6,6 +6,11 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
     selector: 'app-welcome',
     templateUrl: './welcome.html',
+    styles: `
+        .logo {
+            max-width: stretch;
+        }
+    `,
     imports: [TranslatePipe, MatCardModule, MatButtonModule],
     standalone: true,
 })

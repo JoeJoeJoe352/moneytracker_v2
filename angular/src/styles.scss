@@ -28,6 +28,11 @@ html {
     );
 }
 
+.cdk-global-scrollblock {
+    // backdrop miatt megjelenhet alól egy üres scrollbar. Mivel nincs oldalra scrollozás az oldalon egyáltalán, ezért a legegyszerűbb ezt kikapcsolni
+    overflow-y: hidden !important;
+}
+
 body {
     // Default the application to a light color theme
     color-scheme: light;
@@ -36,9 +41,6 @@ body {
     // ikon gomb), amik pár px-szel túlnyúlhatnak a viewport szélén és felesleges
     // horizontális scrollbart okoznak, ami elveszi a függőleges helyet 100vh-s elemektől
     overflow-x: hidden;
-
-    // A body/html sosem görget, a tartalom görgetését az .app-shell-content végzi.
-    overflow-y: hidden;
 
     background-color: var(--mat-sys-surface);
     color: var(--mat-sys-on-surface);

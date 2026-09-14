@@ -16,5 +16,8 @@ mat-toolbar {
         flex-wrap: wrap;
         width: 100%;
         max-width: 1140px;
+        // mobilnézeten az ikon kattintható felülete ki tud lógni a tartalomból
+        // és ez oldalra görgetést tud okozni. 
+        padding-right: 12px;
     }
 }
