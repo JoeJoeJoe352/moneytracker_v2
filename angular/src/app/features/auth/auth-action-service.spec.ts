@@ -14,8 +14,9 @@ describe('AuthActionService (Vitest)', () => {
     let authServiceMock: {
         login: ReturnType<typeof vi.fn>;
         register: ReturnType<typeof vi.fn>;
+        authenticateUser: ReturnType<typeof vi.fn>;
     };
-    let userDataStoreMock: { loadUserData: ReturnType<typeof vi.fn> };
+    let userDataStoreMock: { loadUserData: ReturnType<typeof vi.fn>; resetData: ReturnType<typeof vi.fn> };
     let snackBarMock: { open: ReturnType<typeof vi.fn> };
     let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
@@ -30,8 +31,9 @@ describe('AuthActionService (Vitest)', () => {
         authServiceMock = {
             login: vi.fn(() => of({ message: 'ok' })),
             register: vi.fn(() => of({ message: 'ok' })),
+            authenticateUser: vi.fn(() => of({ username: 'joe', wallets: [] })),
         };
-        userDataStoreMock = { loadUserData: vi.fn() };
+        userDataStoreMock = { loadUserData: vi.fn(), resetData: vi.fn() };
         snackBarMock = { open: vi.fn() };
         consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
@@ -109,6 +111,30 @@ describe('AuthActionService (Vitest)', () => {
             expect(snackBarMock.open).toHaveBeenCalledWith('etc.general-error', 'etc.close');
             expect(onSuccess).not.toHaveBeenCalled();
             expect(loading()).toBe(false);
+        });
+
+        it('should reset the user data and not call onSuccess when the post-login authcheck fails', () => {
+            authServiceMock.authenticateUser.mockReturnValue(throwError(() => ({ status: 500 })));
+            const loading = signal(false);
+            const onSuccess = vi.fn();
+
+            service.login(loginParams, loading, onSuccess);
+
+            expect(userDataStoreMock.resetData).toHaveBeenCalledTimes(1);
+            expect(consoleErrorSpy).toHaveBeenCalledWith('unknown error during authcheck!', {
+                status: 500,
+            });
+            expect(onSuccess).not.toHaveBeenCalled();
+        });
+
+        it('should not log to console when the post-login authcheck fails with a 401', () => {
+            authServiceMock.authenticateUser.mockReturnValue(throwError(() => ({ status: 401 })));
+            const loading = signal(false);
+
+            service.login(loginParams, loading, vi.fn());
+
+            expect(userDataStoreMock.resetData).toHaveBeenCalledTimes(1);
+            expect(consoleErrorSpy).not.toHaveBeenCalled();
         });
     });
 

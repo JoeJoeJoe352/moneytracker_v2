@@ -3,6 +3,11 @@ import { UserDataStore } from './shared/services/user-data-store';
 
 export function initApp(authService: AuthService, userDataStore: UserDataStore) {
     return new Promise<void>((resolve) => {
+        if (!userDataStore.isUserLogged()) {
+            resolve();
+            return;
+        }
+
         authService.authenticateUser().subscribe({
             next: (userData) => {
                 userDataStore.loadUserData(userData);
