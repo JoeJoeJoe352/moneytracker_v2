@@ -4,13 +4,14 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { signal } from '@angular/core';
-import { TransactionDetailRowComponent } from './transaction-detail-row-component';
+import { TransactionDetailFormComponent } from './transaction-detail-form-component';
+import { CategorySelectComponent } from './category-select-component';
 import { DetailForm } from '../transaction/interfaces';
 import { DropdownInterface } from '../../shared/interfaces';
 
 describe('TransactionDetailRowComponent (Vitest)', () => {
-    let fixture: ComponentFixture<TransactionDetailRowComponent>;
-    let component: TransactionDetailRowComponent;
+    let fixture: ComponentFixture<TransactionDetailFormComponent>;
+    let component: TransactionDetailFormComponent;
     const fb = new FormBuilder();
 
     function buildDetailGroup(overrides: Partial<{
@@ -33,18 +34,13 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TransactionDetailRowComponent],
+            imports: [TransactionDetailFormComponent],
             providers: [provideTranslateService()],
         }).compileComponents();
 
-        fixture = TestBed.createComponent(TransactionDetailRowComponent);
+        fixture = TestBed.createComponent(TransactionDetailFormComponent);
         component = fixture.componentInstance;
         component.categoryData = signal<DropdownInterface[]>([]);
-        component.multiselectSettings = signal({
-            singleSelection: false,
-            idField: 'item_id',
-            textField: 'item_text',
-        });
         component.isCategorySaveInProgress = false;
         component.isLastDetailRow = false;
         component.index = 0;
@@ -76,7 +72,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         expect(weightInput.value).toBe('2');
         expect(unitPriceInput.value).toBe('300');
 
-        const suffixInputs = fixture.nativeElement.querySelectorAll('.input-with-suffix input');
+        const suffixInputs = fixture.nativeElement.querySelectorAll('mat-form-field input');
         const totalPriceInput = suffixInputs[suffixInputs.length - 1];
         expect(Number(totalPriceInput.value)).toBe(600);
         expect(totalPriceInput.disabled).toBe(true);
@@ -88,7 +84,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture.detectChanges();
 
-        const suffix = fixture.nativeElement.querySelector('.suffix');
+        const suffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(suffix.textContent.trim()).toBe('€');
     });
 
@@ -102,7 +98,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture.detectChanges();
 
-        const suffixes = fixture.nativeElement.querySelectorAll('.suffix');
+        const suffixes = fixture.nativeElement.querySelectorAll('[matTextSuffix]');
         const suffixTexts = Array.from(suffixes as NodeListOf<HTMLElement>).map((el) =>
             el.textContent.trim(),
         );
@@ -117,12 +113,12 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         component.detail.controls.detailName.updateValueAndValidity();
 
         fixture.detectChanges();
-        expect(fixture.nativeElement.querySelector('.form-field-error')).toBeNull();
+        expect(fixture.nativeElement.querySelector('mat-error')).toBeNull();
 
         component.detail.controls.detailName.markAsTouched();
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('.form-field-error')).toBeTruthy();
+        expect(fixture.nativeElement.querySelector('mat-error')).toBeTruthy();
     });
 
     it('should disable the delete button when isLastDetailRow is true', () => {
@@ -131,7 +127,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture.detectChanges();
 
-        const button = fixture.nativeElement.querySelector('button.btn-primary-red');
+        const button = fixture.nativeElement.querySelector('button.mat-button-danger');
         expect(button.disabled).toBe(true);
     });
 
@@ -141,7 +137,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture.detectChanges();
 
-        const button = fixture.nativeElement.querySelector('button.btn-primary-red');
+        const button = fixture.nativeElement.querySelector('button.mat-button-danger');
         expect(button.disabled).toBe(false);
     });
 
@@ -153,31 +149,23 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         let emitted = false;
         component.rowDeleted.subscribe(() => (emitted = true));
 
-        const button = fixture.nativeElement.querySelector('button.btn-primary-red');
+        const button = fixture.nativeElement.querySelector('button.mat-button-danger');
         button.click();
 
         expect(emitted).toBe(true);
     });
 
-    it('should forward category dropdown events (filter change, click, dropdown close) to its outputs', () => {
+    it('should pass addCategoryCallback through to the category select', () => {
+        const addCategoryCallback = () => {
+            throw new Error('not called in this test');
+        };
         component.detail = buildDetailGroup();
+        component.addCategoryCallback = addCategoryCallback;
         fixture.detectChanges();
 
-        const dropdown = fixture.debugElement.query(By.css('ng-multiselect-dropdown'));
+        const categorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent))
+            .componentInstance as CategorySelectComponent;
 
-        let filterChangeValue: unknown;
-        component.categoryFilterChange.subscribe((v) => (filterChangeValue = v));
-        dropdown.triggerEventHandler('onFilterChange', 'kenyér');
-        expect(filterChangeValue).toBe('kenyér');
-
-        let clickEmitted = false;
-        component.categoryDropdownClick.subscribe(() => (clickEmitted = true));
-        dropdown.triggerEventHandler('click', new Event('click'));
-        expect(clickEmitted).toBe(true);
-
-        let closedEmitted = false;
-        component.categorySearchTextCleared.subscribe(() => (closedEmitted = true));
-        dropdown.triggerEventHandler('onDropDownClose', undefined);
-        expect(closedEmitted).toBe(true);
+        expect(categorySelect.addCategoryCallback).toBe(addCategoryCallback);
     });
 });

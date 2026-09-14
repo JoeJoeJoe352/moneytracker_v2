@@ -1,35 +1,33 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { of, throwError } from 'rxjs';
+import { EventEmitter } from '@angular/core';
+import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { provideTranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
-import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
-import { TranslatePipe } from '@ngx-translate/core';
-import TransactionListComponent from '../transaction-list/transaction-list-component';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatDialog } from '@angular/material/dialog';
 import { TransactionsListComponent } from './transactions-component';
 import { TransactionService } from './transaction-service';
 import { CategoryService } from './category-service';
 import { TransactionListElementData } from '../transaction-list/interfaces';
-import { TransactionTypeEnum } from './transaction-type-enum';
 import { TransactionModalStateService } from './transaction-modal-state-service';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { TransactionModalComponent } from './transaction-modal';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
 
-@Component({
-    selector: 'app-create-transaction-modal',
-    template: '',
-})
-class StubTransactionModalComponent {
-    @Input() transaction: unknown = null;
-    @Input() categories: unknown;
-    @Input() isTransactionFormDisabled = false;
-    @Input() isCategorySaveInProgress = false;
-    @Input() isDataInitializing: unknown;
-    @Output() closeModal = new EventEmitter<void>();
-    @Output() deleteTransactionRequested = new EventEmitter<number>();
-    @Output() saved = new EventEmitter<unknown>();
-    @Output() categoryAdded = new EventEmitter<string>();
+/**
+ * A MatDialog.open() valós helyett használt, kézzel vezérelhető dialogRef, ami lehetővé teszi a
+ * dialog "componentInstance"-ének (kimenő eseményeinek) és afterClosed()-jének szimulálását,
+ * anélkül hogy a valós MatDialog/CDK overlay-t kellene betöltenünk a tesztekhez.
+ */
+class FakeDialogRef<T> {
+    close = vi.fn((result?: unknown) => this.closedSubject.next(result));
+    private closedSubject = new Subject<unknown>();
+
+    constructor(public componentInstance: T) {}
+
+    afterClosed(): Observable<unknown> {
+        return this.closedSubject.asObservable();
+    }
 }
 
 const sampleTransactions: TransactionListElementData[] = [
@@ -59,6 +57,13 @@ describe('TransactionsListComponent (Vitest)', () => {
         getTransactionById: ReturnType<typeof vi.fn>;
     };
     let routerMock: { navigate: ReturnType<typeof vi.fn> };
+    let queryParamsSubject: BehaviorSubject<Record<string, string>>;
+    let dialogOpenSpy: ReturnType<typeof vi.fn>;
+    let transactionModalDialogRefs: FakeDialogRef<{
+        deleteTransactionRequested: EventEmitter<number>;
+        saved: EventEmitter<unknown>;
+        categoryAdded: EventEmitter<string>;
+    }>[];
 
     function setup(options: {
         isHistoryMode?: boolean;
@@ -72,11 +77,27 @@ describe('TransactionsListComponent (Vitest)', () => {
             getTransactionById: vi.fn(() => of(null)),
         };
         routerMock = { navigate: vi.fn() };
+        queryParamsSubject = new BehaviorSubject<Record<string, string>>(options.queryParams ?? {});
+
+        transactionModalDialogRefs = [];
+        dialogOpenSpy = vi.fn((componentType: unknown) => {
+            if (componentType === TransactionModalComponent) {
+                const dialogRef = new FakeDialogRef({
+                    deleteTransactionRequested: new EventEmitter<number>(),
+                    saved: new EventEmitter<unknown>(),
+                    categoryAdded: new EventEmitter<string>(),
+                });
+                transactionModalDialogRefs.push(dialogRef);
+                return dialogRef;
+            }
+            throw new Error('Unexpected dialog component opened: ' + String(componentType));
+        });
 
         TestBed.configureTestingModule({
             imports: [TransactionsListComponent],
             providers: [
                 provideTranslateService(),
+                provideNativeDateAdapter(),
                 { provide: TransactionService, useValue: transactionServiceMock },
                 {
                     provide: CategoryService,
@@ -88,20 +109,13 @@ describe('TransactionsListComponent (Vitest)', () => {
                 { provide: Router, useValue: routerMock },
                 {
                     provide: ActivatedRoute,
-                    useValue: { snapshot: { queryParams: options.queryParams ?? {} } },
+                    useValue: {
+                        snapshot: { queryParams: options.queryParams ?? {} },
+                        queryParams: queryParamsSubject,
+                    },
                 },
+                { provide: MatDialog, useValue: { open: dialogOpenSpy } },
             ],
-        });
-        TestBed.overrideComponent(TransactionsListComponent, {
-            set: {
-                imports: [
-                    StubTransactionModalComponent,
-                    TransactionListComponent,
-                    ReactiveFormsModule,
-                    NgxsmkDatepickerComponent,
-                    TranslatePipe,
-                ],
-            },
         });
 
         fixture = TestBed.createComponent(TransactionsListComponent);
@@ -136,27 +150,16 @@ describe('TransactionsListComponent (Vitest)', () => {
             queryParams: { name: 'kávé' },
         });
 
-        expect(component['filterForm'].value.name).toBe('kávé');
+        const nameInput = fixture.nativeElement.querySelector('#name');
+        expect(nameInput.value).toBe('kávé');
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
         const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
         expect(params.get('name')).toBe('kávé');
     });
 
-    it('should navigate merging the used filter params into the URL after a successful history fetch', () => {
-        setup({ isHistoryMode: true, needSearchField: true, queryParams: { name: 'kávé' } });
-
-        expect(routerMock.navigate).toHaveBeenCalledWith(
-            [],
-            expect.objectContaining({
-                queryParamsHandling: 'merge',
-                queryParams: expect.objectContaining({ name: 'kávé' }),
-            }),
-        );
-    });
-
-    it('should reload the history with the current form value when the filter form is submitted', () => {
+    it('should navigate with the entered filter values, replacing (not merging) the query params, when the filter form is submitted', () => {
         setup({ isHistoryMode: true, needSearchField: true });
-        transactionServiceMock.getTransactionHistory.mockClear();
+        routerMock.navigate.mockClear();
 
         const nameInput = fixture.nativeElement.querySelector('#name');
         nameInput.value = 'tej';
@@ -165,29 +168,51 @@ describe('TransactionsListComponent (Vitest)', () => {
         const form = fixture.nativeElement.querySelector('form');
         form.dispatchEvent(new Event('submit'));
 
+        expect(routerMock.navigate).toHaveBeenCalledWith(
+            [],
+            expect.objectContaining({ queryParams: { name: 'tej' } }),
+        );
+        expect(routerMock.navigate).not.toHaveBeenCalledWith(
+            [],
+            expect.objectContaining({ queryParamsHandling: 'merge' }),
+        );
+    });
+
+    it('should reload the history whenever the route query params change (e.g. after the filter navigates)', () => {
+        setup({ isHistoryMode: true, needSearchField: true });
+        transactionServiceMock.getTransactionHistory.mockClear();
+
+        queryParamsSubject.next({ name: 'tej' });
+
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
         const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
         expect(params.get('name')).toBe('tej');
     });
 
-    it('should reset the form, clear the query params and reload when clearInputs is called', () => {
-        setup({ isHistoryMode: true, needSearchField: true });
+    it('should reset the form and navigate with empty query params when clearInputs is called', () => {
+        setup({ isHistoryMode: true, needSearchField: true, queryParams: { name: 'kávé' } });
         transactionServiceMock.getTransactionHistory.mockClear();
         routerMock.navigate.mockClear();
 
         const nameInput = fixture.nativeElement.querySelector('#name');
-        nameInput.value = 'kávé';
-        nameInput.dispatchEvent(new Event('input'));
-        fixture.detectChanges();
-        expect(component['filterForm'].value.name).toBe('kávé');
+        expect(nameInput.value).toBe('kávé');
 
-        const clearButton = fixture.nativeElement.querySelectorAll('form button')[1];
+        const clearButton = fixture.nativeElement.querySelector('#clear-filters');
         clearButton.click();
         fixture.detectChanges();
 
-        expect(component['filterForm'].value.name).toBe('');
-        expect(routerMock.navigate).toHaveBeenCalledWith([], { queryParams: {} });
+        expect(nameInput.value).toBe('');
+        expect(routerMock.navigate).toHaveBeenCalledWith(
+            [],
+            expect.objectContaining({ queryParams: {} }),
+        );
+
+        // a router.navigate mockolt, ezért a valós navigáció eredményét (a route queryParams
+        // frissülését) itt szimuláljuk, hogy a reaktív újratöltést is leteszteljük
+        queryParamsSubject.next({});
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
+        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
+        expect(params.get('name')).toBeNull();
     });
 
     it('should reload the list once when reloadTrigger changes after the initial render', () => {
@@ -243,6 +268,7 @@ describe('TransactionsListComponent (Vitest)', () => {
         fixture.detectChanges();
 
         expect(transactionServiceMock.getTransactionById).toHaveBeenCalledWith(1);
-        expect(fixture.nativeElement.querySelector('app-create-transaction-modal')).toBeTruthy();
+        expect(dialogOpenSpy).toHaveBeenCalledWith(TransactionModalComponent, expect.anything());
+        expect(transactionModalDialogRefs).toHaveLength(1);
     });
 });

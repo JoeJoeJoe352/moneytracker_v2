@@ -1,14 +1,17 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
 import { signal } from '@angular/core';
 import { TransactionFormComponent } from './transaction-form-component';
+import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
-import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 import { UserDataStore } from '../../shared/services/user-data-store';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
 import { WalletDataInterface } from '../wallet/interfaces';
 
 describe('TransactionFormComponent (Vitest)', () => {
@@ -20,6 +23,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             imports: [TransactionFormComponent],
             providers: [
                 provideTranslateService(),
+                provideNativeDateAdapter(),
                 { provide: TransactionService, useValue: { utils: new TransactionUtils() } },
                 {
                     provide: UserDataStore,
@@ -158,7 +162,7 @@ describe('TransactionFormComponent (Vitest)', () => {
 
     it('should show the delete button only for an existing transaction, and emit its id on click', () => {
         fixture.detectChanges();
-        expect(fixture.nativeElement.querySelector('.btn-primary-red')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.mat-button-danger')).toBeNull();
 
         const backendTransaction: TransactionDataFromBackend = {
             id: 42,
@@ -193,7 +197,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         let deletedId: number | undefined;
         component.deleted.subscribe((id) => (deletedId = id));
 
-        const deleteButton = fixture.nativeElement.querySelector('.btn-primary-red');
+        const deleteButton = fixture.nativeElement.querySelector('.mat-button-danger');
         expect(deleteButton).toBeTruthy();
         deleteButton.click();
 
@@ -214,59 +218,37 @@ describe('TransactionFormComponent (Vitest)', () => {
         expect(component.details.length).toBe(1); // utolsó sor nem törölhető
     });
 
-    it('should emit categoryAdded only when the "no filtered data" button is clicked with a non-empty search text', () => {
+    it('should pass addCategoryCallback through to the category selects', () => {
+        const addCategoryCallback = () => {
+            throw new Error('not called in this test');
+        };
+        component.addCategoryCallback = addCategoryCallback;
         fixture.detectChanges();
 
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
-
-        const otherTarget = document.createElement('div');
-        component.onCategoryDropdownClick({ target: otherTarget } as unknown as Event);
-        expect(addedCategory).toBeUndefined();
-
-        const noFilteredDataButton = document.createElement('div');
-        noFilteredDataButton.classList.add('no-filtered-data');
-        component.onCategoryFilterChange('Új kategória');
-        component.onCategoryDropdownClick({ target: noFilteredDataButton } as unknown as Event);
-
-        expect(addedCategory).toBe('Új kategória');
-    });
-
-    it('should not emit categoryAdded when a category save is already in progress', () => {
-        fixture.detectChanges();
-        component.isCategorySaveInProgress = true;
-
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
-
-        component.onCategoryFilterChange('Új kategória');
-        const noFilteredDataButton = document.createElement('div');
-        noFilteredDataButton.classList.add('no-filtered-data');
-        component.onCategoryDropdownClick({ target: noFilteredDataButton } as unknown as Event);
-
-        expect(addedCategory).toBeUndefined();
+        const categorySelects = fixture.debugElement.queryAll(By.directive(CategorySelectComponent));
+        expect(categorySelects.length).toBeGreaterThan(0);
+        categorySelects.forEach((categorySelect) => {
+            expect((categorySelect.componentInstance as CategorySelectComponent).addCategoryCallback).toBe(
+                addCategoryCallback,
+            );
+        });
     });
 
     it('should initialize the price suffix from the default wallet currency', () => {
         fixture.detectChanges();
 
-        const priceSuffix = fixture.nativeElement.querySelector(
-            '.input-with-suffix .suffix',
-        );
+        const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('Ft');
     });
 
     it('should update the price suffix when the wallet select changes', () => {
         fixture.detectChanges();
 
-        const walletSelect = fixture.nativeElement.querySelector('#transaction-wallet');
-        walletSelect.value = walletSelect.options[1].value;
-        walletSelect.dispatchEvent(new Event('change'));
+        const walletSelect = fixture.debugElement.query(By.directive(MatSelect));
+        walletSelect.triggerEventHandler('selectionChange', { value: 2 });
         fixture.detectChanges();
 
-        const priceSuffix = fixture.nativeElement.querySelector(
-            '.input-with-suffix .suffix',
-        );
+        const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('€');
     });
 
@@ -302,22 +284,19 @@ describe('TransactionFormComponent (Vitest)', () => {
         });
         fixture.detectChanges();
 
-        const priceSuffix = fixture.nativeElement.querySelector(
-            '.input-with-suffix .suffix',
-        );
+        const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('€');
     });
 
     it('should render the wallet options with their currency code and the price suffix with the selected currency symbol', () => {
         fixture.detectChanges();
 
-        const options = fixture.nativeElement.querySelectorAll('#transaction-wallet option');
-        expect(options[0].textContent.trim()).toBe('Test Wallet (HUF)');
-        expect(options[1].textContent.trim()).toBe('Euro Wallet (EUR)');
+        const walletSelect = fixture.debugElement.query(By.directive(MatSelect))
+            .componentInstance as MatSelect;
+        const optionTexts = walletSelect.options.map((option) => option.viewValue.trim());
+        expect(optionTexts).toEqual(['Test Wallet (HUF)', 'Euro Wallet (EUR)']);
 
-        const priceSuffix = fixture.nativeElement.querySelector(
-            '.input-with-suffix .suffix',
-        );
+        const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('Ft');
     });
 });

@@ -1,10 +1,14 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { of, Subject, switchMap, tap } from 'rxjs';
+import { Observable, of, Subject, switchMap, tap } from 'rxjs';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TransactionService } from './transaction-service';
 import { TransactionActionService } from './transaction-action-service';
 import { CategoryService } from './category-service';
-import { NewTransaction } from './interfaces';
+import { CategoryResponseInterface, NewTransaction } from './interfaces';
+import { TransactionModalComponent, TransactionModalInputInterface } from './transaction-modal';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { _, TranslateService } from '@ngx-translate/core';
 
 /**
  * A tranzakció létrehozó/szerkesztő modal állapotát és műveleteit fogja össze
@@ -12,15 +16,15 @@ import { NewTransaction } from './interfaces';
  *
  * Komponens szinten kell providerelni (providers: [TransactionModalStateService]), hogy minden
  * oldal saját, egymástól független state-tel rendelkezzen.
- *
- * Mivel a mentés/törlés utáni teendő (pl. lista újratöltése) oldalanként eltérő, ezt a `changed`
- * observable-ön keresztül a hívó oldal maga iratkozik fel rá.
  */
 @Injectable()
 export class TransactionModalStateService {
     private transactionService = inject(TransactionService);
     private transactionActionService = inject(TransactionActionService);
     private categoryService = inject(CategoryService);
+    private dialog = inject(MatDialog);
+    private snackBar = inject(MatSnackBar);
+    private translateService = inject(TranslateService);
 
     /**
      * Kiválasztott tranzakció azonosítója.
@@ -28,22 +32,19 @@ export class TransactionModalStateService {
      */
     private selectedTransactionIdTrigger = signal<number | null>(null);
     /**
-     * Kategórialistát újra kell-e tölteni. Minden új kategória mentéskor
+     * Kategórialista aktuális állapota. Modal megnyitásakor töltődik be, új kategória mentésekor
+     * pedig kiegészül a szerverről visszakapott új elemmel (nem tölti újra a teljes listát)
      */
-    private reloadCategoryDataTrigger = signal(0);
-    /**
-     * Volt-e modal felnyitására kérés?
-     */
-    private isModalOpenRequested = signal(false);
+    private categoriesSignal = signal<CategoryResponseInterface[]>([]);
     /**
      * Kategória lista betöltődött-e már?
      */
     private isCategoriesLoaded = signal(false);
-
     /**
-     * Tranzakció létrehozó/szerkesztő modal nyitva van-e
+     * Jelenleg nyitva lévő modal referenciája
      */
-    public isTransactionModalOpen = signal(false);
+    private dialogRef: MatDialogRef<TransactionModalComponent> | null = null;
+
     /**
      * Tranzakciós form írható-e
      */
@@ -62,23 +63,23 @@ export class TransactionModalStateService {
     public changed = new Subject<void>();
 
     constructor() {
-        // todo átnézni, lehet-e egyszerűsíteni
         effect(() => {
-            // Ha felnyitjuk a modalt, akkor lehet még nincs betöltve minden függősége. Ekkor a modal komponens fog egy loading ikont kirakni
-            // azért itt nyitom fel a modalt, mert lehetőség van beállítani a modal töltöttségi állapotát
-            if (this.isModalOpenRequested() && !this.isTransactionModalOpen()) {
-                this.isTransactionModalOpen.set(true);
-                if (!this.areAllModalDependenciesLoaded()) {
-                    this.isModalDataInitializing.set(true);
-                } else {
-                    this.isModalDataInitializing.set(false); // ez lehet nem kell ide, de jobb a biztonság
-                }
-            } else {
-                // Ha már fel van nyitva a modal, akkor ha betöltődött az adat, akkor levesszük a loadert
-                if (this.areAllModalDependenciesLoaded()) {
-                    this.isModalDataInitializing.set(false);
-                }
-            }
+            this.isModalDataInitializing.set(!this.areAllModalDependenciesLoaded());
+        });
+
+        this.categoryService.listCategories().subscribe({
+            next: (categories) => {
+                this.categoriesSignal.set(categories);
+                this.isCategoriesLoaded.set(true);
+            },
+            error: (err) => {
+                console.error('Problem with loading the categories' + err);
+                this.snackBar.open(
+                    this.translateService.instant(_('etc.general-error')),
+                    this.translateService.instant(_('etc.close')),
+                );
+                this.isCategoriesLoaded.set(true);
+            },
         });
     }
 
@@ -95,16 +96,9 @@ export class TransactionModalStateService {
     );
 
     /**
-     * Kategóriák listája. Modal megnyitásakor és új kategória mentésekor töltődik újra
+     * Kategóriák listája. Modal megnyitásakor töltődik be
      */
-    public categories = toSignal(
-        toObservable(this.reloadCategoryDataTrigger).pipe(
-            tap(() => this.isCategoriesLoaded.set(false)),
-            switchMap(() => this.categoryService.listCategories()),
-            tap(() => this.isCategoriesLoaded.set(true)),
-        ),
-        { initialValue: [] },
-    );
+    public categories = this.categoriesSignal.asReadonly();
 
     /**
      * Tranzakció akkor van betöltött állapotban, ha nincs kiválasztva egy sem, vagy ki van választva és be is vannak töltve az adatai
@@ -133,21 +127,43 @@ export class TransactionModalStateService {
     /**
      * Tranzakció létrehozó/szerkesztő modal felnyitása
      *
-     * @param {number | null} id -> ha null, akkor új tranzakció nyilik fel, ha szám, akkor adott id-jű tranzakció
+     * @param {number | null} id. Ha null, akkor új tranzakció nyilik fel, ha szám, akkor adott id-jű tranzakció
      */
     public open(id: number | null): void {
         this.selectedTransactionIdTrigger.set(id);
-        this.isModalOpenRequested.set(true);
-        // modal felnyitása a constructor effect-ben van, ha minden api hívás lefutott
+
+        const dialogRef = this.dialog.open(TransactionModalComponent, {
+            width: '600px',
+            data: {
+                transaction: this.transactionData,
+                isDataInitializing: this.isModalDataInitializing,
+                categories: this.categories,
+                isTransactionFormDisabled: this.isTransactionFormDisabled,
+                isCategorySaveInProgress: this.isAddingCategoryInProgress,
+                addCategoryCallback: this.saveCategory,
+            } as TransactionModalInputInterface,
+        });
+        this.dialogRef = dialogRef;
+
+        dialogRef.componentInstance.deleteTransactionRequested.subscribe((transactionId) =>
+            this.confirmDeletion(transactionId),
+        );
+        dialogRef.componentInstance.saved.subscribe((payload) => this.save(payload));
+        dialogRef.componentInstance.categoryAdded.subscribe((categoryName) =>
+            this.saveCategory(categoryName),
+        );
+
+        dialogRef.afterClosed().subscribe(() => {
+            this.selectedTransactionIdTrigger.set(null);
+            this.dialogRef = null;
+        });
     }
 
     /**
      * Modal becsukása
      */
-    public close(): void {
-        this.selectedTransactionIdTrigger.set(null);
-        this.isTransactionModalOpen.set(false);
-        this.isModalOpenRequested.set(false);
+    private close(): void {
+        this.dialogRef?.close();
     }
 
     /**
@@ -177,20 +193,27 @@ export class TransactionModalStateService {
     }
 
     /**
-     * Hozzáad egy új kategóriát és újratölti a kategórialistát
+     * Hozzáad egy új kategóriát és beszúrja a kategórialistába
+     * Observable-ből lekérhető az új kategória adatai
      */
-    public saveCategory(categoryName: string): void {
+    public saveCategory = (categoryName: string): Observable<CategoryResponseInterface> => {
         this.isAddingCategoryInProgress.set(true);
 
-        this.categoryService.saveCategory({ name: categoryName }).subscribe({
-            next: () => {
-                this.reloadCategoryDataTrigger.update((value) => value + 1);
-                this.isAddingCategoryInProgress.set(false);
-            },
-            error: (err) => {
-                console.error('Problem with the category save' + err);
-                this.isAddingCategoryInProgress.set(false);
-            },
-        });
-    }
+        return this.categoryService.saveCategory({ name: categoryName }).pipe(
+            tap({
+                next: (category) => {
+                    this.categoriesSignal.update((categories) => [...categories, category]);
+                    this.isAddingCategoryInProgress.set(false);
+                },
+                error: (err) => {
+                    console.error('Problem with the category save' + err);
+                    this.snackBar.open(
+                        this.translateService.instant(_('etc.general-error')),
+                        this.translateService.instant(_('etc.close')),
+                    );
+                    this.isAddingCategoryInProgress.set(false);
+                },
+            }),
+        );
+    };
 }

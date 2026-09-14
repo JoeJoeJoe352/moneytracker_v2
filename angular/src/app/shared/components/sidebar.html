@@ -1,0 +1,35 @@
+<div class="sidebar-wrapper">
+    <div class="sidebar-card">
+        <a class="brand" routerLink="/">
+            <img src="assets/images/logo-color.svg" alt="logo" />
+            <span>Moneytracker</span>
+        </a>
+
+        <ul class="sidebar-links">
+            @for (linkItem of linkList(); track $index) {
+                <app-header-link-list
+                    [linkData]="linkItem"
+                    (clicked)="linkItem.action ? linkItem.action() : null"
+                />
+            }
+        </ul>
+
+        @if (userData.isUserLogged()) {
+            <div class="sidebar-footer">
+                <span class="sidebar-footer-text">
+                    {{ 'header.welcome' | translate }}, {{ userData.username() }}
+                </span>
+
+                <button
+                    matIconButton
+                    type="button"
+                    class="logout-btn"
+                    aria-label="Logout"
+                    (click)="logout()"
+                >
+                    <mat-icon fontIcon="logout"></mat-icon>
+                </button>
+            </div>
+        }
+    </div>
+</div>

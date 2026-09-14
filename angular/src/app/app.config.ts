@@ -1,5 +1,11 @@
-import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+    ApplicationConfig,
+    inject,
+    provideAppInitializer,
+    provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 import { routes } from './app.routes';
 import { initApp } from './app.initializer';
@@ -11,17 +17,28 @@ import { AuthService } from './features/auth/auth-service';
 import { UserDataStore } from './shared/services/user-data-store';
 import { LanguageInterceptor } from './language-interceptor';
 import { SupportedLangEnum } from './shared/enums';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS } from '@angular/material/progress-spinner';
+import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 
 export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
         provideRouter(routes),
-        provideHttpClient(
-            withInterceptors([
-                CredentialsInterceptor, 
-                LanguageInterceptor
-            ]),
-        ),
+        provideNativeDateAdapter(),
+        {
+            provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+            useValue: { appearance: 'outline' },
+        },
+        {
+            provide: MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS,
+            useValue: { diameter: 50 },
+        },
+        {
+            provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
+            useValue: { duration: 2500 },
+        },
+        provideHttpClient(withInterceptors([CredentialsInterceptor, LanguageInterceptor])),
         provideTranslateService({
             loader: provideTranslateHttpLoader({
                 prefix: './i18n/',

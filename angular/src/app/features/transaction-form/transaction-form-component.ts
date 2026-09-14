@@ -1,6 +1,7 @@
 import {
     Component,
     computed,
+    ElementRef,
     EventEmitter,
     inject,
     Input,
@@ -9,6 +10,7 @@ import {
     signal,
     Signal,
     SimpleChanges,
+    ViewChild,
 } from '@angular/core';
 import {
     FormArray,
@@ -18,22 +20,30 @@ import {
     ReactiveFormsModule,
     Validators,
 } from '@angular/forms';
-import { NgxsmkDatepickerComponent } from 'ngxsmk-datepicker';
-import { SwitchComponent } from '../../shared/components/switch.component';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 import { DropdownInterface } from '../../shared/interfaces';
-import { TransactionDetailRowComponent } from './transaction-detail-row-component';
+import { TransactionDetailFormComponent } from './transaction-detail-form-component';
+import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction/transaction-service';
 import {
     CategoryResponseInterface,
     DetailForm,
     NewTransaction,
     TransactionDataFromBackend,
+    TransactionInputDefaultValuesWithDetails,
 } from '../transaction/interfaces';
 import { validDate } from './valid-date-validator';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
+import { MatDialogModule } from '@angular/material/dialog';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-transaction-form-component',
@@ -41,17 +51,22 @@ import { WalletDataUtil } from '../wallet/wallet-data-util';
     styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
     imports: [
         ReactiveFormsModule,
-        NgxsmkDatepickerComponent,
-        SwitchComponent,
+        MatDatepickerModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSlideToggleModule,
         TranslatePipe,
-        NgMultiSelectDropDownModule,
-        TransactionDetailRowComponent,
+        TransactionDetailFormComponent,
+        CategorySelectComponent,
+        MatDialogModule,
     ],
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
     private transactionService = inject(TransactionService);
-    private translateService = inject(TranslateService);
     protected userData = inject(UserDataStore);
     protected walletUtil = inject(WalletDataUtil);
 
@@ -72,6 +87,7 @@ export class TransactionFormComponent implements OnChanges {
      */
     @Input({ required: true }) isCategorySaveInProgress!: boolean;
 
+    @Input() addCategoryCallback!: (name: string) => Observable<CategoryResponseInterface>;
     /**
      * Mentés gombra kattintott a user
      */
@@ -80,21 +96,16 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakció törlés gombra kattintott a user
      */
     @Output() deleted = new EventEmitter<number>();
+
     /**
-     * Új kategóriát szeretne a user hozzáadni a listájához
+     * Az "új tétel" gomb sora, hogy addRow()-nál az oldal aljára tudjunk görgetni
      */
-    @Output() categoryAdded = new EventEmitter<string>();
+    @ViewChild('detailAddButton') private detailAddButton?: ElementRef<HTMLElement>;
 
     /**
      * Tranzakciós form
      */
     protected transactionForm: FormGroup;
-
-    /**
-     * A kategória dropdown keresőmezőjébe gépelt szöveg
-     * todo üres stringre állítani, ha user hozzáad elemet
-     */
-    protected categorySearchText = signal('');
 
     /**
      * User által kiválasztott wallet
@@ -125,63 +136,120 @@ export class TransactionFormComponent implements OnChanges {
      * Changes Betöltés után ha van kezdőérték beállítva, akkor a formba azokat állítjuk be
      */
     ngOnChanges(changes: SimpleChanges): void {
+        if (changes['isTransactionFormDisabled']) {
+            if (this.isTransactionFormDisabled) {
+                this.transactionForm.disable();
+            } else {
+                this.transactionForm.enable();
+                // enable() minden leszármazott kontrollt enged, ezért az ár megadási mód szerinti
+                // disabled állapotot vissza kell állítani soronként
+                this.details.controls.forEach((detailGroup) =>
+                    this.applyDetailRowPriceModeDisabledState(
+                        detailGroup,
+                        detailGroup.controls.detailIsComplexPriceMode.value,
+                    ),
+                );
+            }
+        }
         if (changes['transaction']) {
             if (this.transaction === null) {
                 // Nincs átadva paraméterül transaction (ngOnchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
                 return;
             }
-            this.setSelectedWalletSymbol(this.transaction.walletId);
+            this.setWalletSymbol(this.transaction.walletId);
+
             const convertedInputValues = this.transactionService.utils.convertDataToInput(
                 this.transaction,
             );
-
-            // A meglévő form kontrollokat frissítjük a friss adatokkal, nem hozunk létre új FormGroup-ot,
-            // mert az újra létrehozná a 'categories' kontrollt is, amitől az ng-multiselect-dropdown
-            // "no FormControl instance attached" hibát dobna
-            this.transactionForm.patchValue({
-                name: convertedInputValues.name,
-                isIncome: convertedInputValues.isIncome,
-                isComplexTransaction: convertedInputValues.isComplexTransaction,
-                price: convertedInputValues.price,
-                transactionDate: convertedInputValues.transactionDate,
-                categories: this.mapCategoryIdsToDropdownData(
-                    convertedInputValues.categories ?? [],
-                ),
-                walletId: convertedInputValues.walletId,
-            });
-
-            this.transactionForm.setControl(
-                'details',
-                this.fb.array(
-                    convertedInputValues.details.map((detail) => this.generateNewRow(detail)),
-                ),
-            );
+            this.refreshFormWithData(convertedInputValues);
         }
     }
 
     /**
-     * Selectben lévő wallet váltáskor lefutó műveletek
-     * @param event 
+     * Meglévő form elemeket frissíti a megadot adatokkal
      */
-    protected onWalletChange(event: Event): void {
-        const walletId = Number((event.target as HTMLSelectElement).value);
-        this.setSelectedWalletSymbol(walletId);
+    private refreshFormWithData(inputValues: TransactionInputDefaultValuesWithDetails) {
+        this.transactionForm.patchValue({
+            name: inputValues.name,
+            isIncome: inputValues.isIncome,
+            isComplexTransaction: inputValues.isComplexTransaction,
+            price: inputValues.price,
+            transactionDate: inputValues.transactionDate,
+            categories: this.mapCategoryIdsToDropdownData(inputValues.categories ?? []),
+            walletId: inputValues.walletId,
+        });
+
+        this.transactionForm.setControl(
+            'details',
+            this.fb.array(inputValues.details.map((detail) => this.generateNewRow(detail))),
+        );
+    }
+
+    /**
+     * Selectben lévő wallet váltáskor lefutó műveletek
+     */
+    protected onWalletChange(walletId: number): void {
+        this.setWalletSymbol(walletId);
     }
 
     /**
      * Beállítja a kiválasztott wallet-hez tartozó pénznem szimbólumát
      */
-    private setSelectedWalletSymbol(walletId: number): void {
-        const selectedWallet = this.userData
-            .getWallets()
-            .filter((wallet) => wallet.id === walletId)[0];
+    private setWalletSymbol(walletId: number): void {
+        const selectedWallet = this.userData.getWallets().find((wallet) => wallet.id === walletId);
         if (!selectedWallet) {
             console.error('wallet not found in this transaction: ' + this.transaction);
+            return;
         }
         const currencySymbol = this.walletUtil.getCurrencySymbolForCurrencyCode(
             selectedWallet.currencyCode,
         );
         this.selectedWalletsCurrency.set(currencySymbol);
+    }
+
+    /**
+     * Kategória id-kat alakítja át a dropdown által elvárt {item_id, item_text} formátumra.
+     */
+    private mapCategoryIdsToDropdownData(ids: number[]): DropdownInterface[] {
+        return ids.length > 0
+            ? this.categoryData().filter((category) => ids.includes(category.item_id))
+            : [];
+    }
+
+    /**
+     * Form elküldésekori műveletek
+     */
+    onSubmit(): void {
+        if (this.transactionForm.invalid) {
+            this.transactionForm.markAllAsTouched();
+            console.error(this.transactionForm.errors);
+            return;
+        }
+        this.saved.emit(this.transactionForm.value);
+    }
+
+    /**
+     * Törli a megadott indexű tétel sort
+     */
+    deleteRow(index: number): void {
+        if (this.isLastDetailRow) {
+            console.error('utolsó sort nem lehet törölni');
+            return;
+        }
+        this.details.removeAt(index);
+    }
+
+    /**
+     * Létrehoz egy új üres sort
+     */
+    addRow(): void {
+        this.details.push(this.generateNewEmptyRow());
+        setTimeout(() =>
+            this.detailAddButton?.nativeElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+            }),
+        );
     }
 
     /**
@@ -212,83 +280,6 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
-     * Kategória id-kat alakítja át a dropdown által elvárt {item_id, item_text} formátumra.
-     */
-    private mapCategoryIdsToDropdownData(ids: number[]): DropdownInterface[] {
-        return ids.length > 0
-            ? this.categoryData().filter((category) => ids.includes(category.item_id))
-            : [];
-    }
-
-    /**
-     * Form elküldésekori műveletek
-     */
-    onSubmit(): void {
-        if (this.transactionForm.invalid) {
-            this.transactionForm.markAllAsTouched();
-            console.error(this.transactionForm.errors);
-            return;
-        }
-        this.saved.emit(this.transactionForm.value);
-    }
-
-    /**
-     * A kategória dropdown keresőmezőjének szövege változott
-     */
-    onCategoryFilterChange(filterItem: unknown): void {
-        this.categorySearchText.set(filterItem as string);
-    }
-    /**
-     * MultiselectSettings beállításai
-     */
-    protected multiselectSettings: Signal<IDropdownSettings> = computed(() => {
-        return {
-            singleSelection: false,
-            idField: 'item_id',
-            textField: 'item_text',
-            itemsShowLimit: 3,
-            allowSearchFilter: true,
-            noFilteredDataAvailablePlaceholderText: this.translateService.instant(
-                'transaction.category.add',
-            ),
-            enableCheckAll: false,
-        };
-    });
-
-    /**
-     * A kategória dropdown "nincs találat" sorára kattintás lekezelése (ez jelenik meg gombként, ha nincs találat)
-     */
-    onCategoryDropdownClick(event: Event): void {
-        // kattintás esetén csak akkor ad hozzá elemet, hogyha a "nincs ilyen elem" gombra kattint
-        if ((event.target as HTMLElement).closest('.no-filtered-data')) {
-            const name = this.categorySearchText().trim();
-            if (!name || this.isCategorySaveInProgress) {
-                return;
-            }
-            this.categoryAdded.emit(name);
-        }
-    }
-
-    /**
-     * Törli a megadott indexű tétel sort
-     */
-    deleteRow(index: number): void {
-        if (this.isLastDetailRow) {
-            console.error('utolsó sort nem lehet törölni');
-            return;
-        }
-        this.details.removeAt(index);
-    }
-
-    /**
-     * Létrehoz egy új üres sort
-     */
-    addRow(): void {
-        // todo ugorjon az oldal az aljára
-        this.details.push(this.generateNewEmptyRow());
-    }
-
-    /**
      * Detail struktúra, amit új tranzakciónál, vagy új detail hozzáadásánál bővítjük vele a formot
      */
     generateNewRow(params: {
@@ -302,8 +293,8 @@ export class TransactionFormComponent implements OnChanges {
         const detailGroup = this.fb.group({
             detailName: [params.name, Validators.required],
             detailPrice: [params.price, [Validators.min(1)]],
-            detailWeight: [params.weight],
-            detailUnitPrice: [params.unitPrice],
+            detailWeight: [params.weight, [Validators.min(1)]],
+            detailUnitPrice: [params.unitPrice, [Validators.min(1)]],
             detailIsComplexPriceMode: [params.isComplexPriceMode],
             categories: [this.mapCategoryIdsToDropdownData(params.categories ?? [])],
         }) as FormGroup<DetailForm>;
@@ -337,35 +328,48 @@ export class TransactionFormComponent implements OnChanges {
      * A detailhez tartozó logikát beállítja (ha a price inputba gépelünk, akkor a weight és unit price inputok letiltódnak, és fordítva)
      */
     private setupDetailReactiveLogic(detailGroup: FormGroup<DetailForm>) {
-        const priceControl = detailGroup.controls.detailPrice;
-        const unitControl = detailGroup.controls.detailUnitPrice;
-        const weightControl = detailGroup.controls.detailWeight;
         const isComplexModeControl = detailGroup.controls.detailIsComplexPriceMode;
 
         // már létező tranzakciónál a disabled/enabled-ek beállítása
-        if (isComplexModeControl.value) {
-            priceControl.disable({ emitEvent: false });
-        } else {
-            // Az ár ki van írva a usernek mindenképpen, ezért valid állapot, hogy mindhárom adat ki van töltve, ezért itt elég csak a price-t disabled-re tenni
-            unitControl.disable({ emitEvent: false });
-            weightControl.disable({ emitEvent: false });
-        }
+        this.applyDetailRowPriceModeDisabledState(detailGroup, isComplexModeControl.value);
 
         // PRICE inputba gépelés
         isComplexModeControl.valueChanges.subscribe((isComplexMode) => {
-            if (isComplexMode) {
-                // emitEvent azért kell, hogy disable ne emiteljen egy újabb change-t, mert akkor végtelen ciklusba kerülünk
-                priceControl.disable({ emitEvent: false });
-
-                weightControl.enable({ emitEvent: false });
-                unitControl.enable({ emitEvent: false });
-            } else {
-                priceControl.enable({ emitEvent: false });
-
-                unitControl.disable({ emitEvent: false });
-                weightControl.disable({ emitEvent: false });
-            }
+            this.applyDetailRowPriceModeDisabledState(detailGroup, isComplexMode);
         });
+    }
+
+    /**
+     * A price/weight/unitPrice kontrollok disabled állapotát állítja be az ár megadási mód alapján.
+     * Kell akkor is, ha a teljes form disable()/enable()-je felülírná ezt az állapotot.
+     */
+    private applyDetailRowPriceModeDisabledState(
+        detailGroup: FormGroup<DetailForm>,
+        isComplexMode: boolean | null,
+    ): void {
+        const priceControl = detailGroup.controls.detailPrice;
+        const unitControl = detailGroup.controls.detailUnitPrice;
+        const weightControl = detailGroup.controls.detailWeight;
+
+        if (isComplexMode) {
+            // emitEvent azért kell, hogy disable ne emiteljen egy újabb change-t, mert akkor végtelen ciklusba kerülünk
+            priceControl.disable({ emitEvent: false });
+            weightControl.enable({ emitEvent: false });
+            unitControl.enable({ emitEvent: false });
+        } else {
+            priceControl.enable({ emitEvent: false });
+            unitControl.disable({ emitEvent: false });
+            weightControl.disable({ emitEvent: false });
+        }
+    }
+
+    /**
+     * Komplex tranzakció kapcsoló állításakor létrehoz egy új üres sort, hogyha nincs (default nincs, vagy ha törölte a user a sort)
+     */
+    protected handleIsComplexTransactionToggle() {
+        if (this.isComplexTransaction.value && this.details.length === 0) {
+            this.addRow();
+        }
     }
 
     // Getters
@@ -374,7 +378,7 @@ export class TransactionFormComponent implements OnChanges {
      * Utolsó detail sor nem törölhető, ezért a gombot letiltjuk, ha csak 1 sor van
      */
     get isLastDetailRow() {
-        return this.details.length < 2;
+        return this.details.length <= 1;
     }
 
     get name(): FormControl<string> {

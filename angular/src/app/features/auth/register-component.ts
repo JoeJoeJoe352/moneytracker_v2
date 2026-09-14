@@ -1,55 +1,83 @@
-import { Component, EventEmitter, inject, Output, signal, WritableSignal } from "@angular/core";
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { AuthService } from "./auth-service";
-import { NgClass } from "@angular/common";
-import { passwordMismatchValidator } from "./password-match.directive";
-import { UniqueNameAndEmailDirective } from "./unique-username.directive.";
-import { TranslatePipe } from "@ngx-translate/core";
+import { Component, EventEmitter, inject, Output } from '@angular/core';
+import {
+    FormBuilder,
+    FormControl,
+    FormGroup,
+    ReactiveFormsModule,
+    Validators,
+} from '@angular/forms';
+import { passwordMismatchValidator } from './password-match.directive';
+import { UniqueNameAndEmailDirective } from './unique-username.directive.';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { isLoadingInterface, RegisterRequestData } from './interfaces';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
 
 const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 @Component({
-    selector: "app-register-component",
-    templateUrl: "./register-component.html",
-    imports: [ReactiveFormsModule, NgClass, TranslatePipe],
-    styleUrls: ["../../shared/components/form-style.scss"],
+    selector: 'app-register-component',
+    templateUrl: './register-component.html',
+    styleUrl: './register-component.scss',
+    imports: [
+        ReactiveFormsModule,
+        TranslatePipe,
+        MatFormFieldModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatInputModule,
+    ],
 })
 export class RegisterComponent {
-    @Output() closeModal = new EventEmitter<void>();
+    private readonly fb = inject(FormBuilder);
+    private readonly uniqueValidator = inject(UniqueNameAndEmailDirective);
 
-    // injektálások 
-    private fb = inject(FormBuilder)
-    private authService = inject(AuthService)
-    private uniqueValidator = inject(UniqueNameAndEmailDirective)
-
-    registerForm: FormGroup
     /**
      * Töltődés alatt van-e a form
      */
-    isLoading: WritableSignal<boolean> = signal(false);
+    protected isLoading = inject<isLoadingInterface>(MAT_DIALOG_DATA).isloading;
     /**
-     * Van-e a hiba a backendről
+     * Regisztrációs gombra rákattintott-e a user
      */
-    backendErrorMsg: WritableSignal<string> = signal('');
+    @Output() register = new EventEmitter<RegisterRequestData>();
+
+    registerForm: FormGroup;
 
     constructor() {
         this.registerForm = this.fb.nonNullable.group(
             {
-                username: ['', {
-                    validators: [Validators.required, Validators.minLength(3), Validators.maxLength(20)],
-                    asyncValidators: [this.uniqueValidator.validateUsername.bind(this.uniqueValidator)],
-                    updateOn: 'blur'
-                }],
-                email: ['', {
-                    validators: [Validators.pattern(STRICT_EMAIL_REGEX), Validators.required],
-                    asyncValidators: [this.uniqueValidator.validateEmail.bind(this.uniqueValidator)],
-                    updateOn: 'blur',
-                }],
+                username: [
+                    '',
+                    {
+                        validators: [
+                            Validators.required,
+                            Validators.minLength(3),
+                            Validators.maxLength(20),
+                        ],
+                        asyncValidators: [
+                            this.uniqueValidator.validateUsername.bind(this.uniqueValidator),
+                        ],
+                        updateOn: 'blur',
+                    },
+                ],
+                email: [
+                    '',
+                    {
+                        validators: [Validators.pattern(STRICT_EMAIL_REGEX), Validators.required],
+                        asyncValidators: [
+                            this.uniqueValidator.validateEmail.bind(this.uniqueValidator),
+                        ],
+                        updateOn: 'blur',
+                    },
+                ],
                 password: ['', [Validators.required, Validators.minLength(6)]],
                 passwordAgain: ['', [Validators.required]],
-            }, {
+            },
+            {
                 validators: passwordMismatchValidator(),
-            }
-        )
+            },
+        );
     }
 
     /**
@@ -60,20 +88,12 @@ export class RegisterComponent {
             return;
         }
 
-        this.isLoading.set(true)
-        this.backendErrorMsg.set('')
-
-        this.authService.register(this.username.value, this.email.value, this.password.value).subscribe({
-            next: () => {
-                this.isLoading.set(false);
-                this.closeModal.emit()
-            },
-            error: (response) => {
-                console.error("unknown error during register!", response);
-                this.backendErrorMsg.set('Unknown error happened, please try again later');
-                this.isLoading.set(false);
-            },
-        })
+        const params = {
+            email: this.email.value,
+            username: this.username.value,
+            password: this.password.value,
+        };
+        this.register.emit(params);
     }
 
     // Getters
@@ -90,7 +110,7 @@ export class RegisterComponent {
     }
 
     get passwordAgain(): FormControl<string> {
-        return this.registerForm.get('passwordAgain') as FormControl<string>;   
+        return this.registerForm.get('passwordAgain') as FormControl<string>;
     }
 
     get hasPasswordMismatchError(): boolean {

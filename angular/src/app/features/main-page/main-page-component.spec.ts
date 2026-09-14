@@ -1,15 +1,22 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Subject, of } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MainPage } from './main-page-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { CategoryService } from '../transaction/category-service';
 import { MoneySumInterface } from '../transaction/interfaces';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
+import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { CurrencyCodesEnum } from '../../shared/enums';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
+import { StatCardComponent } from './stat-card-component';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-transactions-list-component',
@@ -22,30 +29,50 @@ class StubTransactionsListComponent {
     @Output() transactionsChanged = new EventEmitter<void>();
 }
 
-@Component({
-    selector: 'app-create-transaction-modal',
-    template: '',
-})
-class StubTransactionModalComponent {
-    @Input() transaction: unknown = null;
-    @Input() categories: unknown;
-    @Input() isTransactionFormDisabled = false;
-    @Input() isCategorySaveInProgress = false;
-    @Input() isDataInitializing: unknown;
-    @Output() closeModal = new EventEmitter<void>();
-    @Output() deleteTransactionRequested = new EventEmitter<number>();
-    @Output() saved = new EventEmitter<unknown>();
-    @Output() categoryAdded = new EventEmitter<string>();
+/**
+ * A MatDialog.open() valós helyett használt, kézzel vezérelhető dialogRef, ami lehetővé teszi a
+ * dialog "componentInstance"-ének (kimenő eseményeinek) és afterClosed()-jének szimulálását,
+ * anélkül hogy a valós MatDialog/CDK overlay-t kellene betöltenünk a tesztekhez.
+ */
+class FakeDialogRef<T> {
+    close = vi.fn((result?: unknown) => this.closedSubject.next(result));
+    private closedSubject = new Subject<unknown>();
+
+    constructor(public componentInstance: T) {}
+
+    afterClosed(): Observable<unknown> {
+        return this.closedSubject.asObservable();
+    }
 }
 
 describe('MainPage (Vitest)', () => {
     let fixture: ComponentFixture<MainPage>;
     let getMoneySum$: Subject<MoneySumInterface>;
     let getMoneySumSpy: ReturnType<typeof vi.fn>;
+    let dialogOpenSpy: ReturnType<typeof vi.fn>;
+    let transactionModalDialogRefs: FakeDialogRef<{
+        deleteTransactionRequested: EventEmitter<number>;
+        saved: EventEmitter<unknown>;
+        categoryAdded: EventEmitter<string>;
+    }>[];
 
     function setup() {
         getMoneySum$ = new Subject<MoneySumInterface>();
         getMoneySumSpy = vi.fn(() => getMoneySum$.asObservable());
+
+        transactionModalDialogRefs = [];
+        dialogOpenSpy = vi.fn((componentType: unknown) => {
+            if (componentType === TransactionModalComponent) {
+                const dialogRef = new FakeDialogRef({
+                    deleteTransactionRequested: new EventEmitter<number>(),
+                    saved: new EventEmitter<unknown>(),
+                    categoryAdded: new EventEmitter<string>(),
+                });
+                transactionModalDialogRefs.push(dialogRef);
+                return dialogRef;
+            }
+            throw new Error('Unexpected dialog component opened: ' + String(componentType));
+        });
 
         TestBed.configureTestingModule({
             imports: [MainPage],
@@ -67,15 +94,20 @@ describe('MainPage (Vitest)', () => {
                         saveCategory: () => of({ id: 1, name: 'x', isDefaultCategory: false }),
                     },
                 },
+                { provide: MatDialog, useValue: { open: dialogOpenSpy } },
             ],
         });
         TestBed.overrideComponent(MainPage, {
             set: {
                 imports: [
                     StubTransactionsListComponent,
-                    StubTransactionModalComponent,
                     TranslatePipe,
                     CurrencyFormatPipe,
+                    StatCardComponent,
+                    MatCard,
+                    MatIcon,
+                    MatProgressSpinner,
+                    MatButton,
                 ],
             },
         });
@@ -87,7 +119,7 @@ describe('MainPage (Vitest)', () => {
     beforeEach(() => setup());
 
     it('should show a spinner while the money sum is loading, then render the totals once loaded', () => {
-        expect(fixture.nativeElement.querySelector('.balance-card .spinner-border')).toBeTruthy();
+        expect(fixture.nativeElement.querySelector('.balance-card mat-spinner')).toBeTruthy();
         expect(fixture.nativeElement.querySelector('.balance-card .stat-value')).toBeNull();
 
         getMoneySum$.next({
@@ -97,7 +129,7 @@ describe('MainPage (Vitest)', () => {
         });
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('.balance-card .spinner-border')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.balance-card mat-spinner')).toBeNull();
         expect(fixture.nativeElement.querySelector('.balance-card .stat-value').textContent).toContain(
             '15,000',
         );
@@ -118,7 +150,7 @@ describe('MainPage (Vitest)', () => {
         const trend = fixture.nativeElement.querySelector('.stat-trend');
         expect(trend.classList.contains('positive')).toBe(true);
         expect(trend.classList.contains('negative')).toBe(false);
-        expect(trend.querySelector('.bi-arrow-up-short')).toBeTruthy();
+        expect(trend.querySelector('mat-icon[fontIcon="arrow_upward"]')).toBeTruthy();
         expect(trend.textContent).toContain('3,000');
     });
 
@@ -133,7 +165,7 @@ describe('MainPage (Vitest)', () => {
         const trend = fixture.nativeElement.querySelector('.stat-trend');
         expect(trend.classList.contains('negative')).toBe(true);
         expect(trend.classList.contains('positive')).toBe(false);
-        expect(trend.querySelector('.bi-arrow-down-short')).toBeTruthy();
+        expect(trend.querySelector('mat-icon[fontIcon="arrow_downward"]')).toBeTruthy();
     });
 
     it('should open the transaction modal when the create-transaction button is clicked', () => {
@@ -144,13 +176,14 @@ describe('MainPage (Vitest)', () => {
         });
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('app-create-transaction-modal')).toBeNull();
+        expect(dialogOpenSpy).not.toHaveBeenCalled();
 
         const createButton = fixture.nativeElement.querySelector('.balance-card button');
         createButton.click();
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('app-create-transaction-modal')).toBeTruthy();
+        expect(dialogOpenSpy).toHaveBeenCalledWith(TransactionModalComponent, expect.anything());
+        expect(transactionModalDialogRefs).toHaveLength(1);
     });
 
     it('should refetch only the money sum when the transaction list reports a change', () => {

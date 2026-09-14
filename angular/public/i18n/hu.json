@@ -10,9 +10,7 @@
     "faster": "Gyorsabban tudsz félretenni — látod, hol tudsz okosan optimalizálni.",
     "security": "Biztonságot és szabadságot ad — pontosan tudod, hogy megengedhetsz-e valamit magadnak.",
     "goals": "Segít elérni hosszú távú célokat — lakás, utazás, tartalék, bármi, ami fontos.",
-    "register": "A folytatáshoz regisztrálj, vagy lépj be!",
-    "register.title": "Regisztráció",
-    "login.title": "Bejelentkezés"
+    "register": "A folytatáshoz regisztrálj, vagy lépj be!"
   },
   "login": {
     "title": "Bejelentkezés",
@@ -20,7 +18,8 @@
     "password": "Jelszó",
     "submit": "Bejelentkezés",
     "username.required-error": "A felhasználónév megadása kötelező!",
-    "password.required-error": "A jelszó megadása kötelező!"
+    "password.required-error": "A jelszó megadása kötelező!",
+    "success": "Sikeres bejelentkezés"
   },
   "register": {
     "username": "Felhasználónév",
@@ -39,14 +38,19 @@
     "password_again.required-error": "A jelszó megerősítése kötelező!",
     "password_again.minlength-error": "A jelszó megerősítésének legalább 6 karakter hosszúnak kell lennie!",
     "password_again.mismatch-error": "A jelszavak nem egyeznek!",
-    "submit": "Regisztráció"
+    "submit": "Regisztráció",
+    "success": "Sikeres regisztráció",
+    "title": "Regisztráció"
   },
   "header": {
     "welcome": "Üdvözlünk",
     "transactions": "Tranzakciók",
     "logout": "Kijelentkezés",
+    "logout.success": "Sikeres kijelentkezés",
     "dashboard": "Főoldal",
-    "wallets": "Tárcák"
+    "wallets": "Tárcák",
+    "register": "Regisztráció",
+    "login": "Bejelentkezés"
   },
   "footer": {
     "home": "Főoldal"
@@ -54,33 +58,37 @@
   "transaction": {
     "create": "Tranzakció létrehozása",
     "update": "Tranzakció módosítása",
-    "delete": "Tranzakció törlése",
+    "save": "Mentés",
+    "delete": "Törlés",
     "delete.confirm": "Biztosan törölni szeretnéd a tranzakciót?",
     "delete.error": "Hiba történt a tranzakció törlése közben!",
     "update.error": "Hiba történt a tranzakció módosítása közben!",
     "create.error": "Hiba történt a tranzakció létrehozása közben!",
     "name": "Tranzakció neve",
-    "name.required": "A tranzakció nevének megadása kötelező!",
-    "name.minlength": "A tranzakció nevének legalább 3 karakter hosszúnak kell lennie!",
-    "name.maxlength": "A tranzakció nevének legfeljebb 50 karakter hosszúnak kell lennie!",
-    "type": "Tranzakció típusa",
+    "name.required": "Kötelező megadni!",
+    "name.minlength": "A név legalább 3 karakter lehet!",
+    "name.maxlength": "A név legfeljebb 50 karakter lehet!",
+    "type": "Kiadás vagy bevétel",
+    "type.hint": "Ez adja meg a tranzakció előjelét",
     "price": "Összeg",
     "price.required": "Az összeg megadása kötelező!",
-    "price.min": "Az összegnek nagyobbnak kell lennie, mint nulla!",
+    "price.min": "Az összeg 0-nál nagyobb lehet!",
     "date": "Dátum",
     "date.placeholder": "Adj meg dátumot!",
-    "date.required": "A dátum megadása kötelező!",
+    "date.required": "Kötelező megadni!",
     "date.invalid": "A dátum érvénytelen!",
     "expense": "Kiadás",
     "income": "Bevétel",
-    "hide_details": "Tranzakciós összeg megadása",
-    "show_details": "Tételek felsorolása",
+    "detail_state_label": "Rögzítés módja",
+    "hide_details": "Egyszer",
+    "show_details": "Tételenként",
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
     "category": {
       "add": "Új kategória hozzáadásához kattints ide!"
     },
     "wallet": "Tárca",
+    "wallet.hint": "Ehhez lesz kötve a tranzakció",
 
     "detail": {
       "title": "Tranzakció részletei",
@@ -93,12 +101,13 @@
       "delete.last-one-error": "Utolsó tétel nem törölhető",
       "delete_row.tooltip": "Tétel törlése",
       "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek.",
-      "weight": "Súly",
-      "weight.min": "A súlynak nagyobbnak kell lennie, mint nulla!",
+      "amount": "Mennyiség",
+      "amount.min": "A mennyiségnek nagyobbnak kell lennie, mint nulla!",
       "unit_price": "Egységár",
       "unit_price.min": "Az egységárnak nagyobbnak kell lennie, mint nulla!",
-      "simple_price_mode": "Ár megadása",
-      "complex_price_mode": "Mennyiség és egységár megadása",
+      "price_mode.label": "Árképzés típusa",
+      "simple_price_mode": "Teljes ár",
+      "complex_price_mode": "Mennyiség és egységár",
       "total_price": "Teljes ár"
     }
   },
@@ -106,6 +115,7 @@
     "create": "Tárca létrehozása",
     "update": "Tárca módosítása",
     "delete": "Tárca törlése",
+    "cancel": "Mégse",
     "delete.confirm": "Biztosan törölni szeretnéd ezt a tárcát?",
     "name": "Tárca neve",
     "name.required": "A tárca nevének megadása kötelező!",
@@ -135,7 +145,8 @@
     "balance_change_this_month": "ebben a hónapban",
     "total_income": "Bevétel ebben a hónapban",
     "total_expenses": "Kiadás ebben a hónapban",
-    "last_transactions": "Legutóbbi tranzakciók"
+    "last_transactions": "Legutóbbi tranzakciók",
+    "stat.no_data": "Nincs megjeleníthető érték ebben a hónapban"
   },
   "transaction_page": {
     "title": "Tranzakcióim",
@@ -152,5 +163,14 @@
     "hu": "Magyar",
     "de": "Német",
     "en": "Angol"
+  },
+  "etc": {
+    "datepicker.format": "YYYY. MM. DD.",
+    "confirm": "Megerősítés",
+    "cancel": "Mégse",
+    "close": "Bezárás",
+    "delete-success": "Sikeres törlés!",
+    "save-success": "Sikeres mentés!",
+    "general-error": "Váratlan hiba történt, kérlek próbáld újra később!"
   }
 }

@@ -1,18 +1,34 @@
 import { Component, EventEmitter, Input, Output, Signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { IDropdownSettings, NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
-import { SwitchComponent } from '../../shared/components/switch.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { DropdownInterface } from '../../shared/interfaces';
-import { DetailForm } from '../transaction/interfaces';
+import { CategoryResponseInterface, DetailForm } from '../transaction/interfaces';
+import { CategorySelectComponent } from './category-select-component';
+import { Observable } from 'rxjs';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
-    selector: 'app-transaction-detail-row-component',
-    templateUrl: './transaction-detail-row-component.html',
-    styleUrl: './transaction-detail-row-component.scss',
-    imports: [ReactiveFormsModule, TranslatePipe, NgMultiSelectDropDownModule, SwitchComponent],
+    selector: 'app-transaction-detail-form-component',
+    templateUrl: './transaction-detail-form-component.html',
+    styleUrl: './transaction-detail-form-component.scss',
+    imports: [
+        ReactiveFormsModule,
+        TranslatePipe,
+        MatSlideToggleModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        CategorySelectComponent,
+        MatCardModule,
+    ],
 })
-export class TransactionDetailRowComponent {
+export class TransactionDetailFormComponent {
     /**
      * A sorhoz tartozó FormGroup (a szülő details FormArray-jének egy eleme)
      */
@@ -26,10 +42,6 @@ export class TransactionDetailRowComponent {
      */
     @Input({ required: true }) categoryData!: Signal<DropdownInterface[]>;
     /**
-     * MultiselectSettings beállításai
-     */
-    @Input({ required: true }) multiselectSettings!: Signal<IDropdownSettings>;
-    /**
      * Kategória mentése folyamatban van-e
      */
     @Input({ required: true }) isCategorySaveInProgress!: boolean;
@@ -42,18 +54,7 @@ export class TransactionDetailRowComponent {
      */
     @Input({ required: true }) currencySymbol!: string;
 
-    /**
-     * A kategória dropdown keresőmezőjének szövege változott
-     */
-    @Output() categoryFilterChange = new EventEmitter<unknown>();
-    /**
-     * A kategória dropdown-ra kattintott a user
-     */
-    @Output() categoryDropdownClick = new EventEmitter<Event>();
-    /**
-     * A kategória dropdown bezáródott, a keresőszöveget törölni kell
-     */
-    @Output() categorySearchTextCleared = new EventEmitter<void>();
+    @Input() addCategoryCallback!: (name: string) => Observable<CategoryResponseInterface>;
     /**
      * A sor törlés gombjára kattintott a user
      */

@@ -7,6 +7,9 @@
     padding-top: 1.5rem;
     cursor: pointer;
     transition: $transition-base;
+    // hogy a matRipple ne lógjon ki a kártya lekerekített sarkain
+    overflow: hidden;
+    border-radius: $border-radius-lg;
 
     &:hover {
         transform: translateY(-4px);
@@ -61,7 +64,6 @@
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.18);
     font-size: 0.7rem;
-    font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
@@ -94,7 +96,6 @@
     .wallet-name {
         max-width: 70%;
         font-size: 1rem;
-        font-weight: 600;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

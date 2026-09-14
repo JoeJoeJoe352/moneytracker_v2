@@ -10,7 +10,12 @@ export enum CurrencyCodesEnum {
 }
 
 export enum SupportedLangEnum {
-    hu = "hu",
-    en = "en",
-    de = "de",
+    hu = 'hu',
+    en = 'en',
+    de = 'de',
+}
+
+export enum TransactionTypeEnum {
+  INCOME = 'INCOME',
+  OUTCOME = 'OUTCOME'
 }

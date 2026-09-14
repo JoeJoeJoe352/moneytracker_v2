@@ -1,30 +1,50 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, OnInit, Output, Signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+
+export interface WalletFormInputInterface {
+    wallet: WalletDataInterface | null;
+    isFormDisabled: Signal<boolean>;
+}
 
 @Component({
     selector: 'app-wallet-form-component',
     templateUrl: './wallet-form-component.html',
-    styleUrls: ['../../shared/components/form-style.scss'],
+    styleUrls: ['../../shared/components/form-style.scss', './wallet-form-component.scss'],
     standalone: true,
-    imports: [ReactiveFormsModule, TranslatePipe],
+    imports: [
+        ReactiveFormsModule,
+        TranslatePipe,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule,
+    ],
 })
 export class WalletFormComponent implements OnInit {
-    private fb = inject(FormBuilder);
+    private readonly fb = inject(FormBuilder);
+    protected readonly currencyOptions = Object.values(CurrencyCodesEnum);
+    protected readonly walletTypeOptions = Object.values(WalletTypesEnum);
+
+    public data = inject<WalletFormInputInterface>(MAT_DIALOG_DATA);
 
     /**
      * Ha meg van adva, akkor a form szerkesztő módban nyílik, egyébként létrehozó módban
      */
-    @Input() wallet: WalletDataInterface | null = null;
-    @Input({ required: true }) isFormDisabled!: boolean;
+    protected wallet: WalletDataInterface | null = null;
 
-    @Output() saved = new EventEmitter<WalletCreateRequest | WalletUpdateRequest>();
     @Output() deleted = new EventEmitter<number>();
-
-    protected readonly currencyOptions = Object.values(CurrencyCodesEnum);
-    protected readonly walletTypeOptions = Object.values(WalletTypesEnum);
+    @Output() saved = new EventEmitter<WalletCreateRequest | WalletUpdateRequest>();
 
     protected walletForm = this.fb.nonNullable.group({
         name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
@@ -33,13 +53,14 @@ export class WalletFormComponent implements OnInit {
     });
 
     ngOnInit(): void {
+        this.wallet = this.data.wallet;
         if (this.wallet) {
             this.walletForm.patchValue({
                 name: this.wallet.name,
                 currencyCode: this.wallet.currencyCode,
                 walletType: this.wallet.type,
             });
-            // Egyenlőre nem akarom lekezelni mi lenne a tárcában szereplő tranzakciókkal, ha valutát váltana
+            // Mert egyenlőre nem akarom lekezelni mi lenne a tárcában szereplő tranzakciókkal, ha valutát váltana
             this.walletForm.controls.currencyCode.disable();
         }
     }
@@ -47,7 +68,7 @@ export class WalletFormComponent implements OnInit {
     /**
      * Meglévő walletet szerkesztünk-e
      */
-    protected get isEditMode(): boolean {
+    protected isEditMode(): this is { wallet: WalletDataInterface } {
         return this.wallet !== null;
     }
 
@@ -63,7 +84,7 @@ export class WalletFormComponent implements OnInit {
         const value = this.walletForm.getRawValue();
 
         this.saved.emit(
-            this.isEditMode
+            this.isEditMode()
                 ? { name: value.name, walletType: value.walletType }
                 : {
                       name: value.name,

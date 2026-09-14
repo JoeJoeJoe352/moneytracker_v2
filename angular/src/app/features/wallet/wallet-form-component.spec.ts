@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideTranslateService } from '@ngx-translate/core';
-import { WalletFormComponent } from './wallet-form-component';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
 import { WalletDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
 
@@ -12,13 +14,17 @@ describe('WalletFormComponent (Vitest)', () => {
     async function setup(wallet: WalletDataInterface | null) {
         await TestBed.configureTestingModule({
             imports: [WalletFormComponent],
-            providers: [provideTranslateService()],
+            providers: [
+                provideTranslateService(),
+                {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: { wallet, isFormDisabled: signal(false) } as WalletFormInputInterface,
+                },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(WalletFormComponent);
         component = fixture.componentInstance;
-        component.wallet = wallet;
-        component.isFormDisabled = false;
         fixture.detectChanges();
     }
 
@@ -38,7 +44,7 @@ describe('WalletFormComponent (Vitest)', () => {
         });
 
         it('should not render a delete button', () => {
-            expect(fixture.nativeElement.querySelector('.btn-primary-red')).toBeNull();
+            expect(fixture.nativeElement.querySelector('.mat-button-danger')).toBeNull();
         });
 
         it('should not emit "saved" and should mark controls touched when submitting an invalid form', () => {
@@ -110,7 +116,7 @@ describe('WalletFormComponent (Vitest)', () => {
             let deletedId: number | undefined;
             component.deleted.subscribe((id) => (deletedId = id));
 
-            const deleteButton = fixture.nativeElement.querySelector('.btn-primary-red');
+            const deleteButton = fixture.nativeElement.querySelector('.mat-button-danger');
             expect(deleteButton).toBeTruthy();
             deleteButton.click();
 

@@ -81,7 +81,7 @@ public class AuthController {
     }
 
     /**
-     * Felhasználó kiejlentkeztetése (jwt token törlése a böngészőből)
+     * Felhasználó kijelentkeztetése (jwt token törlése a böngészőből)
      * 
      * @return ResponseEntity üres body, de tartalmaz headerben egy expiration
      *         cookie-t

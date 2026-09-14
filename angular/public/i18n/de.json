@@ -64,6 +64,7 @@
     "name.minlength": "Der Transaktionsname muss mindestens 3 Zeichen lang sein!",
     "name.maxlength": "Der Transaktionsname darf höchstens 50 Zeichen lang sein!",
     "type": "Transaktionstyp",
+    "type.hint": "Dies bestimmt das Vorzeichen der Transaktion",
     "price": "Betrag",
     "price.required": "Der Betrag ist erforderlich!",
     "price.min": "Der Betrag muss größer als null sein!",
@@ -73,13 +74,16 @@
     "date.invalid": "Das Datum ist ungültig!",
     "expense": "Ausgabe",
     "income": "Einnahme",
-    "hide_details": "Transaktionsbetrag angeben",
-    "show_details": "Posten auflisten",
+    "detail_state_label": "Erfassungsart",
+    "hide_details": "Einzelbetrag",
+    "show_details": "Posten",
+    "detail_state.hint": "Bei der Posten-Erfassung kannst du Betrag und Kategorie für jeden Posten einzeln angeben",
     "categories": "Kategorien",
     "categories.add": "Kategorien hinzufügen",
     "category": {
       "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!"
     },
+    "wallet.hint": "Die Transaktion wird damit verknüpft",
 
     "detail": {
       "title": "Transaktionsdetails",
@@ -105,6 +109,7 @@
     "create": "Wallet erstellen",
     "update": "Wallet bearbeiten",
     "delete": "Wallet löschen",
+    "cancel": "Abbrechen",
     "delete.confirm": "Möchtest du dieses Wallet wirklich löschen?",
     "name": "Wallet-Name",
     "name.required": "Der Wallet-Name ist erforderlich!",
@@ -146,5 +151,14 @@
     "hu": "Ungarn",
     "de": "Deutsch",
     "en": "Englisch"
+  },
+  "etc": {
+    "datepicker.format": "DD.MM.YYYY.",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "delete-success": "Erfolgreich gelöscht!",
+    "save-success": "Erfolgreich gespeichert!",
+    "general-error": "Ein unerwarteter Fehler ist aufgetreten, bitte versuche es später erneut!"
   }
 }

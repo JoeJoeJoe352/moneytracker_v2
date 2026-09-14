@@ -64,6 +64,7 @@
     "name.minlength": "Transaction name must be at least 3 characters long!",
     "name.maxlength": "Transaction name must be at most 50 characters long!",
     "type": "Transaction type",
+    "type.hint": "This determines the transaction's sign",
     "price": "Amount",
     "price.required": "Amount is required!",
     "price.min": "Amount must be greater than zero!",
@@ -73,13 +74,16 @@
     "date.invalid": "Date is invalid!",
     "expense": "Expense",
     "income": "Income",
-    "hide_details": "Enter transaction amount",
-    "show_details": "List items",
+    "detail_state_label": "Recording mode",
+    "hide_details": "Single amount",
+    "show_details": "Itemized",
+    "detail_state.hint": "With itemized recording, you can enter an amount and category for each item",
     "categories": "Categories",
     "categories.add": "Add categories",
     "category": {
       "add": "Click here to add a new category!"
     },
+    "wallet.hint": "The transaction will be linked to this",
 
     "detail": {
       "title": "Transaction details",
@@ -105,6 +109,7 @@
     "create": "Create wallet",
     "update": "Update wallet",
     "delete": "Delete wallet",
+    "cancel": "Cancel",
     "delete.confirm": "Are you sure you want to delete this wallet?",
     "name": "Wallet name",
     "name.required": "Wallet name is required!",
@@ -143,8 +148,17 @@
     }
   },
   "language": {
-    "hu": "Hungary",
+    "hu": "Hungarian",
     "de": "German",
     "en": "English"
+  },
+  "etc": {
+    "datepicker.format": "MM/DD/YYYY.",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete-success": "Successfully deleted!",
+    "save-success": "Successfully saved!",
+    "general-error": "An unexpected error occurred, please try again later!"
   }
 }

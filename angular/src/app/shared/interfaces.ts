@@ -4,8 +4,10 @@ export interface DropdownInterface {
     item_text: string;
 }
 
-// Fejlécben lévő linkek interface-e
+// Fejlécben lévő linkek interface-e. Url és action attributumok kizárják egymást
 export interface LinkInterface {
-    url: string;
+    url?: string;
     langKey: string;
+    icon: string;
+    action?: () => void
 }

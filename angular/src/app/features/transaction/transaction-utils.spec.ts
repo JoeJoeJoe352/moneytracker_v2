@@ -1,5 +1,5 @@
+import { TransactionTypeEnum } from '../../shared/enums';
 import { TransactionUtils } from './transaction-utils';
-import { TransactionTypeEnum } from './transaction-type-enum';
 
 describe('TransactionUtils', () => {
     let utils: TransactionUtils;

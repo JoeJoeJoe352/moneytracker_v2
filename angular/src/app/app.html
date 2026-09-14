@@ -1,7 +1,21 @@
-<div class="app-body">
-    <app-header/>
-    <div class="container mt-3">
-        <router-outlet />
+<div class="app-shell">
+    <button
+        type="button"
+        class="mobile-menu-backdrop"
+        [class.mobile-menu-backdrop-open]="isMobileMenuOpen()"
+        [tabIndex]="isMobileMenuOpen() ? 0 : -1"
+        aria-label="Menü bezárása"
+        (click)="closeMobileMenu()"
+    ></button>
+    <app-sidebar
+        class="app-shell-sidebar"
+        [class.mobile-menu-open]="isMobileMenuOpen()"
+        [class.mobile-menu-closed]="!isMobileMenuOpen()"
+    />
+    <div class="app-shell-main">
+        <app-header class="app-shell-header" (mobileMenuToggled)="toggleMobileMenu()" />
+        <main class="app-shell-content">
+            <router-outlet />
+        </main>
     </div>
-    <app-footer/>
 </div>

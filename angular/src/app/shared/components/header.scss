@@ -1,34 +1,23 @@
 @use '../variables.scss' as *;
 
-.navbar-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 2; // 2, mert tárca listaoldalon a tárca előtere a backdrop előtt van
-}
+mat-toolbar {
+    position: relative;
+    z-index: 2;
+    height: $header-height;
+    padding: 0;
+    justify-content: end;
+    box-shadow: $shadow-sm;
+    --mat-toolbar-container-background-color: #{$moneytracker-white};
 
-.navbar {
-  z-index: 2;
-  background-color: $moneytracker-green !important;
-  box-shadow: $shadow-sm;
-
-  .navbar-brand {
-    color: $moneytracker-white;
-  }
-
-  .nav-link {
-    cursor: pointer;
-    color: $moneytracker-white;
-  }
-
-  .logo-wrapper {
-    background: $moneytracker-white;
-    border-radius: 20px;
-    padding: 5px 10px;
-    color: $moneytracker-black;
-
-    img {
-      height: 25px;
+    .header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 1140px;
+        // mobilnézeten az ikon kattintható felülete ki tud lógni a tartalomból
+        // és ez oldalra görgetést tud okozni. 
+        padding-right: 12px;
     }
-  }
 }

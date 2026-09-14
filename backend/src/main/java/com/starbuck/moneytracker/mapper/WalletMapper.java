@@ -16,6 +16,9 @@ public class WalletMapper {
     }
 
     public List<WalletResponseDto> toDtoList(List<Wallet> wallets) {
+        if (wallets == null || wallets.size() == 0) {
+            throw new IllegalArgumentException("Wallet list empty or null");
+        }
         return wallets.stream()
                 .map((wallet) -> this.toDto(wallet))
                 .collect(Collectors.toList());

@@ -1,13 +1,15 @@
 import { Component, computed, Input, Signal } from '@angular/core';
 import { TransactionListElementData } from './interfaces';
-import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { TransactionTypeEnum } from '../../shared/enums';
 
 @Component({
     selector: 'app-transaction-card',
     templateUrl: './transaction-card-component.html',
     styleUrl: './transaction-card-component.scss',
-    imports: [CurrencyFormatPipe],
+    imports: [CurrencyFormatPipe, MatCard, MatIcon],
 })
 export default class TransactionCardComponent {
     /**

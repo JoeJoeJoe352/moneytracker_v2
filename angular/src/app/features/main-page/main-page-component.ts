@@ -1,15 +1,20 @@
 import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { switchMap, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionsListComponent } from '../transaction/transactions-component';
-import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
 import { MoneySumInterface, WalletSummaryInterface } from '../transaction/interfaces';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
+import { StatCardComponent } from './stat-card-component';
+import { TransactionTypeEnum } from '../../shared/enums';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-main-page-component',
@@ -19,18 +24,21 @@ import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
     imports: [
         TransactionsListComponent,
         TranslatePipe,
-        TransactionModalComponent,
         CurrencyFormatPipe,
+        StatCardComponent,
+        MatCard,
+        MatIcon,
+        MatProgressSpinner,
+        MatButton,
     ],
     providers: [TransactionModalStateService, DecimalPipe],
 })
 export class MainPage {
     private transactionService = inject(TransactionService);
-    private translateService = inject(TranslateService);
-    private decimalPipe = inject(DecimalPipe);
     protected modal = inject(TransactionModalStateService);
     protected walletUtils = inject(WalletDataUtil);
 
+    protected transactionType = TransactionTypeEnum
     /**
      * Újra kell-e tölteni az adatokat? Ha ez változik, akkor újra fogja tölteni a listát.
      * Azért számot növelünk és nem boolean értéket, mert ha gyorsan hívódik egymás után,

@@ -2,16 +2,18 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { signal } from '@angular/core';
+import { MatSelect } from '@angular/material/select';
 import { TransactionFormComponent } from './transaction-form-component';
-import { TransactionDetailRowComponent } from './transaction-detail-row-component';
+import { TransactionDetailFormComponent } from './transaction-detail-form-component';
+import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
 import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
-import { TransactionTypeEnum } from '../transaction/transaction-type-enum';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { WalletDataInterface } from '../wallet/interfaces';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
 
 describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
     let fixture: ComponentFixture<TransactionFormComponent>;
@@ -50,6 +52,7 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
             imports: [TransactionFormComponent],
             providers: [
                 provideTranslateService(),
+                provideNativeDateAdapter(),
                 { provide: TransactionService, useValue: { utils: new TransactionUtils() } },
                 {
                     provide: UserDataStore,
@@ -100,13 +103,13 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
     });
 
     it('should render one real detail row component per detail form group, correctly bound', () => {
-        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailRowComponent));
+        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailFormComponent));
 
         expect(rows.length).toBe(2);
-        expect((rows[0].componentInstance as TransactionDetailRowComponent).detail).toBe(
+        expect((rows[0].componentInstance as TransactionDetailFormComponent).detail).toBe(
             component.details.at(0),
         );
-        expect((rows[1].componentInstance as TransactionDetailRowComponent).detail).toBe(
+        expect((rows[1].componentInstance as TransactionDetailFormComponent).detail).toBe(
             component.details.at(1),
         );
         expect(fixture.nativeElement.querySelector('#detail-name-0').value).toBe('Kenyér');
@@ -119,14 +122,14 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         fixture.detectChanges();
 
         expect(
-            fixture.nativeElement.querySelectorAll('app-transaction-detail-row-component').length,
+            fixture.nativeElement.querySelectorAll('app-transaction-detail-form-component').length,
         ).toBe(3);
         expect(component.details.length).toBe(3);
     });
 
     it('should remove a detail row when its own delete button is clicked', () => {
         const deleteButtons = fixture.nativeElement.querySelectorAll(
-            'app-transaction-detail-row-component .btn-primary-red',
+            'app-transaction-detail-form-component .mat-button-danger',
         );
         expect(deleteButtons.length).toBe(2);
 
@@ -134,20 +137,20 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         fixture.detectChanges();
 
         expect(
-            fixture.nativeElement.querySelectorAll('app-transaction-detail-row-component').length,
+            fixture.nativeElement.querySelectorAll('app-transaction-detail-form-component').length,
         ).toBe(1);
         expect(fixture.nativeElement.querySelector('#detail-name-0').value).toBe('Tej');
     });
 
     it("should disable every row's delete button once only one detail row remains", () => {
         const deleteButtons = fixture.nativeElement.querySelectorAll(
-            'app-transaction-detail-row-component .btn-primary-red',
+            'app-transaction-detail-form-component .mat-button-danger',
         );
         deleteButtons[0].click();
         fixture.detectChanges();
 
         const remainingDeleteButton = fixture.nativeElement.querySelector(
-            'app-transaction-detail-row-component .btn-primary-red',
+            'app-transaction-detail-form-component .mat-button-danger',
         );
         expect(remainingDeleteButton.disabled).toBe(true);
     });
@@ -173,34 +176,32 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         expect(component.details.at(1).controls.detailPrice.disabled).toBe(false);
     });
 
-    it('should forward category-related outputs from a detail row up to the form component, driving categoryAdded', () => {
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
+    it('should pass addCategoryCallback from the form component down through a detail row to the category select', () => {
+        const addCategoryCallback = () => {
+            throw new Error('not called in this test');
+        };
+        component.addCategoryCallback = addCategoryCallback;
+        fixture.detectChanges();
 
-        const firstDropdown = fixture.debugElement.query(By.css('ng-multiselect-dropdown'));
-        firstDropdown.triggerEventHandler('onFilterChange', 'tej');
+        const firstCategorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent))
+            .componentInstance as CategorySelectComponent;
 
-        const noFilteredDataButton = document.createElement('div');
-        noFilteredDataButton.classList.add('no-filtered-data');
-        firstDropdown.triggerEventHandler('click', { target: noFilteredDataButton });
-
-        expect(addedCategory).toBe('tej');
+        expect(firstCategorySelect.addCategoryCallback).toBe(addCategoryCallback);
     });
 
     it('should propagate the selected wallet currency symbol down to every detail row', () => {
-        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailRowComponent));
+        const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailFormComponent));
 
         expect(
-            rows.map((row) => (row.componentInstance as TransactionDetailRowComponent).currencySymbol),
+            rows.map((row) => (row.componentInstance as TransactionDetailFormComponent).currencySymbol),
         ).toEqual(['Ft', 'Ft']);
 
-        const walletSelect = fixture.nativeElement.querySelector('#transaction-wallet');
-        walletSelect.value = '2';
-        walletSelect.dispatchEvent(new Event('change'));
+        const walletSelect = fixture.debugElement.query(By.directive(MatSelect));
+        walletSelect.triggerEventHandler('selectionChange', { value: 2 });
         fixture.detectChanges();
 
         const suffixes = fixture.nativeElement.querySelectorAll(
-            'app-transaction-detail-row-component .suffix',
+            'app-transaction-detail-form-component [matTextSuffix]',
         );
         expect(suffixes[0].textContent.trim()).toBe('€');
     });

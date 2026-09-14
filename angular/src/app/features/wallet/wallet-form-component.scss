@@ -1,0 +1,22 @@
+.wallet-form {
+    .wallet-form-single-row {
+        mat-form-field {
+            width: 100%;
+        }
+    }
+
+    .wallet-form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        mat-form-field {
+            flex: 1 1 200px;
+        }
+    }
+
+    .form-description {
+        text-align: justify;
+        color: #6b7280;
+    }
+}
