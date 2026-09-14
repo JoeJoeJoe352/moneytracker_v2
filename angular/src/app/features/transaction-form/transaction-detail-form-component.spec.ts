@@ -155,16 +155,17 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         expect(emitted).toBe(true);
     });
 
-    it('should forward categoryAdded from the category select up to its own output', () => {
+    it('should pass addCategoryCallback through to the category select', () => {
+        const addCategoryCallback = () => {
+            throw new Error('not called in this test');
+        };
         component.detail = buildDetailGroup();
+        component.addCategoryCallback = addCategoryCallback;
         fixture.detectChanges();
 
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
+        const categorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent))
+            .componentInstance as CategorySelectComponent;
 
-        const categorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent));
-        categorySelect.triggerEventHandler('categoryAdded', 'kenyér');
-
-        expect(addedCategory).toBe('kenyér');
+        expect(categorySelect.addCategoryCallback).toBe(addCategoryCallback);
     });
 });

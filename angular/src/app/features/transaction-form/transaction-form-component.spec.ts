@@ -218,16 +218,20 @@ describe('TransactionFormComponent (Vitest)', () => {
         expect(component.details.length).toBe(1); // utolsó sor nem törölhető
     });
 
-    it('should forward categoryAdded from the category select up to its own output', () => {
+    it('should pass addCategoryCallback through to the category selects', () => {
+        const addCategoryCallback = () => {
+            throw new Error('not called in this test');
+        };
+        component.addCategoryCallback = addCategoryCallback;
         fixture.detectChanges();
 
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
-
-        const categorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent));
-        categorySelect.triggerEventHandler('categoryAdded', 'Új kategória');
-
-        expect(addedCategory).toBe('Új kategória');
+        const categorySelects = fixture.debugElement.queryAll(By.directive(CategorySelectComponent));
+        expect(categorySelects.length).toBeGreaterThan(0);
+        categorySelects.forEach((categorySelect) => {
+            expect((categorySelect.componentInstance as CategorySelectComponent).addCategoryCallback).toBe(
+                addCategoryCallback,
+            );
+        });
     });
 
     it('should initialize the price suffix from the default wallet currency', () => {

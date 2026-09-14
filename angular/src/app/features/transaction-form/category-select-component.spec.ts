@@ -1,12 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { signal } from '@angular/core';
+import { of } from 'rxjs';
 import { MatAutocomplete } from '@angular/material/autocomplete';
 import { MatChipRow } from '@angular/material/chips';
 import { CategorySelectComponent } from './category-select-component';
 import { DropdownInterface } from '../../shared/interfaces';
+import { CategoryResponseInterface } from '../transaction/interfaces';
 
 describe('CategorySelectComponent (Vitest)', () => {
     let fixture: ComponentFixture<CategorySelectComponent>;
@@ -87,29 +89,40 @@ describe('CategorySelectComponent (Vitest)', () => {
         expect(changedValue).toEqual([transport]);
     });
 
-    it('should emit categoryAdded with the trimmed search text when the "add new" option is selected', () => {
+    it('should call addCategoryCallback with the trimmed search text and add the returned category as a chip', () => {
+        const newCategory: CategoryResponseInterface = {
+            id: 3,
+            name: 'Health',
+            isDefaultCategory: false,
+        };
+        const addCategoryCallback = vi.fn(() => of(newCategory));
+        component.addCategoryCallback = addCategoryCallback;
         fixture.detectChanges();
         setSearchText('  Health  ');
 
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
+        let changedValue: DropdownInterface[] | undefined;
+        component.registerOnChange((value) => (changedValue = value));
 
         selectOption(component.addNewOption);
+        fixture.detectChanges();
 
-        expect(addedCategory).toBe('Health');
+        expect(addCategoryCallback).toHaveBeenCalledWith('Health');
+        expect(chipTexts()).toEqual(['Health']);
+        expect(changedValue).toEqual([{ item_id: 3, item_text: 'Health' }]);
     });
 
-    it('should not emit categoryAdded when disabled', () => {
+    it('should not call addCategoryCallback when disabled', () => {
+        const addCategoryCallback = vi.fn(() =>
+            of<CategoryResponseInterface>({ id: 3, name: 'Health', isDefaultCategory: false }),
+        );
+        component.addCategoryCallback = addCategoryCallback;
         fixture.detectChanges();
         component.setDisabledState(true);
         setSearchText('Health');
 
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
-
         selectOption(component.addNewOption);
 
-        expect(addedCategory).toBeUndefined();
+        expect(addCategoryCallback).not.toHaveBeenCalled();
     });
 
     it('should clear the search text after a selection', () => {

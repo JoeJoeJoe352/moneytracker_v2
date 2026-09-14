@@ -176,14 +176,17 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         expect(component.details.at(1).controls.detailPrice.disabled).toBe(false);
     });
 
-    it('should forward categoryAdded from a detail row up to the form component', () => {
-        let addedCategory: string | undefined;
-        component.categoryAdded.subscribe((name) => (addedCategory = name));
+    it('should pass addCategoryCallback from the form component down through a detail row to the category select', () => {
+        const addCategoryCallback = () => {
+            throw new Error('not called in this test');
+        };
+        component.addCategoryCallback = addCategoryCallback;
+        fixture.detectChanges();
 
-        const firstCategorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent));
-        firstCategorySelect.triggerEventHandler('categoryAdded', 'tej');
+        const firstCategorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent))
+            .componentInstance as CategorySelectComponent;
 
-        expect(addedCategory).toBe('tej');
+        expect(firstCategorySelect.addCategoryCallback).toBe(addCategoryCallback);
     });
 
     it('should propagate the selected wallet currency symbol down to every detail row', () => {
