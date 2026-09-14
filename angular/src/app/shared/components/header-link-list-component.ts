@@ -7,18 +7,16 @@ import { MatIcon } from '@angular/material/icon';
 @Component({
     selector: 'app-header-link-list',
     template: `
-        <li>
-            <a
-                class="nav-link"
-                [routerLink]="linkData.url"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="{ exact: linkData.url === '/' }"
-                (click)="clicked.emit()"
-            >
-                <mat-icon [fontIcon]="linkData.icon"></mat-icon>
-                {{ linkData.langKey | translate }}
-            </a>
-        </li>
+        <a
+            class="nav-link"
+            [routerLink]="linkData.url"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: linkData.url === '/' }"
+            (click)="clicked.emit()"
+        >
+            <mat-icon [fontIcon]="linkData.icon"></mat-icon>
+            {{ linkData.langKey | translate }}
+        </a>
     `,
     imports: [TranslatePipe, RouterLink, RouterLinkActive, MatIcon],
     styles: `

@@ -7,10 +7,12 @@
 
         <ul class="sidebar-links">
             @for (linkItem of linkList(); track $index) {
-                <app-header-link-list
-                    [linkData]="linkItem"
-                    (clicked)="linkItem.action ? linkItem.action() : null"
-                />
+                <li>
+                    <app-header-link-list
+                        [linkData]="linkItem"
+                        (clicked)="linkItem.action ? linkItem.action() : null"
+                    />
+                </li>
             }
         </ul>
 
