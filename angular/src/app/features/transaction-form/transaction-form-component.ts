@@ -270,7 +270,7 @@ export class TransactionFormComponent implements OnChanges {
             isIncome: new FormControl(false),
             isComplexTransaction: new FormControl(false),
             price: [null, { validators: [Validators.min(1)] }],
-            transactionDate: this.fb.control(null, {
+            transactionDate: this.fb.control(new Date(), {
                 validators: [Validators.required, validDate],
             }),
             walletId: new FormControl(this.userData.getDefaultWallet().id),

@@ -39,7 +39,6 @@
                         >
                     }
                 </mat-select>
-                <mat-hint>{{ 'transaction.wallet.hint' | translate }}</mat-hint>
             </mat-form-field>
 
             <!-- Dátum -->
@@ -164,7 +163,7 @@
                     />
                 }
                 <div class="detail-add-row" #detailAddButton>
-                    <button mat-mini-fab type="button" color="primary" (click)="addRow()">
+                    <button mat-mini-fab type="button" class="mat-fab-green" (click)="addRow()">
                         <mat-icon fontIcon="add"></mat-icon>
                     </button>
                 </div>

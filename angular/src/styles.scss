@@ -166,3 +166,16 @@ html {
     --mat-button-text-label-text-color: #{$moneytracker-red};
     --mat-button-text-state-layer-color: #{$moneytracker-red};
 }
+
+// zöld mat-fab / mat-mini-fab szín
+.mat-fab-green {
+    --mat-fab-container-color: #{$moneytracker-green};
+    --mat-fab-foreground-color: #{$moneytracker-white};
+    --mat-fab-state-layer-color: #{$moneytracker-white};
+    --mat-fab-ripple-color: #{$moneytracker-white};
+
+    --mat-fab-small-container-color: #{$moneytracker-green};
+    --mat-fab-small-foreground-color: #{$moneytracker-white};
+    --mat-fab-small-state-layer-color: #{$moneytracker-white};
+    --mat-fab-small-ripple-color: #{$moneytracker-white};
+}
