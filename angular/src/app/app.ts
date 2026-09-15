@@ -3,10 +3,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { Header } from './shared/components/header';
 import { ReactiveFormsModule } from '@angular/forms';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { SUPPORTED_LANGS } from './shared/utils/language-util';
-import { SupportedLangEnum } from './shared/enums';
-import { LanguageService, LOCALSTORAGE_KEY_LANG } from './shared/services/translate-service';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Sidebar } from './shared/components/sidebar';
 
 @Component({
@@ -16,25 +13,11 @@ import { Sidebar } from './shared/components/sidebar';
     imports: [RouterOutlet, Header, ReactiveFormsModule, Sidebar, TranslatePipe],
 })
 export class App {
-    protected readonly title = signal('Moneytracker');
-    private translate = inject(TranslateService);
-    private languageService = inject(LanguageService);
     private router = inject(Router);
 
     protected isMobileMenuOpen = signal(false);
 
     constructor() {
-        this.translate.addLangs(SUPPORTED_LANGS);
-
-        let fallBackLang = this.translate.getFallbackLang();
-        if (fallBackLang === null) {
-            console.error('Please set the fallback lang');
-            fallBackLang = SupportedLangEnum.en;
-        }
-
-        const lang = localStorage.getItem(LOCALSTORAGE_KEY_LANG) ?? fallBackLang;
-        this.languageService.setLanguage(lang);
-
         this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
             this.isMobileMenuOpen.set(false);
         });

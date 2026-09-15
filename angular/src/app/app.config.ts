@@ -22,6 +22,7 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS } from '@angular/material/progress-spinner';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { provideServiceWorker } from '@angular/service-worker';
+import { LanguageService } from './shared/services/translate-service';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -48,7 +49,7 @@ export const appConfig: ApplicationConfig = {
             }),
             fallbackLang: SupportedLangEnum.en,
         }),
-        provideAppInitializer(() => initApp(inject(AuthService), inject(UserDataStore))),
+        provideAppInitializer(() => initApp(inject(AuthService), inject(UserDataStore), inject(LanguageService))),
         provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000',
