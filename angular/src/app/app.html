@@ -4,7 +4,7 @@
         class="mobile-menu-backdrop"
         [class.mobile-menu-backdrop-open]="isMobileMenuOpen()"
         [tabIndex]="isMobileMenuOpen() ? 0 : -1"
-        aria-label="Menü bezárása"
+        [attr.aria-label]="'header.menu.close' | translate"
         (click)="closeMobileMenu()"
     ></button>
     <app-sidebar

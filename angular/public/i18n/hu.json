@@ -1,4 +1,7 @@
 {
+  "error": {
+    "not_found": "Az oldal nem található"
+  },
   "welcome": {
     "title": "Üdvözlünk a Moneytrackerben!",
     "welcomeText": "A kiadásaink rendszeres nyomonkövetése segít tudatosabbá válni a mindennapokban. Megmutatja, hol szivárog el a pénz, mely szokások támogatnak, és melyek húznak vissza. Ha látod a valós számokat, könnyebb okos döntéseket hozni: félretenni, tervezni, vagy épp bátran megengedni magadnak valamit. A pénzügyi átláthatóság nem korlátoz, hanem szabadságot ad — pontosan tudod, hol tartasz, és merre szeretnél menni.",
@@ -49,6 +52,8 @@
     "logout.success": "Sikeres kijelentkezés",
     "dashboard": "Főoldal",
     "wallets": "Tárcák",
+    "menu.open": "Menü",
+    "menu.close": "Menü bezárása",
     "register": "Regisztráció",
     "login": "Bejelentkezés"
   },

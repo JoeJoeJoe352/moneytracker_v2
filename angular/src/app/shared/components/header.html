@@ -8,7 +8,9 @@
                     mat-icon-button
                     class="menu-toggle"
                     type="button"
-                    aria-label="Menu"
+                    [attr.aria-label]="
+                        (isMobileMenuOpen ? 'header.menu.close' : 'header.menu.open') | translate
+                    "
                     aria-controls="app-sidebar-nav"
                     [attr.aria-expanded]="isMobileMenuOpen"
                     (click)="toggleMenu()"

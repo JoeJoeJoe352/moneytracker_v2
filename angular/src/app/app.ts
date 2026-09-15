@@ -3,7 +3,7 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { Header } from './shared/components/header';
 import { ReactiveFormsModule } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SUPPORTED_LANGS } from './shared/utils/language-util';
 import { SupportedLangEnum } from './shared/enums';
 import { LanguageService, LOCALSTORAGE_KEY_LANG } from './shared/services/translate-service';
@@ -13,7 +13,7 @@ import { Sidebar } from './shared/components/sidebar';
     selector: 'app-root',
     templateUrl: './app.html',
     styleUrls: ['./app.scss', './shared/components/mobile-menu.scss'],
-    imports: [RouterOutlet, Header, ReactiveFormsModule, Sidebar],
+    imports: [RouterOutlet, Header, ReactiveFormsModule, Sidebar, TranslatePipe],
 })
 export class App {
     protected readonly title = signal('Moneytracker');

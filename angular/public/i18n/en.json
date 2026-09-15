@@ -1,4 +1,7 @@
 {
+  "error": {
+    "not_found": "Page not found"
+  },
   "welcome": {
     "title": "Welcome to Moneytracker!",
     "welcomeText": "Regularly tracking our expenses helps us become more mindful in everyday life. It shows where the money leaks away, which habits support us, and which hold us back. When you see the real numbers, it's easier to make smart decisions: saving, planning, or confidently allowing yourself something. Financial transparency doesn't limit you — it gives you freedom, since you know exactly where you stand and where you want to go.",
@@ -46,7 +49,9 @@
     "transactions": "Transactions",
     "logout": "Log out",
     "dashboard": "Dashboard",
-    "wallets": "Wallets"
+    "wallets": "Wallets",
+    "menu.open": "Menu",
+    "menu.close": "Close menu"
   },
   "footer": {
     "home": "Home"

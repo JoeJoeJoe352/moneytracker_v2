@@ -1,4 +1,7 @@
 {
+  "error": {
+    "not_found": "Seite nicht gefunden"
+  },
   "welcome": {
     "title": "Willkommen bei Moneytracker!",
     "welcomeText": "Die regelmäßige Verfolgung unserer Ausgaben hilft uns, im Alltag bewusster zu handeln. Sie zeigt, wo das Geld versickert, welche Gewohnheiten uns unterstützen und welche uns zurückhalten. Wenn du die echten Zahlen siehst, fällt es leichter, kluge Entscheidungen zu treffen: sparen, planen oder dir mutig etwas gönnen. Finanzielle Transparenz schränkt nicht ein, sondern schenkt Freiheit — du weißt genau, wo du stehst und wohin du willst.",
@@ -46,7 +49,9 @@
     "transactions": "Transaktionen",
     "logout": "Abmelden",
     "dashboard": "Startseite",
-    "wallets": "Wallets"
+    "wallets": "Wallets",
+    "menu.open": "Menü",
+    "menu.close": "Menü schließen"
   },
   "footer": {
     "home": "Startseite"
