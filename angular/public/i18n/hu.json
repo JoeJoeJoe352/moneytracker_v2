@@ -85,7 +85,8 @@
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
     "category": {
-      "add": "Új kategória hozzáadásához kattints ide!"
+      "add": "Új kategória hozzáadásához kattints ide!",
+      "remove": "{{name}} eltávolítása"
     },
     "wallet": "Tárca",
     "wallet.hint": "Ehhez lesz kötve a tranzakció",

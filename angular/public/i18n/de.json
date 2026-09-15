@@ -81,7 +81,8 @@
     "categories": "Kategorien",
     "categories.add": "Kategorien hinzufügen",
     "category": {
-      "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!"
+      "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!",
+      "remove": "{{name}} entfernen"
     },
     "wallet.hint": "Die Transaktion wird damit verknüpft",
 

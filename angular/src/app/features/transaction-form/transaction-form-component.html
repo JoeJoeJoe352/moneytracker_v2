@@ -72,9 +72,9 @@
         <div class="form-row toggler-row">
             <!-- Tranzakciótípus -->
             <div class="toggle-field">
-                <mat-label>
+                <span id="transaction-type-label">
                     {{ 'transaction.type' | translate }}
-                </mat-label>
+                </span>
                 <div class="toggle-field-control">
                     <span [class.red-text]="!isIncome.value">{{
                         'transaction.expense' | translate
@@ -84,6 +84,7 @@
                         class="mat-slide-toggle-income-expense"
                         id="transaction-transactionType-bool"
                         formControlName="isIncome"
+                        aria-labelledby="transaction-type-label"
                     />
                     <span [class.green-text]="isIncome.value">{{
                         'transaction.income' | translate
@@ -93,9 +94,9 @@
             </div>
             <!-- részletek mutatása/elrejtése kapcsoló -->
             <div class="toggle-field">
-                <mat-label>
+                <span id="transaction-detail-state-label">
                     {{ 'transaction.detail_state_label' | translate }}
-                </mat-label>
+                </span>
                 <div class="toggle-field-control">
                     <span [class.active-text]="!isComplexTransaction.value">{{
                         'transaction.hide_details' | translate
@@ -105,6 +106,7 @@
                         class="mat-slide-toggle-on-off"
                         formControlName="isComplexTransaction"
                         id="transaction-show-details"
+                        aria-labelledby="transaction-detail-state-label"
                         (change)="handleIsComplexTransactionToggle()"
                     />
                     <span [class.active-text]="isComplexTransaction.value">{{
@@ -163,8 +165,14 @@
                     />
                 }
                 <div class="detail-add-row" #detailAddButton>
-                    <button mat-mini-fab type="button" class="mat-fab-green" (click)="addRow()">
-                        <mat-icon fontIcon="add"></mat-icon>
+                    <button
+                        mat-mini-fab
+                        type="button"
+                        class="mat-fab-green"
+                        [attr.aria-label]="'transaction.detail.add-detail' | translate"
+                        (click)="addRow()"
+                    >
+                        <mat-icon aria-hidden="true" fontIcon="add"></mat-icon>
                     </button>
                 </div>
             </div>

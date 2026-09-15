@@ -27,13 +27,16 @@
 
         <!-- Ár / unitprice és weight mutatása -->
         <div>
-            <mat-label>{{ 'transaction.detail.price_mode.label' | translate }}</mat-label>
+            <span id="price-mode-label-{{ index }}">
+                {{ 'transaction.detail.price_mode.label' | translate }}
+            </span>
             <div class="price-mode-toggle">
                 <span>{{ 'transaction.detail.simple_price_mode' | translate }}</span>
                 <mat-slide-toggle
                     class="mat-slide-toggle-on-off"
                     formControlName="detailIsComplexPriceMode"
                     id="transaction-is-complex-price-mode-{{ index }}"
+                    [attr.aria-labelledby]="'price-mode-label-' + index"
                     hideIcon
                 />
                 <span>{{ 'transaction.detail.complex_price_mode' | translate }}</span>
@@ -125,7 +128,7 @@
                 (click)="rowDeleted.emit()"
                 [disabled]="isLastDetailRow"
             >
-                <mat-icon fontIcon="delete"></mat-icon>
+                <mat-icon aria-hidden="true" fontIcon="delete"></mat-icon>
                 {{ 'transaction.detail.delete_row.tooltip' | translate }}
             </button>
         </div>
