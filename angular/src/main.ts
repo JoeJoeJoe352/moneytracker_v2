@@ -3,7 +3,6 @@ import { appConfig } from './app/app.config';
 import { App } from './app/app';
 import { LOCALSTORAGE_KEY_LANG } from './app/shared/services/translate-service';
 import { SupportedLangEnum } from './app/shared/enums';
-import 'zone.js';
 
 // legelső betöltéskor nincs a localstorage-be a nyelv beállítva, de a LanguageInterceptornak kellene, hogy a fordítási file-t be tudja tölteni
 if (!localStorage.getItem(LOCALSTORAGE_KEY_LANG)) {

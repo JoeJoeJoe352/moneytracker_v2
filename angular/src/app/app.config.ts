@@ -4,6 +4,7 @@ import {
     isDevMode,
     provideAppInitializer,
     provideBrowserGlobalErrorListeners,
+    provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -27,6 +28,7 @@ import { LanguageService } from './shared/services/translate-service';
 export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
+        provideZonelessChangeDetection(),
         provideRouter(routes),
         provideNativeDateAdapter(),
         {
