@@ -148,6 +148,7 @@
     }
   },
   "language": {
+    "title": "Language",
     "hu": "Hungarian",
     "de": "German",
     "en": "English"

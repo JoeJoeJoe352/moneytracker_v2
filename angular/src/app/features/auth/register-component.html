@@ -80,7 +80,7 @@
                 id="reg-password"
                 type="password"
                 formControlName="password"
-                autocomplete="current-password"
+                autocomplete="new-password"
                 [readonly]="isLoading()"
             />
             @if (password.invalid && (password.dirty || password.touched)) {
@@ -107,7 +107,7 @@
                 id="reg-password-again"
                 type="password"
                 formControlName="passwordAgain"
-                autocomplete="current-password"
+                autocomplete="new-password"
                 [readonly]="isLoading()"
             />
             @if (passwordAgain.invalid && (passwordAgain.dirty || passwordAgain.touched)) {
@@ -117,12 +117,12 @@
                     </mat-error>
                 }
             }
-        </mat-form-field>
             @if (passwordAgain.touched && hasPasswordMismatchError) {
                 <mat-error>
                     {{ 'register.password_again.mismatch-error' | translate }}
                 </mat-error>
             }
+        </mat-form-field>
     </mat-dialog-content>
 
     <mat-dialog-actions>
