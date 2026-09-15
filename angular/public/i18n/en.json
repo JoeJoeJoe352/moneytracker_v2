@@ -157,6 +157,7 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "close": "Close",
+    "loading": "Loading",
     "delete-success": "Successfully deleted!",
     "save-success": "Successfully saved!",
     "general-error": "An unexpected error occurred, please try again later!"
