@@ -1,7 +1,7 @@
 <div class="sidebar-wrapper">
     <div class="sidebar-card">
         <a class="brand" routerLink="/">
-            <img src="assets/images/logo-color.svg" alt="logo" />
+            <img src="assets/images/logo-color.svg" alt="" />
             <span>Moneytracker</span>
         </a>
 
@@ -26,10 +26,10 @@
                     matIconButton
                     type="button"
                     class="logout-btn"
-                    aria-label="Logout"
+                    [attr.aria-label]="'header.logout' | translate"
                     (click)="logout()"
                 >
-                    <mat-icon fontIcon="logout"></mat-icon>
+                    <mat-icon aria-hidden="true" fontIcon="logout"></mat-icon>
                 </button>
             </div>
         }

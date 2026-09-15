@@ -1,13 +1,33 @@
 <!doctype html>
-<html lang="hu">
+<!-- inicializáláskor felülíródik ugyan, de a felolvasó szoftvereknek jó, ha van beállítva valami default érték addig is -->
+<html lang="en">
     <head>
         <meta charset="utf-8" />
         <title>The Moneytracker</title>
         <base href="/" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#297b2f" />
+        <meta name="description" content="Kiadások bevételek követése, diagramok, áttekintések" />
         <link rel="icon" type="image/x-icon" href="favicon.ico" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+        <!-- Így nem lesz content blocking resource az ikonoknak a betöltése -->
+        <link
+            rel="preload"
+            as="style"
+            href="https://fonts.googleapis.com/icon?family=Material+Icons&amp;display=swap"
+            onload="
+                this.onload = null;
+                this.rel = 'stylesheet';
+            "
+        />
+        <noscript>
+            <link
+                href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
+                rel="stylesheet"
+            />
+        </noscript>
+        <link rel="manifest" href="manifest.webmanifest" />
     </head>
     <body>
         <app-root></app-root>

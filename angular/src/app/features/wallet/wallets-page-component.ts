@@ -73,6 +73,7 @@ export class WalletsPageComponent {
      */
     protected openWalletModal(walletData: WalletDataInterface | null): void {
         const dialogRef = this.dialog.open(WalletFormComponent, {
+            restoreFocus: true,
             width: '500px',
             data: {
                 wallet: walletData,
@@ -113,13 +114,10 @@ export class WalletsPageComponent {
      * Törli a walletet megerősítés után, majd újratölti a listát
      */
     private onWalletDeleted(walletId: number, dialogRef: MatDialogRef<WalletFormComponent>): void {
-        this.dialog
-            .open(ConfirmDialogComponent, {
-                data: {
-                    message: this.translateService.instant(_('wallet.delete.confirm')),
-                    danger: true,
-                },
-            })
+        ConfirmDialogComponent.open(this.dialog, {
+            message: this.translateService.instant(_('wallet.delete.confirm')),
+            danger: true,
+        })
             .afterClosed()
             .subscribe((confirmed) => {
                 if (!confirmed) {

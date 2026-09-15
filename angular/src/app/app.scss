@@ -1,4 +1,4 @@
-// Emiatt lábléc mindig lent lesz, ha túl kicsi a content, akkor is
+// Emiatt az oldal mérete mindig legalább akkora lesz, mint a monitor mérete
 .app-shell {
     display: flex;
     min-height: 100vh;
@@ -21,7 +21,6 @@
     min-width: 0;
 }
 
-// A tényleges görgetés itt történik, a body/html sosem görget (ld. styles.scss)
 .app-shell-content {
     flex: 1 1 auto;
     padding: 12px;

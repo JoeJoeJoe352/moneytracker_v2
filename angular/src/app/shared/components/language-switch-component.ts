@@ -1,5 +1,5 @@
 import { Component, computed, inject, Signal, signal } from '@angular/core';
-import { _, TranslateService } from '@ngx-translate/core';
+import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SupportedLangEnum } from '../enums';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -14,9 +14,9 @@ import { LanguageService } from '../services/translate-service';
             mat-icon-button
             [matMenuTriggerFor]="languageMenu"
             type="button"
-            aria-label="Language"
+            [aria-label]="'language.title' | translate"
         >
-            <mat-icon fontIcon="language"></mat-icon>
+            <mat-icon aria-hidden="true" fontIcon="language"></mat-icon>
         </button>
         <mat-menu #languageMenu="matMenu">
             @for (language of languageData(); track $index) {
@@ -24,6 +24,7 @@ import { LanguageService } from '../services/translate-service';
                     mat-menu-item
                     type="button"
                     [class.active]="language.id === currentLanguage()"
+                    [attr.aria-current]="language.id === currentLanguage() ? 'true' : null"
                     (click)="switchLanguage(language.id)"
                 >
                     {{ language.name }}
@@ -31,7 +32,7 @@ import { LanguageService } from '../services/translate-service';
             }
         </mat-menu>
     `,
-    imports: [MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger],
+    imports: [MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, TranslatePipe],
 })
 export class LanguageSwitcherComponent {
     private translateService = inject(TranslateService);

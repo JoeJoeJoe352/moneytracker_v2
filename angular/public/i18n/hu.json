@@ -1,4 +1,7 @@
 {
+  "error": {
+    "not_found": "Az oldal nem található"
+  },
   "welcome": {
     "title": "Üdvözlünk a Moneytrackerben!",
     "welcomeText": "A kiadásaink rendszeres nyomonkövetése segít tudatosabbá válni a mindennapokban. Megmutatja, hol szivárog el a pénz, mely szokások támogatnak, és melyek húznak vissza. Ha látod a valós számokat, könnyebb okos döntéseket hozni: félretenni, tervezni, vagy épp bátran megengedni magadnak valamit. A pénzügyi átláthatóság nem korlátoz, hanem szabadságot ad — pontosan tudod, hol tartasz, és merre szeretnél menni.",
@@ -49,6 +52,8 @@
     "logout.success": "Sikeres kijelentkezés",
     "dashboard": "Főoldal",
     "wallets": "Tárcák",
+    "menu.open": "Menü",
+    "menu.close": "Menü bezárása",
     "register": "Regisztráció",
     "login": "Bejelentkezés"
   },
@@ -85,7 +90,8 @@
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
     "category": {
-      "add": "Új kategória hozzáadásához kattints ide!"
+      "add": "Új kategória hozzáadásához kattints ide!",
+      "remove": "{{name}} eltávolítása"
     },
     "wallet": "Tárca",
     "wallet.hint": "Ehhez lesz kötve a tranzakció",
@@ -139,7 +145,10 @@
     "usd": "Dollár"
   },
   "mainpage": {
+    "page_title": "Legutóbbi tranzakcióim",
     "total_balance": "Összes pénz",
+    "increase": "Növekedés",
+    "decrease": "Csökkenés",
     "create_transaction.button": "Tranzakció létrehozása",
     "no_transaction": "Nincs még felvett tranzakció",
     "balance_change_this_month": "ebben a hónapban",
@@ -152,14 +161,17 @@
     "title": "Tranzakcióim",
 
     "filter": {
+      "title": "Szűrés",
       "name": "Tranzakciónév",
       "date": "Tranzakció dátuma",
       "date.placeholder": "Válassz egy dátumot",
+      "date.open-calendar": "Naptár megnyitása",
       "submit": "Keresés",
       "clear": "Filterek törlése"
     }
   },
   "language": {
+    "title": "Nyelv",
     "hu": "Magyar",
     "de": "Német",
     "en": "Angol"
@@ -169,6 +181,7 @@
     "confirm": "Megerősítés",
     "cancel": "Mégse",
     "close": "Bezárás",
+    "loading": "Betöltés",
     "delete-success": "Sikeres törlés!",
     "save-success": "Sikeres mentés!",
     "general-error": "Váratlan hiba történt, kérlek próbáld újra később!"

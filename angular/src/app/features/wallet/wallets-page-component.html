@@ -5,10 +5,10 @@
             {{ 'wallet.create' | translate }}
         </button>
     </mat-card-actions>
-    <mat-card-content>
+    <mat-card-content aria-live="polite" [attr.aria-busy]="isWalletListLoading()">
         @if (isWalletListLoading()) {
             <div class="text-center">
-                <mat-spinner />
+                <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
             </div>
         } @else {
             <app-wallets-list-component

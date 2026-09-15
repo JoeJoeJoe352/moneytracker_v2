@@ -133,6 +133,7 @@ export class TransactionModalStateService {
         this.selectedTransactionIdTrigger.set(id);
 
         const dialogRef = this.dialog.open(TransactionModalComponent, {
+            restoreFocus: true,
             width: '600px',
             data: {
                 transaction: this.transactionData,

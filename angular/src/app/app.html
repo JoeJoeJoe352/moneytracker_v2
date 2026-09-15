@@ -4,17 +4,24 @@
         class="mobile-menu-backdrop"
         [class.mobile-menu-backdrop-open]="isMobileMenuOpen()"
         [tabIndex]="isMobileMenuOpen() ? 0 : -1"
-        aria-label="Menü bezárása"
+        [attr.aria-label]="'header.menu.close' | translate"
         (click)="closeMobileMenu()"
     ></button>
     <app-sidebar
+        id="app-sidebar-nav"
+        role="navigation"
         class="app-shell-sidebar"
         [class.mobile-menu-open]="isMobileMenuOpen()"
         [class.mobile-menu-closed]="!isMobileMenuOpen()"
     />
     <div class="app-shell-main">
-        <app-header class="app-shell-header" (mobileMenuToggled)="toggleMobileMenu()" />
-        <main class="app-shell-content">
+        <app-header
+            role="banner"
+            class="app-shell-header"
+            [isMobileMenuOpen]="isMobileMenuOpen()"
+            (mobileMenuToggled)="toggleMobileMenu()"
+        />
+        <main class="app-shell-content" role="main">
             <router-outlet />
         </main>
     </div>

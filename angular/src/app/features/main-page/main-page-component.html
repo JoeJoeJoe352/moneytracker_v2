@@ -3,50 +3,48 @@
         <mat-card class="stat-card balance-card">
             <div class="stat-card-header">
                 <span class="stat-icon-badge">
-                    <mat-icon
-                        aria-hidden="false"
-                        aria-label="Balance"
-                        fontIcon="account_balance_wallet"
-                    ></mat-icon>
+                    <mat-icon aria-hidden="true" fontIcon="account_balance_wallet"></mat-icon>
                 </span>
                 <div class="stat-label">{{ 'mainpage.total_balance' | translate }}</div>
             </div>
-            @if (isMoneySumLoading()) {
-                <mat-spinner />
-            } @else {
-                <div class="stat-value">
-                    @for (sum of moneySumSummarizedPerCurrency()?.moneySum; track $index) {
-                        <div>{{ sum.total | currencyFormat: sum.currencyCode }}</div>
-                    }
-                </div>
-                <div>
-                    @if (balanceChangeThisMonth(); as changes) {
-                        @for (change of changes; track $index) {
-                            <div
-                                class="stat-trend"
-                                [class.positive]="change.total >= 0"
-                                [class.negative]="change.total < 0"
-                            >
-                                @if (change.total >= 0) {
-                                    <mat-icon
-                                        aria-hidden="false"
-                                        aria-label="Increase"
-                                        fontIcon="arrow_upward"
-                                    ></mat-icon>
-                                } @else {
-                                    <mat-icon
-                                        aria-hidden="false"
-                                        aria-label="Decrease"
-                                        fontIcon="arrow_downward"
-                                    ></mat-icon>
-                                }
-                                {{ change.total | currencyFormat: change.currencyCode }}
-                                {{ 'mainpage.balance_change_this_month' | translate }}
-                            </div>
+            <div aria-live="polite" [attr.aria-busy]="isMoneySumLoading()">
+                @if (isMoneySumLoading()) {
+                    <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
+                } @else {
+                    <div class="stat-value">
+                        @for (sum of moneySumSummarizedPerCurrency()?.moneySum; track $index) {
+                            <div>{{ sum.total | currencyFormat: sum.currencyCode }}</div>
                         }
-                    }
-                </div>
-            }
+                    </div>
+                    <div>
+                        @if (balanceChangeThisMonth(); as changes) {
+                            @for (change of changes; track $index) {
+                                <div
+                                    class="stat-trend"
+                                    [class.positive]="change.total >= 0"
+                                    [class.negative]="change.total < 0"
+                                >
+                                    @if (change.total >= 0) {
+                                        <mat-icon
+                                            aria-hidden="false"
+                                            [attr.aria-label]="'mainpage.increase' | translate"
+                                            fontIcon="arrow_upward"
+                                        ></mat-icon>
+                                    } @else {
+                                        <mat-icon
+                                            aria-hidden="false"
+                                            [attr.aria-label]="'mainpage.decrease' | translate"
+                                            fontIcon="arrow_downward"
+                                        ></mat-icon>
+                                    }
+                                    {{ change.total | currencyFormat: change.currencyCode }}
+                                    {{ 'mainpage.balance_change_this_month' | translate }}
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
             <button
                 matButton="outlined"
                 type="button"

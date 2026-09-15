@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -34,4 +34,15 @@ export interface ConfirmDialogData {
 })
 export class ConfirmDialogComponent {
     protected data = inject<ConfirmDialogData>(MAT_DIALOG_DATA);
+
+    /**
+     * Megerősítő dialog megnyitása a megfelelő ARIA role-lal
+     */
+    static open(dialog: MatDialog, data: ConfirmDialogData): MatDialogRef<ConfirmDialogComponent, boolean> {
+        return dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {
+            data,
+            role: data.danger ? 'alertdialog' : 'dialog',
+            ariaLabel: data.title ?? data.message,
+        });
+    }
 }

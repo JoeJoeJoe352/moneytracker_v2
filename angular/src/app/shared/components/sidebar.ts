@@ -90,6 +90,7 @@ export class Sidebar {
      */
     openLoginModal = () => {
         const dialogRef = this.dialog.open(LoginComponent, {
+            restoreFocus: true,
             width: '500px',
             data: {
                 isloading: this.isloading,
@@ -109,6 +110,7 @@ export class Sidebar {
      */
     openRegisterModal = () => {
         const dialogRef = this.dialog.open(RegisterComponent, {
+            restoreFocus: true,
             width: '500px',
             data: {
                 isloading: this.isloading,

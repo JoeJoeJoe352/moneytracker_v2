@@ -3,8 +3,10 @@
     role="button"
     tabindex="0"
     matRipple
+    [attr.aria-label]="walletData.name + ', ' + (walletData.sum | currencyFormat: walletData.currencyCode)"
     (click)="cardClicked.emit(walletData.id)"
     (keydown.enter)="cardClicked.emit(walletData.id)"
+    (keydown.space)="$event.preventDefault(); cardClicked.emit(walletData.id)"
 >
     <div class="wallet-flap">
         <span class="wallet-clasp"></span>
