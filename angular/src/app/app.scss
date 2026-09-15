@@ -1,17 +1,15 @@
-// Az app-shell a teljes viewportot kitölti, maga a html/body sosem görget.
-// Enélkül a Material dialog scroll-block trükkje (position: fixed a html-en,
-// hogy ne lehessen a háttérben görgetni) levágja a viewporton túli tartalmat,
-// ha a lap le van görgetve, amikor egy dialog megnyílik.
+// Emiatt az oldal mérete mindig legalább akkora lesz, mint a monitor mérete
 .app-shell {
     display: flex;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
 }
 
 .app-shell-sidebar {
     flex: 0 0 auto;
     width: 15%;
-    height: 100%;
+    position: sticky;
+    top: 0;
+    height: 100vh;
     overflow-y: auto;
 }
 
@@ -21,13 +19,9 @@
     flex-direction: column;
     flex: 1 1 auto;
     min-width: 0;
-    height: 100%;
 }
 
-// Csak ez a rész görgethető, a header és a sidebar fixen a helyén marad
 .app-shell-content {
     flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
     padding: 12px;
 }
