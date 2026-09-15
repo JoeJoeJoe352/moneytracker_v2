@@ -1,15 +1,17 @@
-// Emiatt lábléc mindig lent lesz, ha túl kicsi a content, akkor is
+// Az app-shell a teljes viewportot kitölti, maga a html/body sosem görget.
+// Enélkül a Material dialog scroll-block trükkje (position: fixed a html-en,
+// hogy ne lehessen a háttérben görgetni) levágja a viewporton túli tartalmat,
+// ha a lap le van görgetve, amikor egy dialog megnyílik.
 .app-shell {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .app-shell-sidebar {
     flex: 0 0 auto;
     width: 15%;
-    position: sticky;
-    top: 0;
-    height: 100vh;
+    height: 100%;
     overflow-y: auto;
 }
 
@@ -19,10 +21,13 @@
     flex-direction: column;
     flex: 1 1 auto;
     min-width: 0;
+    height: 100%;
 }
 
-// A tényleges görgetés itt történik, a body/html sosem görget (ld. styles.scss)
+// Csak ez a rész görgethető, a header és a sidebar fixen a helyén marad
 .app-shell-content {
     flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
     padding: 12px;
 }
