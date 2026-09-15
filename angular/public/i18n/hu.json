@@ -140,6 +140,8 @@
   },
   "mainpage": {
     "total_balance": "Összes pénz",
+    "increase": "Növekedés",
+    "decrease": "Csökkenés",
     "create_transaction.button": "Tranzakció létrehozása",
     "no_transaction": "Nincs még felvett tranzakció",
     "balance_change_this_month": "ebben a hónapban",

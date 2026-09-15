@@ -129,6 +129,8 @@
   },
   "mainpage": {
     "total_balance": "Total balance",
+    "increase": "Increase",
+    "decrease": "Decrease",
     "create_transaction.button": "Create transaction",
     "no_transaction": "No transactions yet",
     "balance_change_this_month": "this month",
