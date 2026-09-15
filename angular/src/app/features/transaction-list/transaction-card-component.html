@@ -8,13 +8,13 @@
             @if (isIncome()) {
                 <mat-icon
                     aria-hidden="false"
-                    aria-label="Income"
+                    [attr.aria-label]="'transaction.income' | translate"
                     fontIcon="arrow_upward"
                 ></mat-icon>
             } @else {
                 <mat-icon
                     aria-hidden="false"
-                    aria-label="expense"
+                    [attr.aria-label]="'transaction.expense' | translate"
                     fontIcon="arrow_downward"
                 ></mat-icon>
             }

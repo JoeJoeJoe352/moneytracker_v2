@@ -139,6 +139,7 @@
     "usd": "Dollár"
   },
   "mainpage": {
+    "page_title": "Legutóbbi tranzakcióim",
     "total_balance": "Összes pénz",
     "increase": "Növekedés",
     "decrease": "Csökkenés",
@@ -154,9 +155,11 @@
     "title": "Tranzakcióim",
 
     "filter": {
+      "title": "Szűrés",
       "name": "Tranzakciónév",
       "date": "Tranzakció dátuma",
       "date.placeholder": "Válassz egy dátumot",
+      "date.open-calendar": "Naptár megnyitása",
       "submit": "Keresés",
       "clear": "Filterek törlése"
     }

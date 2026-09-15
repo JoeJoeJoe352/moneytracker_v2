@@ -2,10 +2,11 @@
     {{ (data.transaction() ? 'transaction.update' : 'transaction.create') | translate }}
 </h2>
 
+<div aria-live="polite" [attr.aria-busy]="data.isDataInitializing()">
 @if (data.isDataInitializing()) {
     <mat-dialog-content>
         <div class="text-center">
-            <mat-spinner />
+            <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
         </div>
     </mat-dialog-content>
 } @else {
@@ -19,3 +20,4 @@
         [isCategorySaveInProgress]="data.isCategorySaveInProgress()"
     />
 }
+</div>

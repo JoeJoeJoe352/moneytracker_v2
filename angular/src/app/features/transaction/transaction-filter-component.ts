@@ -43,6 +43,10 @@ export class TransactionFilter implements OnInit {
      */
     @Input({ required: true }) defaultData!: FilterData | null;
     /**
+     * A cím heading szintje (aria-level), a szülő komponens heading-hierarchiájától függően
+     */
+    @Input() headingLevel = 2;
+    /**
      * Tranzakciós adatok töltődnek-e
      */
     @Input({ required: true }) isTransactionListLoading!: WritableSignal<boolean>;

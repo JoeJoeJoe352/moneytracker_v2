@@ -1,8 +1,8 @@
 <mat-card>
-    <div class="transaction-list">
+    <div class="transaction-list" aria-live="polite" [aria-busy]="isTransactionListLoading">
         @if (isTransactionListLoading) {
             <div class="spinner">
-                <mat-spinner />
+                <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
             </div>
         } @else {
             @if (title) {

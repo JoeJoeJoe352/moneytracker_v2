@@ -128,6 +128,7 @@
     "usd": "Dollar"
   },
   "mainpage": {
+    "page_title": "Meine letzten Transaktionen",
     "total_balance": "Gesamtguthaben",
     "increase": "Anstieg",
     "decrease": "Rückgang",
@@ -142,9 +143,11 @@
     "title": "Meine Transaktionen",
 
     "filter": {
+      "title": "Filter",
       "name": "Transaktionsname",
       "date": "Transaktionsdatum",
       "date.placeholder": "Datum auswählen",
+      "date.open-calendar": "Kalender öffnen",
       "submit": "Suchen",
       "clear": "Filter zurücksetzen"
     }
