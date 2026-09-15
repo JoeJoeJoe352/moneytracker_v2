@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -11,6 +11,8 @@ import { LanguageSwitcherComponent } from './language-switch-component';
     imports: [MatToolbar, MatIconButton, MatIcon, LanguageSwitcherComponent],
 })
 export class Header {
+    @Input() isMobileMenuOpen = false;
+
     @Output() mobileMenuToggled = new EventEmitter<void>();
 
     /**

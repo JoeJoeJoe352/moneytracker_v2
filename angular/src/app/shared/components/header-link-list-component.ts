@@ -11,10 +11,12 @@ import { MatIcon } from '@angular/material/icon';
             class="nav-link"
             [routerLink]="linkData.url"
             routerLinkActive="active"
+            #rla="routerLinkActive"
+            [attr.aria-current]="rla.isActive ? 'page' : null"
             [routerLinkActiveOptions]="{ exact: linkData.url === '/' }"
             (click)="clicked.emit()"
         >
-            <mat-icon [fontIcon]="linkData.icon"></mat-icon>
+            <mat-icon aria-hidden="true" [fontIcon]="linkData.icon"></mat-icon>
             {{ linkData.langKey | translate }}
         </a>
     `,

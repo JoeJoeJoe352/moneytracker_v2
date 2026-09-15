@@ -9,9 +9,11 @@
                     class="menu-toggle"
                     type="button"
                     aria-label="Menu"
+                    aria-controls="app-sidebar-nav"
+                    [attr.aria-expanded]="isMobileMenuOpen"
                     (click)="toggleMenu()"
                 >
-                    <mat-icon fontIcon="menu"></mat-icon>
+                    <mat-icon aria-hidden="true" fontIcon="menu"></mat-icon>
                 </button>
             </div>
         </div>
