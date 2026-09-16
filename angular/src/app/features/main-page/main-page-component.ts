@@ -1,13 +1,12 @@
-import { Component, computed, inject, Signal, signal, WritableSignal } from '@angular/core';
+import { Component, computed, inject, resource, Signal, signal } from '@angular/core';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { switchMap, tap } from 'rxjs';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { firstValueFrom } from 'rxjs';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionsListComponent } from '../transaction/transactions-component';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
-import { MoneySumInterface, WalletSummaryInterface } from '../transaction/interfaces';
+import { WalletSummaryInterface } from '../transaction/interfaces';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 import { StatCardComponent } from './stat-card-component';
 import { TransactionTypeEnum } from '../../shared/enums';
@@ -34,11 +33,11 @@ import { MatButton } from '@angular/material/button';
     providers: [TransactionModalStateService, DecimalPipe],
 })
 export class MainPage {
-    private transactionService = inject(TransactionService);
-    protected modal = inject(TransactionModalStateService);
-    protected walletUtils = inject(WalletDataUtil);
+    private readonly transactionService = inject(TransactionService);
+    protected readonly modal = inject(TransactionModalStateService);
+    protected readonly walletUtils = inject(WalletDataUtil);
 
-    protected transactionType = TransactionTypeEnum
+    protected transactionType = TransactionTypeEnum;
     /**
      * Újra kell-e tölteni az adatokat? Ha ez változik, akkor újra fogja tölteni a listát.
      * Azért számot növelünk és nem boolean értéket, mert ha gyorsan hívódik egymás után,
@@ -46,71 +45,46 @@ export class MainPage {
      */
     protected reloadTransactionListTrigger = signal(0);
 
-    /**
-     * Ha ez az érték változik, újratöltjük az összesítést. Külön jelzőérték a listától,
-     * mert az összesítést a lista saját maga is módosíthatja (pl. szerkesztés/törlés a listában),
-     * nem csak az itt lévő "+ tranzakció létrehozása" gomb
-     */
-    private reloadMoneySumTrigger = signal(0);
-
-    /**
-     * Összes pénz töltődik-e
-     */
-    protected isMoneySumLoading = signal(true);
-
-    /**
-     * Az összesített pénz, valutánként
-     */
-    protected moneySumSummarizedPerCurrency: WritableSignal<MoneySumInterface | null> =
-        signal(null);
-
     constructor() {
         // Mentés/törlés után újratöltjük a listát és az összesítést
         this.modal.changed.subscribe(() => {
             this.reloadTransactionListTrigger.update((value) => value + 1);
-            this.reloadMoneySumTrigger.update((value) => value + 1);
+            this.moneySumSummarizedPerCurrency.reload();
         });
     }
 
     /**
      * A tranzakciós listában történt változás után újratöltjük az összesítést
      */
-    protected onListTransactionsChanged(): void {
-        this.reloadMoneySumTrigger.update((value) => value + 1);
+    protected reloadList(): void {
+        this.moneySumSummarizedPerCurrency.reload();
     }
 
     /**
-     * Felhasználó összes pénze.
+     * Walletek összegei, valutánként összegezve
      */
-    protected moneySum = toSignal(
-        toObservable(this.reloadMoneySumTrigger).pipe(
-            tap(() => this.isMoneySumLoading.set(true)),
-            switchMap(() =>
-                this.transactionService.getMoneySum().pipe(
-                    tap((walletData) => {
-                        this.isMoneySumLoading.set(false);
-                        this.moneySumSummarizedPerCurrency.set({
-                            moneySum: this.walletUtils.summarizeSumPerCurrency(walletData.moneySum),
-                            expenseSumThisMonth: this.walletUtils.summarizeSumPerCurrency(
-                                walletData.expenseSumThisMonth,
-                            ),
-                            incomeSumThisMonth: this.walletUtils.summarizeSumPerCurrency(
-                                walletData.incomeSumThisMonth,
-                            ),
-                        });
-                    }),
+    protected moneySumSummarizedPerCurrency = resource({
+        loader: async () => {
+            const moneySum = await firstValueFrom(this.transactionService.getMoneySum());
+
+            return {
+                moneySum: this.walletUtils.summarizeSumPerCurrency(moneySum.moneySum),
+                expenseSumThisMonth: this.walletUtils.summarizeSumPerCurrency(
+                    moneySum.expenseSumThisMonth,
                 ),
-            ),
-        ),
-        { initialValue: null },
-    );
+                incomeSumThisMonth: this.walletUtils.summarizeSumPerCurrency(
+                    moneySum.incomeSumThisMonth,
+                ),
+            };
+        },
+    });
 
     /**
      * Az egyenleg nettó változása ebben a hónapban
      */
     protected balanceChangeThisMonth: Signal<WalletSummaryInterface[]> = computed(() => {
-        const income = this.moneySumSummarizedPerCurrency()?.incomeSumThisMonth;
-        const expense = this.moneySumSummarizedPerCurrency()?.expenseSumThisMonth;
+        const income = this.moneySumSummarizedPerCurrency.value()?.incomeSumThisMonth;
+        const expense = this.moneySumSummarizedPerCurrency.value()?.expenseSumThisMonth;
         if (!income || !expense) {
             return [];
         }

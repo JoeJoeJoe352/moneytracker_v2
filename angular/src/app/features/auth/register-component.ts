@@ -34,15 +34,18 @@ export class RegisterComponent {
     private readonly uniqueValidator = inject(UniqueNameAndEmailDirective);
 
     /**
-     * Töltődés alatt van-e a form
-     */
-    protected isLoading = inject<isLoadingInterface>(MAT_DIALOG_DATA).isloading;
-    /**
      * Regisztrációs gombra rákattintott-e a user
      */
     @Output() register = new EventEmitter<RegisterRequestData>();
 
-    registerForm: FormGroup;
+    /**
+     * Töltődés alatt van-e a form
+     */
+    protected isLoading = inject<isLoadingInterface>(MAT_DIALOG_DATA).isloading;
+    /**
+     * Regisztrációs form beállításai
+     */
+    protected registerForm: FormGroup;
 
     constructor() {
         this.registerForm = this.fb.nonNullable.group(

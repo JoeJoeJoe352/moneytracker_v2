@@ -11,7 +11,7 @@
             {{ getCardTitle() | translate }}
         </div>
     </div>
-    <div aria-live="polite" [attr.aria-busy]="isMoneySumLoading()">
+    <div aria-live="polite" [attr.aria-busy]="isMoneySumLoading">
         @if (isMoneySumLoading()) {
             <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
         } @else if (walletSummaries.length > 0) {

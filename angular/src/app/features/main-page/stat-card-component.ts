@@ -1,4 +1,4 @@
-import { Component, computed, Input, WritableSignal } from '@angular/core';
+import { Component, computed, Input, Signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 import { WalletSummaryInterface } from '../transaction/interfaces';
@@ -22,7 +22,7 @@ export class StatCardComponent {
     /**
      * Töltődés alatt vannak-e az adatok
      */
-    @Input({ required: true }) isMoneySumLoading!: WritableSignal<boolean>;
+    @Input({ required: true }) isMoneySumLoading!: Signal<boolean>;
     /**
      * Kártya adatai
      */

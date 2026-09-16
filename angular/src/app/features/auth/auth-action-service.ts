@@ -44,7 +44,10 @@ export class AuthActionService {
                     loadingSignal.set(false);
                     return EMPTY;
                 }),
-                switchMap(() => this.authService.authenticateUser()),
+                switchMap(() => {
+                    // User adatok lekérése, mert a login végpont csak a cookie-t állítja be
+                    return this.authService.authenticateUser();
+                }),
             )
             .subscribe({
                 next: (userData) => {
@@ -61,6 +64,7 @@ export class AuthActionService {
                     if (error.status !== 401) {
                         console.error('unknown error during authcheck!', error);
                     }
+                    loadingSignal.set(false);
                 },
             });
     }

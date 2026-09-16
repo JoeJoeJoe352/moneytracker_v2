@@ -7,12 +7,12 @@
                 </span>
                 <div class="stat-label">{{ 'mainpage.total_balance' | translate }}</div>
             </div>
-            <div aria-live="polite" [attr.aria-busy]="isMoneySumLoading()">
-                @if (isMoneySumLoading()) {
+            <div aria-live="polite" [attr.aria-busy]="moneySumSummarizedPerCurrency.isLoading()">
+                @if (moneySumSummarizedPerCurrency.isLoading()) {
                     <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
                 } @else {
                     <div class="stat-value">
-                        @for (sum of moneySumSummarizedPerCurrency()?.moneySum; track $index) {
+                        @for (sum of moneySumSummarizedPerCurrency.value()?.moneySum; track $index) {
                             <div>{{ sum.total | currencyFormat: sum.currencyCode }}</div>
                         }
                     </div>
@@ -58,16 +58,16 @@
 
     <div class="stats-col">
         <app-stat-card-component
-            [isMoneySumLoading]="isMoneySumLoading"
-            [walletSummaries]="moneySumSummarizedPerCurrency()?.incomeSumThisMonth ?? []"
+            [isMoneySumLoading]="moneySumSummarizedPerCurrency.isLoading"
+            [walletSummaries]="moneySumSummarizedPerCurrency.value()?.incomeSumThisMonth ?? []"
             [transactionType]="transactionType.INCOME"
         />
     </div>
 
     <div class="stats-col">
         <app-stat-card-component
-            [isMoneySumLoading]="isMoneySumLoading"
-            [walletSummaries]="moneySumSummarizedPerCurrency()?.expenseSumThisMonth ?? []"
+            [isMoneySumLoading]="moneySumSummarizedPerCurrency.isLoading"
+            [walletSummaries]="moneySumSummarizedPerCurrency.value()?.expenseSumThisMonth ?? []"
             [transactionType]="transactionType.OUTCOME"
         />
     </div>
@@ -79,7 +79,7 @@
             [isHistoryMode]="false"
             [needSearchField]="false"
             [reloadTrigger]="reloadTransactionListTrigger()"
-            (transactionsChanged)="onListTransactionsChanged()"
+            (transactionsChanged)="reloadList()"
         />
     </div>
 </div>

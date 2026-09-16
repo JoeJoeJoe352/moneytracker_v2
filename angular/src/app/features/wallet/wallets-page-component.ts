@@ -1,9 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { Component, inject, resource } from '@angular/core';
+import { firstValueFrom, Observable } from 'rxjs';
 import { WalletService } from './wallet-service';
-import { tap } from 'rxjs/internal/operators/tap';
-import { switchMap } from 'rxjs/internal/operators/switchMap';
 import { WalletsListComponent } from './wallets-list-component';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
@@ -31,42 +28,25 @@ export class WalletsPageComponent {
     private readonly snackBar = inject(MatSnackBar);
 
     /**
-     * Wallet lista újratöltéséhez való signal (növelni az értékét és újratöltődik)
+     * Wallet adatok
      */
-    private reloadWalletListTrigger = signal(0);
-    /**
-     * Wallet lista töltődik-e jelenleg
-     */
-    protected isWalletListLoading = signal(false);
-    /**
-     * Wallet form írásvédett-e (Pl.: mentéskor)
-     */
-    protected isWalletFormDisabled = signal(false);
-    /**
-     * Wallet adatokat tároló változó
-     */
-    protected walletListData = toSignal(
-        toObservable(this.reloadWalletListTrigger).pipe(
-            tap(() => this.isWalletListLoading.set(true)),
-            switchMap(() =>
-                this.walletService.listWallets().pipe(
-                    tap((wallets) => {
-                        this.isWalletListLoading.set(false);
-                        // store-t is befrissítjük mellékhatásként, a sum nélkül
-                        this.userData.setWallets(
-                            wallets.map((wallet) => ({
-                                id: wallet.id,
-                                name: wallet.name,
-                                currencyCode: wallet.currencyCode,
-                                type: wallet.type,
-                            })),
-                        );
-                    }),
-                ),
-            ),
-        ),
-        { initialValue: [] },
-    );
+    protected walletListResource = resource({
+        defaultValue: [],
+        loader: async () => {
+            const wallets = await firstValueFrom(this.walletService.listWallets());
+
+            // store frissítés mellékhatásként
+            this.userData.setWallets(
+                wallets.map((wallet) => ({
+                    id: wallet.id,
+                    name: wallet.name,
+                    currencyCode: wallet.currencyCode,
+                    type: wallet.type,
+                })),
+            );
+            return wallets;
+        },
+    });
 
     /**
      * Megnyitja a wallet létrehozó/szerkesztő modalt. Ha van id, akkor szerkesztés, egyébként létrehozás
@@ -77,7 +57,7 @@ export class WalletsPageComponent {
             width: '500px',
             data: {
                 wallet: walletData,
-                isFormDisabled: this.isWalletFormDisabled,
+                isFormDisabled: this.walletListResource.isLoading,
             } as WalletFormInputInterface,
         });
 
@@ -98,7 +78,6 @@ export class WalletsPageComponent {
         dialogRef: MatDialogRef<WalletFormComponent>,
     ): void {
         const isEditMode = existingWalletData !== null;
-        this.isWalletFormDisabled.set(true);
 
         const request = isEditMode
             ? this.walletService.updateWallet(
@@ -124,8 +103,6 @@ export class WalletsPageComponent {
                     return;
                 }
 
-                this.isWalletFormDisabled.set(true);
-
                 this.handleWalletRequest(
                     this.walletService.softDeleteWallet(walletId),
                     _('etc.delete-success'),
@@ -136,7 +113,7 @@ export class WalletsPageComponent {
 
     /**
      * Egy wallet létrehozó/módosító/törlő kérés lefutása utáni műveleteket végzi el
-     * (user tájékoztatás, hiba logolás, stb...)
+     * (user tájékoztatás, hiba logolás, modal bezárás, lista frissítés, stb...)
      */
     private handleWalletRequest(
         request: Observable<unknown>,
@@ -149,7 +126,8 @@ export class WalletsPageComponent {
                     this.translateService.instant(successMessageKey),
                     this.translateService.instant(_('etc.close')),
                 );
-                this.afterWalletChange(dialogRef);
+                this.walletListResource.reload();
+                dialogRef.close();
             },
             error: (error) => {
                 console.error(error);
@@ -157,17 +135,7 @@ export class WalletsPageComponent {
                     this.translateService.instant(_('etc.general-error')),
                     this.translateService.instant(_('etc.close')),
                 );
-                this.isWalletFormDisabled.set(false);
             },
         });
-    }
-
-    /**
-     * Műveletek, ami wallet mentés után kell végrehajtani
-     */
-    private afterWalletChange(dialogRef: MatDialogRef<WalletFormComponent>): void {
-        this.isWalletFormDisabled.set(false);
-        this.reloadWalletListTrigger.update((value) => value + 1);
-        dialogRef.close();
     }
 }

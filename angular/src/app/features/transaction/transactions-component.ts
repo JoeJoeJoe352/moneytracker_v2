@@ -34,11 +34,11 @@ export interface FilterData {
     providers: [TransactionModalStateService],
 })
 export class TransactionsListComponent implements OnInit, OnChanges {
-    private transactionService = inject(TransactionService);
-    private router = inject(Router);
-    private route = inject(ActivatedRoute);
-    private destroyRef = inject(DestroyRef);
-    protected modal = inject(TransactionModalStateService);
+    private readonly transactionService = inject(TransactionService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly destroyRef = inject(DestroyRef);
+    protected readonly modal = inject(TransactionModalStateService);
 
     /**
      * Teljes listát szeretnénk-e látni, vagy csak egy részét

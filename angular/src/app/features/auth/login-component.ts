@@ -21,11 +21,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     ],
 })
 export class LoginComponent {
-    protected isLoading = inject<isLoadingInterface>(MAT_DIALOG_DATA).isloading;
-    @Output() login = new EventEmitter<LoginRequestData>();
-
     private readonly fb = inject(FormBuilder);
 
+    @Output() login = new EventEmitter<LoginRequestData>();
+
+    /**
+     * Töltődés alatt van-e a form
+     */
+    protected isLoading = inject<isLoadingInterface>(MAT_DIALOG_DATA).isloading;
+    /**
+     * login form adatai
+     */
     protected loginForm: FormGroup;
 
     constructor() {
@@ -49,7 +55,7 @@ export class LoginComponent {
     }
 
     /**
-     * Check if there is a problem with the username field after the user interacted with it.
+     * Megnézi van-e valami hiba a felhasználónév mezőben
      */
     get isUsernameFieldHasError(): boolean {
         return (
@@ -58,7 +64,7 @@ export class LoginComponent {
         );
     }
     /**
-     * Check if there is a problem with the password field after the user interacted with it.
+     * Ellenőrzi a jelszó mezőt, van-e valami hiba
      */
     get isPasswordFieldHasError(): boolean {
         return (
