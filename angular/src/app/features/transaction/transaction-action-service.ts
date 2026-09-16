@@ -2,15 +2,27 @@ import { inject, Injectable, WritableSignal } from '@angular/core';
 import { TransactionService } from './transaction-service';
 import { _, TranslateService } from '@ngx-translate/core';
 import { NewTransaction } from './interfaces';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog-component';
+import { MatDialog } from '@angular/material/dialog';
+import { Observable, map } from 'rxjs';
 
 // TODO ez törölhető, csak egy helyen vannak használva ezek a függvények és nem is kell több
 @Injectable({ providedIn: 'root' })
 export class TransactionActionService {
-    private transactionService = inject(TransactionService);
-    private translateService = inject(TranslateService);
+    private readonly transactionService = inject(TransactionService);
+    private readonly translateService = inject(TranslateService);
+    private readonly dialog = inject(MatDialog);
 
-    confirmDeletion(): boolean {
-        return confirm(this.translateService.instant(_('transaction.delete.confirm')));
+    /**
+     * Törlés dialog feldobása
+     */
+    public confirmDeletion(): Observable<boolean> {
+        return ConfirmDialogComponent.open(this.dialog, {
+            message: this.translateService.instant(_('transaction.delete.confirm')),
+            danger: true,
+        })
+            .afterClosed()
+            .pipe(map((confirmed) => confirmed ?? false));
     }
 
     /**
@@ -20,7 +32,7 @@ export class TransactionActionService {
      * @param isDisabled        egy signal, ami a formot disabled állapotra állítja
      * @param refreshCallback   mentés után az adatokat újratöltő függvény
      */
-    deleteTransaction(
+    public deleteTransaction(
         id: number,
         isDisabled: WritableSignal<boolean>,
         refreshCallback: () => void,
@@ -44,7 +56,7 @@ export class TransactionActionService {
      * @param isDisabled        egy signal, ami a formot disabled állapotra állítja
      * @param refreshCallback   mentés után az adatokat újratöltő függvény
      */
-    saveTransaction(
+    public saveTransaction(
         payload: NewTransaction,
         transactionId: number | null,
         isDisabled: WritableSignal<boolean>,

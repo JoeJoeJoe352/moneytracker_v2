@@ -1,14 +1,22 @@
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Observable, of, Subject, switchMap, tap } from 'rxjs';
+import { computed, effect, inject, Injectable, resource, ResourceRef, signal } from '@angular/core';
+import { firstValueFrom, Observable, Subject, tap } from 'rxjs';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TransactionService } from './transaction-service';
 import { TransactionActionService } from './transaction-action-service';
 import { CategoryService } from './category-service';
-import { CategoryResponseInterface, NewTransaction } from './interfaces';
+import {
+    CategoryResponseInterface,
+    NewTransaction,
+    TransactionDataFromBackend,
+} from './interfaces';
 import { TransactionModalComponent, TransactionModalInputInterface } from './transaction-modal';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { _, TranslateService } from '@ngx-translate/core';
+
+interface ModalParams {
+    isOpen: boolean;
+    editId: number | null;
+}
 
 /**
  * A tranzakció létrehozó/szerkesztő modal állapotát és műveleteit fogja össze
@@ -27,19 +35,20 @@ export class TransactionModalStateService {
     private translateService = inject(TranslateService);
 
     /**
-     * Kiválasztott tranzakció azonosítója.
-     * Ha ez változik, akkor le fog futni a tranzakció betöltés is (transactionData)
+     * Nyitva van-e a modal
      */
-    private selectedTransactionIdTrigger = signal<number | null>(null);
+    private isOpen = signal(false);
     /**
-     * Kategórialista aktuális állapota. Modal megnyitásakor töltődik be, új kategória mentésekor
-     * pedig kiegészül a szerverről visszakapott új elemmel (nem tölti újra a teljes listát)
+     * Szerkesztendő tranzakció azonosítója. Ha null, akkor új tranzakció felvétele van folyamatban
      */
-    private categoriesSignal = signal<CategoryResponseInterface[]>([]);
+    private editId = signal<number | null>(null);
     /**
-     * Kategória lista betöltődött-e már?
+     * A transactionData és a categoriesResource közös reaktív paramétere.
      */
-    private isCategoriesLoaded = signal(false);
+    private modalParams = computed<ModalParams>(() => ({
+        isOpen: this.isOpen(),
+        editId: this.editId(),
+    }));
     /**
      * Jelenleg nyitva lévő modal referenciája
      */
@@ -66,61 +75,70 @@ export class TransactionModalStateService {
         effect(() => {
             this.isModalDataInitializing.set(!this.areAllModalDependenciesLoaded());
         });
-
-        this.categoryService.listCategories().subscribe({
-            next: (categories) => {
-                this.categoriesSignal.set(categories);
-                this.isCategoriesLoaded.set(true);
-            },
-            error: (err) => {
-                console.error('Problem with loading the categories' + err);
-                this.snackBar.open(
-                    this.translateService.instant(_('etc.general-error')),
-                    this.translateService.instant(_('etc.close')),
-                );
-                this.isCategoriesLoaded.set(true);
-            },
-        });
     }
 
     /**
      * Kiválasztott tranzakció adatai
      */
-    public transactionData = toSignal(
-        toObservable(this.selectedTransactionIdTrigger).pipe(
-            switchMap((id) =>
-                id === null ? of(null) : this.transactionService.getTransactionById(id),
-            ),
-        ),
-        { initialValue: null },
-    );
+    public transactionData: ResourceRef<TransactionDataFromBackend | null> = resource({
+        defaultValue: null,
+        params: this.modalParams,
+        loader: async ({ params }) => {
+            if (params.editId === null) {
+                return null;
+            }
+            return firstValueFrom(this.transactionService.getTransactionById(params.editId));
+        },
+    });
 
     /**
-     * Kategóriák listája. Modal megnyitásakor töltődik be
+     * Kategóriák listája. Ugyanarra a paraméterre (modalParams) épül, mint a transactionData,
+     * így minden alkalommal újratöltődik, amikor a modal megnyílik
      */
-    public categories = this.categoriesSignal.asReadonly();
+    private categoriesResource: ResourceRef<CategoryResponseInterface[]> = resource({
+        defaultValue: [],
+        params: this.modalParams,
+        loader: async ({ params }) => {
+            if (!params.isOpen) {
+                return this.categoriesResource.value();
+            }
+            try {
+                return await firstValueFrom(this.categoryService.listCategories());
+            } catch (err) {
+                console.error('Problem with loading the categories' + err);
+                this.snackBar.open(
+                    this.translateService.instant(_('etc.general-error')),
+                    this.translateService.instant(_('etc.close')),
+                );
+                return [];
+            }
+        },
+    });
+
+    /**
+     * Kategóriák listája
+     */
+    public categories = this.categoriesResource.value;
 
     /**
      * Tranzakció akkor van betöltött állapotban, ha nincs kiválasztva egy sem, vagy ki van választva és be is vannak töltve az adatai
      */
     private isTransactionDataLoaded = computed(
-        () =>
-            this.selectedTransactionIdTrigger() === null ||
-            (this.selectedTransactionIdTrigger() !== null && this.transactionData() !== null),
+        () => this.editId() === null || this.transactionData.value() !== null,
     );
 
     /**
      * Be van-e töltve a modal minden függősége?
      */
     private areAllModalDependenciesLoaded = computed(
-        () => this.isTransactionDataLoaded() && this.isCategoriesLoaded(),
+        () => this.isTransactionDataLoaded() && !this.categoriesResource.isLoading(),
     );
 
     /**
      * Műveletek, amik minden olyan művelet után le kell futtatni, ami tranzakciólista módosulásával járhat (Pl.: új tranzakció felvétele, módosítása, törlése)
      */
     private afterChange(): void {
-        this.close();
+        this.dialogRef?.close();
         this.changed.next();
     }
 
@@ -129,62 +147,60 @@ export class TransactionModalStateService {
      *
      * @param {number | null} id. Ha null, akkor új tranzakció nyilik fel, ha szám, akkor adott id-jű tranzakció
      */
-    public open(id: number | null): void {
-        this.selectedTransactionIdTrigger.set(id);
+    public open(id: number | null = null): void {
+        this.editId.set(id);
+        this.isOpen.set(true);
 
         const dialogRef = this.dialog.open(TransactionModalComponent, {
             restoreFocus: true,
             width: '600px',
             data: {
-                transaction: this.transactionData,
+                transaction: this.transactionData.value,
                 isDataInitializing: this.isModalDataInitializing,
                 categories: this.categories,
                 isTransactionFormDisabled: this.isTransactionFormDisabled,
                 isCategorySaveInProgress: this.isAddingCategoryInProgress,
                 addCategoryCallback: this.saveCategory,
-            } as TransactionModalInputInterface,
+            } satisfies TransactionModalInputInterface,
         });
         this.dialogRef = dialogRef;
 
-        dialogRef.componentInstance.deleteTransactionRequested.subscribe((transactionId) =>
-            this.confirmDeletion(transactionId),
-        );
-        dialogRef.componentInstance.saved.subscribe((payload) => this.save(payload));
-        dialogRef.componentInstance.categoryAdded.subscribe((categoryName) =>
-            this.saveCategory(categoryName),
-        );
+        dialogRef.componentInstance.deleteTransactionRequested
+            .subscribe((transactionId) => this.confirmDeletion(transactionId));
+
+        dialogRef.componentInstance.saved
+            .subscribe((payload) => this.save(payload));
+
+        dialogRef.componentInstance.categoryAdded
+            .subscribe((categoryName) => this.saveCategory(categoryName));
 
         dialogRef.afterClosed().subscribe(() => {
-            this.selectedTransactionIdTrigger.set(null);
+            this.isOpen.set(false);
+            this.editId.set(null);
             this.dialogRef = null;
         });
-    }
-
-    /**
-     * Modal becsukása
-     */
-    private close(): void {
-        this.dialogRef?.close();
     }
 
     /**
      * Feldob egy confirmot, hogy biztosan törölni szeretné-e a user a tranzakciót, ha igent nyom, törli
      */
     public confirmDeletion(transactionId: number): void {
-        if (this.transactionActionService.confirmDeletion()) {
-            this.transactionActionService.deleteTransaction(
-                transactionId,
-                this.isTransactionFormDisabled,
-                () => this.afterChange(),
-            );
-        }
+        this.transactionActionService.confirmDeletion().subscribe((confirmed) => {
+            if (confirmed) {
+                this.transactionActionService.deleteTransaction(
+                    transactionId,
+                    this.isTransactionFormDisabled,
+                    () => this.afterChange(),
+                );
+            }
+        });
     }
 
     /**
      * Elmenti a tranzakció adatait
      */
     public save(payload: NewTransaction): void {
-        const transactionId = this.transactionData()?.id ?? null;
+        const transactionId = this.transactionData.value()?.id ?? null;
         this.transactionActionService.saveTransaction(
             payload,
             transactionId,
@@ -203,7 +219,7 @@ export class TransactionModalStateService {
         return this.categoryService.saveCategory({ name: categoryName }).pipe(
             tap({
                 next: (category) => {
-                    this.categoriesSignal.update((categories) => [...categories, category]);
+                    this.categoriesResource.update((categories) => [...categories, category]);
                     this.isAddingCategoryInProgress.set(false);
                 },
                 error: (err) => {
