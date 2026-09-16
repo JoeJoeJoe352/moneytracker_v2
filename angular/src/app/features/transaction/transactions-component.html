@@ -8,8 +8,8 @@
 
 @if (needSearchField) {
     <app-transaction-filter
-        [defaultData]="dataFromQuery()"
-        [isTransactionListLoading]="isTransactionListLoading"
+        [defaultData]="filterInputDefaultValuesFromQuery()"
+        [isTransactionListLoading]="transactionListData.isLoading"
         (filterSubmit)="onFilterSubmit($event)"
         (resetForm)="clearInputs()"
     />
@@ -17,7 +17,7 @@
 
 <app-transaction-list
     [title]="isHistoryMode ? null : ('mainpage.last_transactions' | translate)"
-    [isTransactionListLoading]="isTransactionListLoading()"
-    [transactions]="transactionListData()"
+    [isTransactionListLoading]="transactionListData.isLoading()"
+    [transactions]="transactionListData.value()"
     (editTransaction)="modal.open($event.transactionId)"
 />

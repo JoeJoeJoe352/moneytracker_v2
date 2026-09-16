@@ -5,7 +5,7 @@ import {
     Input,
     OnInit,
     Output,
-    WritableSignal,
+    Signal,
 } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -49,7 +49,7 @@ export class TransactionFilter implements OnInit {
     /**
      * Tranzakciós adatok töltődnek-e
      */
-    @Input({ required: true }) isTransactionListLoading!: WritableSignal<boolean>;
+    @Input({ required: true }) isTransactionListLoading!: Signal<boolean>;
     /**
      * Form elküldése event
      */

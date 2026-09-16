@@ -7,6 +7,7 @@ import {
     OnChanges,
     OnInit,
     Output,
+    resource,
     signal,
     SimpleChanges,
 } from '@angular/core';
@@ -16,9 +17,9 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import TransactionListComponent from '../transaction-list/transaction-list-component';
-import { TransactionListElementData } from '../transaction-list/interfaces';
 import { TransactionFilter } from './transaction-filter-component';
-import { MatCardModule } from "@angular/material/card";
+import { MatCardModule } from '@angular/material/card';
+import { firstValueFrom } from 'rxjs';
 
 export interface FilterData {
     name: string;
@@ -59,50 +60,57 @@ export class TransactionsListComponent implements OnInit, OnChanges {
     @Output() transactionsChanged = new EventEmitter<void>();
 
     /**
-     * Töltődik-e jelenleg a tranzakciós lista
-     */
-    protected isTransactionListLoading = signal(true);
-    /**
-     * Tranzakciós lista
-     */
-    protected transactionListData = signal<TransactionListElementData[]>([]);
-    /**
      * Kezdeti szűrőfeltételek a query paraméterekből, a szűrő komponens inicializálásához
      */
-    protected dataFromQuery = signal<FilterData | null>(null);
+    protected filterInputDefaultValuesFromQuery = signal<FilterData | null>(null);
 
     /**
      * Legutóbb kapott (a route query paramétereiből számított) szűrőparaméterek, amikor nem a
      * szűrő form küldi az újratöltést kiváltó eseményt (pl. reloadTrigger, modal mentés/törlés)
      */
-    private latestParams = new URLSearchParams();
+    private latestParams = signal(new URLSearchParams());
 
     ngOnInit(): void {
-        // A route query változára  újratöltjük a listát
+        // A route query változára újratöltjük a listát
         this.route.queryParams
             .pipe(takeUntilDestroyed(this.destroyRef)) // amíg a komponens meg nem szűnik
             .subscribe((queryParams) => {
-                this.latestParams = new URLSearchParams(queryParams as Params);
+                // latestParams beállítás után automatikusan újratöltődik a lista
+                this.latestParams.set(new URLSearchParams(queryParams as Params));
                 // A kezdeti értékből állítjuk be a szűrő form kezdőértékeit
-                if (this.dataFromQuery() === null) {
-                    this.dataFromQuery.set(this.toFilterData(this.latestParams));
+                if (this.filterInputDefaultValuesFromQuery() === null) {
+                    this.filterInputDefaultValuesFromQuery.set(this.toFilterData(this.latestParams()));
                 }
-                this.loadTransactionHistory();
             });
 
         // Mentés/törlés után újratöltjük a listát, és jelezzük a szülő komponensnek is
-        this.modal.changed.subscribe(() => {
-            this.loadTransactionHistory();
+        this.modal.changed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.transactionListData.reload();
             this.transactionsChanged.emit();
         });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        // A szülő komponensben létrejött új tranzakció után újratöltjük a listát
+        // A szülő komponens ha üzen (új tranzakció felvételéről), akkor újratöltjük a listát
         if (changes['reloadTrigger'] && !changes['reloadTrigger'].firstChange) {
-            this.loadTransactionHistory();
+            this.transactionListData.reload();
         }
     }
+
+    /**
+     * Tranzakciós lista adatok. A query paraméterek változtatásakor magától betöltődik
+     */
+    protected transactionListData = resource({
+        defaultValue: [],
+        params: this.latestParams,
+        loader: async ({params}) => {
+            const apiObserver = this.isHistoryMode
+                ? this.transactionService.getTransactionHistory(params)
+                : this.transactionService.getLastTransactions();
+
+            return firstValueFrom(apiObserver);
+        },
+    });
 
     /**
      * Szűrő form beküldésekor lefutó művelet: a route query paramétereinek frissítése, amire a
@@ -123,29 +131,6 @@ export class TransactionsListComponent implements OnInit, OnChanges {
             relativeTo: this.route,
             queryParams: {},
         });
-    }
-
-    /**
-     * Tranzakciók letöltése a backendről, a kártyás listához
-     */
-    loadTransactionHistory(): void {
-        this.isTransactionListLoading.set(true);
-
-        const apiObserver = this.isHistoryMode
-            ? this.transactionService.getTransactionHistory(this.latestParams)
-            : this.transactionService.getLastTransactions();
-
-        apiObserver.subscribe({
-            next: (response) => {
-                this.isTransactionListLoading.set(false);
-                this.transactionListData.set(response);
-            },
-            error: (response) => {
-                console.error('unknown error during last transaction listing!', response);
-                this.isTransactionListLoading.set(false);
-            },
-        });
-        return;
     }
 
     /**
