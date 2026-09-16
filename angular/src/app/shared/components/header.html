@@ -9,10 +9,10 @@
                     class="menu-toggle"
                     type="button"
                     [attr.aria-label]="
-                        (isMobileMenuOpen ? 'header.menu.close' : 'header.menu.open') | translate
+                        (isMobileMenuOpen() ? 'header.menu.close' : 'header.menu.open') | translate
                     "
                     aria-controls="app-sidebar-nav"
-                    [attr.aria-expanded]="isMobileMenuOpen"
+                    [attr.aria-expanded]="isMobileMenuOpen()"
                     (click)="toggleMenu()"
                 >
                     <mat-icon aria-hidden="true" fontIcon="menu"></mat-icon>

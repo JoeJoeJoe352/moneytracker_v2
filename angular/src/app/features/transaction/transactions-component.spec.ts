@@ -65,7 +65,7 @@ describe('TransactionsListComponent (Vitest)', () => {
         categoryAdded: EventEmitter<string>;
     }>[];
 
-    function setup(options: {
+    async function setup(options: {
         isHistoryMode?: boolean;
         needSearchField?: boolean;
         queryParams?: Record<string, string>;
@@ -120,13 +120,14 @@ describe('TransactionsListComponent (Vitest)', () => {
 
         fixture = TestBed.createComponent(TransactionsListComponent);
         component = fixture.componentInstance;
-        component.isHistoryMode = options.isHistoryMode ?? false;
-        component.needSearchField = options.needSearchField ?? false;
+        fixture.componentRef.setInput('isHistoryMode', options.isHistoryMode ?? false);
+        fixture.componentRef.setInput('needSearchField', options.needSearchField ?? false);
         fixture.detectChanges();
+        await fixture.whenStable();
     }
 
-    it('should load the last transactions on init when not in history mode', () => {
-        setup({ isHistoryMode: false });
+    it('should load the last transactions on init when not in history mode', async () => {
+        await setup({ isHistoryMode: false });
 
         expect(transactionServiceMock.getLastTransactions).toHaveBeenCalledTimes(1);
         expect(transactionServiceMock.getTransactionHistory).not.toHaveBeenCalled();
@@ -135,16 +136,16 @@ describe('TransactionsListComponent (Vitest)', () => {
         expect(list.querySelectorAll('app-transaction-card').length).toBe(1);
     });
 
-    it('should stop the loading state and keep the list empty if fetching the last transactions fails', () => {
-        setup({ isHistoryMode: false, getLastTransactionsResult: throwError(() => new Error('boom')) });
+    it('should stop the loading state and keep the list empty if fetching the last transactions fails', async () => {
+        await setup({ isHistoryMode: false, getLastTransactionsResult: throwError(() => new Error('boom')) });
 
-        expect(component['isTransactionListLoading']()).toBe(false);
+        expect(component['transactionListData'].isLoading()).toBe(false);
         const list = fixture.nativeElement.querySelector('app-transaction-list');
         expect(list.querySelectorAll('app-transaction-card').length).toBe(0);
     });
 
-    it('should initialize the filter form from the query params in history mode', () => {
-        setup({
+    it('should initialize the filter form from the query params in history mode', async () => {
+        await setup({
             isHistoryMode: true,
             needSearchField: true,
             queryParams: { name: 'kávé' },
@@ -157,8 +158,8 @@ describe('TransactionsListComponent (Vitest)', () => {
         expect(params.get('name')).toBe('kávé');
     });
 
-    it('should navigate with the entered filter values, replacing (not merging) the query params, when the filter form is submitted', () => {
-        setup({ isHistoryMode: true, needSearchField: true });
+    it('should navigate with the entered filter values, replacing (not merging) the query params, when the filter form is submitted', async () => {
+        await setup({ isHistoryMode: true, needSearchField: true });
         routerMock.navigate.mockClear();
 
         const nameInput = fixture.nativeElement.querySelector('#name');
@@ -178,19 +179,20 @@ describe('TransactionsListComponent (Vitest)', () => {
         );
     });
 
-    it('should reload the history whenever the route query params change (e.g. after the filter navigates)', () => {
-        setup({ isHistoryMode: true, needSearchField: true });
+    it('should reload the history whenever the route query params change (e.g. after the filter navigates)', async () => {
+        await setup({ isHistoryMode: true, needSearchField: true });
         transactionServiceMock.getTransactionHistory.mockClear();
 
         queryParamsSubject.next({ name: 'tej' });
+        await fixture.whenStable();
 
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
         const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
         expect(params.get('name')).toBe('tej');
     });
 
-    it('should reset the form and navigate with empty query params when clearInputs is called', () => {
-        setup({ isHistoryMode: true, needSearchField: true, queryParams: { name: 'kávé' } });
+    it('should reset the form and navigate with empty query params when clearInputs is called', async () => {
+        await setup({ isHistoryMode: true, needSearchField: true, queryParams: { name: 'kávé' } });
         transactionServiceMock.getTransactionHistory.mockClear();
         routerMock.navigate.mockClear();
 
@@ -210,28 +212,31 @@ describe('TransactionsListComponent (Vitest)', () => {
         // a router.navigate mockolt, ezért a valós navigáció eredményét (a route queryParams
         // frissülését) itt szimuláljuk, hogy a reaktív újratöltést is leteszteljük
         queryParamsSubject.next({});
+        await fixture.whenStable();
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
         const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
         expect(params.get('name')).toBeNull();
     });
 
-    it('should reload the list once when reloadTrigger changes after the initial render', () => {
-        setup({ isHistoryMode: false });
+    it('should reload the list once when reloadTrigger changes after the initial render', async () => {
+        await setup({ isHistoryMode: false });
 
         // az input első explicit beállítása maga számít "firstChange"-nek Angular szemszögéből,
         // függetlenül a mező JS-alapértékétől, ezért ez még nem tölt újra
         fixture.componentRef.setInput('reloadTrigger', 1);
         fixture.detectChanges();
+        await fixture.whenStable();
         transactionServiceMock.getLastTransactions.mockClear();
 
         fixture.componentRef.setInput('reloadTrigger', 2);
         fixture.detectChanges();
+        await fixture.whenStable();
 
         expect(transactionServiceMock.getLastTransactions).toHaveBeenCalledTimes(1);
     });
 
-    it('should not reload again on the initial reloadTrigger change (firstChange guard)', () => {
-        setup({ isHistoryMode: false });
+    it('should not reload again on the initial reloadTrigger change (firstChange guard)', async () => {
+        await setup({ isHistoryMode: false });
 
         // ngOnChanges runs once more right after ngOnInit for the same initial value; must stay a no-op
         component.ngOnChanges({
@@ -246,8 +251,8 @@ describe('TransactionsListComponent (Vitest)', () => {
         expect(transactionServiceMock.getLastTransactions).toHaveBeenCalledTimes(1);
     });
 
-    it('should reload the list and emit transactionsChanged when the modal reports a save/delete', () => {
-        setup({ isHistoryMode: false });
+    it('should reload the list and emit transactionsChanged when the modal reports a save/delete', async () => {
+        await setup({ isHistoryMode: false });
         transactionServiceMock.getLastTransactions.mockClear();
 
         let emitted = false;
@@ -255,13 +260,14 @@ describe('TransactionsListComponent (Vitest)', () => {
 
         const modalState = fixture.debugElement.injector.get(TransactionModalStateService);
         modalState.changed.next();
+        await fixture.whenStable();
 
         expect(transactionServiceMock.getLastTransactions).toHaveBeenCalledTimes(1);
         expect(emitted).toBe(true);
     });
 
-    it('should open the modal with the clicked transaction id when a card is clicked', () => {
-        setup({ isHistoryMode: false });
+    it('should open the modal with the clicked transaction id when a card is clicked', async () => {
+        await setup({ isHistoryMode: false });
 
         const card = fixture.nativeElement.querySelector('app-transaction-card');
         card.click();

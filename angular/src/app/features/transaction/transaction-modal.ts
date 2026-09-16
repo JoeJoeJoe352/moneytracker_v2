@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Output, Signal } from '@angular/core';
+import { Component, inject, output, Signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,7 +38,7 @@ export interface TransactionModalInputInterface {
 export class TransactionModalComponent {
     public data = inject<TransactionModalInputInterface>(MAT_DIALOG_DATA);
 
-    @Output() deleteTransactionRequested = new EventEmitter<number>();
-    @Output() saved = new EventEmitter<NewTransaction>();
-    @Output() categoryAdded = new EventEmitter<string>();
+    public deleteTransactionRequested = output<number>();
+    public saved = output<NewTransaction>();
+    public categoryAdded = output<string>();
 }

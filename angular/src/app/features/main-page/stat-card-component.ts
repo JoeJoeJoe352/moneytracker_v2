@@ -1,4 +1,4 @@
-import { Component, computed, Input, Signal } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
 import { WalletSummaryInterface } from '../transaction/interfaces';
@@ -18,21 +18,21 @@ export class StatCardComponent {
     /**
      * Tranzakció típusa
      */
-    @Input({ required: true }) transactionType!: TransactionTypeEnum;
+    transactionType = input.required<TransactionTypeEnum>()
     /**
      * Töltődés alatt vannak-e az adatok
-     */
-    @Input({ required: true }) isMoneySumLoading!: Signal<boolean>;
+    */
+    isMoneySumLoading = input.required<boolean>()
     /**
      * Kártya adatai
-     */
-    @Input({ required: true }) walletSummaries!: WalletSummaryInterface[];
+    */
+    walletSummaries = input.required<WalletSummaryInterface[]>()
 
     /**
      * Kártya címe, a tranzakció típus függvényében
      */
     protected getCardTitle = computed(() => {
-        switch (this.transactionType) {
+        switch (this.transactionType()) {
             case TransactionTypeEnum.INCOME:
                 return 'mainpage.total_income';
             case TransactionTypeEnum.OUTCOME:
@@ -44,6 +44,6 @@ export class StatCardComponent {
      * Bevétel-e a tranzakció
      */
     protected isIncome = computed(() => {
-        return this.transactionType === TransactionTypeEnum.INCOME;
+        return this.transactionType() === TransactionTypeEnum.INCOME;
     });
 }

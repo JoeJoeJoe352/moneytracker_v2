@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -23,7 +23,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 export class LoginComponent {
     private readonly fb = inject(FormBuilder);
 
-    @Output() login = new EventEmitter<LoginRequestData>();
+    public login = output<LoginRequestData>()
 
     /**
      * Töltődés alatt van-e a form

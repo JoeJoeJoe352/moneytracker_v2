@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { WalletDataInterface } from './interfaces';
 import { WalletCardComponent } from './wallet-card-component';
 
@@ -6,7 +6,7 @@ import { WalletCardComponent } from './wallet-card-component';
     selector: 'app-wallets-list-component',
     template: `
         <div class="wallet-list">
-            @for (wallet of walletListData; track wallet.id) {
+            @for (wallet of walletListData(); track wallet.id) {
                 <app-wallet-card-component
                     [walletData]="wallet"
                     (cardClicked)="walletCardClicked.emit(wallet)"
@@ -19,6 +19,13 @@ import { WalletCardComponent } from './wallet-card-component';
     standalone: true,
 })
 export class WalletsListComponent {
-    @Input({ required: true }) walletListData!: WalletDataInterface[];
-    @Output() walletCardClicked = new EventEmitter<WalletDataInterface>();
+    /**
+     * Wallet lista elemei
+     */
+    public walletListData = input.required<WalletDataInterface[]>();
+
+    /**
+     * Event, hogy user rákattintott valamelyik elemre
+     */
+    public walletCardClicked = output<WalletDataInterface>();
 }

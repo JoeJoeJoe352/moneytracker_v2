@@ -143,9 +143,9 @@
                 <div class="categories-field">
                     <app-category-select
                         formControlName="categories"
-                        [categoryData]="categoryData"
-                        [disabled]="isCategorySaveInProgress"
-                        [addCategoryCallback]="addCategoryCallback"
+                        [categoryData]="categoryData()"
+                        [disabled]="isCategorySaveInProgress()"
+                        [addCategoryCallback]="addCategoryCallback()"
                     />
                 </div>
             </div>
@@ -157,10 +157,10 @@
                         [detail]="detail"
                         [index]="$index"
                         [categoryData]="categoryData"
-                        [isCategorySaveInProgress]="isCategorySaveInProgress"
+                        [isCategorySaveInProgress]="isCategorySaveInProgress()"
                         [isLastDetailRow]="isLastDetailRow"
                         [currencySymbol]="selectedWalletsCurrency()"
-                        [addCategoryCallback]="addCategoryCallback"
+                        [addCategoryCallback]="addCategoryCallback()"
                         (rowDeleted)="deleteRow($index)"
                     />
                 }
@@ -183,24 +183,24 @@
             mat-stroked-button
             type="button"
             mat-dialog-close
-            [disabled]="isTransactionFormDisabled"
+            [disabled]="isTransactionFormDisabled()"
         >
             {{ 'etc.close' | translate }}
         </button>
         <button
             mat-flat-button
             type="submit"
-            [disabled]="transactionForm.invalid || isTransactionFormDisabled"
+            [disabled]="transactionForm.invalid || isTransactionFormDisabled()"
         >
             {{ 'transaction.save' | translate }}
         </button>
-        @if (isExistingTransaction()) {
+        @if (transaction(); as currentTransaction) {
             <button
                 mat-flat-button
                 type="button"
                 class="mat-button-danger"
-                [disabled]="isTransactionFormDisabled"
-                (click)="deleted.emit(transaction.id)"
+                [disabled]="isTransactionFormDisabled()"
+                (click)="deleted.emit(currentTransaction.id)"
             >
                 {{ 'transaction.delete' | translate }}
             </button>

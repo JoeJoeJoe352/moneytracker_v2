@@ -1,16 +1,16 @@
 <mat-card class="detail-card">
-    <div [formGroup]="detail" class="detail-rows">
+    <div [formGroup]="detail()" class="detail-rows">
         <div class="detail-row">
             <mat-form-field>
                 <mat-label>{{ 'transaction.detail.name' | translate }}</mat-label>
                 <input
-                    id="detail-name-{{ index }}"
+                    id="detail-name-{{ index() }}"
                     matInput
                     type="text"
                     formControlName="detailName"
                 />
-                @if (detail.get('detailName')?.invalid && detail.get('detailName')?.touched) {
-                    @if (detail.get('detailName')?.hasError('required')) {
+                @if (detail().get('detailName')?.invalid && detail().get('detailName')?.touched) {
+                    @if (detail().get('detailName')?.hasError('required')) {
                         <mat-error>{{ 'transaction.detail.name.required' | translate }}</mat-error>
                     }
                 }
@@ -19,15 +19,15 @@
         <div class="detail-categories">
             <app-category-select
                 formControlName="categories"
-                [categoryData]="categoryData"
-                [disabled]="isCategorySaveInProgress"
-                [addCategoryCallback]="addCategoryCallback"
+                [categoryData]="categoryData()()"
+                [disabled]="isCategorySaveInProgress()"
+                [addCategoryCallback]="addCategoryCallback()"
             />
         </div>
 
         <!-- Ár / unitprice és weight mutatása -->
         <div>
-            <span id="price-mode-label-{{ index }}">
+            <span id="price-mode-label-{{ index() }}">
                 {{ 'transaction.detail.price_mode.label' | translate }}
             </span>
             <div class="price-mode-toggle">
@@ -35,8 +35,8 @@
                 <mat-slide-toggle
                     class="mat-slide-toggle-on-off"
                     formControlName="detailIsComplexPriceMode"
-                    id="transaction-is-complex-price-mode-{{ index }}"
-                    [attr.aria-labelledby]="'price-mode-label-' + index"
+                    id="transaction-is-complex-price-mode-{{ index() }}"
+                    [attr.aria-labelledby]="'price-mode-label-' + index()"
                     hideIcon
                 />
                 <span>{{ 'transaction.detail.complex_price_mode' | translate }}</span>
@@ -45,18 +45,20 @@
 
         <!-- Ár blokk -->
         <div class="detail-price-row">
-            @if (!detail.get('detailIsComplexPriceMode')?.value) {
+            @if (!detail().get('detailIsComplexPriceMode')?.value) {
                 <mat-form-field>
                     <mat-label>{{ 'transaction.detail.price' | translate }}</mat-label>
                     <input
-                        id="detail-price-{{ index }}"
+                        id="detail-price-{{ index() }}"
                         matInput
                         type="number"
                         formControlName="detailPrice"
                     />
-                    <span matTextSuffix>{{ currencySymbol }}</span>
-                    @if (detail.get('detailPrice')?.invalid && detail.get('detailPrice')?.touched) {
-                        @if (detail.get('detailPrice')?.hasError('min')) {
+                    <span matTextSuffix>{{ currencySymbol() }}</span>
+                    @if (
+                        detail().get('detailPrice')?.invalid && detail().get('detailPrice')?.touched
+                    ) {
+                        @if (detail().get('detailPrice')?.hasError('min')) {
                             <mat-error>{{ 'transaction.detail.price.min' | translate }}</mat-error>
                         }
                     }
@@ -65,16 +67,17 @@
                 <mat-form-field>
                     <mat-label>{{ 'transaction.detail.amount' | translate }}</mat-label>
                     <input
-                        id="detail-weight-{{ index }}"
+                        id="detail-weight-{{ index() }}"
                         matInput
                         type="number"
                         formControlName="detailWeight"
                     />
                     <span matTextSuffix>kg</span>
                     @if (
-                        detail.get('detailWeight')?.invalid && detail.get('detailWeight')?.touched
+                        detail().get('detailWeight')?.invalid &&
+                        detail().get('detailWeight')?.touched
                     ) {
-                        @if (detail.get('detailWeight')?.hasError('min')) {
+                        @if (detail().get('detailWeight')?.hasError('min')) {
                             <mat-error>{{ 'transaction.detail.amount.min' | translate }}</mat-error>
                         }
                     }
@@ -83,17 +86,17 @@
                 <mat-form-field>
                     <mat-label>{{ 'transaction.detail.unit_price' | translate }}</mat-label>
                     <input
-                        id="detail-unitprice-{{ index }}"
+                        id="detail-unitprice-{{ index() }}"
                         matInput
                         type="number"
                         formControlName="detailUnitPrice"
                     />
-                    <span matTextSuffix>{{ currencySymbol }}/Kg</span>
+                    <span matTextSuffix>{{ currencySymbol() }}/Kg</span>
                     @if (
-                        detail.get('detailUnitPrice')?.invalid &&
-                        detail.get('detailUnitPrice')?.touched
+                        detail().get('detailUnitPrice')?.invalid &&
+                        detail().get('detailUnitPrice')?.touched
                     ) {
-                        @if (detail.get('detailUnitPrice')?.hasError('min')) {
+                        @if (detail().get('detailUnitPrice')?.hasError('min')) {
                             <mat-error>{{
                                 'transaction.detail.unit_price.min' | translate
                             }}</mat-error>
@@ -103,8 +106,8 @@
 
                 <mat-form-field>
                     <mat-label>{{ 'transaction.detail.total_price' | translate }}</mat-label>
-                    @let weight = detail.get('detailWeight');
-                    @let unitPrice = detail.get('detailUnitPrice');
+                    @let weight = detail().get('detailWeight');
+                    @let unitPrice = detail().get('detailUnitPrice');
                     <input
                         matInput
                         type="number"
@@ -115,7 +118,7 @@
                         "
                         [disabled]="true"
                     />
-                    <span matTextSuffix>{{ currencySymbol }}</span>
+                    <span matTextSuffix>{{ currencySymbol() }}</span>
                 </mat-form-field>
             }
         </div>
@@ -126,7 +129,7 @@
                 type="button"
                 class="mat-button-danger"
                 (click)="rowDeleted.emit()"
-                [disabled]="isLastDetailRow"
+                [disabled]="isLastDetailRow()"
             >
                 <mat-icon aria-hidden="true" fontIcon="delete"></mat-icon>
                 {{ 'transaction.detail.delete_row.tooltip' | translate }}

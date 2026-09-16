@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { WalletDataInterface } from './interfaces';
 import { WalletDataUtil } from './wallet-data-util';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -15,6 +15,13 @@ import { MatRippleModule } from '@angular/material/core';
 export class WalletCardComponent {
     protected readonly walletDataUtil = inject(WalletDataUtil);
 
-    @Input({ required: true }) walletData!: WalletDataInterface;
-    @Output() cardClicked = new EventEmitter<number>();
+    /**
+     * Egy wallet adatai
+     */
+    public walletData = input.required<WalletDataInterface>();
+
+    /**
+     * Walletra rákattintott a user
+     */
+    public cardClicked = output<number>();
 }

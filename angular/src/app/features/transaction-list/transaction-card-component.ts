@@ -4,7 +4,7 @@ import {
     ElementRef,
     HostListener,
     inject,
-    Input,
+    input,
     Signal,
 } from '@angular/core';
 import { TransactionListElementData } from './interfaces';
@@ -22,7 +22,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     host: {
         role: 'button',
         tabindex: '0',
-        '[attr.aria-label]': 'this.transaction.name',
+        '[attr.aria-label]': 'this.transaction().name',
     },
 })
 export default class TransactionCardComponent {
@@ -31,7 +31,7 @@ export default class TransactionCardComponent {
     /**
      * Megjelenítendő tranzakció adatai
      */
-    @Input({ required: true }) transaction!: TransactionListElementData;
+    public transaction = input.required<TransactionListElementData>()
 
     /**
      * Billentyűzettel is aktiválható legyen a kártya (Enter/Space), ugyanúgy mint egérkattintásra
@@ -47,14 +47,14 @@ export default class TransactionCardComponent {
      * Tranzakció típusa bevétel-e
      */
     protected isIncome: Signal<boolean> = computed(
-        () => this.transaction.transactionType == TransactionTypeEnum.INCOME,
+        () => this.transaction().transactionType == TransactionTypeEnum.INCOME,
     );
 
     /**
      * Tranzakció kategóriák listája
      */
     protected categoryList: Signal<Set<string>> = computed(() => {
-        const categories: string[] = this.transaction.transactionDetails.flatMap(
+        const categories: string[] = this.transaction().transactionDetails.flatMap(
             (detail) => detail.categories,
         );
         return new Set(categories);

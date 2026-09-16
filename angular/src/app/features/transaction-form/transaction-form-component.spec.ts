@@ -56,9 +56,12 @@ describe('TransactionFormComponent (Vitest)', () => {
 
         fixture = TestBed.createComponent(TransactionFormComponent);
         component = fixture.componentInstance;
-        component.isTransactionFormDisabled = false;
-        component.isCategorySaveInProgress = false;
-        component.categoryList = signal<CategoryResponseInterface[]>([]);
+        fixture.componentRef.setInput('isTransactionFormDisabled', false);
+        fixture.componentRef.setInput('isCategorySaveInProgress', false);
+        fixture.componentRef.setInput('categoryList', signal<CategoryResponseInterface[]>([]));
+        fixture.componentRef.setInput('addCategoryCallback', () => {
+            throw new Error('not called in this test');
+        });
     });
 
     it('should build an empty, invalid form for a new transaction by default', () => {
@@ -124,7 +127,7 @@ describe('TransactionFormComponent (Vitest)', () => {
                 },
             ],
         };
-        component.transaction = backendTransaction;
+        fixture.componentRef.setInput('transaction', backendTransaction);
 
         component.ngOnChanges({
             transaction: {
@@ -144,7 +147,7 @@ describe('TransactionFormComponent (Vitest)', () => {
     });
 
     it('should do nothing when ngOnChanges fires with a null transaction (initial run)', () => {
-        component.transaction = null;
+        fixture.componentRef.setInput('transaction', null);
 
         expect(() =>
             component.ngOnChanges({
@@ -183,7 +186,7 @@ describe('TransactionFormComponent (Vitest)', () => {
                 },
             ],
         };
-        component.transaction = backendTransaction;
+        fixture.componentRef.setInput('transaction', backendTransaction);
         component.ngOnChanges({
             transaction: {
                 currentValue: backendTransaction,
@@ -222,15 +225,15 @@ describe('TransactionFormComponent (Vitest)', () => {
         const addCategoryCallback = () => {
             throw new Error('not called in this test');
         };
-        component.addCategoryCallback = addCategoryCallback;
+        fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
         fixture.detectChanges();
 
         const categorySelects = fixture.debugElement.queryAll(By.directive(CategorySelectComponent));
         expect(categorySelects.length).toBeGreaterThan(0);
         categorySelects.forEach((categorySelect) => {
-            expect((categorySelect.componentInstance as CategorySelectComponent).addCategoryCallback).toBe(
-                addCategoryCallback,
-            );
+            expect(
+                (categorySelect.componentInstance as CategorySelectComponent).addCategoryCallback(),
+            ).toBe(addCategoryCallback);
         });
     });
 
@@ -272,7 +275,7 @@ describe('TransactionFormComponent (Vitest)', () => {
                 },
             ],
         };
-        component.transaction = backendTransaction;
+        fixture.componentRef.setInput('transaction', backendTransaction);
 
         component.ngOnChanges({
             transaction: {

@@ -32,9 +32,9 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
 
     it('should render each transaction through the real card component with correct data', () => {
         // GIVEN
-        component.isTransactionListLoading = false;
-        component.title = null;
-        component.transactions = [
+        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('title', null);
+        fixture.componentRef.setInput('transactions', [
             {
                 id: 1,
                 name: 'Fizetés',
@@ -64,7 +64,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
                 ],
                 wallet: sampleWallet,
             },
-        ] as TransactionListElementData[];
+        ] as TransactionListElementData[]);
 
         // WHEN
         fixture.detectChanges();
@@ -90,8 +90,8 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
 
     it('should emit editTransaction with the id of the clicked card, not just the first one', () => {
         // GIVEN
-        component.isTransactionListLoading = false;
-        component.transactions = [
+        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('transactions', [
             {
                 id: 10,
                 name: 'tranzakció1',
@@ -112,7 +112,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
                 transactionDetails: [],
                 wallet: sampleWallet,
             },
-        ];
+        ]);
 
         let emitted: { transactionId: number } | undefined;
         component.editTransaction.subscribe((event) => (emitted = event));
@@ -129,8 +129,8 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
 
     it('should instantiate a real TransactionCardComponent instance for each transaction', () => {
         // GIVEN
-        component.isTransactionListLoading = false;
-        component.transactions = [
+        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('transactions', [
             {
                 id: 1,
                 name: 'tranzakció1',
@@ -141,7 +141,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
                 transactionDetails: [],
                 wallet: sampleWallet,
             },
-        ];
+        ]);
 
         // WHEN
         fixture.detectChanges();
@@ -151,6 +151,6 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
         const cardComponent = cardDebugElement.componentInstance as TransactionCardComponent;
 
         expect(cardComponent).toBeInstanceOf(TransactionCardComponent);
-        expect(cardComponent.transaction.name).toBe('tranzakció1');
+        expect(cardComponent.transaction().name).toBe('tranzakció1');
     });
 });

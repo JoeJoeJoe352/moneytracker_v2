@@ -86,10 +86,13 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
 
         fixture = TestBed.createComponent(TransactionFormComponent);
         component = fixture.componentInstance;
-        component.isTransactionFormDisabled = false;
-        component.isCategorySaveInProgress = false;
-        component.categoryList = signal<CategoryResponseInterface[]>([]);
-        component.transaction = complexTransaction;
+        fixture.componentRef.setInput('isTransactionFormDisabled', false);
+        fixture.componentRef.setInput('isCategorySaveInProgress', false);
+        fixture.componentRef.setInput('categoryList', signal<CategoryResponseInterface[]>([]));
+        fixture.componentRef.setInput('addCategoryCallback', () => {
+            throw new Error('not called in this test');
+        });
+        fixture.componentRef.setInput('transaction', complexTransaction);
 
         component.ngOnChanges({
             transaction: {
@@ -106,10 +109,10 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailFormComponent));
 
         expect(rows.length).toBe(2);
-        expect((rows[0].componentInstance as TransactionDetailFormComponent).detail).toBe(
+        expect((rows[0].componentInstance as TransactionDetailFormComponent).detail()).toBe(
             component.details.at(0),
         );
-        expect((rows[1].componentInstance as TransactionDetailFormComponent).detail).toBe(
+        expect((rows[1].componentInstance as TransactionDetailFormComponent).detail()).toBe(
             component.details.at(1),
         );
         expect(fixture.nativeElement.querySelector('#detail-name-0').value).toBe('Kenyér');
@@ -180,20 +183,22 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         const addCategoryCallback = () => {
             throw new Error('not called in this test');
         };
-        component.addCategoryCallback = addCategoryCallback;
+        fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
         fixture.detectChanges();
 
         const firstCategorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent))
             .componentInstance as CategorySelectComponent;
 
-        expect(firstCategorySelect.addCategoryCallback).toBe(addCategoryCallback);
+        expect(firstCategorySelect.addCategoryCallback()).toBe(addCategoryCallback);
     });
 
     it('should propagate the selected wallet currency symbol down to every detail row', () => {
         const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailFormComponent));
 
         expect(
-            rows.map((row) => (row.componentInstance as TransactionDetailFormComponent).currencySymbol),
+            rows.map((row) =>
+                (row.componentInstance as TransactionDetailFormComponent).currencySymbol(),
+            ),
         ).toEqual(['Ft', 'Ft']);
 
         const walletSelect = fixture.debugElement.query(By.directive(MatSelect));

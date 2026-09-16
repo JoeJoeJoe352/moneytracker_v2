@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, output } from '@angular/core';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -19,8 +19,9 @@ import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
     template: '',
 })
 class StubWalletsListComponent {
-    @Input() walletListData: WalletDataInterface[] = [];
-    @Output() walletCardClicked = new EventEmitter<WalletDataInterface>();
+    walletListData = input<WalletDataInterface[]>([]);
+
+    walletCardClicked = output<WalletDataInterface>();
 }
 
 /**
@@ -63,7 +64,7 @@ describe('WalletsPageComponent (Vitest)', () => {
     }>[];
     let confirmDialogRefs: FakeDialogRef<unknown>[];
 
-    function setup(listWalletsResult: Observable<WalletDataInterface[]> = of([sampleWallet])) {
+    async function setup(listWalletsResult: Observable<WalletDataInterface[]> = of([sampleWallet])) {
         walletServiceMock = {
             listWallets: vi.fn(() => listWalletsResult),
             createWallet: vi.fn(() => of(undefined)),
@@ -113,6 +114,7 @@ describe('WalletsPageComponent (Vitest)', () => {
         fixture = TestBed.createComponent(WalletsPageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+        await fixture.whenStable();
     }
 
     function getListStub(): StubWalletsListComponent {
@@ -129,32 +131,32 @@ describe('WalletsPageComponent (Vitest)', () => {
         return confirmDialogRefs[confirmDialogRefs.length - 1];
     }
 
-    it('should load the wallet list on init', () => {
-        setup();
+    it('should load the wallet list on init', async () => {
+        await setup();
 
         expect(walletServiceMock.listWallets).toHaveBeenCalledTimes(1);
-        expect(getListStub().walletListData).toEqual([sampleWallet]);
+        expect(getListStub().walletListData()).toEqual([sampleWallet]);
     });
 
-    // A jelenlegi implementáció a tap(() => isWalletListLoading.set(false))-t csak a sikeres
-    // ágon futtatja le, hiba esetén nincs catchError, ezért a spinner örökre fennmarad.
-    // Ez a teszt a jelenlegi (hibás) viselkedést rögzíti - lásd a kapcsolódó megjegyzést.
-    it('should keep showing the spinner forever if loading the wallets fails (known bug: no catchError)', () => {
-        setup(throwError(() => new Error('boom')));
+    // A resource() maga kezeli a hibaállapotot: sikertelen betöltés után isLoading() false lesz
+    // (a spinner eltűnik), a lista pedig üresen jelenik meg ahelyett, hogy a hibás resource.value()
+    // hívás elszállna.
+    it('should stop loading and render an empty list if loading the wallets fails', async () => {
+        await setup(throwError(() => new Error('boom')));
 
-        expect(component['isWalletListLoading']()).toBe(true);
-        expect(fixture.nativeElement.querySelector('mat-spinner')).toBeTruthy();
-        expect(fixture.nativeElement.querySelector('app-wallets-list-component')).toBeNull();
+        expect(component['walletListResource'].isLoading()).toBe(false);
+        expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+        expect(getListStub().walletListData()).toEqual([]);
     });
 
-    it('should not open any dialog until the create button is clicked', () => {
-        setup();
+    it('should not open any dialog until the create button is clicked', async () => {
+        await setup();
 
         expect(dialogOpenSpy).not.toHaveBeenCalled();
     });
 
-    it('should open the wallet form dialog in create mode (no wallet) when the create button is clicked', () => {
-        setup();
+    it('should open the wallet form dialog in create mode (no wallet) when the create button is clicked', async () => {
+        await setup();
 
         const createButton = fixture.nativeElement.querySelector('button');
         createButton.click();
@@ -165,8 +167,8 @@ describe('WalletsPageComponent (Vitest)', () => {
         );
     });
 
-    it('should open the wallet form dialog in edit mode with the clicked wallet when a card is clicked', () => {
-        setup();
+    it('should open the wallet form dialog in edit mode with the clicked wallet when a card is clicked', async () => {
+        await setup();
 
         getListStub().walletCardClicked.emit(sampleWallet);
 
@@ -176,8 +178,8 @@ describe('WalletsPageComponent (Vitest)', () => {
         );
     });
 
-    it('should create a new wallet, reload the list and close the dialog', () => {
-        setup();
+    it('should create a new wallet, reload the list and close the dialog', async () => {
+        await setup();
         walletServiceMock.listWallets.mockClear();
 
         component['openWalletModal'](null);
@@ -188,7 +190,7 @@ describe('WalletsPageComponent (Vitest)', () => {
             walletType: WalletTypesEnum.default,
         };
         lastWalletFormDialogRef().componentInstance.saved.emit(payload);
-        TestBed.tick();
+        await fixture.whenStable();
 
         expect(walletServiceMock.createWallet).toHaveBeenCalledWith(payload);
         expect(walletServiceMock.updateWallet).not.toHaveBeenCalled();
@@ -196,8 +198,8 @@ describe('WalletsPageComponent (Vitest)', () => {
         expect(lastWalletFormDialogRef().close).toHaveBeenCalled();
     });
 
-    it('should update the selected wallet and reload the list', () => {
-        setup();
+    it('should update the selected wallet and reload the list', async () => {
+        await setup();
         walletServiceMock.listWallets.mockClear();
 
         component['openWalletModal'](sampleWallet);
@@ -207,15 +209,15 @@ describe('WalletsPageComponent (Vitest)', () => {
             walletType: WalletTypesEnum.savings,
         };
         lastWalletFormDialogRef().componentInstance.saved.emit(payload);
-        TestBed.tick();
+        await fixture.whenStable();
 
         expect(walletServiceMock.updateWallet).toHaveBeenCalledWith(sampleWallet.id, payload);
         expect(walletServiceMock.createWallet).not.toHaveBeenCalled();
         expect(walletServiceMock.listWallets).toHaveBeenCalledTimes(1);
     });
 
-    it('should keep the dialog open and re-enable the form if saving fails', () => {
-        setup();
+    it('should keep the dialog open and re-enable the form if saving fails', async () => {
+        await setup();
         walletServiceMock.createWallet.mockReturnValue(throwError(() => new Error('boom')));
 
         component['openWalletModal'](null);
@@ -226,11 +228,11 @@ describe('WalletsPageComponent (Vitest)', () => {
         });
 
         expect(lastWalletFormDialogRef().close).not.toHaveBeenCalled();
-        expect(component['isWalletFormDisabled']()).toBe(false);
+        expect(component['walletListResource'].isLoading()).toBe(false);
     });
 
-    it('should not delete the wallet when the confirm dialog is declined', () => {
-        setup();
+    it('should not delete the wallet when the confirm dialog is declined', async () => {
+        await setup();
 
         component['openWalletModal'](sampleWallet);
         lastWalletFormDialogRef().componentInstance.deleted.emit(sampleWallet.id);
@@ -241,15 +243,15 @@ describe('WalletsPageComponent (Vitest)', () => {
         expect(walletServiceMock.softDeleteWallet).not.toHaveBeenCalled();
     });
 
-    it('should delete the wallet, reload the list and close the dialog when confirmed', () => {
-        setup();
+    it('should delete the wallet, reload the list and close the dialog when confirmed', async () => {
+        await setup();
         walletServiceMock.listWallets.mockClear();
 
         component['openWalletModal'](sampleWallet);
         const formDialogRef = lastWalletFormDialogRef();
         formDialogRef.componentInstance.deleted.emit(sampleWallet.id);
         lastConfirmDialogRef().close(true);
-        TestBed.tick();
+        await fixture.whenStable();
 
         expect(walletServiceMock.softDeleteWallet).toHaveBeenCalledWith(sampleWallet.id);
         expect(walletServiceMock.listWallets).toHaveBeenCalledTimes(1);

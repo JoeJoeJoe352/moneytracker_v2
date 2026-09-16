@@ -1,6 +1,6 @@
 <mat-form-field class="category-select">
     <mat-label>{{ 'transaction.categories' | translate }}</mat-label>
-    <mat-chip-grid #chipGrid [disabled]="disabled">
+    <mat-chip-grid #chipGrid [disabled]="isDisabled()">
         @for (category of selected(); track category.item_id) {
             <mat-chip-row (removed)="remove(category)">
                 {{ category.item_text }}
@@ -27,7 +27,7 @@
             <mat-option [value]="option">{{ option.item_text }}</mat-option>
         }
         @if (showAddOption()) {
-            <mat-option [value]="addNewOption" [disabled]="disabled">
+            <mat-option [value]="addNewOption" [disabled]="isDisabled()">
                 {{ 'transaction.category.add' | translate }}
             </mat-option>
         }

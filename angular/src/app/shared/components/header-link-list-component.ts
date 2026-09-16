@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, input, OnInit, output } from '@angular/core';
 import { LinkInterface } from '../interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -9,15 +9,15 @@ import { MatIcon } from '@angular/material/icon';
     template: `
         <a
             class="nav-link"
-            [routerLink]="linkData.url"
+            [routerLink]="linkData().url"
             routerLinkActive="active"
             #rla="routerLinkActive"
             [attr.aria-current]="rla.isActive ? 'page' : null"
-            [routerLinkActiveOptions]="{ exact: linkData.url === '/' }"
+            [routerLinkActiveOptions]="{ exact: linkData().url === '/' }"
             (click)="clicked.emit()"
         >
-            <mat-icon aria-hidden="true" [fontIcon]="linkData.icon"></mat-icon>
-            {{ linkData.langKey | translate }}
+            <mat-icon aria-hidden="true" [fontIcon]="linkData().icon"></mat-icon>
+            {{ linkData().langKey | translate }}
         </a>
     `,
     imports: [TranslatePipe, RouterLink, RouterLinkActive, MatIcon],
@@ -52,14 +52,17 @@ export class HeaderLinkListComponent implements OnInit {
     /**
      * Linkek listája, amik jelenjenek meg a fejlécben
      */
-    @Input({ required: true }) linkData!: LinkInterface;
+    linkData = input.required<LinkInterface>();
 
-    @Output() clicked = new EventEmitter<void>();
+    /**
+     * rákattintott a user az egyik elemre
+     */
+    clicked = output<void>();
 
     ngOnInit(): void {
-        if (this.linkData.action && this.linkData.url) {
+        if (this.linkData().action && this.linkData().url) {
             throw new Error('Url and action coextists is forbidden');
-        } else if (!this.linkData.action && !this.linkData.url) {
+        } else if (!this.linkData().action && !this.linkData().url) {
             throw new Error('One of url or actions must exists');
         }
     }

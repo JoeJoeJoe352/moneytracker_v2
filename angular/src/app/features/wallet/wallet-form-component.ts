@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, OnInit, Output, Signal } from '@angular/core';
+import { Component, inject, OnInit, output, Signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
@@ -43,8 +43,8 @@ export class WalletFormComponent implements OnInit {
      */
     protected wallet: WalletDataInterface | null = null;
 
-    @Output() deleted = new EventEmitter<number>();
-    @Output() saved = new EventEmitter<WalletCreateRequest | WalletUpdateRequest>();
+    public deleted = output<number>()
+    public saved = output<WalletCreateRequest | WalletUpdateRequest>()
 
     protected walletForm = this.fb.nonNullable.group({
         name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],

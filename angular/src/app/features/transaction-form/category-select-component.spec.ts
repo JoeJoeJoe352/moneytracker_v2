@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
-import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { MatAutocomplete } from '@angular/material/autocomplete';
 import { MatChipRow } from '@angular/material/chips';
@@ -25,7 +24,7 @@ describe('CategorySelectComponent (Vitest)', () => {
 
         fixture = TestBed.createComponent(CategorySelectComponent);
         component = fixture.componentInstance;
-        component.categoryData = signal<DropdownInterface[]>([food, transport]);
+        fixture.componentRef.setInput('categoryData', [food, transport]);
     });
 
     function chipTexts(): string[] {
@@ -96,7 +95,7 @@ describe('CategorySelectComponent (Vitest)', () => {
             isDefaultCategory: false,
         };
         const addCategoryCallback = vi.fn(() => of(newCategory));
-        component.addCategoryCallback = addCategoryCallback;
+        fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
         fixture.detectChanges();
         setSearchText('  Health  ');
 
@@ -115,7 +114,7 @@ describe('CategorySelectComponent (Vitest)', () => {
         const addCategoryCallback = vi.fn(() =>
             of<CategoryResponseInterface>({ id: 3, name: 'Health', isDefaultCategory: false }),
         );
-        component.addCategoryCallback = addCategoryCallback;
+        fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
         fixture.detectChanges();
         component.setDisabledState(true);
         setSearchText('Health');

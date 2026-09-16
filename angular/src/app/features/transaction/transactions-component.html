@@ -1,4 +1,4 @@
-@if (isHistoryMode) {
+@if (isHistoryMode()) {
     <mat-card class="title-card">
         <mat-card-header>
             <h1 mat-card-title>{{ 'transaction_page.title' | translate }}</h1>
@@ -6,18 +6,18 @@
     </mat-card>
 }
 
-@if (needSearchField) {
+@if (needSearchField()) {
     <app-transaction-filter
         [defaultData]="filterInputDefaultValuesFromQuery()"
-        [isTransactionListLoading]="transactionListData.isLoading"
+        [isTransactionListLoading]="transactionListData.isLoading()"
         (filterSubmit)="onFilterSubmit($event)"
         (resetForm)="clearInputs()"
     />
 }
 
 <app-transaction-list
-    [title]="isHistoryMode ? null : ('mainpage.last_transactions' | translate)"
+    [title]="isHistoryMode() ? null : ('mainpage.last_transactions' | translate)"
     [isTransactionListLoading]="transactionListData.isLoading()"
-    [transactions]="transactionListData.value()"
+    [transactions]="transactionListData.hasValue() ? transactionListData.value() : []"
     (editTransaction)="modal.open($event.transactionId)"
 />

@@ -27,8 +27,8 @@ describe('TransactionListComponent (Vitest)', () => {
     });
 
     it('should show spinner when loading', () => {
-        component.isTransactionListLoading = true;
-        component.transactions = [];
+        fixture.componentRef.setInput('isTransactionListLoading', true);
+        fixture.componentRef.setInput('transactions', []);
         fixture.detectChanges();
 
         const spinner = fixture.nativeElement.querySelector('mat-spinner');
@@ -36,9 +36,9 @@ describe('TransactionListComponent (Vitest)', () => {
     });
 
     it('should show title when provided', () => {
-        component.isTransactionListLoading = false;
-        component.title = 'Tranzakciók';
-        component.transactions = [];
+        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('title', 'Tranzakciók');
+        fixture.componentRef.setInput('transactions', []);
         fixture.detectChanges();
 
         const titleEl = fixture.nativeElement.querySelector('[mat-card-title]');
@@ -46,12 +46,12 @@ describe('TransactionListComponent (Vitest)', () => {
     });
 
     it('should render correct number of transaction cards', () => {
-        component.isTransactionListLoading = false;
-        component.title = null;
-        component.transactions = [
+        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('title', null);
+        fixture.componentRef.setInput('transactions', [
             { id: 1, name: 'tranzakció1', priceSum: 100, transactionType: 'INCOME', transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [], wallet: sampleWallet },
             { id: 2, name: 'tranzakció2', priceSum: -200, transactionType: 'OUTCOME', transactionDate: '2024-01-02', isComplexTransaction: true, transactionDetails: [], wallet: sampleWallet },
-        ];
+        ]);
 
         fixture.detectChanges();
 
@@ -62,10 +62,10 @@ describe('TransactionListComponent (Vitest)', () => {
     it('should emit editTransaction when card is clicked', () => {
         const spy = vi.spyOn(component.editTransaction, 'emit');
 
-        component.isTransactionListLoading = false;
-        component.transactions = [
+        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('transactions', [
             { id: 5, name: 'tranzakció5', priceSum: 100, transactionType: 'INCOME', transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [], wallet: sampleWallet },
-        ];
+        ]);
 
         fixture.detectChanges();
 
@@ -76,8 +76,8 @@ describe('TransactionListComponent (Vitest)', () => {
     });
 
     it('should show empty message when no transactions', () => {
-        component.isTransactionListLoading = false;
-        component.transactions = [];
+        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('transactions', []);
         fixture.detectChanges();
 
         const emptyMsg = fixture.nativeElement.querySelector('p.text-center');

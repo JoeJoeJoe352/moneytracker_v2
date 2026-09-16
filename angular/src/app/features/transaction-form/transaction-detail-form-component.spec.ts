@@ -40,15 +40,21 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture = TestBed.createComponent(TransactionDetailFormComponent);
         component = fixture.componentInstance;
-        component.categoryData = signal<DropdownInterface[]>([]);
-        component.isCategorySaveInProgress = false;
-        component.isLastDetailRow = false;
-        component.index = 0;
-        component.currencySymbol = 'Ft';
+        fixture.componentRef.setInput('categoryData', signal<DropdownInterface[]>([]));
+        fixture.componentRef.setInput('isCategorySaveInProgress', false);
+        fixture.componentRef.setInput('isLastDetailRow', false);
+        fixture.componentRef.setInput('index', 0);
+        fixture.componentRef.setInput('currencySymbol', 'Ft');
+        fixture.componentRef.setInput('addCategoryCallback', () => {
+            throw new Error('not called in this test');
+        });
     });
 
     it('should show simple price input when detailIsComplexPriceMode is false, and hide weight/unitprice', () => {
-        component.detail = buildDetailGroup({ detailIsComplexPriceMode: false });
+        fixture.componentRef.setInput(
+            'detail',
+            buildDetailGroup({ detailIsComplexPriceMode: false }),
+        );
 
         fixture.detectChanges();
 
@@ -58,11 +64,14 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
     });
 
     it('should show weight/unitprice/total-price inputs and compute the total when detailIsComplexPriceMode is true', () => {
-        component.detail = buildDetailGroup({
-            detailIsComplexPriceMode: true,
-            detailWeight: 2,
-            detailUnitPrice: 300,
-        });
+        fixture.componentRef.setInput(
+            'detail',
+            buildDetailGroup({
+                detailIsComplexPriceMode: true,
+                detailWeight: 2,
+                detailUnitPrice: 300,
+            }),
+        );
 
         fixture.detectChanges();
 
@@ -79,8 +88,11 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
     });
 
     it('should render the currencySymbol input in the simple price suffix', () => {
-        component.detail = buildDetailGroup({ detailIsComplexPriceMode: false });
-        component.currencySymbol = '€';
+        fixture.componentRef.setInput(
+            'detail',
+            buildDetailGroup({ detailIsComplexPriceMode: false }),
+        );
+        fixture.componentRef.setInput('currencySymbol', '€');
 
         fixture.detectChanges();
 
@@ -89,12 +101,15 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
     });
 
     it('should render the currencySymbol input in the unitprice and total-price suffixes when in complex price mode', () => {
-        component.detail = buildDetailGroup({
-            detailIsComplexPriceMode: true,
-            detailWeight: 2,
-            detailUnitPrice: 300,
-        });
-        component.currencySymbol = '$';
+        fixture.componentRef.setInput(
+            'detail',
+            buildDetailGroup({
+                detailIsComplexPriceMode: true,
+                detailWeight: 2,
+                detailUnitPrice: 300,
+            }),
+        );
+        fixture.componentRef.setInput('currencySymbol', '$');
 
         fixture.detectChanges();
 
@@ -106,24 +121,25 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
     });
 
     it('should show a required error on the name field only after it becomes touched and invalid', () => {
-        component.detail = buildDetailGroup({ detailName: '' });
-        component.detail.controls.detailName.setValidators((control) =>
+        const detail = buildDetailGroup({ detailName: '' });
+        fixture.componentRef.setInput('detail', detail);
+        detail.controls.detailName.setValidators((control) =>
             control.value ? null : { required: true },
         );
-        component.detail.controls.detailName.updateValueAndValidity();
+        detail.controls.detailName.updateValueAndValidity();
 
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelector('mat-error')).toBeNull();
 
-        component.detail.controls.detailName.markAsTouched();
+        detail.controls.detailName.markAsTouched();
         fixture.detectChanges();
 
         expect(fixture.nativeElement.querySelector('mat-error')).toBeTruthy();
     });
 
     it('should disable the delete button when isLastDetailRow is true', () => {
-        component.detail = buildDetailGroup();
-        component.isLastDetailRow = true;
+        fixture.componentRef.setInput('detail', buildDetailGroup());
+        fixture.componentRef.setInput('isLastDetailRow', true);
 
         fixture.detectChanges();
 
@@ -132,8 +148,8 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
     });
 
     it('should enable the delete button when isLastDetailRow is false', () => {
-        component.detail = buildDetailGroup();
-        component.isLastDetailRow = false;
+        fixture.componentRef.setInput('detail', buildDetailGroup());
+        fixture.componentRef.setInput('isLastDetailRow', false);
 
         fixture.detectChanges();
 
@@ -142,8 +158,8 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
     });
 
     it('should emit rowDeleted when the delete button is clicked', () => {
-        component.detail = buildDetailGroup();
-        component.isLastDetailRow = false;
+        fixture.componentRef.setInput('detail', buildDetailGroup());
+        fixture.componentRef.setInput('isLastDetailRow', false);
         fixture.detectChanges();
 
         let emitted = false;
@@ -159,13 +175,13 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
         const addCategoryCallback = () => {
             throw new Error('not called in this test');
         };
-        component.detail = buildDetailGroup();
-        component.addCategoryCallback = addCategoryCallback;
+        fixture.componentRef.setInput('detail', buildDetailGroup());
+        fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
         fixture.detectChanges();
 
         const categorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent))
             .componentInstance as CategorySelectComponent;
 
-        expect(categorySelect.addCategoryCallback).toBe(addCategoryCallback);
+        expect(categorySelect.addCategoryCallback()).toBe(addCategoryCallback);
     });
 });

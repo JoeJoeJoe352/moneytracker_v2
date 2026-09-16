@@ -11,16 +11,16 @@
             {{ getCardTitle() | translate }}
         </div>
     </div>
-    <div aria-live="polite" [attr.aria-busy]="isMoneySumLoading">
+    <div aria-live="polite" [attr.aria-busy]="isMoneySumLoading()">
         @if (isMoneySumLoading()) {
             <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
-        } @else if (walletSummaries.length > 0) {
+        } @else if (walletSummaries().length > 0) {
             <div
                 class="stat-value income"
                 [class.income]="isIncome()"
                 [class.expense]="!isIncome()"
             >
-                @for (summary of walletSummaries; track $index) {
+                @for (summary of walletSummaries(); track $index) {
                     <div class="stat-price-row">
                         {{ summary.total | currencyFormat: summary.currencyCode }}
                     </div>

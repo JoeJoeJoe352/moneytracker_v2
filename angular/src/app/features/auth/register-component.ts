@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Output } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import {
     FormBuilder,
     FormControl,
@@ -36,7 +36,7 @@ export class RegisterComponent {
     /**
      * Regisztrációs gombra rákattintott-e a user
      */
-    @Output() register = new EventEmitter<RegisterRequestData>();
+    public register = output<RegisterRequestData>()
 
     /**
      * Töltődés alatt van-e a form

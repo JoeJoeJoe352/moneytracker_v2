@@ -28,7 +28,7 @@ describe('WalletCardComponent (Vitest)', () => {
 
         fixture = TestBed.createComponent(WalletCardComponent);
         component = fixture.componentInstance;
-        component.walletData = wallet;
+        fixture.componentRef.setInput('walletData', wallet);
     });
 
     it('should render the wallet name and currency amount with the currency symbol as a suffix', () => {
@@ -43,7 +43,7 @@ describe('WalletCardComponent (Vitest)', () => {
     });
 
     it('should render the euro symbol for an EUR wallet', () => {
-        component.walletData = { ...wallet, currencyCode: CurrencyCodesEnum.eur };
+        fixture.componentRef.setInput('walletData', { ...wallet, currencyCode: CurrencyCodesEnum.eur });
         fixture.detectChanges();
 
         expect(fixture.nativeElement.querySelector('.wallet-balance-amount').textContent.replace(/\s+/g, ' ').trim()).toBe(

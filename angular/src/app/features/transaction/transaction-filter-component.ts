@@ -1,11 +1,9 @@
 import {
     Component,
-    EventEmitter,
     inject,
-    Input,
+    input,
     OnInit,
-    Output,
-    Signal,
+    output,
 } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -41,23 +39,23 @@ export class TransactionFilter implements OnInit {
     /**
      * Form alapértelmezett adatai
      */
-    @Input({ required: true }) defaultData!: FilterData | null;
-    /**
-     * A cím heading szintje (aria-level), a szülő komponens heading-hierarchiájától függően
-     */
-    @Input() headingLevel = 2;
+    public defaultData = input.required<FilterData | null>();
     /**
      * Tranzakciós adatok töltődnek-e
      */
-    @Input({ required: true }) isTransactionListLoading!: Signal<boolean>;
+    public isTransactionListLoading = input.required<boolean>();
+    /**
+     * A cím heading szintje (aria-level), a szülő komponens heading-hierarchiájától függően
+     */
+    public headingLevel = input(2);
     /**
      * Form elküldése event
      */
-    @Output() filterSubmit = new EventEmitter<FilterData>();
+    public filterSubmit = output<FilterData>();
     /**
      * Form resetelése event
      */
-    @Output() resetForm = new EventEmitter<void>();
+    public resetForm = output<void>();
 
     /**
      * Form definiciója
@@ -67,7 +65,7 @@ export class TransactionFilter implements OnInit {
     private defaultFormData = { name: '', date: null };
 
     ngOnInit(): void {
-        this.buildForm(this.defaultData ?? this.defaultFormData);
+        this.buildForm(this.defaultData() ?? this.defaultFormData);
     }
 
     /**

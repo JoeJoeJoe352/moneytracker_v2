@@ -3,7 +3,7 @@ import {
     computed,
     ElementRef,
     forwardRef,
-    Input,
+    input,
     Signal,
     signal,
     ViewChild,
@@ -58,14 +58,24 @@ export class CategorySelectComponent implements ControlValueAccessor {
     /**
      * Kiválasztható kategóriák listája
      */
-    @Input({ required: true }) categoryData!: Signal<DropdownInterface[]>;
+    public categoryData = input.required<DropdownInterface[]>();
     /**
      * Kategória mentése folyamatban van-e (ez alatt az egész komponens le van tiltva)
      */
-    @Input() disabled = false;
+    public disabled = input(false);
+    /**
+     * A form (ControlValueAccessor.setDisabledState) letiltotta-e a mezőt
+     */
+    private formDisabled = signal(false);
+    /**
+     * Ténylegesen le van-e tiltva a komponens (a disabled input vagy a form letiltása miatt)
+     */
+    protected isDisabled = computed(() => this.disabled() || this.formDisabled());
 
-    @Input() addCategoryCallback!: (name: string) => Observable<CategoryResponseInterface>;
-
+    public addCategoryCallback = input.required<(name: string) => Observable<CategoryResponseInterface>>();
+    /**
+     * Inputba írt keresési szöveg
+     */
     private searchText = signal('');
 
     private onChange: (value: DropdownInterface[]) => void = () => undefined;
@@ -123,12 +133,18 @@ export class CategorySelectComponent implements ControlValueAccessor {
                 throw new Error('Categoryinput not exists');
             }
             const name = this.categoryInput.nativeElement.value.trim();
-            if (name && !this.disabled) {
-                this.addCategoryCallback(name).subscribe({ 
+            if (name && !this.isDisabled()) {
+                this.addCategoryCallback()(name).subscribe({
                     next: (category) => {
                         // note: új kategóriát a szülő state service-ben adjuk hozzá
-                        const newCategoryAsDropdownInterface = {item_id: category.id, item_text: category.name} as DropdownInterface
-                        this.selected.update((categories) => [...categories, newCategoryAsDropdownInterface]);
+                        const newCategoryAsDropdownInterface = {
+                            item_id: category.id,
+                            item_text: category.name,
+                        } as DropdownInterface;
+                        this.selected.update((categories) => [
+                            ...categories,
+                            newCategoryAsDropdownInterface,
+                        ]);
                         this.emitChange();
                     },
                 });
@@ -176,7 +192,7 @@ export class CategorySelectComponent implements ControlValueAccessor {
     }
 
     setDisabledState(isDisabled: boolean): void {
-        this.disabled = isDisabled;
+        this.formDisabled.set(isDisabled);
         if (isDisabled) {
             this.searchControl.disable();
         } else {

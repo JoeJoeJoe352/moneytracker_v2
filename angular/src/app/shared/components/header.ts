@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -12,9 +12,15 @@ import { TranslatePipe } from '@ngx-translate/core';
     imports: [MatToolbar, MatIconButton, MatIcon, LanguageSwitcherComponent, TranslatePipe],
 })
 export class Header {
-    @Input() isMobileMenuOpen = false;
+    /**
+     * Nyitva van-e a mobile menü
+     */
+    isMobileMenuOpen = input(false)
 
-    @Output() mobileMenuToggled = new EventEmitter<void>();
+    /**
+     * Mobil menüt átkapcsolta a user
+     */
+    mobileMenuToggled = output<void>()
 
     /**
      * hamburger menu lenyitása/bezárása

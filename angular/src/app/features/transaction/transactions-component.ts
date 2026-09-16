@@ -1,12 +1,11 @@
 import {
     Component,
     DestroyRef,
-    EventEmitter,
     inject,
-    Input,
+    input,
     OnChanges,
     OnInit,
-    Output,
+    output,
     resource,
     signal,
     SimpleChanges,
@@ -44,20 +43,20 @@ export class TransactionsListComponent implements OnInit, OnChanges {
     /**
      * Teljes listát szeretnénk-e látni, vagy csak egy részét
      */
-    @Input({ required: true }) isHistoryMode!: boolean;
+    public isHistoryMode = input.required<boolean>();
     /**
      * Megjelenjen-e a keresési mező
-     */
-    @Input({ required: true }) needSearchField!: boolean;
+    */
+    public needSearchField = input.required<boolean>();
     /**
      * Ha ez az érték változik, a lista újratöltődik (pl. ha a szülő komponensben jött létre új tranzakció)
-     */
-    @Input() reloadTrigger = 0;
+    */
+    public reloadTrigger = input<number>(0);
     /**
      * Akkor emitál, amikor a listában lévő valamelyik tranzakció változott (létrejött/módosult/törlődött),
      * hogy a szülő komponens is tudja frissíteni a saját adatait (pl. összesítés)
      */
-    @Output() transactionsChanged = new EventEmitter<void>();
+    public transactionsChanged = output<void>()
 
     /**
      * Kezdeti szűrőfeltételek a query paraméterekből, a szűrő komponens inicializálásához
@@ -79,7 +78,9 @@ export class TransactionsListComponent implements OnInit, OnChanges {
                 this.latestParams.set(new URLSearchParams(queryParams as Params));
                 // A kezdeti értékből állítjuk be a szűrő form kezdőértékeit
                 if (this.filterInputDefaultValuesFromQuery() === null) {
-                    this.filterInputDefaultValuesFromQuery.set(this.toFilterData(this.latestParams()));
+                    this.filterInputDefaultValuesFromQuery.set(
+                        this.toFilterData(this.latestParams()),
+                    );
                 }
             });
 
@@ -90,6 +91,7 @@ export class TransactionsListComponent implements OnInit, OnChanges {
         });
     }
 
+    // TODO ezt hozzá lehet valahogy kötni a reloadTrigger signalhoz????
     ngOnChanges(changes: SimpleChanges): void {
         // A szülő komponens ha üzen (új tranzakció felvételéről), akkor újratöltjük a listát
         if (changes['reloadTrigger'] && !changes['reloadTrigger'].firstChange) {
@@ -103,8 +105,8 @@ export class TransactionsListComponent implements OnInit, OnChanges {
     protected transactionListData = resource({
         defaultValue: [],
         params: this.latestParams,
-        loader: async ({params}) => {
-            const apiObserver = this.isHistoryMode
+        loader: async ({ params }) => {
+            const apiObserver = this.isHistoryMode()
                 ? this.transactionService.getTransactionHistory(params)
                 : this.transactionService.getLastTransactions();
 

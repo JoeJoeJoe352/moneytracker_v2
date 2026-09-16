@@ -26,11 +26,11 @@
                 [class.income]="isIncome()"
                 [class.outcome]="!isIncome()"
             >
-                {{ transaction.priceSum | currencyFormat: transaction.wallet.currencyCode }}
+                {{ transaction().priceSum | currencyFormat: transaction().wallet.currencyCode }}
             </div>
             <div class="transaction-base-data">
-                <div class="transaction-name">{{ transaction.name }}</div>
-                <div class="wallet-name">({{ transaction.wallet.name }})</div>
+                <div class="transaction-name">{{ transaction().name }}</div>
+                <div class="wallet-name">({{ transaction().wallet.name }})</div>
             </div>
             @if (categoriesAsString()) {
                 <div class="transaction-categories">{{ categoriesAsString() }}</div>
@@ -38,7 +38,7 @@
         </div>
 
         <div class="transaction-meta">
-            <div class="transaction-date">{{ transaction.transactionDate }}</div>
+            <div class="transaction-date">{{ transaction().transactionDate }}</div>
         </div>
     </div>
 </mat-card>

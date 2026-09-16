@@ -2,11 +2,10 @@ import {
     Component,
     computed,
     ElementRef,
-    EventEmitter,
     inject,
-    Input,
+    input,
     OnChanges,
-    Output,
+    output,
     signal,
     Signal,
     SimpleChanges,
@@ -73,29 +72,30 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Form disabled-e (pl.: töltődéskor)
      */
-    @Input({ required: true }) isTransactionFormDisabled!: boolean;
+    public isTransactionFormDisabled = input.required<boolean>();
     /**
      * Kategóriák listája a selecthez
      */
-    @Input({ required: true }) categoryList!: Signal<CategoryResponseInterface[]>;
+    public categoryList = input.required<Signal<CategoryResponseInterface[]>>();
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
-    @Input() transaction: TransactionDataFromBackend | null = null;
+    public transaction = input<TransactionDataFromBackend | null>(null);
     /**
      * Kategória mentése folyamatban van-e
      */
-    @Input({ required: true }) isCategorySaveInProgress!: boolean;
+    public isCategorySaveInProgress = input.required<boolean>();
 
-    @Input() addCategoryCallback!: (name: string) => Observable<CategoryResponseInterface>;
+    public addCategoryCallback =
+        input.required<(name: string) => Observable<CategoryResponseInterface>>();
     /**
      * Mentés gombra kattintott a user
      */
-    @Output() saved = new EventEmitter<NewTransaction>();
+    public saved = output<NewTransaction>();
     /**
      * Tranzakció törlés gombra kattintott a user
      */
-    @Output() deleted = new EventEmitter<number>();
+    public deleted = output<number>();
 
     /**
      * Az "új tétel" gomb sora, hogy addRow()-nál az oldal aljára tudjunk görgetni
@@ -120,7 +120,7 @@ export class TransactionFormComponent implements OnChanges {
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
      */
     protected categoryData: Signal<DropdownInterface[]> = computed(() => {
-        return this.categoryList().map((category) => {
+        return this.categoryList()().map((category) => {
             return {
                 item_id: category.id,
                 item_text: category.name,
@@ -137,7 +137,7 @@ export class TransactionFormComponent implements OnChanges {
      */
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['isTransactionFormDisabled']) {
-            if (this.isTransactionFormDisabled) {
+            if (this.isTransactionFormDisabled()) {
                 this.transactionForm.disable();
             } else {
                 this.transactionForm.enable();
@@ -152,14 +152,15 @@ export class TransactionFormComponent implements OnChanges {
             }
         }
         if (changes['transaction']) {
-            if (this.transaction === null) {
+            const transaction = this.transaction();
+            if (transaction === null) {
                 // Nincs átadva paraméterül transaction (ngOnchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
                 return;
             }
-            this.setWalletSymbol(this.transaction.walletId);
+            this.setWalletSymbol(transaction.walletId);
 
             const convertedInputValues = this.transactionService.utils.convertDataToInput(
-                this.transaction,
+                transaction,
             );
             this.refreshFormWithData(convertedInputValues);
         }
@@ -198,7 +199,7 @@ export class TransactionFormComponent implements OnChanges {
     private setWalletSymbol(walletId: number): void {
         const selectedWallet = this.userData.getWallets().find((wallet) => wallet.id === walletId);
         if (!selectedWallet) {
-            console.error('wallet not found in this transaction: ' + this.transaction);
+            console.error('wallet not found in this transaction: ' + this.transaction());
             return;
         }
         const currencySymbol = this.walletUtil.getCurrencySymbolForCurrencyCode(
@@ -315,13 +316,6 @@ export class TransactionFormComponent implements OnChanges {
             isComplexPriceMode: false,
             categories: [],
         });
-    }
-
-    /**
-     * Létező tranzakció adatai vannak-e a formban (+ guard)
-     */
-    isExistingTransaction(): this is { transaction: TransactionDataFromBackend } {
-        return this.transaction !== null;
     }
 
     /**

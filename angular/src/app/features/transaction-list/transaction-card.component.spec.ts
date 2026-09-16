@@ -23,7 +23,7 @@ describe('TransactionCardComponent (Vitest)', () => {
 
     it('should render income transaction correctly. No categories, simple transaction', () => {
         // GIVEN
-        component.transaction = {
+        fixture.componentRef.setInput('transaction', {
             id: 25,
             name: 'Fizetés',
             priceSum: 500000,
@@ -46,7 +46,7 @@ describe('TransactionCardComponent (Vitest)', () => {
                 currencyCode: CurrencyCodesEnum.huf,
                 type: WalletTypesEnum.default,
             },
-        };
+        });
 
         // WHEN
         fixture.detectChanges();
@@ -78,7 +78,7 @@ describe('TransactionCardComponent (Vitest)', () => {
 
     it('should render outcome transaction correctly. Categories and ', () => {
         // GIVEN
-        component.transaction = {
+        fixture.componentRef.setInput('transaction', {
             id: 26,
             isComplexTransaction: true,
             name: 'Bevásárlás',
@@ -109,7 +109,7 @@ describe('TransactionCardComponent (Vitest)', () => {
                 currencyCode: CurrencyCodesEnum.eur,
                 type: WalletTypesEnum.default,
             },
-        };
+        });
 
         // WHEN
         fixture.detectChanges();

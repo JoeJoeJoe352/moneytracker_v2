@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, Signal } from '@angular/core';
+import { Component, input, output, Signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -32,31 +32,34 @@ export class TransactionDetailFormComponent {
     /**
      * A sorhoz tartozó FormGroup (a szülő details FormArray-jének egy eleme)
      */
-    @Input({ required: true }) detail!: FormGroup<DetailForm>;
+    public detail = input.required<FormGroup<DetailForm>>();
     /**
      * A sor indexe a details FormArray-ben
      */
-    @Input({ required: true }) index!: number;
+    public index = input.required<number>();
     /**
      * Kategória adatok a dropdown számára
      */
-    @Input({ required: true }) categoryData!: Signal<DropdownInterface[]>;
+    public categoryData = input.required<Signal<DropdownInterface[]>>();
     /**
      * Kategória mentése folyamatban van-e
      */
-    @Input({ required: true }) isCategorySaveInProgress!: boolean;
+    public isCategorySaveInProgress = input.required<boolean>();
     /**
      * Ez az utolsó detail sor-e (törlés gomb letiltásához)
      */
-    @Input({ required: true }) isLastDetailRow!: boolean;
+    public isLastDetailRow = input.required<boolean>();
     /**
      * A kiválasztott wallet-hez tartozó pénznem szimbóluma (Ft, €, $ stb.)
      */
-    @Input({ required: true }) currencySymbol!: string;
-
-    @Input() addCategoryCallback!: (name: string) => Observable<CategoryResponseInterface>;
+    public currencySymbol = input.required<string>();
+    /**
+     * Kategória hozzáadásakor lefutó callback
+     */
+    public addCategoryCallback =
+        input.required<(name: string) => Observable<CategoryResponseInterface>>();
     /**
      * A sor törlés gombjára kattintott a user
      */
-    @Output() rowDeleted = new EventEmitter<void>();
+    public rowDeleted = output<void>();
 }

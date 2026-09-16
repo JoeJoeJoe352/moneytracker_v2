@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, input, output } from '@angular/core';
 import { Observable, Subject, of } from 'rxjs';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,10 +23,10 @@ import { MatButton } from '@angular/material/button';
     template: '',
 })
 class StubTransactionsListComponent {
-    @Input() isHistoryMode = false;
-    @Input() needSearchField = false;
-    @Input() reloadTrigger = 0;
-    @Output() transactionsChanged = new EventEmitter<void>();
+    public isHistoryMode = input(false)
+    public needSearchField = input(false)
+    public reloadTrigger = input(0)
+    public transactionsChanged = output()
 }
 
 /**
@@ -118,7 +118,7 @@ describe('MainPage (Vitest)', () => {
 
     beforeEach(() => setup());
 
-    it('should show a spinner while the money sum is loading, then render the totals once loaded', () => {
+    it('should show a spinner while the money sum is loading, then render the totals once loaded', async () => {
         expect(fixture.nativeElement.querySelector('.balance-card mat-spinner')).toBeTruthy();
         expect(fixture.nativeElement.querySelector('.balance-card .stat-value')).toBeNull();
 
@@ -128,6 +128,7 @@ describe('MainPage (Vitest)', () => {
             expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 2000 }],
         });
         fixture.detectChanges();
+        await fixture.whenStable();
 
         expect(fixture.nativeElement.querySelector('.balance-card mat-spinner')).toBeNull();
         expect(fixture.nativeElement.querySelector('.balance-card .stat-value').textContent).toContain(
@@ -139,13 +140,14 @@ describe('MainPage (Vitest)', () => {
         );
     });
 
-    it('should render the balance trend as positive when income exceeds expense this month', () => {
+    it('should render the balance trend as positive when income exceeds expense this month', async () => {
         getMoneySum$.next({
             moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 3000 }],
             incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 5000 }],
             expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 2000 }],
         });
         fixture.detectChanges();
+        await fixture.whenStable();
 
         const trend = fixture.nativeElement.querySelector('.stat-trend');
         expect(trend.classList.contains('positive')).toBe(true);
@@ -154,13 +156,14 @@ describe('MainPage (Vitest)', () => {
         expect(trend.textContent).toContain('3,000');
     });
 
-    it('should render the balance trend as negative when expense exceeds income this month', () => {
+    it('should render the balance trend as negative when expense exceeds income this month', async () => {
         getMoneySum$.next({
             moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: -1000 }],
             incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 1000 }],
             expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 2000 }],
         });
         fixture.detectChanges();
+        await fixture.whenStable();
 
         const trend = fixture.nativeElement.querySelector('.stat-trend');
         expect(trend.classList.contains('negative')).toBe(true);
@@ -186,13 +189,14 @@ describe('MainPage (Vitest)', () => {
         expect(transactionModalDialogRefs).toHaveLength(1);
     });
 
-    it('should refetch only the money sum when the transaction list reports a change', () => {
+    it('should refetch only the money sum when the transaction list reports a change', async () => {
         getMoneySum$.next({
             moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
             incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
             expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
         });
         fixture.detectChanges();
+        await fixture.whenStable();
         expect(getMoneySumSpy).toHaveBeenCalledTimes(1);
 
         const listStub = fixture.debugElement.query(
@@ -200,30 +204,33 @@ describe('MainPage (Vitest)', () => {
         ).componentInstance as StubTransactionsListComponent;
         listStub.transactionsChanged.emit();
         fixture.detectChanges();
+        TestBed.tick();
 
         expect(getMoneySumSpy).toHaveBeenCalledTimes(2);
-        expect(listStub.reloadTrigger).toBe(0); // csak az összesítés töltődik újra, a lista nem
+        expect(listStub.reloadTrigger()).toBe(0); // csak az összesítés töltődik újra, a lista nem
     });
 
-    it('should refetch both the money sum and bump the list reload trigger when the modal reports a save/delete', () => {
+    it('should refetch both the money sum and bump the list reload trigger when the modal reports a save/delete', async () => {
         getMoneySum$.next({
             moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
             incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
             expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
         });
         fixture.detectChanges();
+        await fixture.whenStable();
         expect(getMoneySumSpy).toHaveBeenCalledTimes(1);
 
         const listStub = fixture.debugElement.query(
             (de) => de.componentInstance instanceof StubTransactionsListComponent,
         ).componentInstance as StubTransactionsListComponent;
-        expect(listStub.reloadTrigger).toBe(0);
+        expect(listStub.reloadTrigger()).toBe(0);
 
         const modalState = fixture.debugElement.injector.get(TransactionModalStateService);
         modalState.changed.next();
         fixture.detectChanges();
+        TestBed.tick();
 
         expect(getMoneySumSpy).toHaveBeenCalledTimes(2);
-        expect(listStub.reloadTrigger).toBe(1);
+        expect(listStub.reloadTrigger()).toBe(1);
     });
 });

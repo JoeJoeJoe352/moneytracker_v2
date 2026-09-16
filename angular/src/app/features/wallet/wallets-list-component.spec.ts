@@ -22,7 +22,7 @@ describe('WalletsListComponent (Vitest)', () => {
 
         fixture = TestBed.createComponent(WalletsListComponent);
         component = fixture.componentInstance;
-        component.walletListData = wallets;
+        fixture.componentRef.setInput('walletListData', wallets);
     });
 
     it('should render exactly one card per wallet', () => {

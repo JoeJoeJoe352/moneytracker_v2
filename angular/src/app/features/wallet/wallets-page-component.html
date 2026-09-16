@@ -12,7 +12,7 @@
             </div>
         } @else {
             <app-wallets-list-component
-                [walletListData]="walletListResource.value()"
+                [walletListData]="walletListResource.hasValue() ? walletListResource.value() : []"
                 (walletCardClicked)="openWalletModal($event)"
             />
         }
