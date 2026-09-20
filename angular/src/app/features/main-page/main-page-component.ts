@@ -1,4 +1,5 @@
 import { Component, computed, inject, resource, Signal, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -47,7 +48,7 @@ export class MainPage {
 
     constructor() {
         // Mentés/törlés után újratöltjük a listát és az összesítést
-        this.modal.changed.subscribe(() => {
+        this.modal.changed.pipe(takeUntilDestroyed()).subscribe(() => {
             this.reloadTransactionListTrigger.update((value) => value + 1);
             this.moneySumSummarizedPerCurrency.reload();
         });

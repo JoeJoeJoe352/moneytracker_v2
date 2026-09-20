@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 import { DateAdapter } from '@angular/material/core';
 import { TranslateService } from '@ngx-translate/core';
+import { SUPPORTED_LANGS } from '../utils/language-util';
 
 export const LOCALSTORAGE_KEY_LANG = 'lang';
 
@@ -25,8 +26,12 @@ export class LanguageService {
         this.document.documentElement.lang = language;
     }
 
+    /**
+     * Visszaadja a localStorage-ban tárolt nyelvet.
+     */
     public getLanguageFromLocalStore(): string | null {
-        return localStorage.getItem(LOCALSTORAGE_KEY_LANG);
+        const language = localStorage.getItem(LOCALSTORAGE_KEY_LANG);
+        return SUPPORTED_LANGS.find((supportedLang) => supportedLang === language) ?? null;
     }
 
     /**
