@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
     selector: 'app-welcome',
@@ -12,7 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
             max-width: stretch;
         }
     `,
-    imports: [TranslatePipe, MatCardModule, MatButtonModule],
+    imports: [TranslatePipe, MatCardModule, MatButtonModule, NgOptimizedImage],
     standalone: true,
 })
 export class Welcome {}
