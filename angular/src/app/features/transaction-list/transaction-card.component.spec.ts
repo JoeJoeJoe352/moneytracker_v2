@@ -6,7 +6,6 @@ import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../s
 
 describe('TransactionCardComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionCardComponent>;
-    let component: TransactionCardComponent;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
@@ -18,7 +17,6 @@ describe('TransactionCardComponent (Vitest)', () => {
         TestBed.inject(TranslateService).use('hu');
 
         fixture = TestBed.createComponent(TransactionCardComponent);
-        component = fixture.componentInstance;
     });
 
     it('should render income transaction correctly. No categories, simple transaction', () => {
