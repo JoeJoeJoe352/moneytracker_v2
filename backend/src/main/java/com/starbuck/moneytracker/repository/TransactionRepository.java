@@ -60,7 +60,7 @@ public interface TransactionRepository extends
                     YEAR(t.transactionDate) = YEAR(CURDATE()) AND
                     MONTH(t.transactionDate) = MONTH(CURDATE()) AND
                     t.transactionType = ?2
-                WHERE w.user.id = ?1
+                WHERE w.user.id = ?1 AND w.status = 0
                 GROUP BY w.id
                 ORDER BY w.id
             """)

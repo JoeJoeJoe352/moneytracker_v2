@@ -33,6 +33,7 @@ import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
@@ -386,6 +387,46 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         this.deleteData(incomeLastYear);
         this.walletRepo.delete(secondWallet);
         this.walletRepo.delete(emptyWallet);
+    }
+
+    /**
+     * A soft delete-elt (letiltott) wallet tranzakciói nem számítanak bele a havi kiadásokba és bevételekbe
+     */
+    @Test
+    void sumForMonth_ignoresDisabledWallets() {
+        // Given
+        var disabledWallet = walletRepo.save(new Wallet("disabled", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        Transaction expenseInActiveWallet = this.persistSimpleTransaction("expenseActive",
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-100), LocalDate.now(), this.wallet);
+        Transaction incomeInActiveWallet = this.persistSimpleTransaction("incomeActive",
+                TransactionTypeEnum.INCOME,
+                new BigDecimal(70), LocalDate.now(), this.wallet);
+        Transaction expenseInDisabledWallet = this.persistSimpleTransaction("expenseDisabled",
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-500), LocalDate.now(), disabledWallet);
+        Transaction incomeInDisabledWallet = this.persistSimpleTransaction("incomeDisabled",
+                TransactionTypeEnum.INCOME,
+                new BigDecimal(900), LocalDate.now(), disabledWallet);
+        // Tranzakciót csak aktív walleten lehet létrehozni, ezért csak a tranzakciók után tiltjuk le
+        disabledWallet.setStatus(GeneralStatusEnum.DISABLED);
+        walletRepo.save(disabledWallet);
+
+        // When
+        List<WalletSummaryDto> expenses = transactionService.sumAllExpenseForMonth();
+        List<WalletSummaryDto> incomes = transactionService.sumAllIncomeForMonth();
+
+        // Then
+        assertEquals(1, expenses.size());
+        assertEquals(new BigDecimal("100.00"), expenses.get(0).getTotal());
+        assertEquals(1, incomes.size());
+        assertEquals(new BigDecimal("70.00"), incomes.get(0).getTotal());
+
+        this.deleteData(expenseInActiveWallet);
+        this.deleteData(incomeInActiveWallet);
+        this.deleteData(expenseInDisabledWallet);
+        this.deleteData(incomeInDisabledWallet);
+        this.walletRepo.delete(disabledWallet);
     }
 
     /**
