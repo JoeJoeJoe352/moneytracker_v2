@@ -109,6 +109,7 @@
                 formControlName="passwordAgain"
                 autocomplete="new-password"
                 [readonly]="isLoading()"
+                [errorStateMatcher]="passwordMismatchMatcher"
             />
             @if (passwordAgain.invalid && (passwordAgain.dirty || passwordAgain.touched)) {
                 @if (passwordAgain.hasError('required')) {
@@ -117,7 +118,7 @@
                     </mat-error>
                 }
             }
-            @if (passwordAgain.touched && hasPasswordMismatchError) {
+            @if (registerForm.hasError('passwordMismatch')) {
                 <mat-error>
                     {{ 'register.password_again.mismatch-error' | translate }}
                 </mat-error>

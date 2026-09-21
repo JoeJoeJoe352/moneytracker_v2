@@ -4,7 +4,7 @@ import { AuthService } from './auth-service';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { NotificationService } from '../../shared/services/notification-service';
 import { LoginRequestData, RegisterRequestData } from './interfaces';
-import { catchError, EMPTY, switchMap } from 'rxjs';
+import { catchError, EMPTY, finalize, switchMap } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -34,19 +34,19 @@ export class AuthActionService {
                         console.error('Ismeretlen hiba történt a bejelentkezés során!', response);
                         this.notification.showGeneralError();
                     }
-                    loadingSignal.set(false);
                     return EMPTY;
                 }),
                 switchMap(() => {
                     // User adatok lekérése, mert a login végpont csak a cookie-t állítja be
                     return this.authService.authenticateUser();
                 }),
+                // minden kimenetnél (siker, hiba, megszakítás) véget ér a töltés
+                finalize(() => loadingSignal.set(false)),
             )
             .subscribe({
                 next: (userData) => {
                     this.userDataStore.loadUserData(userData);
                     this.notification.show(_('login.success'));
-                    loadingSignal.set(false);
                     onSuccess();
                 },
                 error: (error) => {
@@ -54,7 +54,6 @@ export class AuthActionService {
                     if (error.status !== 401) {
                         console.error('unknown error during authcheck!', error);
                     }
-                    loadingSignal.set(false);
                 },
             });
     }
@@ -69,17 +68,18 @@ export class AuthActionService {
     ): void {
         loadingSignal.set(true);
 
-        this.authService.register(params).subscribe({
-            next: () => {
-                this.notification.show(_('register.success'));
-                onSuccess();
-                loadingSignal.set(false);
-            },
-            error: (response) => {
-                console.error('Ismeretlen hiba történt a regisztráció során!', response);
-                this.notification.showGeneralError();
-                loadingSignal.set(false);
-            },
-        });
+        this.authService
+            .register(params)
+            .pipe(finalize(() => loadingSignal.set(false)))
+            .subscribe({
+                next: () => {
+                    this.notification.show(_('register.success'));
+                    onSuccess();
+                },
+                error: (response) => {
+                    console.error('Ismeretlen hiba történt a regisztráció során!', response);
+                    this.notification.showGeneralError();
+                },
+            });
     }
 }

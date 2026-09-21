@@ -1,10 +1,10 @@
 import { Component, inject, output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
-import { isLoadingInterface, LoginRequestData } from './interfaces';
+import { AuthDialogData, LoginRequestData } from './interfaces';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
@@ -23,23 +23,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 export class LoginComponent {
     private readonly fb = inject(FormBuilder);
 
-    public login = output<LoginRequestData>()
+    public login = output<LoginRequestData>();
 
     /**
      * Töltődés alatt van-e a form
      */
-    protected isLoading = inject<isLoadingInterface>(MAT_DIALOG_DATA).isloading;
+    protected isLoading = inject<AuthDialogData>(MAT_DIALOG_DATA).isLoading;
     /**
      * login form adatai
      */
-    protected loginForm: FormGroup;
-
-    constructor() {
-        this.loginForm = this.fb.nonNullable.group({
-            username: ['', Validators.required],
-            password: ['', Validators.required],
-        });
-    }
+    protected readonly loginForm = this.fb.nonNullable.group({
+        username: ['', Validators.required],
+        password: ['', Validators.required],
+    });
 
     /**
      * Login adatok küldése
@@ -50,26 +46,6 @@ export class LoginComponent {
             return;
         }
 
-        const { username, password } = this.loginForm.getRawValue();
-        this.login.emit({ username: username, password: password });
-    }
-
-    /**
-     * Megnézi van-e valami hiba a felhasználónév mezőben
-     */
-    get isUsernameFieldHasError(): boolean {
-        return (
-            this.loginForm.controls['username'].touched &&
-            this.loginForm.controls['username'].hasError('required')
-        );
-    }
-    /**
-     * Ellenőrzi a jelszó mezőt, van-e valami hiba
-     */
-    get isPasswordFieldHasError(): boolean {
-        return (
-            this.loginForm.controls['password'].touched &&
-            this.loginForm.controls['password'].hasError('required')
-        );
+        this.login.emit(this.loginForm.getRawValue());
     }
 }

@@ -14,7 +14,7 @@
                     autocomplete="username"
                     formControlName="username"
                 />
-                @if (isUsernameFieldHasError) {
+                @if (loginForm.controls.username.hasError('required')) {
                     <mat-error>
                         {{ 'login.username.required-error' | translate }}
                     </mat-error>
@@ -34,7 +34,7 @@
                     formControlName="password"
                 />
 
-                @if (isPasswordFieldHasError) {
+                @if (loginForm.controls.password.hasError('required')) {
                     <mat-error>
                         {{ 'login.password.required-error' | translate }}
                     </mat-error>

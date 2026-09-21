@@ -1,16 +1,14 @@
 import { Component, inject, output } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
-    FormBuilder,
-    FormControl,
-    FormGroup,
-    ReactiveFormsModule,
-    Validators,
-} from '@angular/forms';
-import { passwordMismatchValidator } from './password-match.directive';
-import { UniqueNameAndEmailDirective } from './unique-username.directive.';
+    PasswordMismatchErrorStateMatcher,
+    passwordMismatchValidator,
+} from './password-match-validator';
+import { uniqueEmailValidator, uniqueUsernameValidator } from './unique-user-validators';
+import { AuthService } from './auth-service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { isLoadingInterface, RegisterRequestData } from './interfaces';
+import { AuthDialogData, RegisterRequestData } from './interfaces';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -31,57 +29,54 @@ const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 })
 export class RegisterComponent {
     private readonly fb = inject(FormBuilder);
-    private readonly uniqueValidator = inject(UniqueNameAndEmailDirective);
+    private readonly authService = inject(AuthService);
+
+    /**
+     * A jelszó egyezés hibát (ami a form szintjén van) a konfirm mezőnél is hibaként jeleníti meg
+     */
+    protected readonly passwordMismatchMatcher = new PasswordMismatchErrorStateMatcher();
 
     /**
      * Regisztrációs gombra rákattintott-e a user
      */
-    public register = output<RegisterRequestData>()
+    public register = output<RegisterRequestData>();
 
     /**
      * Töltődés alatt van-e a form
      */
-    protected isLoading = inject<isLoadingInterface>(MAT_DIALOG_DATA).isloading;
+    protected isLoading = inject<AuthDialogData>(MAT_DIALOG_DATA).isLoading;
     /**
      * Regisztrációs form beállításai
      */
-    protected registerForm: FormGroup;
-
-    constructor() {
-        this.registerForm = this.fb.nonNullable.group(
-            {
-                username: [
-                    '',
-                    {
-                        validators: [
-                            Validators.required,
-                            Validators.minLength(3),
-                            Validators.maxLength(20),
-                        ],
-                        asyncValidators: [
-                            this.uniqueValidator.validateUsername.bind(this.uniqueValidator),
-                        ],
-                        updateOn: 'blur',
-                    },
-                ],
-                email: [
-                    '',
-                    {
-                        validators: [Validators.pattern(STRICT_EMAIL_REGEX), Validators.required],
-                        asyncValidators: [
-                            this.uniqueValidator.validateEmail.bind(this.uniqueValidator),
-                        ],
-                        updateOn: 'blur',
-                    },
-                ],
-                password: ['', [Validators.required, Validators.minLength(6)]],
-                passwordAgain: ['', [Validators.required]],
-            },
-            {
-                validators: passwordMismatchValidator(),
-            },
-        );
-    }
+    protected readonly registerForm = this.fb.nonNullable.group(
+        {
+            username: [
+                '',
+                {
+                    validators: [
+                        Validators.required,
+                        Validators.minLength(3),
+                        Validators.maxLength(20),
+                    ],
+                    asyncValidators: [uniqueUsernameValidator(this.authService)],
+                    updateOn: 'blur',
+                },
+            ],
+            email: [
+                '',
+                {
+                    validators: [Validators.pattern(STRICT_EMAIL_REGEX), Validators.required],
+                    asyncValidators: [uniqueEmailValidator(this.authService)],
+                    updateOn: 'blur',
+                },
+            ],
+            password: ['', [Validators.required, Validators.minLength(6)]],
+            passwordAgain: ['', [Validators.required]],
+        },
+        {
+            validators: passwordMismatchValidator,
+        },
+    );
 
     /**
      * Form küldéskor lefutó kódok
@@ -92,32 +87,25 @@ export class RegisterComponent {
             return;
         }
 
-        const params = {
-            email: this.email.value,
-            username: this.username.value,
-            password: this.password.value,
-        };
-        this.register.emit(params);
+        // a passwordAgain csak az ellenőrzéshez kell, a backendnek nem küldjük el
+        const { email, username, password } = this.registerForm.getRawValue();
+        this.register.emit({ email, username, password });
     }
 
     // Getters
-    get username(): FormControl<string> {
-        return this.registerForm.get('username') as FormControl<string>;
+    get username() {
+        return this.registerForm.controls.username;
     }
 
-    get email(): FormControl<string> {
-        return this.registerForm.get('email') as FormControl<string>;
+    get email() {
+        return this.registerForm.controls.email;
     }
 
-    get password(): FormControl<string> {
-        return this.registerForm.get('password') as FormControl<string>;
+    get password() {
+        return this.registerForm.controls.password;
     }
 
-    get passwordAgain(): FormControl<string> {
-        return this.registerForm.get('passwordAgain') as FormControl<string>;
-    }
-
-    get hasPasswordMismatchError(): boolean {
-        return this.registerForm.hasError('passwordMismatch') && this.registerForm.touched;
+    get passwordAgain() {
+        return this.registerForm.controls.passwordAgain;
     }
 }

@@ -31,7 +31,7 @@ export class Sidebar {
     /**
      * Töltődés alatt van-e valamelyik form
      */
-    protected isloading = signal(false);
+    protected isLoading = signal(false);
 
     /**
      * Összeállítja a linkek listáját, amit a user láthat az oldalsávban
@@ -86,12 +86,12 @@ export class Sidebar {
             restoreFocus: true,
             width: '500px',
             data: {
-                isloading: this.isloading,
+                isLoading: this.isLoading,
             },
         });
 
         dialogRef.componentInstance.login.subscribe((payload) =>
-            this.actionService.login(payload, this.isloading, () => {
+            this.actionService.login(payload, this.isLoading, () => {
                 dialogRef.close();
                 this.router.navigate(['/']);
             }),
@@ -106,12 +106,12 @@ export class Sidebar {
             restoreFocus: true,
             width: '500px',
             data: {
-                isloading: this.isloading,
+                isLoading: this.isLoading,
             },
         });
 
         dialogRef.componentInstance.register.subscribe((payload) =>
-            this.actionService.register(payload, this.isloading, () => {
+            this.actionService.register(payload, this.isLoading, () => {
                 dialogRef.close();
             }),
         );
