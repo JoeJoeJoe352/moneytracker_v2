@@ -1,9 +1,9 @@
 import { Component, input, output } from '@angular/core';
-import TransactionCardComponent from '../transaction-list/transaction-card-component';
 import { TransactionListElementData } from './interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
+import TransactionCardComponent from './transaction-card-component';
 
 @Component({
     selector: 'app-transaction-list',
