@@ -26,11 +26,7 @@
             <!-- Wallet -->
             <mat-form-field>
                 <mat-label>{{ 'transaction.wallet' | translate }}</mat-label>
-                <mat-select
-                    id="transaction-wallet"
-                    formControlName="walletId"
-                    (selectionChange)="onWalletChange($event.value)"
-                >
+                <mat-select id="transaction-wallet" formControlName="walletId">
                     @for (item of userData.getWallets(); track item.id) {
                         <mat-option [value]="item.id"
                             >{{ item.name }} ({{ item.currencyCode }})</mat-option
@@ -184,7 +180,7 @@
         <button
             mat-flat-button
             type="submit"
-            [disabled]="transactionForm.invalid || isTransactionFormDisabled()"
+            [disabled]="isTransactionFormDisabled()"
         >
             {{ 'transaction.save' | translate }}
         </button>

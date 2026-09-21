@@ -6,7 +6,6 @@ import {
     input,
     OnChanges,
     output,
-    signal,
     Signal,
     SimpleChanges,
     viewChild,
@@ -14,7 +13,6 @@ import {
 import {
     FormArray,
     FormBuilder,
-    FormControl,
     FormGroup,
     ReactiveFormsModule,
     Validators,
@@ -43,6 +41,7 @@ import { WalletDataUtil } from '../wallet/wallet-data-util';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { TransactionUtils } from '../transaction/transaction-utils';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-transaction-form-component',
@@ -103,18 +102,30 @@ export class TransactionFormComponent implements OnChanges {
     private readonly detailAddButton = viewChild<ElementRef<HTMLElement>>('detailAddButton');
 
     /**
-     * Tranzakciós form
+     * Tranzakciós form. A selectedWalletId előtt kell létrehozni, mert annak a valueChanges-ét figyeli
      */
-    protected transactionForm: FormGroup;
+    protected readonly transactionForm = this.createForm();
 
     /**
-     * User által kiválasztott wallet
+     * A formban kiválasztott wallet azonosítója (a form változásaira, pl. select váltásra vagy
+     * meglévő tranzakció betöltésére magától frissül)
      */
-    protected selectedWalletsCurrency = signal(
-        this.walletUtil.getCurrencySymbolForCurrencyCode(
-            this.userData.getDefaultWallet().currencyCode,
-        ),
-    );
+    private readonly selectedWalletId = toSignal(this.walletId.valueChanges, {
+        initialValue: this.walletId.value,
+    });
+
+    /**
+     * A kiválasztott wallet pénznemének szimbóluma
+     */
+    protected readonly selectedWalletsCurrency = computed(() => {
+        const selectedWallet = this.userData
+            .getWallets()
+            .find((wallet) => wallet.id === this.selectedWalletId());
+
+        return selectedWallet
+            ? this.walletUtil.getCurrencySymbolForCurrencyCode(selectedWallet.currencyCode)
+            : '';
+    });
 
     /**
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
@@ -127,10 +138,6 @@ export class TransactionFormComponent implements OnChanges {
             };
         });
     });
-
-    constructor() {
-        this.transactionForm = this.createForm();
-    }
 
     /**
      * Changes Betöltés után ha van kezdőérték beállítva, akkor a formba azokat állítjuk be
@@ -157,8 +164,6 @@ export class TransactionFormComponent implements OnChanges {
                 // Nincs átadva paraméterül transaction (ngOnchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
                 return;
             }
-            this.setWalletSymbol(transaction.walletId);
-
             const convertedInputValues = this.transactionUtils.convertDataToInput(transaction);
             this.refreshFormWithData(convertedInputValues);
         }
@@ -185,28 +190,6 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
-     * Selectben lévő wallet váltáskor lefutó műveletek
-     */
-    protected onWalletChange(walletId: number): void {
-        this.setWalletSymbol(walletId);
-    }
-
-    /**
-     * Beállítja a kiválasztott wallet-hez tartozó pénznem szimbólumát
-     */
-    private setWalletSymbol(walletId: number): void {
-        const selectedWallet = this.userData.getWallets().find((wallet) => wallet.id === walletId);
-        if (!selectedWallet) {
-            console.error('wallet not found in this transaction: ' + this.transaction());
-            return;
-        }
-        const currencySymbol = this.walletUtil.getCurrencySymbolForCurrencyCode(
-            selectedWallet.currencyCode,
-        );
-        this.selectedWalletsCurrency.set(currencySymbol);
-    }
-
-    /**
      * Kategória id-kat alakítja át a dropdown által elvárt {item_id, item_text} formátumra.
      */
     private mapCategoryIdsToDropdownData(ids: number[]): DropdownInterface[] {
@@ -218,19 +201,20 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Form elküldésekori műveletek
      */
-    onSubmit(): void {
+    protected onSubmit(): void {
         if (this.transactionForm.invalid) {
             this.transactionForm.markAllAsTouched();
-            console.error(this.transactionForm.errors);
             return;
         }
-        this.saved.emit(this.transactionForm.value);
+        // A form típusa szerint minden mező opcionális (a letiltott kontrollok kimaradnak a .value-ból),
+        // de érvényes formnál a validátorok miatt a kötelező mezők ki vannak töltve
+        this.saved.emit(this.transactionForm.value as NewTransaction);
     }
 
     /**
      * Törli a megadott indexű tétel sort
      */
-    deleteRow(index: number): void {
+    protected deleteRow(index: number): void {
         if (this.isLastDetailRow) {
             console.error('utolsó sort nem lehet törölni');
             return;
@@ -241,7 +225,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Létrehoz egy új üres sort
      */
-    addRow(): void {
+    protected addRow(): void {
         this.details.push(this.generateNewEmptyRow());
         setTimeout(() =>
             this.detailAddButton()?.nativeElement.scrollIntoView({
@@ -266,22 +250,22 @@ export class TransactionFormComponent implements OnChanges {
                     ],
                 },
             ],
-            isIncome: new FormControl(false),
-            isComplexTransaction: new FormControl(false),
-            price: [null, { validators: [Validators.min(1)] }],
+            isIncome: [false],
+            isComplexTransaction: [false],
+            price: this.fb.control<number | null>(null, { validators: [Validators.min(1)] }),
             transactionDate: this.fb.control(new Date(), {
                 validators: [Validators.required, validDate],
             }),
-            walletId: new FormControl(this.userData.getDefaultWallet().id),
-            details: this.fb.array([]),
-            categories: this.fb.control<DropdownInterface[]>([]),
+            walletId: [this.userData.getDefaultWallet().id],
+            details: new FormArray<FormGroup<DetailForm>>([]),
+            categories: this.fb.nonNullable.control<DropdownInterface[]>([]),
         });
     }
 
     /**
      * Detail struktúra, amit új tranzakciónál, vagy új detail hozzáadásánál bővítjük vele a formot
      */
-    generateNewRow(params: {
+    private generateNewRow(params: {
         name: string;
         price: number | null;
         weight: number | null;
@@ -289,14 +273,16 @@ export class TransactionFormComponent implements OnChanges {
         isComplexPriceMode: boolean | null;
         categories: number[] | null;
     }): FormGroup<DetailForm> {
-        const detailGroup = this.fb.group({
+        const detailGroup = this.fb.nonNullable.group({
             detailName: [params.name, Validators.required],
-            detailPrice: [params.price, [Validators.min(1)]],
-            detailWeight: [params.weight, [Validators.min(1)]],
-            detailUnitPrice: [params.unitPrice, [Validators.min(1)]],
-            detailIsComplexPriceMode: [params.isComplexPriceMode],
-            categories: [this.mapCategoryIdsToDropdownData(params.categories ?? [])],
-        }) as FormGroup<DetailForm>;
+            detailPrice: this.fb.control<number | null>(params.price, [Validators.min(1)]),
+            detailWeight: this.fb.control<number | null>(params.weight, [Validators.min(1)]),
+            detailUnitPrice: this.fb.control<number | null>(params.unitPrice, [Validators.min(1)]),
+            detailIsComplexPriceMode: [params.isComplexPriceMode ?? false],
+            categories: this.fb.nonNullable.control(
+                this.mapCategoryIdsToDropdownData(params.categories ?? []),
+            ),
+        });
 
         this.setupDetailReactiveLogic(detailGroup);
         return detailGroup;
@@ -305,7 +291,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Generál egy új input sort, üres adatokkal
      */
-    generateNewEmptyRow() {
+    private generateNewEmptyRow() {
         return this.generateNewRow({
             name: '',
             price: null,
@@ -373,31 +359,35 @@ export class TransactionFormComponent implements OnChanges {
         return this.details.length <= 1;
     }
 
-    get name(): FormControl<string> {
-        return this.transactionForm.get('name') as FormControl<string>;
+    get walletId() {
+        return this.transactionForm.controls.walletId;
     }
 
-    get price(): FormControl<number | null> {
-        return this.transactionForm.get('price') as FormControl<number | null>;
+    get name() {
+        return this.transactionForm.controls.name;
     }
 
-    get categories(): FormControl<DropdownInterface[]> {
-        return this.transactionForm.get('categories') as FormControl<DropdownInterface[]>;
+    get price() {
+        return this.transactionForm.controls.price;
     }
 
-    get transactionDate(): FormControl<Date | null> {
-        return this.transactionForm.get('transactionDate') as FormControl<Date | null>;
+    get categories() {
+        return this.transactionForm.controls.categories;
     }
 
-    get isIncome(): FormControl<boolean> {
-        return this.transactionForm.get('isIncome') as FormControl<boolean>;
+    get transactionDate() {
+        return this.transactionForm.controls.transactionDate;
     }
 
-    get isComplexTransaction(): FormControl<boolean> {
-        return this.transactionForm.get('isComplexTransaction') as FormControl<boolean>;
+    get isIncome() {
+        return this.transactionForm.controls.isIncome;
     }
 
-    get details(): FormArray<FormGroup<DetailForm>> {
-        return this.transactionForm.get('details') as FormArray<FormGroup<DetailForm>>;
+    get isComplexTransaction() {
+        return this.transactionForm.controls.isComplexTransaction;
+    }
+
+    get details() {
+        return this.transactionForm.controls.details;
     }
 }

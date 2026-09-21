@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { MatSelect } from '@angular/material/select';
 import { TransactionFormComponent } from './transaction-form-component';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
@@ -200,8 +199,7 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
             ),
         ).toEqual(['Ft', 'Ft']);
 
-        const walletSelect = fixture.debugElement.query(By.directive(MatSelect));
-        walletSelect.triggerEventHandler('selectionChange', { value: 2 });
+        component.walletId.setValue(2);
         fixture.detectChanges();
 
         const suffixes = fixture.nativeElement.querySelectorAll(

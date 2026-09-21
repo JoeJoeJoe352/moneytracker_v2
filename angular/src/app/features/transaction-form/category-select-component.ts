@@ -140,6 +140,8 @@ export class CategorySelectComponent implements ControlValueAccessor {
                         ]);
                         this.emitChange();
                     },
+                    // A hibát (snackbar) a callback már kezelte, itt csak azt előzzük meg, hogy kezeletlen RxJS hibaként felszínre kerüljön
+                    error: () => undefined,
                 });
             }
         } else {

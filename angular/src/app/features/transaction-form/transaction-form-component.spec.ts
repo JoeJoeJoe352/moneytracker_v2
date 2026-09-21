@@ -67,12 +67,14 @@ describe('TransactionFormComponent (Vitest)', () => {
         fixture.detectChanges();
 
         expect(component.name.value).toBe('');
+        expect(component.name.invalid).toBe(true);
         expect(component.isIncome.value).toBe(false);
         expect(component.isComplexTransaction.value).toBe(false);
         expect(component.details.length).toBe(0);
 
+        // a mentés gomb érvénytelen formnál is aktív, hogy a kattintás után látszódjanak a hibák
         const submitButton = fixture.nativeElement.querySelector('button[type="submit"]');
-        expect(submitButton.disabled).toBe(true);
+        expect(submitButton.disabled).toBe(false);
     });
 
     it('should not emit "saved" and should mark all controls touched when submitting an invalid form', () => {
@@ -81,7 +83,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         let emitted = false;
         component.saved.subscribe(() => (emitted = true));
 
-        component.onSubmit();
+        fixture.nativeElement.querySelector('button[type="submit"]').click();
 
         expect(emitted).toBe(false);
         expect(component.name.touched).toBe(true);
@@ -101,7 +103,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         let emittedValue: unknown;
         component.saved.subscribe((value) => (emittedValue = value));
 
-        component.onSubmit();
+        submitButton.click();
 
         expect(emittedValue).toMatchObject({ name: 'Bevásárlás', price: 1000 });
     });
@@ -209,14 +211,15 @@ describe('TransactionFormComponent (Vitest)', () => {
     it('should add and remove detail rows, refusing to remove the last one', () => {
         fixture.detectChanges();
 
-        component.addRow();
-        component.addRow();
+        // Közvetlenül hívjuk, mert az utolsó sor törlés gombja le van tiltva, így az ellenőrzés kattintással nem érhető el
+        component['addRow']();
+        component['addRow']();
         expect(component.details.length).toBe(2);
 
-        component.deleteRow(0);
+        component['deleteRow'](0);
         expect(component.details.length).toBe(1);
 
-        component.deleteRow(0);
+        component['deleteRow'](0);
         expect(component.details.length).toBe(1); // utolsó sor nem törölhető
     });
 
@@ -246,8 +249,7 @@ describe('TransactionFormComponent (Vitest)', () => {
     it('should update the price suffix when the wallet select changes', () => {
         fixture.detectChanges();
 
-        const walletSelect = fixture.debugElement.query(By.directive(MatSelect));
-        walletSelect.triggerEventHandler('selectionChange', { value: 2 });
+        component.walletId.setValue(2);
         fixture.detectChanges();
 
         const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
