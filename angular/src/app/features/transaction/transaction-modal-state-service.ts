@@ -1,4 +1,4 @@
-import { computed, effect, inject, Injectable, resource, ResourceRef, signal } from '@angular/core';
+import { computed, inject, Injectable, resource, ResourceRef, signal } from '@angular/core';
 import { firstValueFrom, Observable, Subject, tap } from 'rxjs';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TransactionService } from './transaction-service';
@@ -63,19 +63,16 @@ export class TransactionModalStateService {
      */
     public isAddingCategoryInProgress = signal(false);
     /**
-     * Tranzakciós modal függőségi adatai be vannak-e már töltve?
-     */
-    public isModalDataInitializing = signal(false);
-    /**
      * Mentés/törlés után emittál, hogy a hívó oldal újratölthesse a saját listáját
      */
     public changed = new Subject<void>();
 
-    constructor() {
-        effect(() => {
-            this.isModalDataInitializing.set(!this.areAllModalDependenciesLoaded());
-        });
-    }
+    /**
+     * Tranzakciós modal függőségi adatai töltés alatt vannak-e?
+     */
+    private isModalDataInitializing = computed(() => {
+        return !this.areAllModalDependenciesLoaded();
+    });
 
     /**
      * Kiválasztott tranzakció adatai
@@ -165,11 +162,11 @@ export class TransactionModalStateService {
         });
         this.dialogRef = dialogRef;
 
-        dialogRef.componentInstance.deleteTransactionRequested
-            .subscribe((transactionId) => this.confirmDeletion(transactionId));
+        dialogRef.componentInstance.deleteTransactionRequested.subscribe((transactionId) =>
+            this.confirmDeletion(transactionId),
+        );
 
-        dialogRef.componentInstance.saved
-            .subscribe((payload) => this.save(payload));
+        dialogRef.componentInstance.saved.subscribe((payload) => this.save(payload));
 
         dialogRef.afterClosed().subscribe(() => {
             this.isOpen.set(false);

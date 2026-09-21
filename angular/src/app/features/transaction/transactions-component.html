@@ -8,7 +8,7 @@
 
 @if (needSearchField()) {
     <app-transaction-filter
-        [defaultData]="filterInputDefaultValuesFromQuery()"
+        [defaultData]="filterInputDefaultValuesFromQuery"
         [isTransactionListLoading]="transactionListData.isLoading()"
         (filterSubmit)="onFilterSubmit($event)"
         (resetForm)="clearInputs()"

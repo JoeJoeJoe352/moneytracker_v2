@@ -1,16 +1,13 @@
 import {
     Component,
-    DestroyRef,
     inject,
     input,
     OnChanges,
-    OnInit,
     output,
     resource,
-    signal,
     SimpleChanges,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionService } from '../transaction/transaction-service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -18,7 +15,7 @@ import { TransactionModalStateService } from '../transaction/transaction-modal-s
 import TransactionListComponent from '../transaction-list/transaction-list-component';
 import { TransactionFilter } from './transaction-filter-component';
 import { MatCardModule } from '@angular/material/card';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 export interface FilterData {
     name: string;
@@ -33,11 +30,10 @@ export interface FilterData {
     imports: [TransactionListComponent, TranslatePipe, TransactionFilter, MatCardModule],
     providers: [TransactionModalStateService],
 })
-export class TransactionsListComponent implements OnInit, OnChanges {
+export class TransactionsListComponent implements OnChanges {
     private readonly transactionService = inject(TransactionService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-    private readonly destroyRef = inject(DestroyRef);
     protected readonly modal = inject(TransactionModalStateService);
 
     /**
@@ -46,46 +42,35 @@ export class TransactionsListComponent implements OnInit, OnChanges {
     public isHistoryMode = input.required<boolean>();
     /**
      * Megjelenjen-e a keresési mező
-    */
+     */
     public needSearchField = input.required<boolean>();
     /**
      * Ha ez az érték változik, a lista újratöltődik (pl. ha a szülő komponensben jött létre új tranzakció)
-    */
+     */
     public reloadTrigger = input<number>(0);
     /**
      * Akkor emitál, amikor a listában lévő valamelyik tranzakció változott (létrejött/módosult/törlődött),
      * hogy a szülő komponens is tudja frissíteni a saját adatait (pl. összesítés)
      */
-    public transactionsChanged = output<void>()
+    public transactionsChanged = output<void>();
 
     /**
-     * Kezdeti szűrőfeltételek a query paraméterekből, a szűrő komponens inicializálásához
+     * A route aktuális query paraméterei. Változásukkor a lista magától újratöltődik
      */
-    protected filterInputDefaultValuesFromQuery = signal<FilterData | null>(null);
+    private readonly latestParams = toSignal(
+        this.route.queryParams.pipe(map((params) => new URLSearchParams(params as Params))),
+        { initialValue: new URLSearchParams() },
+    );
 
     /**
-     * Legutóbb kapott (a route query paramétereiből számított) szűrőparaméterek, amikor nem a
-     * szűrő form küldi az újratöltést kiváltó eseményt (pl. reloadTrigger, modal mentés/törlés)
+     * Kezdeti szűrőfeltételek a query paraméterekből, a szűrő komponens inicializálásához.
+     * Csak egyszer számoljuk ki, a szűrő form ezután már maga kezeli az értékeit.
      */
-    private latestParams = signal(new URLSearchParams());
+    protected readonly filterInputDefaultValuesFromQuery = this.toFilterData(this.latestParams());
 
-    ngOnInit(): void {
-        // A route query változára újratöltjük a listát
-        this.route.queryParams
-            .pipe(takeUntilDestroyed(this.destroyRef)) // amíg a komponens meg nem szűnik
-            .subscribe((queryParams) => {
-                // latestParams beállítás után automatikusan újratöltődik a lista
-                this.latestParams.set(new URLSearchParams(queryParams as Params));
-                // A kezdeti értékből állítjuk be a szűrő form kezdőértékeit
-                if (this.filterInputDefaultValuesFromQuery() === null) {
-                    this.filterInputDefaultValuesFromQuery.set(
-                        this.toFilterData(this.latestParams()),
-                    );
-                }
-            });
-
+    constructor() {
         // Mentés/törlés után újratöltjük a listát, és jelezzük a szülő komponensnek is
-        this.modal.changed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        this.modal.changed.pipe(takeUntilDestroyed()).subscribe(() => {
             this.transactionListData.reload();
             this.transactionsChanged.emit();
         });
@@ -115,8 +100,8 @@ export class TransactionsListComponent implements OnInit, OnChanges {
     });
 
     /**
-     * Szűrő form beküldésekor lefutó művelet: a route query paramétereinek frissítése, amire a
-     * queryParams feliratkozás reagálva újratölti a listát
+     * Szűrő form beküldésekor lefutó művelet: a route query paramétereinek frissítése.
+     * A queryParams változásra reagálva újratölti a listát
      */
     protected onFilterSubmit(data: FilterData): void {
         this.router.navigate([], {
