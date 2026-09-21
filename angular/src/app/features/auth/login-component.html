@@ -1,3 +1,5 @@
+<app-dialog-close-button />
+
 <h2 mat-dialog-title>{{ 'login.title' | translate }}</h2>
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
     <mat-dialog-content>
@@ -8,6 +10,7 @@
                     {{ 'login.username' | translate }}
                 </mat-label>
                 <input
+                    cdkFocusInitial
                     matInput
                     id="username"
                     type="text"
@@ -43,10 +46,6 @@
         </div>
     </mat-dialog-content>
     <mat-dialog-actions>
-        <button mat-stroked-button type="button" mat-dialog-close>
-            {{ 'etc.cancel' | translate }}
-        </button>
-
         <button mat-flat-button type="submit" [disabled]="isLoading()">
             {{ 'login.submit' | translate }}
         </button>

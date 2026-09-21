@@ -6,19 +6,21 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 import { AuthDialogData, LoginRequestData } from './interfaces';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { DialogCloseButton } from '../../shared/components/mat-modal-close';
 
 @Component({
     selector: 'app-login-component',
     templateUrl: './login-component.html',
     styleUrl: './login-component.scss',
     imports: [
-        ReactiveFormsModule,
-        TranslatePipe,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatButton,
-        MatInputModule,
-    ],
+    ReactiveFormsModule,
+    TranslatePipe,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatButton,
+    MatInputModule,
+    DialogCloseButton
+],
 })
 export class LoginComponent {
     private readonly fb = inject(FormBuilder);

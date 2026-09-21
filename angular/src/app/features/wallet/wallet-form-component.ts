@@ -1,4 +1,10 @@
-import { Component, inject, OnInit, output, Signal } from '@angular/core';
+import {
+    Component,
+    inject,
+    OnInit,
+    output,
+    Signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
@@ -9,6 +15,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { DialogCloseButton } from '../../shared/components/mat-modal-close';
 
 export interface WalletFormInputInterface {
     wallet: WalletDataInterface | null;
@@ -33,6 +41,8 @@ const WALLET_TYPE_TO_DESCRIPTION: Record<WalletTypesEnum, string> = {
         MatSelectModule,
         MatButtonModule,
         MatDialogModule,
+        MatIconModule,
+        DialogCloseButton,
     ],
 })
 export class WalletFormComponent implements OnInit {

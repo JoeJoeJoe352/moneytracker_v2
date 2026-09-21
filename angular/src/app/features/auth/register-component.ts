@@ -12,6 +12,7 @@ import { AuthDialogData, RegisterRequestData } from './interfaces';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { DialogCloseButton } from '../../shared/components/mat-modal-close';
 
 const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 @Component({
@@ -19,13 +20,14 @@ const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     templateUrl: './register-component.html',
     styleUrl: './register-component.scss',
     imports: [
-        ReactiveFormsModule,
-        TranslatePipe,
-        MatFormFieldModule,
-        MatButtonModule,
-        MatDialogModule,
-        MatInputModule,
-    ],
+    ReactiveFormsModule,
+    TranslatePipe,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatInputModule,
+    DialogCloseButton
+],
 })
 export class RegisterComponent {
     private readonly fb = inject(FormBuilder);

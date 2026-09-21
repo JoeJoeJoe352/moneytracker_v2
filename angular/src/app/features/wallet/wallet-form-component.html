@@ -1,10 +1,12 @@
+<app-dialog-close-button />
+
 <h2 mat-dialog-title>{{ (isEditMode() ? 'wallet.update' : 'wallet.create') | translate }}</h2>
 <form [formGroup]="walletForm" (ngSubmit)="onSubmit()" class="wallet-form">
     <mat-dialog-content>
         <div class="wallet-form-single-row">
             <mat-form-field>
                 <mat-label>{{ 'wallet.name' | translate }}</mat-label>
-                <input id="wallet-name" matInput type="text" formControlName="name" />
+                <input id="wallet-name" matInput type="text" formControlName="name" cdkFocusInitial />
                 @if (name.hasError('required')) {
                     <mat-error>{{ 'wallet.name.required' | translate }}</mat-error>
                 }
@@ -23,7 +25,9 @@
                 <mat-select id="wallet-currency" formControlName="currencyCode">
                     @for (currency of currencyOptions; track currency) {
                         <mat-option [value]="currency">
-                            {{ walletDataUtil.getCurrencyTextForCurrencyCode(currency) | translate }}
+                            {{
+                                walletDataUtil.getCurrencyTextForCurrencyCode(currency) | translate
+                            }}
                         </mat-option>
                     }
                 </mat-select>
@@ -46,7 +50,7 @@
         </p>
     </mat-dialog-content>
 
-    <mat-dialog-actions align="end">
+    <mat-dialog-actions>
         @if (isEditMode()) {
             <button
                 mat-flat-button
@@ -58,10 +62,6 @@
                 {{ 'wallet.delete' | translate }}
             </button>
         }
-
-        <button mat-stroked-button type="button" mat-dialog-close [disabled]="data.isFormDisabled()">
-            {{ 'wallet.cancel' | translate }}
-        </button>
 
         <button mat-flat-button type="submit" [disabled]="data.isFormDisabled()">
             {{ isEditMode() ? ('wallet.update' | translate) : ('wallet.create' | translate) }}
