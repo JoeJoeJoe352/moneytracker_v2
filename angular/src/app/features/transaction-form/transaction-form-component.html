@@ -11,16 +11,14 @@
                     formControlName="name"
                     autocomplete="name"
                 />
-                @if (name.invalid && name.touched) {
-                    @if (name.hasError('required')) {
-                        <mat-error>{{ 'transaction.name.required' | translate }}</mat-error>
-                    }
-                    @if (name.hasError('minlength')) {
-                        <mat-error>{{ 'transaction.name.minlength' | translate }}</mat-error>
-                    }
-                    @if (name.hasError('maxlength')) {
-                        <mat-error>{{ 'transaction.name.maxlength' | translate }}</mat-error>
-                    }
+                @if (name.hasError('required')) {
+                    <mat-error>{{ 'transaction.name.required' | translate }}</mat-error>
+                }
+                @if (name.hasError('minlength')) {
+                    <mat-error>{{ 'transaction.name.minlength' | translate }}</mat-error>
+                }
+                @if (name.hasError('maxlength')) {
+                    <mat-error>{{ 'transaction.name.maxlength' | translate }}</mat-error>
                 }
             </mat-form-field>
         </div>
@@ -33,7 +31,7 @@
                     formControlName="walletId"
                     (selectionChange)="onWalletChange($event.value)"
                 >
-                    @for (item of userData.getWallets(); track $index) {
+                    @for (item of userData.getWallets(); track item.id) {
                         <mat-option [value]="item.id"
                             >{{ item.name }} ({{ item.currencyCode }})</mat-option
                         >
@@ -57,13 +55,11 @@
                     <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
                     <mat-datepicker-toggle matIconSuffix [for]="transactionDatePicker" />
                     <mat-datepicker #transactionDatePicker />
-                    @if (transactionDate.invalid && transactionDate.touched) {
-                        @if (transactionDate.hasError('required')) {
-                            <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>
-                        }
-                        @if (transactionDate.hasError('invalidDate')) {
-                            <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
-                        }
+                    @if (transactionDate.hasError('required')) {
+                        <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>
+                    }
+                    @if (transactionDate.hasError('invalidDate')) {
+                        <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
                     }
                 </mat-form-field>
             </div>
@@ -129,13 +125,11 @@
                         autocomplete="price"
                     />
                     <span matTextSuffix>{{ selectedWalletsCurrency() }}</span>
-                    @if (price.invalid && price.touched) {
-                        @if (price.hasError('required')) {
-                            <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
-                        }
-                        @if (price.hasError('min')) {
-                            <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
-                        }
+                    @if (price.hasError('required')) {
+                        <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
+                    }
+                    @if (price.hasError('min')) {
+                        <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
                     }
                 </mat-form-field>
             </div>

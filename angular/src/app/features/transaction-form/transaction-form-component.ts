@@ -9,7 +9,7 @@ import {
     signal,
     Signal,
     SimpleChanges,
-    ViewChild,
+    viewChild,
 } from '@angular/core';
 import {
     FormArray,
@@ -64,10 +64,10 @@ import { TransactionUtils } from '../transaction/transaction-utils';
     ],
 })
 export class TransactionFormComponent implements OnChanges {
-    private fb = inject(FormBuilder);
-    protected userData = inject(UserDataStore);
-    protected walletUtil = inject(WalletDataUtil);
-    protected transactionUtils = inject(TransactionUtils);
+    private readonly fb = inject(FormBuilder);
+    protected readonly userData = inject(UserDataStore);
+    protected readonly walletUtil = inject(WalletDataUtil);
+    protected readonly transactionUtils = inject(TransactionUtils);
 
     /**
      * Form disabled-e (pl.: töltődéskor)
@@ -100,7 +100,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Az "új tétel" gomb sora, hogy addRow()-nál az oldal aljára tudjunk görgetni
      */
-    @ViewChild('detailAddButton') private detailAddButton?: ElementRef<HTMLElement>;
+    private readonly detailAddButton = viewChild<ElementRef<HTMLElement>>('detailAddButton');
 
     /**
      * Tranzakciós form
@@ -159,9 +159,7 @@ export class TransactionFormComponent implements OnChanges {
             }
             this.setWalletSymbol(transaction.walletId);
 
-            const convertedInputValues = this.transactionUtils.convertDataToInput(
-                transaction,
-            );
+            const convertedInputValues = this.transactionUtils.convertDataToInput(transaction);
             this.refreshFormWithData(convertedInputValues);
         }
     }
@@ -246,7 +244,7 @@ export class TransactionFormComponent implements OnChanges {
     addRow(): void {
         this.details.push(this.generateNewEmptyRow());
         setTimeout(() =>
-            this.detailAddButton?.nativeElement.scrollIntoView({
+            this.detailAddButton()?.nativeElement.scrollIntoView({
                 behavior: 'smooth',
                 block: 'nearest',
             }),
