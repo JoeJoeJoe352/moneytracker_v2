@@ -57,7 +57,7 @@ export class TransactionService {
   }
 
   /**
-   * Utolsó X darab tranzakciót lekéri
+   * Lekéri a user összes pénzét
    */
   getMoneySum(): Observable<MoneySumInterface> {
     return this.http.get<MoneySumInterface>('/api/transaction/sum')

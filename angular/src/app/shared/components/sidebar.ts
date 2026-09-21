@@ -3,7 +3,7 @@ import { AuthService } from '../../features/auth/auth-service';
 import { Router, RouterLink } from '@angular/router';
 import { UserDataStore } from '../services/user-data-store';
 import { LinkInterface } from '../interfaces';
-import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { _, TranslatePipe } from '@ngx-translate/core';
 import { HeaderLinkListComponent } from './header-link-list-component';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -11,7 +11,7 @@ import { AuthActionService } from '../../features/auth/auth-action-service';
 import { MatDialog } from '@angular/material/dialog';
 import { LoginComponent } from '../../features/auth/login-component';
 import { RegisterComponent } from '../../features/auth/register-component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../services/notification-service';
 
 @Component({
     selector: 'app-sidebar',
@@ -21,11 +21,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class Sidebar {
     private readonly actionService = inject(AuthActionService);
-    private readonly translateService = inject(TranslateService);
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
     private readonly dialog = inject(MatDialog);
-    private readonly snackBar = inject(MatSnackBar);
+    private readonly notification = inject(NotificationService);
 
     protected userData = inject(UserDataStore);
 
@@ -69,18 +68,12 @@ export class Sidebar {
         this.authService.logout().subscribe({
             next: () => {
                 this.userData.resetData();
-                this.snackBar.open(
-                    this.translateService.instant(_('header.logout.success')),
-                    this.translateService.instant(_('etc.close')),
-                );
+                this.notification.show(_('header.logout.success'));
                 this.router.navigate(['/welcome']);
             },
             error: (response) => {
                 console.error(response);
-                this.snackBar.open(
-                    this.translateService.instant(_('etc.general-error')),
-                    this.translateService.instant(_('etc.close')),
-                );
+                this.notification.showGeneralError();
             },
         });
     }
