@@ -21,7 +21,22 @@ export class WalletCardComponent {
     public walletData = input.required<WalletDataInterface>();
 
     /**
+     * Ha true, a kártya nem kattintható (pl. amíg a lista újratölt)
+     */
+    public disabled = input(false);
+
+    /**
      * Walletra rákattintott a user
      */
     public cardClicked = output<number>();
+
+    /**
+     * Kártyára kattintáskor lefutó műveletek 
+     */
+    protected onActivate(): void {
+        if (this.disabled()) {
+            return;
+        }
+        this.cardClicked.emit(this.walletData().id);
+    }
 }

@@ -5,10 +5,12 @@
     role="button"
     tabindex="0"
     matRipple
+    [class.disabled]="disabled()"
+    [attr.aria-disabled]="disabled()"
     [attr.aria-label]="wallet.name + ', ' + formattedSum"
-    (click)="cardClicked.emit(wallet.id)"
-    (keydown.enter)="cardClicked.emit(wallet.id)"
-    (keydown.space)="$event.preventDefault(); cardClicked.emit(wallet.id)"
+    (click)="onActivate()"
+    (keydown.enter)="onActivate()"
+    (keydown.space)="$event.preventDefault(); onActivate()"
 >
     <div class="wallet-flap">
         <span class="wallet-clasp"></span>

@@ -21,6 +21,8 @@ import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
 class StubWalletsListComponent {
     walletListData = input<WalletDataInterface[]>([]);
 
+    disabled = input(false);
+
     walletCardClicked = output<WalletDataInterface>();
 }
 
@@ -147,6 +149,33 @@ describe('WalletsPageComponent (Vitest)', () => {
         expect(component['walletListResource'].isLoading()).toBe(false);
         expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
         expect(getListStub().walletListData()).toEqual([]);
+    });
+
+    // Reload alatt a lista a DOM-ban marad (így a dialog restoreFocus-a működik), de le van tiltva
+    it('should keep the list rendered but disabled while the wallets are reloading', async () => {
+        await setup();
+        const stub = getListStub();
+        expect(stub.disabled()).toBe(false);
+
+        walletServiceMock.listWallets.mockReturnValue(new Subject<WalletDataInterface[]>());
+        component['walletListResource'].reload();
+        fixture.detectChanges();
+
+        expect(getListStub()).toBe(stub);
+        expect(stub.disabled()).toBe(true);
+        expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+    });
+
+    it('should disable the create button while the wallets are loading', async () => {
+        await setup();
+        const createButton = fixture.nativeElement.querySelector('button');
+        expect(createButton.disabled).toBe(false);
+
+        walletServiceMock.listWallets.mockReturnValue(new Subject<WalletDataInterface[]>());
+        component['walletListResource'].reload();
+        fixture.detectChanges();
+
+        expect(createButton.disabled).toBe(true);
     });
 
     it('should not open any dialog until the create button is clicked', async () => {

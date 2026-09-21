@@ -12,6 +12,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog-component';
 import { NotificationService } from '../../shared/services/notification-service';
+import { RESOURCE_STATUS_LOADING } from '../../shared/constants';
 
 @Component({
     selector: 'app-wallets-page-component',
@@ -26,6 +27,8 @@ export class WalletsPageComponent {
     private readonly userData = inject(UserDataStore);
     private readonly dialog = inject(MatDialog);
     private readonly notification = inject(NotificationService);
+
+    protected readonly RESOURCE_STATUS_LOADING = RESOURCE_STATUS_LOADING;
 
     /**
      * Wallet adatok

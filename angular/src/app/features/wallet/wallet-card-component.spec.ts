@@ -73,4 +73,19 @@ describe('WalletCardComponent (Vitest)', () => {
 
         expect(clickedId).toBe(5);
     });
+
+    it('should not emit cardClicked when disabled', () => {
+        fixture.componentRef.setInput('disabled', true);
+        fixture.detectChanges();
+
+        let clickedId: number | undefined;
+        component.cardClicked.subscribe((id) => (clickedId = id));
+
+        const card = fixture.nativeElement.querySelector('.wallet-card');
+        card.click();
+        card.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+        expect(clickedId).toBeUndefined();
+        expect(card.getAttribute('aria-disabled')).toBe('true');
+    });
 });

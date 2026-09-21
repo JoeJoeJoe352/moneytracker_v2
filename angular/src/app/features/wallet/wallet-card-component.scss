@@ -14,6 +14,15 @@
     &:hover {
         transform: translateY(-4px);
     }
+
+    &.disabled {
+        cursor: progress;
+        opacity: 0.6;
+
+        &:hover {
+            transform: none;
+        }
+    }
 }
 
 // A keskenyebb, kilógó "fül" a kártya tetején, ami a pénztárca hajtókáját adja vissza

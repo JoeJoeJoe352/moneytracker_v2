@@ -9,6 +9,7 @@ import { WalletCardComponent } from './wallet-card-component';
             @for (wallet of walletListData(); track wallet.id) {
                 <app-wallet-card-component
                     [walletData]="wallet"
+                    [disabled]="disabled()"
                     (cardClicked)="walletCardClicked.emit(wallet)"
                 />
             }
@@ -23,6 +24,11 @@ export class WalletsListComponent {
      * Wallet lista elemei
      */
     public walletListData = input.required<WalletDataInterface[]>();
+
+    /**
+     * Ha true, a kártyák nem kattinthatók (pl. amíg a lista újratölt)
+     */
+    public disabled = input(false);
 
     /**
      * Event, hogy user rákattintott valamelyik elemre
