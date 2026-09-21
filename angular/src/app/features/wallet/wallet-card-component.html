@@ -1,12 +1,14 @@
+@let wallet = walletData();
+@let formattedSum = wallet.sum | currencyFormat: wallet.currencyCode;
 <div
     class="wallet-card"
     role="button"
     tabindex="0"
     matRipple
-    [attr.aria-label]="walletData().name + ', ' + (walletData().sum | currencyFormat: walletData().currencyCode)"
-    (click)="cardClicked.emit(walletData().id)"
-    (keydown.enter)="cardClicked.emit(walletData().id)"
-    (keydown.space)="$event.preventDefault(); cardClicked.emit(walletData().id)"
+    [attr.aria-label]="wallet.name + ', ' + formattedSum"
+    (click)="cardClicked.emit(wallet.id)"
+    (keydown.enter)="cardClicked.emit(wallet.id)"
+    (keydown.space)="$event.preventDefault(); cardClicked.emit(wallet.id)"
 >
     <div class="wallet-flap">
         <span class="wallet-clasp"></span>
@@ -14,19 +16,17 @@
 
     <div class="wallet-body">
         <span class="wallet-type-badge">{{
-            walletDataUtil.getLangForWalletType(walletData().type) | translate
+            walletDataUtil.getLangForWalletType(wallet.type) | translate
         }}</span>
 
         <div class="wallet-balance">
-            <span class="wallet-balance-amount">{{
-                walletData().sum | currencyFormat: walletData().currencyCode
-            }}</span>
+            <span class="wallet-balance-amount">{{ formattedSum }}</span>
         </div>
 
         <div class="wallet-card-bottom">
-            <span class="wallet-name">{{ walletData().name }}</span>
+            <span class="wallet-name">{{ wallet.name }}</span>
             <span class="wallet-currency-code">{{
-                walletDataUtil.getCurrencyTextForCurrencyCode(walletData().currencyCode) | translate
+                walletDataUtil.getCurrencyTextForCurrencyCode(wallet.currencyCode) | translate
             }}</span>
         </div>
     </div>
