@@ -31,13 +31,6 @@ export class WalletService {
     }
 
     /**
-     * Visszaadja a user egy walletjét id alapján
-     */
-    getWalletById(id: number): Observable<WalletDataInterface> {
-        return this.http.get<WalletDataInterface>('/api/wallet/' + id);
-    }
-
-    /**
      * Soft delete-eli a walletet
      */
     softDeleteWallet(id: number): Observable<void> {

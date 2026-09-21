@@ -25,7 +25,7 @@
                 <mat-select id="wallet-currency" formControlName="currencyCode">
                     @for (currency of currencyOptions; track currency) {
                         <mat-option [value]="currency">
-                            {{ 'currency.' + currency.toLowerCase() | translate }}
+                            {{ walletDataUtil.getCurrencyTextForCurrencyCode(currency) | translate }}
                         </mat-option>
                     }
                 </mat-select>
@@ -36,7 +36,7 @@
                 <mat-select id="wallet-type" formControlName="walletType">
                     @for (type of walletTypeOptions; track type) {
                         <mat-option [value]="type">
-                            {{ 'wallet.type.' + type.toLowerCase() | translate }}
+                            {{ walletDataUtil.getLangForWalletType(type) | translate }}
                         </mat-option>
                     }
                 </mat-select>

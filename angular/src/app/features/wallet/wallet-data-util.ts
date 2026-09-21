@@ -2,6 +2,11 @@ import { Injectable } from '@angular/core';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
 import { WalletSummaryInterface } from '../transaction/interfaces';
 
+const WALLET_TYPE_KEYS: Record<WalletTypesEnum, string> = {
+    [WalletTypesEnum.default]: 'wallet.type.default',
+    [WalletTypesEnum.savings]: 'wallet.type.savings',
+};
+
 @Injectable({
     providedIn: 'root',
 })
@@ -9,17 +14,7 @@ export class WalletDataUtil {
     /**
      * Visszaadja a wallet típusát az enum értéke alapján
      */
-    public getLangForWalletType(walletType: WalletTypesEnum): string {
-        switch (walletType) {
-            case WalletTypesEnum.default:
-                return 'wallet.type.default';
-            case WalletTypesEnum.savings:
-                return 'wallet.type.savings';
-            default:
-                console.error('Unknown wallet type const: ' + walletType);
-                return '';
-        }
-    }
+    public getLangForWalletType = (type: WalletTypesEnum) => WALLET_TYPE_KEYS[type] ?? '';
 
     /**
      * Visszaadja a pénznem szöveges reprezentációját az enum értéke alapján
@@ -61,20 +56,10 @@ export class WalletDataUtil {
     public summarizeSumPerCurrency(
         walletSummary: WalletSummaryInterface[],
     ): WalletSummaryInterface[] {
-        const resultArray: WalletSummaryInterface[] = [];
-
-        walletSummary.forEach((walletData) => {
-            const existingItem = resultArray.find(
-                (item) => item.currencyCode === walletData.currencyCode,
-            );
-            
-            if (existingItem) {
-                existingItem.total += walletData.total;
-            } else {
-                resultArray.push({ ...walletData });
-            }
-        });
-
-        return resultArray;
+        const totals = new Map<CurrencyCodesEnum, number>();
+        for (const { currencyCode, total } of walletSummary) {
+            totals.set(currencyCode, (totals.get(currencyCode) ?? 0) + total);
+        }
+        return Array.from(totals, ([currencyCode, total]) => ({ currencyCode, total }));
     }
 }

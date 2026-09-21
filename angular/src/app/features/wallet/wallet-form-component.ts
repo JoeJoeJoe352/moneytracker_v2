@@ -3,8 +3,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { WalletDataUtil } from './wallet-data-util';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -15,6 +15,11 @@ export interface WalletFormInputInterface {
     isFormDisabled: Signal<boolean>;
 }
 
+const WALLET_TYPE_TO_DESCRIPTION: Record<WalletTypesEnum, string> = {
+    [WalletTypesEnum.default]: 'wallet.type.description.default',
+    [WalletTypesEnum.savings]: 'wallet.type.description.savings',
+};
+
 @Component({
     selector: 'app-wallet-form-component',
     templateUrl: './wallet-form-component.html',
@@ -23,7 +28,6 @@ export interface WalletFormInputInterface {
     imports: [
         ReactiveFormsModule,
         TranslatePipe,
-        MatCardModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
@@ -33,6 +37,7 @@ export interface WalletFormInputInterface {
 })
 export class WalletFormComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
+    protected readonly walletDataUtil = inject(WalletDataUtil);
     protected readonly currencyOptions = Object.values(CurrencyCodesEnum);
     protected readonly walletTypeOptions = Object.values(WalletTypesEnum);
 
@@ -43,8 +48,8 @@ export class WalletFormComponent implements OnInit {
      */
     protected wallet: WalletDataInterface | null = null;
 
-    public deleted = output<number>()
-    public saved = output<WalletCreateRequest | WalletUpdateRequest>()
+    public deleted = output<number>();
+    public saved = output<WalletCreateRequest | WalletUpdateRequest>();
 
     protected walletForm = this.fb.nonNullable.group({
         name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
@@ -97,16 +102,8 @@ export class WalletFormComponent implements OnInit {
     /**
      * Visszaadja a nyelvi kulcsot, amely a wallet típusának leírását tartalmazza
      */
-    protected getDescriptionTranslateKeyForWalletType(): string {
-        switch (this.walletType.value) {
-            case WalletTypesEnum.default:
-                return 'wallet.type.description.default';
-            case WalletTypesEnum.savings:
-                return 'wallet.type.description.savings';
-            default:
-                throw Error('No description for the type: ' + this.walletType.value);
-        }
-    }
+    protected getDescriptionTranslateKeyForWalletType = () =>
+        WALLET_TYPE_TO_DESCRIPTION[this.walletType.value] ?? '';
 
     get name() {
         return this.walletForm.controls.name;
