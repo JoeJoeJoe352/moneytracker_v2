@@ -171,9 +171,6 @@ export class TransactionModalStateService {
         dialogRef.componentInstance.saved
             .subscribe((payload) => this.save(payload));
 
-        dialogRef.componentInstance.categoryAdded
-            .subscribe((categoryName) => this.saveCategory(categoryName));
-
         dialogRef.afterClosed().subscribe(() => {
             this.isOpen.set(false);
             this.editId.set(null);

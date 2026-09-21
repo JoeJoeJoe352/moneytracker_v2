@@ -40,5 +40,4 @@ export class TransactionModalComponent {
 
     public deleteTransactionRequested = output<number>();
     public saved = output<NewTransaction>();
-    public categoryAdded = output<string>();
 }
