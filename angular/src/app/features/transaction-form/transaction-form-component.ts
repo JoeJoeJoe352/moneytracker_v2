@@ -30,7 +30,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { DropdownInterface } from '../../shared/interfaces';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
-import { TransactionService } from '../transaction/transaction-service';
 import {
     CategoryResponseInterface,
     DetailForm,
@@ -43,6 +42,7 @@ import { UserDataStore } from '../../shared/services/user-data-store';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
+import { TransactionUtils } from '../transaction/transaction-utils';
 
 @Component({
     selector: 'app-transaction-form-component',
@@ -65,9 +65,9 @@ import { Observable } from 'rxjs';
 })
 export class TransactionFormComponent implements OnChanges {
     private fb = inject(FormBuilder);
-    private transactionService = inject(TransactionService);
     protected userData = inject(UserDataStore);
     protected walletUtil = inject(WalletDataUtil);
+    protected transactionUtils = inject(TransactionUtils);
 
     /**
      * Form disabled-e (pl.: töltődéskor)
@@ -76,7 +76,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Kategóriák listája a selecthez
      */
-    public categoryList = input.required<Signal<CategoryResponseInterface[]>>();
+    public categoryList = input.required<CategoryResponseInterface[]>();
     /**
      * Inputba kapott tranzakció (ha nem új tranzakcióról van szó)
      */
@@ -120,7 +120,7 @@ export class TransactionFormComponent implements OnChanges {
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
      */
     protected categoryData: Signal<DropdownInterface[]> = computed(() => {
-        return this.categoryList()().map((category) => {
+        return this.categoryList().map((category) => {
             return {
                 item_id: category.id,
                 item_text: category.name,
@@ -159,7 +159,7 @@ export class TransactionFormComponent implements OnChanges {
             }
             this.setWalletSymbol(transaction.walletId);
 
-            const convertedInputValues = this.transactionService.utils.convertDataToInput(
+            const convertedInputValues = this.transactionUtils.convertDataToInput(
                 transaction,
             );
             this.refreshFormWithData(convertedInputValues);

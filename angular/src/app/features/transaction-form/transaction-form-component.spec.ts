@@ -4,12 +4,11 @@ import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
-import { signal } from '@angular/core';
 import { TransactionFormComponent } from './transaction-form-component';
 import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
-import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
+import { TransactionDataFromBackend } from '../transaction/interfaces';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
 import { WalletDataInterface } from '../wallet/interfaces';
@@ -58,7 +57,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         component = fixture.componentInstance;
         fixture.componentRef.setInput('isTransactionFormDisabled', false);
         fixture.componentRef.setInput('isCategorySaveInProgress', false);
-        fixture.componentRef.setInput('categoryList', signal<CategoryResponseInterface[]>([]));
+        fixture.componentRef.setInput('categoryList', []);
         fixture.componentRef.setInput('addCategoryCallback', () => {
             throw new Error('not called in this test');
         });

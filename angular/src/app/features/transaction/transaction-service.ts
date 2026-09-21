@@ -10,7 +10,7 @@ import { TransactionListElementData } from '../transaction-list/interfaces';
 })
 export class TransactionService {
   private readonly http = inject(HttpClient);
-  public readonly utils = inject(TransactionUtils)
+  private readonly utils = inject(TransactionUtils)
 
   /**
    * Tranzakció létrehozása

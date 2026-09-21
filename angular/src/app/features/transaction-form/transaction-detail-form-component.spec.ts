@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
-import { signal } from '@angular/core';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
 import { DetailForm } from '../transaction/interfaces';
@@ -40,7 +39,7 @@ describe('TransactionDetailRowComponent (Vitest)', () => {
 
         fixture = TestBed.createComponent(TransactionDetailFormComponent);
         component = fixture.componentInstance;
-        fixture.componentRef.setInput('categoryData', signal<DropdownInterface[]>([]));
+        fixture.componentRef.setInput('categoryData', []);
         fixture.componentRef.setInput('isCategorySaveInProgress', false);
         fixture.componentRef.setInput('isLastDetailRow', false);
         fixture.componentRef.setInput('index', 0);

@@ -21,8 +21,7 @@ interface ModalParams {
  * A tranzakció létrehozó/szerkesztő modal állapotát és műveleteit fogja össze
  * (megnyitás/bezárás, tranzakció + kategórialista betöltése, mentés/törlés/kategória hozzáadása).
  *
- * Komponens szinten kell providerelni (providers: [TransactionModalStateService]), hogy minden
- * oldal saját, egymástól független state-tel rendelkezzen.
+ * Komponens szinten kell providerelni (providers: [TransactionModalStateService]), mert van state-je.
  */
 @Injectable()
 export class TransactionModalStateService {

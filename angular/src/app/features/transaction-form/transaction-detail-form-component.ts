@@ -1,4 +1,4 @@
-import { Component, input, output, Signal } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -40,7 +40,7 @@ export class TransactionDetailFormComponent {
     /**
      * Kategória adatok a dropdown számára
      */
-    public categoryData = input.required<Signal<DropdownInterface[]>>();
+    public categoryData = input.required<DropdownInterface[]>();
     /**
      * Kategória mentése folyamatban van-e
      */

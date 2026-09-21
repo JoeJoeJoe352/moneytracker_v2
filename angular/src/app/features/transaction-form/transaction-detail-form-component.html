@@ -9,17 +9,15 @@
                     type="text"
                     formControlName="detailName"
                 />
-                @if (detail().get('detailName')?.invalid && detail().get('detailName')?.touched) {
-                    @if (detail().get('detailName')?.hasError('required')) {
-                        <mat-error>{{ 'transaction.detail.name.required' | translate }}</mat-error>
-                    }
+                @if (detail().get('detailName')?.hasError('required')) {
+                    <mat-error>{{ 'transaction.detail.name.required' | translate }}</mat-error>
                 }
             </mat-form-field>
         </div>
         <div class="detail-categories">
             <app-category-select
                 formControlName="categories"
-                [categoryData]="categoryData()()"
+                [categoryData]="categoryData()"
                 [disabled]="isCategorySaveInProgress()"
                 [addCategoryCallback]="addCategoryCallback()"
             />
@@ -55,12 +53,8 @@
                         formControlName="detailPrice"
                     />
                     <span matTextSuffix>{{ currencySymbol() }}</span>
-                    @if (
-                        detail().get('detailPrice')?.invalid && detail().get('detailPrice')?.touched
-                    ) {
-                        @if (detail().get('detailPrice')?.hasError('min')) {
-                            <mat-error>{{ 'transaction.detail.price.min' | translate }}</mat-error>
-                        }
+                    @if (detail().get('detailPrice')?.hasError('min')) {
+                        <mat-error>{{ 'transaction.detail.price.min' | translate }}</mat-error>
                     }
                 </mat-form-field>
             } @else {
@@ -73,13 +67,8 @@
                         formControlName="detailWeight"
                     />
                     <span matTextSuffix>kg</span>
-                    @if (
-                        detail().get('detailWeight')?.invalid &&
-                        detail().get('detailWeight')?.touched
-                    ) {
-                        @if (detail().get('detailWeight')?.hasError('min')) {
-                            <mat-error>{{ 'transaction.detail.amount.min' | translate }}</mat-error>
-                        }
+                    @if (detail().get('detailWeight')?.hasError('min')) {
+                        <mat-error>{{ 'transaction.detail.amount.min' | translate }}</mat-error>
                     }
                 </mat-form-field>
 
@@ -92,15 +81,8 @@
                         formControlName="detailUnitPrice"
                     />
                     <span matTextSuffix>{{ currencySymbol() }}/Kg</span>
-                    @if (
-                        detail().get('detailUnitPrice')?.invalid &&
-                        detail().get('detailUnitPrice')?.touched
-                    ) {
-                        @if (detail().get('detailUnitPrice')?.hasError('min')) {
-                            <mat-error>{{
-                                'transaction.detail.unit_price.min' | translate
-                            }}</mat-error>
-                        }
+                    @if (detail().get('detailUnitPrice')?.hasError('min')) {
+                        <mat-error>{{ 'transaction.detail.unit_price.min' | translate }}</mat-error>
                     }
                 </mat-form-field>
 
