@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { AuthDialogData, LoginRequestData } from './interfaces';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DialogCloseButton } from '../../shared/components/mat-modal-close';
@@ -13,14 +13,14 @@ import { DialogCloseButton } from '../../shared/components/mat-modal-close';
     templateUrl: './login-component.html',
     styleUrl: './login-component.scss',
     imports: [
-    ReactiveFormsModule,
-    TranslatePipe,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatButton,
-    MatInputModule,
-    DialogCloseButton
-],
+        ReactiveFormsModule,
+        TranslatePipe,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatButtonModule,
+        MatInputModule,
+        DialogCloseButton,
+    ],
 })
 export class LoginComponent {
     private readonly fb = inject(FormBuilder);
@@ -35,8 +35,26 @@ export class LoginComponent {
      * login form adatai
      */
     protected readonly loginForm = this.fb.nonNullable.group({
-        username: ['', Validators.required],
-        password: ['', Validators.required],
+        username: [
+            '',
+            {
+                validators: [
+                    Validators.required,
+                    Validators.minLength(3),
+                    Validators.maxLength(20),
+                ],
+            },
+        ],
+        password: [
+            '',
+            {
+                validators: [
+                    Validators.required,
+                    Validators.minLength(6),
+                    Validators.maxLength(20),
+                ],
+            },
+        ],
     });
 
     /**

@@ -18,16 +18,20 @@
   "login": {
     "title": "Bejelentkezés",
     "username": "Felhasználónév",
-    "password": "Jelszó",
-    "submit": "Bejelentkezés",
     "username.required-error": "A felhasználónév megadása kötelező!",
+    "username.minlength-error": "A felhasználónévnek legalább 3 karakternek kell lennie!",
+    "username.maxlength-error": "A felhasználónév legfeljebb 20 karakter lehet!",
+    "password": "Jelszó",
     "password.required-error": "A jelszó megadása kötelező!",
+    "password.minlength-error": "A jelszónak legalább 6 karakternek kell lennie!",
+    "password.maxlength-error": "A jelszó legfeljebb 20 karakter lehet!",
+    "submit": "Bejelentkezés",
     "success": "Sikeres bejelentkezés"
   },
   "register": {
     "username": "Felhasználónév",
     "username.required-error": "A felhasználónév megadása kötelező!",
-    "username.minlength-error": "A felhasználónévnek legalább 5 karakternek kell lennie!",
+    "username.minlength-error": "A felhasználónévnek legalább 3 karakternek kell lennie!",
     "username.maxlength-error": "A felhasználónév legfeljebb 20 karakter lehet!",
     "username.taken-error": "A felhasználónév már foglalt!",
     "email": "Email",

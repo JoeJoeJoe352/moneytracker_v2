@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -41,11 +42,14 @@ class UserServiceTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private MessageSource messageSource;
+
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, passwordEncoder, jwtService, walletService);
+        userService = new UserService(userRepository, passwordEncoder, jwtService, walletService, messageSource);
     }
 
     /**
@@ -93,7 +97,6 @@ class UserServiceTest {
     void createUser_throwsWhenUsernameAlreadyExists() {
         UserCreateCommand UserCreateCommand = new UserCreateCommand("testuser", "teszt@email.com", "password");
 
-        Mockito.when(userRepository.existsByEmail("teszt@email.com")).thenReturn(false);
         Mockito.when(userRepository.existsByUsername("testuser")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> {

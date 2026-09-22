@@ -1,5 +1,7 @@
 package com.starbuck.moneytracker.service;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,13 +19,15 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final WalletService walletService;
+    private final MessageSource messageSource;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
-            WalletService walletService) {
+            WalletService walletService, MessageSource messageSource) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.walletService = walletService;
+        this.messageSource = messageSource;
     }
 
     /**
@@ -35,9 +39,13 @@ public class UserService {
      */
     @Transactional
     public User createUser(UserCreateCommand command) {
-        if (userRepository.existsByEmail(command.getEmail())
-                || userRepository.existsByUsername(command.getUsername())) {
-            throw new IllegalArgumentException("Username or email already exists");
+        if (userRepository.existsByUsername(command.getUsername())) {
+            throw new IllegalArgumentException(
+                    messageSource.getMessage("usernameExists", null, LocaleContextHolder.getLocale()));
+        }
+        if (userRepository.existsByEmail(command.getEmail())) {
+            throw new IllegalArgumentException(
+                    messageSource.getMessage("emailExists", null, LocaleContextHolder.getLocale()));
         }
 
         User user = new User(command.getUsername(), passwordEncoder.encode(command.getPassword()), command.getEmail());
@@ -58,7 +66,8 @@ public class UserService {
     public String login(UserLoginCommand command) {
         User user = this.userRepository.findByUsername(command.getUsername());
         if (user == null || !this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid username or password");
+            var errorMsg = messageSource.getMessage("invalidCredentials", null, LocaleContextHolder.getLocale());
+            throw new BadCredentialsException(errorMsg);
         }
         return this.jwtService.generateToken(command.getUsername());
     }

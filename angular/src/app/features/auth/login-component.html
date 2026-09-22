@@ -19,13 +19,27 @@
                     autocomplete="username"
                     formControlName="username"
                 />
-                @if (loginForm.controls.username.hasError('required')) {
-                    <mat-error>
-                        {{ 'login.username.required-error' | translate }}
-                    </mat-error>
+
+                @if (loginForm.controls.username.invalid && loginForm.controls.username.touched) {
+                    @if (loginForm.controls.username.hasError('required')) {
+                        <mat-error>
+                            {{ 'login.username.required-error' | translate }}
+                        </mat-error>
+                    }
+                    @if (loginForm.controls.username.hasError('minlength')) {
+                        <mat-error>
+                            {{ 'login.username.minlength-error' | translate }}
+                        </mat-error>
+                    }
+                    @if (loginForm.controls.username.hasError('maxlength')) {
+                        <mat-error>
+                            {{ 'login.username.maxlength-error' | translate }}
+                        </mat-error>
+                    }
                 }
             </mat-form-field>
-
+        </div>
+        <div class="login-form-row">
             <!-- password -->
             <mat-form-field>
                 <mat-label>
@@ -39,10 +53,22 @@
                     formControlName="password"
                 />
 
-                @if (loginForm.controls.password.hasError('required')) {
-                    <mat-error>
-                        {{ 'login.password.required-error' | translate }}
-                    </mat-error>
+                @if (loginForm.controls.password.invalid && loginForm.controls.password.touched) {
+                    @if (loginForm.controls.password.hasError('required')) {
+                        <mat-error>
+                            {{ 'login.password.required-error' | translate }}
+                        </mat-error>
+                    }
+                    @if (loginForm.controls.password.hasError('minlength')) {
+                        <mat-error>
+                            {{ 'login.password.minlength-error' | translate }}
+                        </mat-error>
+                    }
+                    @if (loginForm.controls.password.hasError('maxlength')) {
+                        <mat-error>
+                            {{ 'login.password.maxlength-error' | translate }}
+                        </mat-error>
+                    }
                 }
             </mat-form-field>
         </div>

@@ -23,7 +23,11 @@
     "password": "Passwort",
     "submit": "Anmelden",
     "username.required-error": "Der Benutzername ist erforderlich!",
-    "password.required-error": "Das Passwort ist erforderlich!"
+    "username.minlength-error": "Der Benutzername muss mindestens 3 Zeichen lang sein!",
+    "username.maxlength-error": "Der Benutzername darf höchstens 20 Zeichen lang sein!",
+    "password.required-error": "Das Passwort ist erforderlich!",
+    "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",
+    "password.maxlength-error": "Das Passwort darf höchstens 20 Zeichen lang sein!"
   },
   "register": {
     "username": "Benutzername",
