@@ -7,6 +7,6 @@ import { TranslatePipe } from "@ngx-translate/core";
     standalone: true,
     imports: [TranslatePipe],
 })
-export class ErrorPage {
+export class ErrorPageComponent {
 
 }

@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-welcome',
-    templateUrl: './welcome.html',
+    templateUrl: './welcome-component.html',
     styles: `
         .logo {
             max-height: 450px;
@@ -15,4 +15,4 @@ import { MatButtonModule } from '@angular/material/button';
     imports: [TranslatePipe, MatCardModule, MatButtonModule],
     standalone: true,
 })
-export class Welcome {}
+export class WelcomeComponent {}

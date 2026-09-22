@@ -2,7 +2,7 @@ import { Component, input, OnInit, output } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { LinkInterface } from './interface';
+import { LinkInterface } from './interfaces';
 
 @Component({
     selector: 'app-header-link-list',

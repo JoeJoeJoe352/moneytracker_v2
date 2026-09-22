@@ -2,7 +2,7 @@ import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { AuthService } from '../../../features/auth/auth-service';
 import { Router, RouterLink } from '@angular/router';
 import { UserDataStore } from '../../services/user-data-store';
-import { LinkInterface } from './interface';
+import { LinkInterface } from './interfaces';
 import { _, TranslatePipe } from '@ngx-translate/core';
 import { HeaderLinkListComponent } from './header-link-list-component';
 import { MatIconButton } from '@angular/material/button';
@@ -15,11 +15,11 @@ import { NotificationService } from '../../services/notification-service';
 
 @Component({
     selector: 'app-sidebar',
-    templateUrl: 'sidebar.html',
-    styleUrl: './sidebar.scss',
+    templateUrl: './sidebar-component.html',
+    styleUrl: './sidebar-component.scss',
     imports: [RouterLink, TranslatePipe, HeaderLinkListComponent, MatIconButton, MatIcon],
 })
-export class Sidebar {
+export class SidebarComponent {
     private readonly actionService = inject(AuthActionService);
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);

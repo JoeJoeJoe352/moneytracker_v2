@@ -4,7 +4,7 @@ import { Component, EventEmitter, input, output } from '@angular/core';
 import { Observable, Subject, of } from 'rxjs';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MainPage } from './main-page-component';
+import { MainPageComponent } from './main-page-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { CategoryService } from '../transaction/category-service';
 import { MoneySumInterface } from '../transaction/interfaces';
@@ -45,8 +45,8 @@ class FakeDialogRef<T> {
     }
 }
 
-describe('MainPage (Vitest)', () => {
-    let fixture: ComponentFixture<MainPage>;
+describe('MainPageComponent (Vitest)', () => {
+    let fixture: ComponentFixture<MainPageComponent>;
     let getMoneySum$: Subject<MoneySumInterface>;
     let getMoneySumSpy: ReturnType<typeof vi.fn>;
     let dialogOpenSpy: ReturnType<typeof vi.fn>;
@@ -73,7 +73,7 @@ describe('MainPage (Vitest)', () => {
         });
 
         TestBed.configureTestingModule({
-            imports: [MainPage],
+            imports: [MainPageComponent],
             providers: [
                 provideTranslateService(),
                 {
@@ -95,7 +95,7 @@ describe('MainPage (Vitest)', () => {
                 { provide: MatDialog, useValue: { open: dialogOpenSpy } },
             ],
         });
-        TestBed.overrideComponent(MainPage, {
+        TestBed.overrideComponent(MainPageComponent, {
             set: {
                 imports: [
                     StubTransactionsListComponent,
@@ -110,7 +110,7 @@ describe('MainPage (Vitest)', () => {
             },
         });
 
-        fixture = TestBed.createComponent(MainPage);
+        fixture = TestBed.createComponent(MainPageComponent);
         fixture.detectChanges();
     }
 

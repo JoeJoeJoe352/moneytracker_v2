@@ -7,11 +7,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-header',
-    templateUrl: 'header.html',
-    styleUrls: ['./header.scss', './mobile-menu.scss'],
+    templateUrl: './header-component.html',
+    styleUrls: ['./header-component.scss', './mobile-menu.scss'],
     imports: [MatToolbar, MatIconButton, MatIcon, LanguageSwitcherComponent, TranslatePipe],
 })
-export class Header {
+export class HeaderComponent {
     /**
      * Nyitva van-e a mobile menü
      */

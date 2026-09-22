@@ -7,4 +7,4 @@ import { TransactionsListComponent } from './transactions-component';
     standalone: true,
     imports: [TransactionsListComponent],
 })
-export class TransactionsPage {}
+export class TransactionsPageComponent {}

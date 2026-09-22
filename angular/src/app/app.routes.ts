@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './auth-guard-guard';
+import { authGuard } from './auth-guard';
 
 /**
  * Routes lazy load-al van betöltve, hogy ne lépjük túl a bundle-size budget-et
@@ -7,18 +7,20 @@ import { authGuard } from './auth-guard-guard';
 export const routes: Routes = [
     {
         path: '',
-        loadComponent: () => import('./features/main-page/main-page-component').then((m) => m.MainPage),
+        loadComponent: () =>
+            import('./features/main-page/main-page-component').then((m) => m.MainPageComponent),
         canActivate: [authGuard],
     },
     {
         path: 'welcome',
-        loadComponent: () => import('./features/welcome/welcome').then((m) => m.Welcome),
+        loadComponent: () =>
+            import('./features/welcome/welcome-component').then((m) => m.WelcomeComponent),
     },
     {
         path: 'transactions',
         loadComponent: () =>
             import('./features/transaction/transactions-page-component').then(
-                (m) => m.TransactionsPage,
+                (m) => m.TransactionsPageComponent,
             ),
         canActivate: [authGuard],
     },
@@ -32,6 +34,7 @@ export const routes: Routes = [
     },
     {
         path: '**',
-        loadComponent: () => import('./features/error/error-page-component').then((m) => m.ErrorPage),
+        loadComponent: () =>
+            import('./features/error/error-page-component').then((m) => m.ErrorPageComponent),
     },
 ];

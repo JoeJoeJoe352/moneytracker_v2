@@ -33,7 +33,7 @@ import { MatButton } from '@angular/material/button';
     ],
     providers: [TransactionModalStateService, DecimalPipe],
 })
-export class MainPage {
+export class MainPageComponent {
     private readonly transactionService = inject(TransactionService);
     protected readonly modal = inject(TransactionModalStateService);
     protected readonly walletUtils = inject(WalletDataUtil);
