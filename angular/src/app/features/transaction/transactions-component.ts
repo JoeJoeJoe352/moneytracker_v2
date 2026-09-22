@@ -76,7 +76,6 @@ export class TransactionsListComponent implements OnChanges {
         });
     }
 
-    // TODO ezt hozzá lehet valahogy kötni a reloadTrigger signalhoz????
     ngOnChanges(changes: SimpleChanges): void {
         // A szülő komponens ha üzen (új tranzakció felvételéről), akkor újratöltjük a listát
         if (changes['reloadTrigger'] && !changes['reloadTrigger'].firstChange) {

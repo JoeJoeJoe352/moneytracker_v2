@@ -17,7 +17,7 @@
 
 <app-transaction-list
     [title]="isHistoryMode() ? null : ('mainpage.last_transactions' | translate)"
-    [isTransactionListLoading]="transactionListData.isLoading()"
+    [listStatus]="transactionListData.status()"
     [transactions]="transactionListData.hasValue() ? transactionListData.value() : []"
     (editTransaction)="modal.open($event.transactionId)"
 />

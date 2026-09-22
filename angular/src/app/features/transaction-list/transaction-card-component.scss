@@ -1,7 +1,6 @@
 @use '../../shared/variables.scss' as *;
 
 .transaction-card-wrapper {
-    cursor: pointer;
     // a lista maga már egy mat-card, ezért a soroknak nem kell saját árnyék/lekerekítés
     --mat-card-elevated-container-shape: 0;
     --mat-card-elevated-container-elevation: 0;

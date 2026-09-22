@@ -29,7 +29,7 @@
                     <mat-datepicker-toggle
                         matIconSuffix
                         [for]="date"
-                        [aria-label]="'transaction_page.filter.date.open-calendar' | translate"
+                        [attr.aria-label]="'transaction_page.filter.date.open-calendar' | translate"
                     />
                     <mat-datepicker #date />
                 </mat-form-field>
@@ -39,7 +39,7 @@
                 mat-flat-button
                 type="submit"
                 [disabled]="isTransactionListLoading()"
-                [aria-disabled]="isTransactionListLoading()"
+                [attr.aria-disabled]="isTransactionListLoading()"
                 class="filter-submit"
             >
                 {{ 'transaction_page.filter.submit' | translate }}
@@ -50,7 +50,7 @@
                 id="clear-filters"
                 type="button"
                 [disabled]="isTransactionListLoading()"
-                [aria-disabled]="isTransactionListLoading()"
+                [attr.aria-disabled]="isTransactionListLoading()"
                 class="filter-clear"
                 (click)="clearInputs()"
             >

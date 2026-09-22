@@ -13,8 +13,11 @@
             @for (transaction of transactions(); track transaction.id) {
                 <div class="transaction-cards">
                     <app-transaction-card
+                        [attr.aria-disabled]="isTransactionListReLoading()"
+                        [class.active-card]="!isTransactionListReLoading()"
+                        [class.disabled-card]="isTransactionListReLoading()"
                         [transaction]="transaction"
-                        (click)="editTransaction.emit({ transactionId: transaction.id })"
+                        (click)="openModalEmit(transaction.id)"
                     />
                 </div>
             } @empty {
