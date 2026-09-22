@@ -241,7 +241,7 @@ export class TransactionFormComponent implements OnChanges {
                     validators: [
                         Validators.required,
                         Validators.minLength(3),
-                        Validators.maxLength(20),
+                        Validators.maxLength(120),
                     ],
                 },
             ],

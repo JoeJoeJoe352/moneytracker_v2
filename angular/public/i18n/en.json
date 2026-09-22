@@ -73,7 +73,7 @@
     "name": "Transaction name",
     "name.required": "Transaction name is required!",
     "name.minlength": "Transaction name must be at least 3 characters long!",
-    "name.maxlength": "Transaction name must be at most 20 characters long!",
+    "name.maxlength": "Transaction name must be at most 120 characters long!",
     "type": "Transaction type",
     "type.hint": "This determines the transaction's sign",
     "price": "Amount",

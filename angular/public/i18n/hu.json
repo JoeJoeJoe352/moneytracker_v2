@@ -77,7 +77,7 @@
     "name": "Tranzakció neve",
     "name.required": "Kötelező megadni!",
     "name.minlength": "A név legalább 3 karakter lehet!",
-    "name.maxlength": "A név legfeljebb 20 karakter lehet!",
+    "name.maxlength": "A név legfeljebb 120 karakter lehet!",
     "type": "Tranzakció típusa (Ez adja meg a tranzakció előjelét)",
     "price": "Összeg",
     "price.required": "Az összeg megadása kötelező!",
