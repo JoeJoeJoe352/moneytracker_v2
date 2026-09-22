@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TransactionsListComponent } from '../transaction/transactions-component';
+import { TransactionsListComponent } from './transactions-component';
 
 @Component({
     selector: 'app-transaction-page-component',

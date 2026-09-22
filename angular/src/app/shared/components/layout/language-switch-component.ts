@@ -1,10 +1,10 @@
 import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { SupportedLangEnum } from '../enums';
+import { SupportedLangEnum } from '../../enums';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { LanguageService } from '../services/translate-service';
+import { LanguageService } from '../../services/translate-service';
 
 @Component({
     selector: 'app-language-switcher',

@@ -17,7 +17,7 @@ export const routes: Routes = [
     {
         path: 'transactions',
         loadComponent: () =>
-            import('./features/history-page/transactions-page-component').then(
+            import('./features/transaction/transactions-page-component').then(
                 (m) => m.TransactionsPage,
             ),
         canActivate: [authGuard],

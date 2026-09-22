@@ -1,8 +1,8 @@
 import { Component, input, OnInit, output } from '@angular/core';
-import { LinkInterface } from '../interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
+import { LinkInterface } from './interface';
 
 @Component({
     selector: 'app-header-link-list',
@@ -22,7 +22,7 @@ import { MatIcon } from '@angular/material/icon';
     `,
     imports: [TranslatePipe, RouterLink, RouterLinkActive, MatIcon],
     styles: `
-        @use '../variables.scss' as *;
+        @use '../../../styles/variables.scss' as *;
 
         .nav-link {
             cursor: pointer;

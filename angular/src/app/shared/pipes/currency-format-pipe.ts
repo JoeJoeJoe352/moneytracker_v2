@@ -28,7 +28,7 @@ export class CurrencyFormatPipe implements PipeTransform {
         // A CLDR pénznem-adatai a szimbólum pozícióját (elé/mögé) és az ezres elválasztókat a UI nyelvéhez (nem a pénznemhez) igazítják
         const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
         const locale = LANGUAGE_TO_LOCALE[lang ?? ''] ?? LANGUAGE_TO_LOCALE[SupportedLangEnum.en];
-        // Az Angular locale-adatai csak a locale "saját" pénznemének szimbólumát ismerik (pl. hu -> Ft), a többihez az ISO kódot adnak vissza
+        // Az Angular locale-adatai csak a locale "saját" pénznemének szimbólumát ismerik, a többihez az ISO kódot adnak vissza
         // (pl. hu locale-ban EUR -> "EUR", nem "€") - ezért a szimbólumot a WalletDataUtil-ból vesszük
         const symbol = this.walletUtils.getCurrencySymbolForCurrencyCode(currencyCode);
 

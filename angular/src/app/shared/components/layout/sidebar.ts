@@ -1,17 +1,17 @@
 import { Component, computed, inject, Signal, signal } from '@angular/core';
-import { AuthService } from '../../features/auth/auth-service';
+import { AuthService } from '../../../features/auth/auth-service';
 import { Router, RouterLink } from '@angular/router';
-import { UserDataStore } from '../services/user-data-store';
-import { LinkInterface } from '../interfaces';
+import { UserDataStore } from '../../services/user-data-store';
+import { LinkInterface } from './interface';
 import { _, TranslatePipe } from '@ngx-translate/core';
 import { HeaderLinkListComponent } from './header-link-list-component';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { AuthActionService } from '../../features/auth/auth-action-service';
+import { AuthActionService } from '../../../features/auth/auth-action-service';
 import { MatDialog } from '@angular/material/dialog';
-import { LoginComponent } from '../../features/auth/login-component';
-import { RegisterComponent } from '../../features/auth/register-component';
-import { NotificationService } from '../services/notification-service';
+import { LoginComponent } from '../../../features/auth/login-component';
+import { RegisterComponent } from '../../../features/auth/register-component';
+import { NotificationService } from '../../services/notification-service';
 
 @Component({
     selector: 'app-sidebar',
