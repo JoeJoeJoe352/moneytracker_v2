@@ -32,7 +32,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
 
     it('should render each transaction through the real card component with correct data', () => {
         // GIVEN
-        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('listStatus', 'resolved');
         fixture.componentRef.setInput('title', null);
         fixture.componentRef.setInput('transactions', [
             {
@@ -90,7 +90,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
 
     it('should emit editTransaction with the id of the clicked card, not just the first one', () => {
         // GIVEN
-        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('listStatus', 'resolved');
         fixture.componentRef.setInput('transactions', [
             {
                 id: 10,
@@ -129,7 +129,7 @@ describe('TransactionList + TransactionCard integration (Vitest)', () => {
 
     it('should instantiate a real TransactionCardComponent instance for each transaction', () => {
         // GIVEN
-        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('listStatus', 'resolved');
         fixture.componentRef.setInput('transactions', [
             {
                 id: 1,
