@@ -13,21 +13,21 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { DialogCloseButton } from '../../shared/components/mat-modal-close';
+import { STRICT_EMAIL_REGEX } from '../../shared/constants';
 
-const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 @Component({
     selector: 'app-register-component',
     templateUrl: './register-component.html',
     styleUrl: './register-component.scss',
     imports: [
-    ReactiveFormsModule,
-    TranslatePipe,
-    MatFormFieldModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatInputModule,
-    DialogCloseButton
-],
+        ReactiveFormsModule,
+        TranslatePipe,
+        MatFormFieldModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatInputModule,
+        DialogCloseButton,
+    ],
 })
 export class RegisterComponent {
     private readonly fb = inject(FormBuilder);
@@ -67,12 +67,19 @@ export class RegisterComponent {
             email: [
                 '',
                 {
-                    validators: [Validators.pattern(STRICT_EMAIL_REGEX), Validators.required],
+                    validators: [
+                        Validators.pattern(STRICT_EMAIL_REGEX),
+                        Validators.required,
+                        Validators.maxLength(30),
+                    ],
                     asyncValidators: [uniqueEmailValidator(this.authService)],
                     updateOn: 'blur',
                 },
             ],
-            password: ['', [Validators.required, Validators.minLength(6)]],
+            password: [
+                '',
+                [Validators.required, Validators.minLength(6), Validators.maxLength(20)],
+            ],
             passwordAgain: ['', [Validators.required]],
         },
         {

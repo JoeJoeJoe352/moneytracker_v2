@@ -5,3 +5,5 @@ import { ResourceStatus } from '@angular/core';
  */
 export const RESOURCE_STATUS_LOADING = 'loading' satisfies ResourceStatus;
 export const RESOURCE_STATUS_RELOADING = 'reloading' satisfies ResourceStatus;
+
+export const STRICT_EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
