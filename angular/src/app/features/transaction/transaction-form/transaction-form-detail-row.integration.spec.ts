@@ -6,12 +6,12 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { TransactionFormComponent } from './transaction-form-component';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
-import { TransactionService } from '../transaction/transaction-service';
-import { TransactionUtils } from '../transaction/transaction-utils';
-import { TransactionDataFromBackend } from '../transaction/interfaces';
-import { UserDataStore } from '../../shared/services/user-data-store';
-import { WalletDataInterface } from '../wallet/interfaces';
-import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
+import { TransactionService } from '../transaction-service';
+import { TransactionUtils } from '../transaction-utils';
+import { TransactionDataFromBackend } from '../interfaces';
+import { UserDataStore } from '../../../shared/services/user-data-store';
+import { WalletDataInterface } from '../../wallet/interfaces';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../../shared/enums';
 
 describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
     let fixture: ComponentFixture<TransactionFormComponent>;

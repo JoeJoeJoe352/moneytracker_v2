@@ -9,7 +9,7 @@ import {
     NewTransaction,
     TransactionDataFromBackend,
 } from './interfaces';
-import { TransactionFormComponent } from '../transaction-form/transaction-form-component';
+import { TransactionFormComponent } from './transaction-form/transaction-form-component';
 import { Observable } from 'rxjs';
 import { DialogCloseButton } from '../../shared/components/mat-modal-close';
 

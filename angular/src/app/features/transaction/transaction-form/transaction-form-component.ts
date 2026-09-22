@@ -20,7 +20,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
-import { DropdownInterface } from '../../shared/interfaces';
+import { DropdownInterface } from '../../../shared/interfaces';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
 import {
@@ -29,19 +29,19 @@ import {
     NewTransaction,
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
-} from '../transaction/interfaces';
+} from '../interfaces';
 import { validDate } from './valid-date-validator';
-import { UserDataStore } from '../../shared/services/user-data-store';
-import { WalletDataUtil } from '../wallet/wallet-data-util';
+import { UserDataStore } from '../../../shared/services/user-data-store';
+import { WalletDataUtil } from '../../wallet/wallet-data-util';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
-import { TransactionUtils } from '../transaction/transaction-utils';
+import { TransactionUtils } from '../transaction-utils';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-transaction-form-component',
     templateUrl: './transaction-form-component.html',
-    styleUrls: ['../../shared/components/form-style.scss', './transaction-form-component.scss'],
+    styleUrls: ['./transaction-form-component.scss'],
     imports: [
         ReactiveFormsModule,
         MatDatepickerModule,

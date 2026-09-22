@@ -6,8 +6,8 @@ import { of, throwError } from 'rxjs';
 import { MatAutocomplete } from '@angular/material/autocomplete';
 import { MatChipRow } from '@angular/material/chips';
 import { CategorySelectComponent } from './category-select-component';
-import { DropdownInterface } from '../../shared/interfaces';
-import { CategoryResponseInterface } from '../transaction/interfaces';
+import { DropdownInterface } from '../../../shared/interfaces';
+import { CategoryResponseInterface } from '../interfaces';
 
 describe('CategorySelectComponent (Vitest)', () => {
     let fixture: ComponentFixture<CategorySelectComponent>;

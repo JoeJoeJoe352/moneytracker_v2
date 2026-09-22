@@ -5,8 +5,8 @@ import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
-import { DetailForm } from '../transaction/interfaces';
-import { DropdownInterface } from '../../shared/interfaces';
+import { DetailForm } from '../interfaces';
+import { DropdownInterface } from '../../../shared/interfaces';
 
 describe('TransactionDetailRowComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionDetailFormComponent>;

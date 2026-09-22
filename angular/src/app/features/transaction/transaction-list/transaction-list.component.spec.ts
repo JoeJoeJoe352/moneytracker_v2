@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import TransactionListComponent from './transaction-list-component';
 import TransactionCardComponent from './transaction-card-component';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
-import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
-import { RESOURCE_STATUS_LOADING } from '../../shared/constants';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../../shared/enums';
+import { RESOURCE_STATUS_LOADING } from '../../../shared/constants';
 
 const sampleWallet = {
     id: 1,
