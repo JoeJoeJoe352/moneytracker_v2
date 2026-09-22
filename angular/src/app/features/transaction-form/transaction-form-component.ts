@@ -10,13 +10,8 @@ import {
     SimpleChanges,
     viewChild,
 } from '@angular/core';
-import {
-    FormArray,
-    FormBuilder,
-    FormGroup,
-    ReactiveFormsModule,
-    Validators,
-} from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { greaterThan } from './greater-than-validator';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
@@ -246,13 +241,15 @@ export class TransactionFormComponent implements OnChanges {
                     validators: [
                         Validators.required,
                         Validators.minLength(3),
-                        Validators.maxLength(200),
+                        Validators.maxLength(20),
                     ],
                 },
             ],
             isIncome: [false],
             isComplexTransaction: [false],
-            price: this.fb.control<number | null>(null, { validators: [Validators.min(1)] }),
+            price: this.fb.control<number | null>(null, {
+                validators: [Validators.required, greaterThan(0)],
+            }),
             transactionDate: this.fb.control(new Date(), {
                 validators: [Validators.required, validDate],
             }),
@@ -274,10 +271,28 @@ export class TransactionFormComponent implements OnChanges {
         categories: number[] | null;
     }): FormGroup<DetailForm> {
         const detailGroup = this.fb.nonNullable.group({
-            detailName: [params.name, Validators.required],
-            detailPrice: this.fb.control<number | null>(params.price, [Validators.min(1)]),
-            detailWeight: this.fb.control<number | null>(params.weight, [Validators.min(1)]),
-            detailUnitPrice: this.fb.control<number | null>(params.unitPrice, [Validators.min(1)]),
+            detailName: [
+                params.name,
+                {
+                    validators: [
+                        Validators.required,
+                        Validators.minLength(3),
+                        Validators.maxLength(20),
+                    ],
+                },
+            ],
+            detailPrice: this.fb.control<number | null>(params.price, [
+                Validators.required,
+                greaterThan(0),
+            ]),
+            detailWeight: this.fb.control<number | null>(params.weight, [
+                Validators.required,
+                greaterThan(0),
+            ]),
+            detailUnitPrice: this.fb.control<number | null>(params.unitPrice, [
+                Validators.required,
+                greaterThan(0),
+            ]),
             detailIsComplexPriceMode: [params.isComplexPriceMode ?? false],
             categories: this.fb.nonNullable.control(
                 this.mapCategoryIdsToDropdownData(params.categories ?? []),

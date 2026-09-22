@@ -12,9 +12,7 @@ public record TransactionDetailCreateDto(
 
     BigDecimal price,
 
-    // Ez lehet null, ha simple tranzakcióról van szó. TODO ez nem fogja meg az egy
-    // karakteres nevet
-    @Length(min = 3, max = 50, message = "Name must be between 3 and 50 characters") 
+    @Length(min = 3, max = 20, message = "Name must be between 3 and 20 characters") 
     String name,
 
     BigDecimal weight,

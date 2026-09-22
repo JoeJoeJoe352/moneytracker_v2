@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record TransactionCreateRequest(
     @NotBlank(message = "Name is mandatory")
-    @Length(min = 3, max = 50, message = "Name must be between 3 and 50 characters")
+    @Length(min = 3, max = 20, message = "Name must be between 3 and 20 characters")
     String name,
 
     BigDecimal globalPrice,

@@ -12,14 +12,16 @@
                     formControlName="name"
                     autocomplete="name"
                 />
-                @if (name.hasError('required')) {
-                    <mat-error>{{ 'transaction.name.required' | translate }}</mat-error>
-                }
-                @if (name.hasError('minlength')) {
-                    <mat-error>{{ 'transaction.name.minlength' | translate }}</mat-error>
-                }
-                @if (name.hasError('maxlength')) {
-                    <mat-error>{{ 'transaction.name.maxlength' | translate }}</mat-error>
+                @if (name.invalid && name.touched) {
+                    @if (name.hasError('required')) {
+                        <mat-error>{{ 'transaction.name.required' | translate }}</mat-error>
+                    }
+                    @if (name.hasError('minlength')) {
+                        <mat-error>{{ 'transaction.name.minlength' | translate }}</mat-error>
+                    }
+                    @if (name.hasError('maxlength')) {
+                        <mat-error>{{ 'transaction.name.maxlength' | translate }}</mat-error>
+                    }
                 }
             </mat-form-field>
         </div>
@@ -52,11 +54,13 @@
                     <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
                     <mat-datepicker-toggle matIconSuffix [for]="transactionDatePicker" />
                     <mat-datepicker #transactionDatePicker />
-                    @if (transactionDate.hasError('required')) {
-                        <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>
-                    }
-                    @if (transactionDate.hasError('invalidDate')) {
-                        <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
+                    @if (transactionDate.invalid && transactionDate.touched) {
+                        @if (transactionDate.hasError('required')) {
+                            <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>
+                        }
+                        @if (transactionDate.hasError('invalidDate')) {
+                            <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
+                        }
                     }
                 </mat-form-field>
             </div>
@@ -83,8 +87,9 @@
                         'transaction.income' | translate
                     }}</span>
                 </div>
-                <mat-hint>{{ 'transaction.type.hint' | translate }}</mat-hint>
             </div>
+        </div>
+        <div class="form-row toggler-row">
             <!-- részletek mutatása/elrejtése kapcsoló -->
             <div class="toggle-field">
                 <span id="transaction-detail-state-label">
@@ -122,11 +127,13 @@
                         autocomplete="price"
                     />
                     <span matTextSuffix>{{ selectedWalletsCurrency() }}</span>
-                    @if (price.hasError('required')) {
-                        <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
-                    }
-                    @if (price.hasError('min')) {
-                        <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
+                    @if (price.invalid && price.touched) {
+                        @if (price.hasError('required')) {
+                            <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
+                        }
+                        @if (price.hasError('greaterThan')) {
+                            <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
+                        }
                     }
                 </mat-form-field>
             </div>

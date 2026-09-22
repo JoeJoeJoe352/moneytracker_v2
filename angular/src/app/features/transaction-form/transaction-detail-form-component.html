@@ -10,8 +10,10 @@
                     type="text"
                     formControlName="detailName"
                 />
-                @if (controls.detailName.hasError('required')) {
-                    <mat-error>{{ 'transaction.detail.name.required' | translate }}</mat-error>
+                @if (controls.detailName.invalid && controls.detailName.touched) {
+                    @if (controls.detailName.hasError('required')) {
+                        <mat-error>{{ 'transaction.detail.field.required' | translate }}</mat-error>
+                    }
                 }
             </mat-form-field>
         </div>
@@ -54,8 +56,13 @@
                         formControlName="detailPrice"
                     />
                     <span matTextSuffix>{{ currencySymbol() }}</span>
-                    @if (controls.detailPrice.hasError('min')) {
-                        <mat-error>{{ 'transaction.detail.price.min' | translate }}</mat-error>
+                    @if (controls.detailPrice.invalid && controls.detailPrice.touched) {
+                        @if (controls.detailPrice.hasError('required')) {
+                            <mat-error>{{ 'transaction.detail.field.required' | translate }}</mat-error>
+                        }
+                        @if (controls.detailPrice.hasError('greaterThan')) {
+                            <mat-error>{{ 'transaction.detail.price.min' | translate }}</mat-error>
+                        }
                     }
                 </mat-form-field>
             } @else {
@@ -68,8 +75,13 @@
                         formControlName="detailWeight"
                     />
                     <span matTextSuffix>kg</span>
-                    @if (controls.detailWeight.hasError('min')) {
-                        <mat-error>{{ 'transaction.detail.amount.min' | translate }}</mat-error>
+                    @if (controls.detailWeight.invalid && controls.detailWeight.touched) {
+                        @if (controls.detailWeight.hasError('required')) {
+                            <mat-error>{{ 'transaction.detail.field.required' | translate }}</mat-error>
+                        }
+                        @if (controls.detailWeight.hasError('greaterThan')) {
+                            <mat-error>{{ 'transaction.detail.amount.min' | translate }}</mat-error>
+                        }
                     }
                 </mat-form-field>
 
@@ -82,8 +94,17 @@
                         formControlName="detailUnitPrice"
                     />
                     <span matTextSuffix>{{ currencySymbol() }}/Kg</span>
-                    @if (controls.detailUnitPrice.hasError('min')) {
-                        <mat-error>{{ 'transaction.detail.unit_price.min' | translate }}</mat-error>
+                    @if (controls.detailUnitPrice.invalid && controls.detailUnitPrice.touched) {
+                        @if (controls.detailUnitPrice.hasError('required')) {
+                            <mat-error>{{
+                                'transaction.detail.field.required' | translate
+                            }}</mat-error>
+                        }
+                        @if (controls.detailUnitPrice.hasError('greaterThan')) {
+                            <mat-error>{{
+                                'transaction.detail.unit_price.min' | translate
+                            }}</mat-error>
+                        }
                     }
                 </mat-form-field>
 
