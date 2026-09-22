@@ -62,7 +62,7 @@ export class WalletFormComponent implements OnInit {
     public saved = output<WalletCreateRequest | WalletUpdateRequest>();
 
     protected walletForm = this.fb.nonNullable.group({
-        name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+        name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
         currencyCode: [CurrencyCodesEnum.huf, [Validators.required]],
         walletType: [WalletTypesEnum.default, [Validators.required]],
     });

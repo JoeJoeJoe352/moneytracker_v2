@@ -15,14 +15,16 @@
                     formControlName="name"
                     cdkFocusInitial
                 />
-                @if (name.hasError('required')) {
-                    <mat-error>{{ 'wallet.name.required' | translate }}</mat-error>
-                }
-                @if (name.hasError('minlength')) {
-                    <mat-error>{{ 'wallet.name.minlength' | translate }}</mat-error>
-                }
-                @if (name.hasError('maxlength')) {
-                    <mat-error>{{ 'wallet.name.maxlength' | translate }}</mat-error>
+                @if (name.invalid && name.touched) {
+                    @if (name.hasError('required')) {
+                        <mat-error>{{ 'wallet.name.required' | translate }}</mat-error>
+                    }
+                    @if (name.hasError('minlength')) {
+                        <mat-error>{{ 'wallet.name.minlength' | translate }}</mat-error>
+                    }
+                    @if (name.hasError('maxlength')) {
+                        <mat-error>{{ 'wallet.name.maxlength' | translate }}</mat-error>
+                    }
                 }
             </mat-form-field>
         </div>

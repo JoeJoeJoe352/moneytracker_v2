@@ -22,6 +22,8 @@ import com.starbuck.moneytracker.mapper.WalletMapper;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
+import jakarta.validation.Valid;
+
 @RestController
 public class WalletController {
 
@@ -52,7 +54,7 @@ public class WalletController {
      */
     @PostMapping(path = "wallet")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createWallet(@RequestBody WalletCreateDto dto) {
+    public void createWallet(@Valid @RequestBody WalletCreateDto dto) {
         var command = new CreateWalletCommand(dto.name(), dto.currencyCode(), dto.walletType(), userUtil.getUser());
         this.walletService.createWallet(command);
     }
@@ -65,7 +67,7 @@ public class WalletController {
      */
     @PutMapping(path = "wallet/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void updateWallet(@RequestBody WalletUpdateDto dto, @PathVariable long id) {
+    public void updateWallet(@Valid @RequestBody WalletUpdateDto dto, @PathVariable long id) {
         var command = new UpdateWalletCommand(dto.name(), dto.walletType());
         this.walletService.updateWallet(id, command);
     }
