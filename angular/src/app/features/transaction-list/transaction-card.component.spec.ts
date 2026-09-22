@@ -74,6 +74,30 @@ describe('TransactionCardComponent (Vitest)', () => {
         expect(badgeIcon.getAttribute('fontIcon')).toBe('arrow_upward');
     });
 
+    it('should render nothing but the icon inside the type badge', () => {
+        fixture.componentRef.setInput('transaction', {
+            id: 27,
+            name: 'Bolt',
+            priceSum: -1000,
+            transactionType: TransactionTypeEnum.OUTCOME,
+            transactionDate: '2024-01-12',
+            isComplexTransaction: false,
+            transactionDetails: [],
+            wallet: {
+                id: 1,
+                name: 'Napi költés',
+                currencyCode: CurrencyCodesEnum.huf,
+                type: WalletTypesEnum.default,
+            },
+        });
+
+        fixture.detectChanges();
+
+        const badge = fixture.nativeElement.querySelector('.transaction-icon-badge');
+        // a mat-icon a fontIcon attribútumból rajzol, ezért a badge-ben nem lehet szöveg
+        expect(badge.textContent.trim()).toBe('');
+    });
+
     it('should render outcome transaction correctly. Categories and ', () => {
         // GIVEN
         fixture.componentRef.setInput('transaction', {

@@ -1,5 +1,7 @@
 .wallet-form {
     .wallet-form-single-row {
+        margin-bottom: 10px;
+
         mat-form-field {
             width: 100%;
         }
@@ -8,7 +10,7 @@
     .wallet-form-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 16px;
 
         mat-form-field {
             flex: 1 1 200px;

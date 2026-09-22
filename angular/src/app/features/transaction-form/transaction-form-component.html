@@ -5,6 +5,7 @@
             <mat-form-field>
                 <mat-label>{{ 'transaction.name' | translate }}</mat-label>
                 <input
+                    cdkFocusInitial
                     id="transaction-name"
                     matInput
                     type="text"
@@ -28,12 +29,8 @@
             <!-- Wallet -->
             <mat-form-field>
                 <mat-label>{{ 'transaction.wallet' | translate }}</mat-label>
-                <mat-select
-                    id="transaction-wallet"
-                    formControlName="walletId"
-                    (selectionChange)="onWalletChange($event.value)"
-                >
-                    @for (item of userData.getWallets(); track $index) {
+                <mat-select id="transaction-wallet" formControlName="walletId">
+                    @for (item of userData.getWallets(); track item.id) {
                         <mat-option [value]="item.id"
                             >{{ item.name }} ({{ item.currencyCode }})</mat-option
                         >
@@ -90,8 +87,9 @@
                         'transaction.income' | translate
                     }}</span>
                 </div>
-                <mat-hint>{{ 'transaction.type.hint' | translate }}</mat-hint>
             </div>
+        </div>
+        <div class="form-row toggler-row">
             <!-- részletek mutatása/elrejtése kapcsoló -->
             <div class="toggle-field">
                 <span id="transaction-detail-state-label">
@@ -133,7 +131,7 @@
                         @if (price.hasError('required')) {
                             <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
                         }
-                        @if (price.hasError('min')) {
+                        @if (price.hasError('greaterThan')) {
                             <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
                         }
                     }
@@ -156,7 +154,7 @@
                     <app-transaction-detail-form-component
                         [detail]="detail"
                         [index]="$index"
-                        [categoryData]="categoryData"
+                        [categoryData]="categoryData()"
                         [isCategorySaveInProgress]="isCategorySaveInProgress()"
                         [isLastDetailRow]="isLastDetailRow"
                         [currencySymbol]="selectedWalletsCurrency()"
@@ -179,21 +177,6 @@
         }
     </mat-dialog-content>
     <mat-dialog-actions>
-        <button
-            mat-stroked-button
-            type="button"
-            mat-dialog-close
-            [disabled]="isTransactionFormDisabled()"
-        >
-            {{ 'etc.close' | translate }}
-        </button>
-        <button
-            mat-flat-button
-            type="submit"
-            [disabled]="transactionForm.invalid || isTransactionFormDisabled()"
-        >
-            {{ 'transaction.save' | translate }}
-        </button>
         @if (transaction(); as currentTransaction) {
             <button
                 mat-flat-button
@@ -205,5 +188,8 @@
                 {{ 'transaction.delete' | translate }}
             </button>
         }
+        <button mat-flat-button type="submit" [disabled]="isTransactionFormDisabled()">
+            {{ 'transaction.save' | translate }}
+        </button>
     </mat-dialog-actions>
 </form>

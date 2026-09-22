@@ -62,7 +62,6 @@ describe('TransactionsListComponent (Vitest)', () => {
     let transactionModalDialogRefs: FakeDialogRef<{
         deleteTransactionRequested: EventEmitter<number>;
         saved: EventEmitter<unknown>;
-        categoryAdded: EventEmitter<string>;
     }>[];
 
     async function setup(options: {
@@ -85,7 +84,6 @@ describe('TransactionsListComponent (Vitest)', () => {
                 const dialogRef = new FakeDialogRef({
                     deleteTransactionRequested: new EventEmitter<number>(),
                     saved: new EventEmitter<unknown>(),
-                    categoryAdded: new EventEmitter<string>(),
                 });
                 transactionModalDialogRefs.push(dialogRef);
                 return dialogRef;

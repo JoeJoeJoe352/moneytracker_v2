@@ -6,7 +6,7 @@ import {
     input,
     Signal,
     signal,
-    ViewChild,
+    viewChild,
 } from '@angular/core';
 import {
     ControlValueAccessor,
@@ -25,6 +25,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { DropdownInterface } from '../../shared/interfaces';
 import { Observable } from 'rxjs';
 import { CategoryResponseInterface } from '../transaction/interfaces';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 /**
  * Kiválasztott érték az "új kategória hozzáadása" opcióhoz, hogy megkülönböztethető legyen
@@ -53,7 +54,8 @@ const ADD_NEW_OPTION = Symbol('add-new-category');
     ],
 })
 export class CategorySelectComponent implements ControlValueAccessor {
-    @ViewChild('categoryInput') private categoryInput?: ElementRef<HTMLInputElement>;
+    private readonly categoryInput =
+        viewChild.required<ElementRef<HTMLInputElement>>('categoryInput');
 
     /**
      * Kiválasztható kategóriák listája
@@ -72,11 +74,8 @@ export class CategorySelectComponent implements ControlValueAccessor {
      */
     protected isDisabled = computed(() => this.disabled() || this.formDisabled());
 
-    public addCategoryCallback = input.required<(name: string) => Observable<CategoryResponseInterface>>();
-    /**
-     * Inputba írt keresési szöveg
-     */
-    private searchText = signal('');
+    public addCategoryCallback =
+        input.required<(name: string) => Observable<CategoryResponseInterface>>();
 
     private onChange: (value: DropdownInterface[]) => void = () => undefined;
 
@@ -84,16 +83,17 @@ export class CategorySelectComponent implements ControlValueAccessor {
 
     protected searchControl = new FormControl('', { nonNullable: true });
 
+    /**
+     * Inputba írt keresési szöveg
+     */
+    private searchText = toSignal(this.searchControl.valueChanges, { initialValue: '' });
+
     protected selected = signal<DropdownInterface[]>([]);
 
     /**
      * Az "új kategória hozzáadása" opció értéke az autocomplete-ban (public, hogy tesztelhető legyen)
      */
     public readonly addNewOption = ADD_NEW_OPTION;
-
-    constructor() {
-        this.searchControl.valueChanges.subscribe((value) => this.searchText.set(value));
-    }
 
     /**
      * Opciók a selecthez
@@ -129,24 +129,19 @@ export class CategorySelectComponent implements ControlValueAccessor {
 
         if (value === ADD_NEW_OPTION) {
             // nyers input adatokból olvassuk ki, mert a this.searchText()-be ilyenkor a symbol kerül be
-            if (!this.categoryInput) {
-                throw new Error('Categoryinput not exists');
-            }
-            const name = this.categoryInput.nativeElement.value.trim();
+            const name = this.categoryInput().nativeElement.value.trim();
             if (name && !this.isDisabled()) {
                 this.addCategoryCallback()(name).subscribe({
                     next: (category) => {
                         // note: új kategóriát a szülő state service-ben adjuk hozzá
-                        const newCategoryAsDropdownInterface = {
-                            item_id: category.id,
-                            item_text: category.name,
-                        } as DropdownInterface;
                         this.selected.update((categories) => [
                             ...categories,
-                            newCategoryAsDropdownInterface,
+                            { item_id: category.id, item_text: category.name },
                         ]);
                         this.emitChange();
                     },
+                    // A hibát (snackbar) a callback már kezelte, itt csak azt előzzük meg, hogy kezeletlen RxJS hibaként felszínre kerüljön
+                    error: () => undefined,
                 });
             }
         } else {
@@ -157,9 +152,7 @@ export class CategorySelectComponent implements ControlValueAccessor {
         this.searchControl.setValue('');
         // Az input megjelenített értéke nem szinkronizálódik a FormControl-ból (matChipInputFor miatt),
         // ezért kézzel is töröljük
-        if (this.categoryInput) {
-            this.categoryInput.nativeElement.value = '';
-        }
+        this.categoryInput().nativeElement.value = '';
     }
 
     /**

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { MatAutocomplete } from '@angular/material/autocomplete';
 import { MatChipRow } from '@angular/material/chips';
 import { CategorySelectComponent } from './category-select-component';
@@ -108,6 +108,25 @@ describe('CategorySelectComponent (Vitest)', () => {
         expect(addCategoryCallback).toHaveBeenCalledWith('Health');
         expect(chipTexts()).toEqual(['Health']);
         expect(changedValue).toEqual([{ item_id: 3, item_text: 'Health' }]);
+    });
+
+    it('should not add a chip and not raise an unhandled error when addCategoryCallback fails', () => {
+        // az RxJS a kezeletlen hibát időzítővel dobja el, ezért a timereket mi léptetjük
+        vi.useFakeTimers();
+        try {
+            const addCategoryCallback = vi.fn(() => throwError(() => new Error('save failed')));
+            fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
+            fixture.detectChanges();
+            setSearchText('Health');
+
+            selectOption(component.addNewOption);
+            fixture.detectChanges();
+
+            expect(() => vi.runAllTimers()).not.toThrow();
+            expect(chipTexts()).toEqual([]);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('should not call addCategoryCallback when disabled', () => {

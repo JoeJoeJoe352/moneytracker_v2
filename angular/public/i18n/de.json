@@ -23,7 +23,11 @@
     "password": "Passwort",
     "submit": "Anmelden",
     "username.required-error": "Der Benutzername ist erforderlich!",
-    "password.required-error": "Das Passwort ist erforderlich!"
+    "username.minlength-error": "Der Benutzername muss mindestens 3 Zeichen lang sein!",
+    "username.maxlength-error": "Der Benutzername darf höchstens 20 Zeichen lang sein!",
+    "password.required-error": "Das Passwort ist erforderlich!",
+    "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",
+    "password.maxlength-error": "Das Passwort darf höchstens 20 Zeichen lang sein!"
   },
   "register": {
     "username": "Benutzername",
@@ -35,9 +39,11 @@
     "email.required-error": "Die E-Mail-Adresse ist erforderlich!",
     "email.pattern-error": "Bitte gib eine gültige E-Mail-Adresse ein!",
     "email.taken-error": "Die E-Mail-Adresse ist bereits vergeben!",
+    "email.maxlength-error": "Die E-Mail-Adresse darf höchstens 30 Zeichen lang sein!",
     "password": "Passwort",
     "password.required-error": "Das Passwort ist erforderlich!",
     "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",
+    "password.maxlength-error": "Das Passwort darf höchstens 20 Zeichen lang sein!",
     "password_again": "Passwort bestätigen",
     "password_again.required-error": "Die Passwortbestätigung ist erforderlich!",
     "password_again.minlength-error": "Die Passwortbestätigung muss mindestens 6 Zeichen lang sein!",
@@ -67,7 +73,7 @@
     "name": "Transaktionsname",
     "name.required": "Der Transaktionsname ist erforderlich!",
     "name.minlength": "Der Transaktionsname muss mindestens 3 Zeichen lang sein!",
-    "name.maxlength": "Der Transaktionsname darf höchstens 50 Zeichen lang sein!",
+    "name.maxlength": "Der Transaktionsname darf höchstens 20 Zeichen lang sein!",
     "type": "Transaktionstyp",
     "type.hint": "Dies bestimmt das Vorzeichen der Transaktion",
     "price": "Betrag",
@@ -92,6 +98,7 @@
     "wallet.hint": "Die Transaktion wird damit verknüpft",
 
     "detail": {
+      "field.required": "Dieses Feld ist erforderlich",
       "title": "Transaktionsdetails",
       "name": "Postenname",
       "name.required": "Name ist erforderlich",
@@ -120,7 +127,7 @@
     "name": "Wallet-Name",
     "name.required": "Der Wallet-Name ist erforderlich!",
     "name.minlength": "Der Wallet-Name muss mindestens 2 Zeichen lang sein!",
-    "name.maxlength": "Der Wallet-Name darf höchstens 50 Zeichen lang sein!",
+    "name.maxlength": "Der Wallet-Name darf höchstens 20 Zeichen lang sein!",
     "currency": "Währung",
     "type_label": "Wallet-Typ",
     "type": {

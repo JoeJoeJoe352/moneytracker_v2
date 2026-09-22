@@ -11,7 +11,8 @@ import { MatButton } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog-component';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../shared/services/notification-service';
+import { RESOURCE_STATUS_LOADING } from '../../shared/constants';
 
 @Component({
     selector: 'app-wallets-page-component',
@@ -25,7 +26,9 @@ export class WalletsPageComponent {
     private readonly translateService = inject(TranslateService);
     private readonly userData = inject(UserDataStore);
     private readonly dialog = inject(MatDialog);
-    private readonly snackBar = inject(MatSnackBar);
+    private readonly notification = inject(NotificationService);
+
+    protected readonly RESOURCE_STATUS_LOADING = RESOURCE_STATUS_LOADING;
 
     /**
      * Wallet adatok
@@ -122,19 +125,13 @@ export class WalletsPageComponent {
     ): void {
         request.subscribe({
             next: () => {
-                this.snackBar.open(
-                    this.translateService.instant(successMessageKey),
-                    this.translateService.instant(_('etc.close')),
-                );
+                this.notification.show(successMessageKey);
                 this.walletListResource.reload();
                 dialogRef.close();
             },
             error: (error) => {
                 console.error(error);
-                this.snackBar.open(
-                    this.translateService.instant(_('etc.general-error')),
-                    this.translateService.instant(_('etc.close')),
-                );
+                this.notification.showGeneralError();
             },
         });
     }

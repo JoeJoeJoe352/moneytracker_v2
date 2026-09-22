@@ -5,19 +5,13 @@
             [class.income]="isIncome()"
             [class.outcome]="!isIncome()"
         >
-            @if (isIncome()) {
-                <mat-icon
-                    aria-hidden="false"
-                    [attr.aria-label]="'transaction.income' | translate"
-                    fontIcon="arrow_upward"
-                ></mat-icon>
-            } @else {
-                <mat-icon
-                    aria-hidden="false"
-                    [attr.aria-label]="'transaction.expense' | translate"
-                    fontIcon="arrow_downward"
-                ></mat-icon>
-            }
+            <mat-icon
+                aria-hidden="false"
+                [fontIcon]="isIncome() ? 'arrow_upward' : 'arrow_downward'"
+                [attr.aria-label]="
+                    (isIncome() ? 'transaction.income' : 'transaction.expense') | translate
+                "
+            />
         </div>
 
         <div class="transaction-info">
@@ -32,8 +26,8 @@
                 <div class="transaction-name">{{ transaction().name }}</div>
                 <div class="wallet-name">({{ transaction().wallet.name }})</div>
             </div>
-            @if (categoriesAsString()) {
-                <div class="transaction-categories">{{ categoriesAsString() }}</div>
+            @if (categories()) {
+                <div class="transaction-categories">{{ categories() }}</div>
             }
         </div>
 

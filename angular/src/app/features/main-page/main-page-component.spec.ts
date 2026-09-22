@@ -53,7 +53,6 @@ describe('MainPage (Vitest)', () => {
     let transactionModalDialogRefs: FakeDialogRef<{
         deleteTransactionRequested: EventEmitter<number>;
         saved: EventEmitter<unknown>;
-        categoryAdded: EventEmitter<string>;
     }>[];
 
     function setup() {
@@ -66,7 +65,6 @@ describe('MainPage (Vitest)', () => {
                 const dialogRef = new FakeDialogRef({
                     deleteTransactionRequested: new EventEmitter<number>(),
                     saved: new EventEmitter<unknown>(),
-                    categoryAdded: new EventEmitter<string>(),
                 });
                 transactionModalDialogRefs.push(dialogRef);
                 return dialogRef;

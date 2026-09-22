@@ -1,5 +1,5 @@
 <mat-card>
-    <div class="transaction-list" aria-live="polite" [aria-busy]="isTransactionListLoading()">
+    <div class="transaction-list" aria-live="polite" [attr.aria-busy]="isTransactionListLoading()">
         @if (isTransactionListLoading()) {
             <div class="spinner">
                 <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
@@ -10,16 +10,17 @@
                     <h2 mat-card-title>{{ title() }}</h2>
                 </mat-card-header>
             }
-            @if (transactions().length > 0) {
-                @for (transaction of transactions(); track transaction.id) {
-                    <div class="transaction-cards">
-                        <app-transaction-card
-                            [transaction]="transaction"
-                            (click)="editTransaction.emit({ transactionId: transaction.id })"
-                        />
-                    </div>
-                }
-            } @else {
+            @for (transaction of transactions(); track transaction.id) {
+                <div class="transaction-cards">
+                    <app-transaction-card
+                        [attr.aria-disabled]="isTransactionListReLoading()"
+                        [class.active-card]="!isTransactionListReLoading()"
+                        [class.disabled-card]="isTransactionListReLoading()"
+                        [transaction]="transaction"
+                        (click)="openModalEmit(transaction.id)"
+                    />
+                </div>
+            } @empty {
                 <p class="text-center">{{ 'mainpage.no_transaction' | translate }}</p>
             }
         }

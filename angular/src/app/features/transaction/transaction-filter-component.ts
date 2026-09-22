@@ -1,11 +1,5 @@
-import {
-    Component,
-    inject,
-    input,
-    OnInit,
-    output,
-} from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, input, OnInit, output } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -13,11 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '@ngx-translate/core';
 import type { FilterData } from './transactions-component';
-
-interface FilterFormInterface {
-    name: FormControl<string>;
-    date: FormControl<Date | null>;
-}
 
 @Component({
     selector: 'app-transaction-filter',
@@ -39,7 +28,7 @@ export class TransactionFilter implements OnInit {
     /**
      * Form alapértelmezett adatai
      */
-    public defaultData = input.required<FilterData | null>();
+    public defaultData = input.required<FilterData>();
     /**
      * Tranzakciós adatok töltődnek-e
      */
@@ -58,32 +47,22 @@ export class TransactionFilter implements OnInit {
     public resetForm = output<void>();
 
     /**
-     * Form definiciója
+     * Form definiciója. A kezdőértékeket az ngOnInit tölti bele
      */
-    protected filterForm!: FormGroup<FilterFormInterface>;
-
-    private defaultFormData = { name: '', date: null };
+    protected readonly filterForm = this.fb.nonNullable.group({
+        name: [''],
+        date: this.fb.control<Date | null>(null),
+    });
 
     ngOnInit(): void {
-        this.buildForm(this.defaultData() ?? this.defaultFormData);
+        this.filterForm.patchValue(this.defaultData());
     }
 
     /**
-     * Filter formot létrehozza és beállítja az alapadatait
-     */
-    private buildForm(defaultData: FilterData): void {
-        this.filterForm = this.fb.nonNullable.group({
-            name: [defaultData.name],
-            date: this.fb.control<Date | null>(defaultData.date),
-        });
-    }
-
-    /**
-     * keresési adatok resetelése
+     * keresési adatok resetelése. Üres értékekre állít vissza
      */
     protected clearInputs(): void {
-        // ha volt kezdő paraméter, arra resetelné vissza, ezért kell a defaultFormData paraméter
-        this.filterForm.reset(this.defaultFormData);
+        this.filterForm.reset();
         this.resetForm.emit();
     }
 
@@ -95,12 +74,11 @@ export class TransactionFilter implements OnInit {
     }
 
     /**
-     * A filter inputok értékei alapján létrehoz egy URLSearchParams objektumot
+     * A filter inputok értékei alapján létrehoz egy FilterData objektumot
      */
     private getValuesFromFilterInputs(): FilterData {
-        const nameInputValue = this.filterForm.get(['name'])!.value.trim() as string;
-        const dateInputValue = this.filterForm.get(['date'])!.value as Date | null;
+        const { name, date } = this.filterForm.getRawValue();
 
-        return { name: nameInputValue, date: dateInputValue };
+        return { name: name.trim(), date };
     }
 }

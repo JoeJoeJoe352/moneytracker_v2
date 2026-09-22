@@ -1,18 +1,24 @@
 <h1>{{ 'header.wallets' | translate }}</h1>
 <mat-card appearance="outlined">
-    <mat-card-actions [align]="'end'">
-        <button matButton="filled" type="button" (click)="openWalletModal(null)">
+    <mat-card-actions align="end">
+        <button
+            matButton="filled"
+            type="button"
+            [disabled]="walletListResource.isLoading()"
+            (click)="openWalletModal(null)"
+        >
             {{ 'wallet.create' | translate }}
         </button>
     </mat-card-actions>
     <mat-card-content aria-live="polite" [attr.aria-busy]="walletListResource.isLoading()">
-        @if (walletListResource.isLoading()) {
+        @if (walletListResource.status() === RESOURCE_STATUS_LOADING) {
             <div class="text-center">
                 <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
             </div>
         } @else {
             <app-wallets-list-component
                 [walletListData]="walletListResource.hasValue() ? walletListResource.value() : []"
+                [disabled]="walletListResource.isLoading()"
                 (walletCardClicked)="openWalletModal($event)"
             />
         }

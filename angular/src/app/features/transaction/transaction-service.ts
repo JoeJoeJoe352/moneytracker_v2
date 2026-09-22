@@ -10,7 +10,7 @@ import { TransactionListElementData } from '../transaction-list/interfaces';
 })
 export class TransactionService {
   private readonly http = inject(HttpClient);
-  public readonly utils = inject(TransactionUtils)
+  private readonly utils = inject(TransactionUtils)
 
   /**
    * Tranzakció létrehozása
@@ -57,7 +57,7 @@ export class TransactionService {
   }
 
   /**
-   * Utolsó X darab tranzakciót lekéri
+   * Lekéri a user összes pénzét
    */
   getMoneySum(): Observable<MoneySumInterface> {
     return this.http.get<MoneySumInterface>('/api/transaction/sum')

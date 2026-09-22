@@ -1,4 +1,7 @@
-<h2 mat-dialog-title>{{ 'register.title' | translate }}</h2>
+<div class="modal-header">
+    <h2 mat-dialog-title>{{ 'register.title' | translate }}</h2>
+    <app-dialog-close-button />
+</div>
 <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
     <mat-dialog-content>
         <!-- username-->
@@ -7,6 +10,7 @@
                 {{ 'register.username' | translate }}
             </mat-label>
             <input
+                cdkFocusInitial
                 matInput
                 id="reg-username"
                 type="text"
@@ -67,6 +71,11 @@
                         {{ 'register.email.taken-error' | translate }}
                     </mat-error>
                 }
+                @if (email.hasError('maxlength')) {
+                    <mat-error>
+                        {{ 'register.email.maxlength-error' | translate }}
+                    </mat-error>
+                }
             }
         </mat-form-field>
 
@@ -94,6 +103,11 @@
                         {{ 'register.password.minlength-error' | translate }}
                     </mat-error>
                 }
+                @if (password.hasError('maxlength')) {
+                    <mat-error>
+                        {{ 'register.password.maxlength-error' | translate }}
+                    </mat-error>
+                }
             }
         </mat-form-field>
 
@@ -109,6 +123,7 @@
                 formControlName="passwordAgain"
                 autocomplete="new-password"
                 [readonly]="isLoading()"
+                [errorStateMatcher]="passwordMismatchMatcher"
             />
             @if (passwordAgain.invalid && (passwordAgain.dirty || passwordAgain.touched)) {
                 @if (passwordAgain.hasError('required')) {
@@ -117,7 +132,7 @@
                     </mat-error>
                 }
             }
-            @if (passwordAgain.touched && hasPasswordMismatchError) {
+            @if (registerForm.hasError('passwordMismatch')) {
                 <mat-error>
                     {{ 'register.password_again.mismatch-error' | translate }}
                 </mat-error>
@@ -126,9 +141,6 @@
     </mat-dialog-content>
 
     <mat-dialog-actions>
-        <button mat-stroked-button type="button" mat-dialog-close>
-            {{ 'etc.cancel' | translate }}
-        </button>
         <button mat-flat-button type="submit" [disabled]="isLoading()">
             {{ 'register.submit' | translate }}
         </button>

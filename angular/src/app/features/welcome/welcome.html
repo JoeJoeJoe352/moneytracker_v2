@@ -1,18 +1,11 @@
-<h1>{{ 'welcome.title' | translate }}</h1>
 <mat-card>
+    <h1 mat-card-title>{{ 'welcome.title' | translate }}</h1>
     <mat-card-content>
-        <img
-            class="logo"
-            mat-card-image
-            ngSrc="../../../assets/images/moneytracker_large_logo.png"
-            alt=""
-            priority
-        />
         <p>
             {{ 'welcome.welcomeText' | translate }}
         </p>
         <mat-card-subtitle>
-            <h2>{{ 'welcome.benefitsTitle' | translate }}</h2>
+            <h2 mat-card-subtitle>{{ 'welcome.benefitsTitle' | translate }}</h2>
         </mat-card-subtitle>
         <ul>
             <li>

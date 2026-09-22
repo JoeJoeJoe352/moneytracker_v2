@@ -13,20 +13,20 @@ public record RegisterRequestDto(
      * Felhasználónév
      */
     @NotBlank(message = "Username is mandatory")
-    @Length(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Length(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     String username,
 
     /**
      * Felhasználó jelszava
      */
     @NotBlank(message = "Password is mandatory")
-    @Length(min = 6, max = 100, message = "Password must be between 6 and 100 characters") // többi validáció frontenden lesz
+    @Length(min = 6, max = 20, message = "Password must be between 6 and 20 characters")
     String password,
 
     /**
      * Felhasználó email címe
      */
-    @Length(min = 5, max = 100, message = "Email must be between 5 and 100 characters")
+    @Length(min = 5, max = 30, message = "Email must be between 5 and 30 characters")
     @NotBlank(message = "Email is mandatory")
     @Email(message = "Email should be valid")
     String email

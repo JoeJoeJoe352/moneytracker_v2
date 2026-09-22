@@ -16,6 +16,9 @@ export interface RegisterRequestData {
     password: string;
 }
 
-export interface isLoadingInterface {
-    isloading: WritableSignal<boolean>;
+/**
+ * A login és regisztrációs modal MAT_DIALOG_DATA-ja
+ */
+export interface AuthDialogData {
+    isLoading: WritableSignal<boolean>;
 }

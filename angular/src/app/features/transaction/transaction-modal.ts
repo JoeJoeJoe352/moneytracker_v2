@@ -11,6 +11,7 @@ import {
 } from './interfaces';
 import { TransactionFormComponent } from '../transaction-form/transaction-form-component';
 import { Observable } from 'rxjs';
+import { DialogCloseButton } from '../../shared/components/mat-modal-close';
 
 export interface TransactionModalInputInterface {
     transaction: Signal<TransactionDataFromBackend | null>;
@@ -27,18 +28,18 @@ export interface TransactionModalInputInterface {
     styleUrl: './transaction-modal.scss',
     standalone: true,
     imports: [
-        TransactionFormComponent,
-        TranslatePipe,
-        MatDialogModule,
-        MatProgressSpinnerModule,
-        MatIconModule,
-        MatButtonModule,
-    ],
+    TransactionFormComponent,
+    TranslatePipe,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatButtonModule,
+    DialogCloseButton
+],
 })
 export class TransactionModalComponent {
     public data = inject<TransactionModalInputInterface>(MAT_DIALOG_DATA);
 
     public deleteTransactionRequested = output<number>();
     public saved = output<NewTransaction>();
-    public categoryAdded = output<string>();
 }

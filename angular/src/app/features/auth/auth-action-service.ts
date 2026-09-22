@@ -1,10 +1,10 @@
 import { inject, Injectable, WritableSignal } from '@angular/core';
-import { _, TranslateService } from '@ngx-translate/core';
+import { _ } from '@ngx-translate/core';
 import { AuthService } from './auth-service';
 import { UserDataStore } from '../../shared/services/user-data-store';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../shared/services/notification-service';
 import { LoginRequestData, RegisterRequestData } from './interfaces';
-import { catchError, EMPTY, switchMap } from 'rxjs';
+import { catchError, EMPTY, finalize, switchMap } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -12,8 +12,7 @@ import { catchError, EMPTY, switchMap } from 'rxjs';
 export class AuthActionService {
     private readonly authService = inject(AuthService);
     private readonly userDataStore = inject(UserDataStore);
-    private readonly snackBar = inject(MatSnackBar);
-    private readonly translateService = inject(TranslateService);
+    private readonly notification = inject(NotificationService);
 
     /**
      * Felhasználó bejelentkezés kérésének kezelése
@@ -30,33 +29,24 @@ export class AuthActionService {
             .pipe(
                 catchError((response) => {
                     if (response.status === 401) {
-                        this.snackBar.open(
-                            response.error.message,
-                            this.translateService.instant(_('etc.close')),
-                        );
+                        this.notification.showText(response.error.message);
                     } else {
                         console.error('Ismeretlen hiba történt a bejelentkezés során!', response);
-                        this.snackBar.open(
-                            this.translateService.instant(_('etc.general-error')),
-                            this.translateService.instant(_('etc.close')),
-                        );
+                        this.notification.showGeneralError();
                     }
-                    loadingSignal.set(false);
                     return EMPTY;
                 }),
                 switchMap(() => {
                     // User adatok lekérése, mert a login végpont csak a cookie-t állítja be
                     return this.authService.authenticateUser();
                 }),
+                // minden kimenetnél (siker, hiba, megszakítás) véget ér a töltés
+                finalize(() => loadingSignal.set(false)),
             )
             .subscribe({
                 next: (userData) => {
                     this.userDataStore.loadUserData(userData);
-                    this.snackBar.open(
-                        this.translateService.instant(_('login.success')),
-                        this.translateService.instant(_('etc.close')),
-                    );
-                    loadingSignal.set(false);
+                    this.notification.show(_('login.success'));
                     onSuccess();
                 },
                 error: (error) => {
@@ -64,7 +54,6 @@ export class AuthActionService {
                     if (error.status !== 401) {
                         console.error('unknown error during authcheck!', error);
                     }
-                    loadingSignal.set(false);
                 },
             });
     }
@@ -79,23 +68,18 @@ export class AuthActionService {
     ): void {
         loadingSignal.set(true);
 
-        this.authService.register(params).subscribe({
-            next: () => {
-                this.snackBar.open(
-                    this.translateService.instant(_('register.success')),
-                    this.translateService.instant(_('etc.close')),
-                );
-                onSuccess();
-                loadingSignal.set(false);
-            },
-            error: (response) => {
-                console.error('Ismeretlen hiba történt a regisztráció során!', response);
-                this.snackBar.open(
-                    this.translateService.instant(_('etc.general-error')),
-                    this.translateService.instant(_('etc.close')),
-                );
-                loadingSignal.set(false);
-            },
-        });
+        this.authService
+            .register(params)
+            .pipe(finalize(() => loadingSignal.set(false)))
+            .subscribe({
+                next: () => {
+                    this.notification.show(_('register.success'));
+                    onSuccess();
+                },
+                error: (response) => {
+                    console.error('Ismeretlen hiba történt a regisztráció során!', response);
+                    this.notification.showGeneralError();
+                },
+            });
     }
 }

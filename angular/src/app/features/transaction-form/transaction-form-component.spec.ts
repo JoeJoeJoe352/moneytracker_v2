@@ -4,12 +4,11 @@ import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
-import { signal } from '@angular/core';
 import { TransactionFormComponent } from './transaction-form-component';
 import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { TransactionUtils } from '../transaction/transaction-utils';
-import { CategoryResponseInterface, TransactionDataFromBackend } from '../transaction/interfaces';
+import { TransactionDataFromBackend } from '../transaction/interfaces';
 import { UserDataStore } from '../../shared/services/user-data-store';
 import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
 import { WalletDataInterface } from '../wallet/interfaces';
@@ -58,7 +57,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         component = fixture.componentInstance;
         fixture.componentRef.setInput('isTransactionFormDisabled', false);
         fixture.componentRef.setInput('isCategorySaveInProgress', false);
-        fixture.componentRef.setInput('categoryList', signal<CategoryResponseInterface[]>([]));
+        fixture.componentRef.setInput('categoryList', []);
         fixture.componentRef.setInput('addCategoryCallback', () => {
             throw new Error('not called in this test');
         });
@@ -68,12 +67,14 @@ describe('TransactionFormComponent (Vitest)', () => {
         fixture.detectChanges();
 
         expect(component.name.value).toBe('');
+        expect(component.name.invalid).toBe(true);
         expect(component.isIncome.value).toBe(false);
         expect(component.isComplexTransaction.value).toBe(false);
         expect(component.details.length).toBe(0);
 
+        // a mentés gomb érvénytelen formnál is aktív, hogy a kattintás után látszódjanak a hibák
         const submitButton = fixture.nativeElement.querySelector('button[type="submit"]');
-        expect(submitButton.disabled).toBe(true);
+        expect(submitButton.disabled).toBe(false);
     });
 
     it('should not emit "saved" and should mark all controls touched when submitting an invalid form', () => {
@@ -82,7 +83,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         let emitted = false;
         component.saved.subscribe(() => (emitted = true));
 
-        component.onSubmit();
+        fixture.nativeElement.querySelector('button[type="submit"]').click();
 
         expect(emitted).toBe(false);
         expect(component.name.touched).toBe(true);
@@ -102,7 +103,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         let emittedValue: unknown;
         component.saved.subscribe((value) => (emittedValue = value));
 
-        component.onSubmit();
+        submitButton.click();
 
         expect(emittedValue).toMatchObject({ name: 'Bevásárlás', price: 1000 });
     });
@@ -210,14 +211,15 @@ describe('TransactionFormComponent (Vitest)', () => {
     it('should add and remove detail rows, refusing to remove the last one', () => {
         fixture.detectChanges();
 
-        component.addRow();
-        component.addRow();
+        // Közvetlenül hívjuk, mert az utolsó sor törlés gombja le van tiltva, így az ellenőrzés kattintással nem érhető el
+        component['addRow']();
+        component['addRow']();
         expect(component.details.length).toBe(2);
 
-        component.deleteRow(0);
+        component['deleteRow'](0);
         expect(component.details.length).toBe(1);
 
-        component.deleteRow(0);
+        component['deleteRow'](0);
         expect(component.details.length).toBe(1); // utolsó sor nem törölhető
     });
 
@@ -247,8 +249,7 @@ describe('TransactionFormComponent (Vitest)', () => {
     it('should update the price suffix when the wallet select changes', () => {
         fixture.detectChanges();
 
-        const walletSelect = fixture.debugElement.query(By.directive(MatSelect));
-        walletSelect.triggerEventHandler('selectionChange', { value: 2 });
+        component.walletId.setValue(2);
         fixture.detectChanges();
 
         const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');

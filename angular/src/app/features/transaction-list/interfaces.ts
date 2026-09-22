@@ -1,4 +1,5 @@
-import { WalletDataInterfaceWithoutSum } from "../wallet/interfaces";
+import { TransactionTypeEnum } from '../../shared/enums';
+import { WalletDataInterfaceWithoutSum } from '../wallet/interfaces';
 
 /**
  * Egy, a listában szereplő elem adatai
@@ -8,10 +9,10 @@ export interface TransactionListElementData {
     name: string;
     priceSum: number;
     transactionDate: string;
-    transactionType: string;
+    transactionType: TransactionTypeEnum;
     isComplexTransaction: boolean;
     transactionDetails: TransactionDetailListElementData[];
-    wallet: WalletDataInterfaceWithoutSum
+    wallet: WalletDataInterfaceWithoutSum;
 }
 
 /**

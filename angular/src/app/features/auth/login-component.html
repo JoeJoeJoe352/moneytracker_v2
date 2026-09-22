@@ -1,4 +1,8 @@
-<h2 mat-dialog-title>{{ 'login.title' | translate }}</h2>
+<div class="modal-header">
+    <h2 mat-dialog-title>{{ 'login.title' | translate }}</h2>
+    <app-dialog-close-button />
+</div>
+
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
     <mat-dialog-content>
         <div class="login-form-row">
@@ -8,19 +12,34 @@
                     {{ 'login.username' | translate }}
                 </mat-label>
                 <input
+                    cdkFocusInitial
                     matInput
                     id="username"
                     type="text"
                     autocomplete="username"
                     formControlName="username"
                 />
-                @if (isUsernameFieldHasError) {
-                    <mat-error>
-                        {{ 'login.username.required-error' | translate }}
-                    </mat-error>
+
+                @if (loginForm.controls.username.invalid && loginForm.controls.username.touched) {
+                    @if (loginForm.controls.username.hasError('required')) {
+                        <mat-error>
+                            {{ 'login.username.required-error' | translate }}
+                        </mat-error>
+                    }
+                    @if (loginForm.controls.username.hasError('minlength')) {
+                        <mat-error>
+                            {{ 'login.username.minlength-error' | translate }}
+                        </mat-error>
+                    }
+                    @if (loginForm.controls.username.hasError('maxlength')) {
+                        <mat-error>
+                            {{ 'login.username.maxlength-error' | translate }}
+                        </mat-error>
+                    }
                 }
             </mat-form-field>
-
+        </div>
+        <div class="login-form-row">
             <!-- password -->
             <mat-form-field>
                 <mat-label>
@@ -34,19 +53,27 @@
                     formControlName="password"
                 />
 
-                @if (isPasswordFieldHasError) {
-                    <mat-error>
-                        {{ 'login.password.required-error' | translate }}
-                    </mat-error>
+                @if (loginForm.controls.password.invalid && loginForm.controls.password.touched) {
+                    @if (loginForm.controls.password.hasError('required')) {
+                        <mat-error>
+                            {{ 'login.password.required-error' | translate }}
+                        </mat-error>
+                    }
+                    @if (loginForm.controls.password.hasError('minlength')) {
+                        <mat-error>
+                            {{ 'login.password.minlength-error' | translate }}
+                        </mat-error>
+                    }
+                    @if (loginForm.controls.password.hasError('maxlength')) {
+                        <mat-error>
+                            {{ 'login.password.maxlength-error' | translate }}
+                        </mat-error>
+                    }
                 }
             </mat-form-field>
         </div>
     </mat-dialog-content>
     <mat-dialog-actions>
-        <button mat-stroked-button type="button" mat-dialog-close>
-            {{ 'etc.cancel' | translate }}
-        </button>
-
         <button mat-flat-button type="submit" [disabled]="isLoading()">
             {{ 'login.submit' | translate }}
         </button>

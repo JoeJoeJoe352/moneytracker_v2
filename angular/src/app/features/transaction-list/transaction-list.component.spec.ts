@@ -3,7 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import TransactionListComponent from './transaction-list-component';
 import TransactionCardComponent from './transaction-card-component';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
+import { RESOURCE_STATUS_LOADING } from '../../shared/constants';
 
 const sampleWallet = {
     id: 1,
@@ -27,7 +28,7 @@ describe('TransactionListComponent (Vitest)', () => {
     });
 
     it('should show spinner when loading', () => {
-        fixture.componentRef.setInput('isTransactionListLoading', true);
+        fixture.componentRef.setInput('listStatus', RESOURCE_STATUS_LOADING);
         fixture.componentRef.setInput('transactions', []);
         fixture.detectChanges();
 
@@ -36,7 +37,7 @@ describe('TransactionListComponent (Vitest)', () => {
     });
 
     it('should show title when provided', () => {
-        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('listStatus', 'resolved');
         fixture.componentRef.setInput('title', 'Tranzakciók');
         fixture.componentRef.setInput('transactions', []);
         fixture.detectChanges();
@@ -46,11 +47,11 @@ describe('TransactionListComponent (Vitest)', () => {
     });
 
     it('should render correct number of transaction cards', () => {
-        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('listStatus', 'resolved');
         fixture.componentRef.setInput('title', null);
         fixture.componentRef.setInput('transactions', [
-            { id: 1, name: 'tranzakció1', priceSum: 100, transactionType: 'INCOME', transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [], wallet: sampleWallet },
-            { id: 2, name: 'tranzakció2', priceSum: -200, transactionType: 'OUTCOME', transactionDate: '2024-01-02', isComplexTransaction: true, transactionDetails: [], wallet: sampleWallet },
+            { id: 1, name: 'tranzakció1', priceSum: 100, transactionType: TransactionTypeEnum.INCOME, transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [], wallet: sampleWallet },
+            { id: 2, name: 'tranzakció2', priceSum: -200, transactionType: TransactionTypeEnum.OUTCOME, transactionDate: '2024-01-02', isComplexTransaction: true, transactionDetails: [], wallet: sampleWallet },
         ]);
 
         fixture.detectChanges();
@@ -62,9 +63,9 @@ describe('TransactionListComponent (Vitest)', () => {
     it('should emit editTransaction when card is clicked', () => {
         const spy = vi.spyOn(component.editTransaction, 'emit');
 
-        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('listStatus', 'resolved');
         fixture.componentRef.setInput('transactions', [
-            { id: 5, name: 'tranzakció5', priceSum: 100, transactionType: 'INCOME', transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [], wallet: sampleWallet },
+            { id: 5, name: 'tranzakció5', priceSum: 100, transactionType: TransactionTypeEnum.INCOME, transactionDate: '2024-01-01', isComplexTransaction: false, transactionDetails: [], wallet: sampleWallet },
         ]);
 
         fixture.detectChanges();
@@ -76,7 +77,7 @@ describe('TransactionListComponent (Vitest)', () => {
     });
 
     it('should show empty message when no transactions', () => {
-        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.componentRef.setInput('listStatus', 'resolved');
         fixture.componentRef.setInput('transactions', []);
         fixture.detectChanges();
 

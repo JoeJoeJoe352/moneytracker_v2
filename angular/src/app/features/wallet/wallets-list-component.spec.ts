@@ -43,4 +43,16 @@ describe('WalletsListComponent (Vitest)', () => {
 
         expect(clicked).toEqual(wallets[1]);
     });
+
+    it('should not emit walletCardClicked when disabled', () => {
+        fixture.componentRef.setInput('disabled', true);
+        fixture.detectChanges();
+
+        let clicked: WalletDataInterface | undefined;
+        component.walletCardClicked.subscribe((wallet) => (clicked = wallet));
+
+        fixture.nativeElement.querySelector('app-wallet-card-component .wallet-card').click();
+
+        expect(clicked).toBeUndefined();
+    });
 });

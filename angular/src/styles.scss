@@ -119,6 +119,8 @@ body {
     --mat-slide-toggle-selected-pressed-handle-horizontal-margin: 0 13.75px;
     --mat-slide-toggle-unselected-with-icon-handle-horizontal-margin: 0 2.5px;
     --mat-slide-toggle-selected-with-icon-handle-horizontal-margin: 0 15px;
+
+    --mat-dialog-actions-alignment: space-between;
 }
 
 html {
@@ -144,6 +146,11 @@ html {
 }
 
 // Általános class-ok
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+}
 
 .text-center {
     text-align: center;
@@ -214,6 +221,11 @@ html {
 
     --mat-button-text-label-text-color: #{$moneytracker-red};
     --mat-button-text-state-layer-color: #{$moneytracker-red};
+}
+
+// ha egyetlen gomb van a dialog actions-ben, jobbra igazodik (space-between mellett)
+.mat-mdc-dialog-actions > :only-child {
+    margin-left: auto;
 }
 
 // zöld mat-fab / mat-mini-fab szín

@@ -23,7 +23,11 @@
     "password": "Password",
     "submit": "Log in",
     "username.required-error": "Username is required!",
-    "password.required-error": "Password is required!"
+    "username.minlength-error": "Username must be at least 3 characters long!",
+    "username.maxlength-error": "Username must be at most 20 characters long!",
+    "password.required-error": "Password is required!",
+    "password.minlength-error": "Password must be at least 6 characters long!",
+    "password.maxlength-error": "Password must be at most 20 characters long!"
   },
   "register": {
     "username": "Username",
@@ -35,9 +39,11 @@
     "email.required-error": "Email is required!",
     "email.pattern-error": "Please enter a valid email address!",
     "email.taken-error": "Email is already taken!",
+    "email.maxlength-error": "Email must be at most 30 characters long!",
     "password": "Password",
     "password.required-error": "Password is required!",
     "password.minlength-error": "Password must be at least 6 characters long!",
+    "password.maxlength-error": "Password must be at most 20 characters long!",
     "password_again": "Confirm password",
     "password_again.required-error": "Password confirmation is required!",
     "password_again.minlength-error": "Password confirmation must be at least 6 characters long!",
@@ -67,7 +73,7 @@
     "name": "Transaction name",
     "name.required": "Transaction name is required!",
     "name.minlength": "Transaction name must be at least 3 characters long!",
-    "name.maxlength": "Transaction name must be at most 50 characters long!",
+    "name.maxlength": "Transaction name must be at most 20 characters long!",
     "type": "Transaction type",
     "type.hint": "This determines the transaction's sign",
     "price": "Amount",
@@ -92,6 +98,7 @@
     "wallet.hint": "The transaction will be linked to this",
 
     "detail": {
+      "field.required": "This field is required",
       "title": "Transaction details",
       "name": "Item name",
       "name.required": "Name is required",
@@ -120,7 +127,7 @@
     "name": "Wallet name",
     "name.required": "Wallet name is required!",
     "name.minlength": "Wallet name must be at least 2 characters long!",
-    "name.maxlength": "Wallet name must be at most 50 characters long!",
+    "name.maxlength": "Wallet name must be at most 20 characters long!",
     "currency": "Currency",
     "type_label": "Wallet type",
     "type": {

@@ -31,12 +31,13 @@ describe('WalletFormComponent (Vitest)', () => {
     describe('create mode', () => {
         beforeEach(() => setup(null));
 
-        it('should build an empty, invalid form by default with the create button disabled', () => {
+        it('should build an empty, invalid form by default with the create button enabled', () => {
             expect(component.name.value).toBe('');
             expect(component['walletForm'].valid).toBe(false);
 
+            // a gomb érvénytelen formnál is aktív, hogy a kattintás után látszódjanak a hibák
             const submitButton = fixture.nativeElement.querySelector('button[type="submit"]');
-            expect(submitButton.disabled).toBe(true);
+            expect(submitButton.disabled).toBe(false);
         });
 
         it('should leave the currency select enabled', () => {
