@@ -1,6 +1,8 @@
-<app-dialog-close-button />
 
-<h2 mat-dialog-title>{{ 'register.title' | translate }}</h2>
+<div class="modal-header">
+    <h2 mat-dialog-title>{{ 'register.title' | translate }}</h2>
+    <app-dialog-close-button />
+</div>
 <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
     <mat-dialog-content>
         <!-- username-->

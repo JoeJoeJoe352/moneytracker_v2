@@ -1,12 +1,20 @@
-<app-dialog-close-button />
+<div class="modal-header">
+    <h2 mat-dialog-title>{{ (isEditMode() ? 'wallet.update' : 'wallet.create') | translate }}</h2>
+    <app-dialog-close-button />
+</div>
 
-<h2 mat-dialog-title>{{ (isEditMode() ? 'wallet.update' : 'wallet.create') | translate }}</h2>
 <form [formGroup]="walletForm" (ngSubmit)="onSubmit()" class="wallet-form">
     <mat-dialog-content>
         <div class="wallet-form-single-row">
             <mat-form-field>
                 <mat-label>{{ 'wallet.name' | translate }}</mat-label>
-                <input id="wallet-name" matInput type="text" formControlName="name" cdkFocusInitial />
+                <input
+                    id="wallet-name"
+                    matInput
+                    type="text"
+                    formControlName="name"
+                    cdkFocusInitial
+                />
                 @if (name.hasError('required')) {
                     <mat-error>{{ 'wallet.name.required' | translate }}</mat-error>
                 }

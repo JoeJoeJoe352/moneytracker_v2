@@ -1,8 +1,9 @@
-<app-dialog-close-button />
-
-<h2 mat-dialog-title>
-    {{ (data.transaction() ? 'transaction.update' : 'transaction.create') | translate }}
-</h2>
+<div class="modal-header">
+    <h2 mat-dialog-title>
+        {{ (data.transaction() ? 'transaction.update' : 'transaction.create') | translate }}
+    </h2>
+    <app-dialog-close-button />
+</div>
 
 <div aria-live="polite" [attr.aria-busy]="data.isDataInitializing()">
     @if (data.isDataInitializing()) {

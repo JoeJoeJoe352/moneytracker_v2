@@ -12,7 +12,6 @@ import { MatIconModule } from '@angular/material/icon';
     `,
     styles: `
         .close-button {
-            float: right;
             right: 5px;
             top: 2px;
         }
