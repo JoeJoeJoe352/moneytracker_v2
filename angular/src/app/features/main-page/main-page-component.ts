@@ -8,9 +8,9 @@ import { TransactionModalStateService } from '../transaction/transaction-modal-s
 import { TransactionsListComponent } from '../transaction/transactions-component';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
 import { WalletSummaryInterface } from '../transaction/interfaces';
-import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
+import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { StatCardComponent } from './stat-card-component';
-import { TransactionTypeEnum } from '../../shared/enums';
+import { TransactionTypeEnum } from '@shared/enums';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';

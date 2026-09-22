@@ -22,7 +22,7 @@ import { LinkInterface } from './interface';
     `,
     imports: [TranslatePipe, RouterLink, RouterLinkActive, MatIcon],
     styles: `
-        @use '../../../styles/variables.scss' as *;
+        @use 'variables' as *;
 
         .nav-link {
             cursor: pointer;

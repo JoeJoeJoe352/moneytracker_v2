@@ -20,7 +20,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
-import { DropdownInterface } from '../../../shared/interfaces';
+import { DropdownInterface } from '@shared/interfaces';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
 import {
@@ -31,7 +31,7 @@ import {
     TransactionInputDefaultValuesWithDetails,
 } from '../interfaces';
 import { validDate } from './valid-date-validator';
-import { UserDataStore } from '../../../shared/services/user-data-store';
+import { UserDataStore } from '@shared/services/user-data-store';
 import { WalletDataUtil } from '../../wallet/wallet-data-util';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';

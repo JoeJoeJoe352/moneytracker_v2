@@ -1,4 +1,4 @@
-@use '../../../styles/variables.scss' as *;
+@use 'variables' as *;
 
 .mobile-menu-button {
     @media (min-width: 768px) {

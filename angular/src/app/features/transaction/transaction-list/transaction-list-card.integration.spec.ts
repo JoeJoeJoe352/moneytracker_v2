@@ -5,7 +5,7 @@ import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import TransactionListComponent from './transaction-list-component';
 import TransactionCardComponent from './transaction-card-component';
 import { TransactionListElementData } from '../interfaces';
-import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../../shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
 
 const sampleWallet = {
     id: 1,

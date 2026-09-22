@@ -7,10 +7,10 @@ import {
     Signal,
 } from '@angular/core';
 import { TransactionListElementData } from '../interfaces';
-import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format-pipe';
+import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { TransactionTypeEnum } from '../../../shared/enums';
+import { TransactionTypeEnum } from '@shared/enums';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({

@@ -12,8 +12,8 @@ import { AuthDialogData, RegisterRequestData } from './interfaces';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-import { DialogCloseButton } from '../../shared/components/mat-modal-close';
-import { STRICT_EMAIL_REGEX } from '../../shared/constants';
+import { DialogCloseButton } from '@shared/components/mat-modal-close';
+import { STRICT_EMAIL_REGEX } from '@shared/constants';
 
 @Component({
     selector: 'app-register-component',

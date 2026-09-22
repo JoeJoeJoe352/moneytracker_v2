@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { DropdownInterface } from '../../../shared/interfaces';
+import { DropdownInterface } from '@shared/interfaces';
 import { CategoryResponseInterface, DetailForm } from '../interfaces';
 import { CategorySelectComponent } from './category-select-component';
 import { Observable } from 'rxjs';

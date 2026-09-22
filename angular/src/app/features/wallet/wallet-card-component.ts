@@ -2,7 +2,7 @@ import { Component, inject, input, output } from '@angular/core';
 import { WalletDataInterface } from './interfaces';
 import { WalletDataUtil } from './wallet-data-util';
 import { TranslatePipe } from '@ngx-translate/core';
-import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
+import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { MatRippleModule } from '@angular/material/core';
 
 @Component({

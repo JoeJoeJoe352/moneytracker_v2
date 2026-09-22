@@ -1,6 +1,6 @@
 import { FormControl } from '@angular/forms';
-import { DropdownInterface } from '../../shared/interfaces';
-import { CurrencyCodesEnum, TransactionTypeEnum } from '../../shared/enums';
+import { DropdownInterface } from '@shared/interfaces';
+import { CurrencyCodesEnum, TransactionTypeEnum } from '@shared/enums';
 import { WalletDataInterfaceWithoutSum } from '../wallet/interfaces';
 
 /**

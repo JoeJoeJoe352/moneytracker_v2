@@ -1,8 +1,8 @@
 import { Component, computed, input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
+import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { WalletSummaryInterface } from '../transaction/interfaces';
-import { TransactionTypeEnum } from '../../shared/enums';
+import { TransactionTypeEnum } from '@shared/enums';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';

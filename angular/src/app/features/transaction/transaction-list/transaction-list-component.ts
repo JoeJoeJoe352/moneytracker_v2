@@ -4,7 +4,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import TransactionCardComponent from './transaction-card-component';
-import { RESOURCE_STATUS_LOADING, RESOURCE_STATUS_RELOADING } from '../../../shared/constants';
+import { RESOURCE_STATUS_LOADING, RESOURCE_STATUS_RELOADING } from '@shared/constants';
 
 @Component({
     selector: 'app-transaction-list',

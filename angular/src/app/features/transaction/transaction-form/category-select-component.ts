@@ -22,7 +22,7 @@ import {
 } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
-import { DropdownInterface } from '../../../shared/interfaces';
+import { DropdownInterface } from '@shared/interfaces';
 import { Observable } from 'rxjs';
 import { CategoryResponseInterface } from '../interfaces';
 import { toSignal } from '@angular/core/rxjs-interop';

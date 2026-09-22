@@ -9,8 +9,8 @@ import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction-service';
 import { TransactionUtils } from '../transaction-utils';
 import { TransactionDataFromBackend } from '../interfaces';
-import { UserDataStore } from '../../../shared/services/user-data-store';
-import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../../shared/enums';
+import { UserDataStore } from '@shared/services/user-data-store';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
 import { WalletDataInterface } from '../../wallet/interfaces';
 
 describe('TransactionFormComponent (Vitest)', () => {

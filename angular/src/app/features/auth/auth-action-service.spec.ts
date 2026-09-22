@@ -4,7 +4,7 @@ import { signal } from '@angular/core';
 import { of, Subject, throwError } from 'rxjs';
 import { AuthActionService } from './auth-action-service';
 import { AuthService } from './auth-service';
-import { UserDataStore } from '../../shared/services/user-data-store';
+import { UserDataStore } from '@shared/services/user-data-store';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService } from '@ngx-translate/core';
 import { LoginRequestData, RegisterRequestData } from './interfaces';

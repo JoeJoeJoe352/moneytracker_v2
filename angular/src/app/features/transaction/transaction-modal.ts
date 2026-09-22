@@ -11,7 +11,7 @@ import {
 } from './interfaces';
 import { TransactionFormComponent } from './transaction-form/transaction-form-component';
 import { Observable } from 'rxjs';
-import { DialogCloseButton } from '../../shared/components/mat-modal-close';
+import { DialogCloseButton } from '@shared/components/mat-modal-close';
 
 export interface TransactionModalInputInterface {
     transaction: Signal<TransactionDataFromBackend | null>;
