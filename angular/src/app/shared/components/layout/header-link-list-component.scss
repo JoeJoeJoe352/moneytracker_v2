@@ -1,24 +1,22 @@
-@use 'variables' as *;
-
 .nav-link {
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 10px 16px;
-    border-radius: $border-radius-lg;
-    color: $moneytracker-white;
+    border-radius: var(--border-radius-lg);
+    color: var(--moneytracker-white);
     text-decoration: none;
     font-weight: 500;
-    transition: $transition-base;
+    transition: var(--transition-base);
     margin-bottom: 6px;
 
     &:hover:not(.active) {
-        background: $moneytracker-darker-green;
+        background: var(--moneytracker-darker-green);
     }
 
     &.active {
-        background: $moneytracker-darker-green;
-        color: $moneytracker-white;
+        background: var(--moneytracker-darker-green);
+        color: var(--moneytracker-white);
     }
 }

@@ -1,15 +1,13 @@
-@use 'variables' as *;
-
 .wallet-card {
     position: relative;
     width: 100%;
     max-width: 320px;
     padding-top: 24px;
     cursor: pointer;
-    transition: $transition-base;
+    transition: var(--transition-base);
     // hogy a matRipple ne lógjon ki a kártya lekerekített sarkain
     overflow: hidden;
-    border-radius: $border-radius-lg;
+    border-radius: var(--border-radius-lg);
 
     &:hover {
         transform: translateY(-4px);
@@ -32,8 +30,8 @@
     width: 62%;
     height: 44px;
     margin-bottom: -18px;
-    border-radius: $border-radius $border-radius 0 0;
-    background: $moneytracker-darker-green;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    background: var(--moneytracker-darker-green);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
@@ -42,7 +40,7 @@
 }
 
 .savings .wallet-flap {
-    background: $moneytracker-blue;
+    background: var(--moneytracker-blue);
 }
 
 .wallet-clasp {
@@ -58,14 +56,14 @@
     z-index: 1;
     min-height: 160px;
     padding: 24px;
-    border-radius: $border-radius-lg;
-    background: linear-gradient(135deg, $moneytracker-green 0%, $moneytracker-darkest-green 100%);
-    color: $moneytracker-white;
-    box-shadow: $shadow;
+    border-radius: var(--border-radius-lg);
+    background: linear-gradient(135deg, var(--moneytracker-green) 0%, var(--moneytracker-darkest-green) 100%);
+    color: var(--moneytracker-white);
+    box-shadow: var(--shadow);
 }
 
 .savings .wallet-body {
-    background: linear-gradient(135deg, $moneytracker-blue 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--moneytracker-blue) 0%, #1d4ed8 100%);
 }
 
 .wallet-type-badge {

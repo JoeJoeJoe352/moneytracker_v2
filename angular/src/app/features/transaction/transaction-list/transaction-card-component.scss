@@ -1,12 +1,10 @@
-@use 'variables' as *;
-
 .transaction-card-wrapper {
     // a lista maga már egy mat-card, ezért a soroknak nem kell saját árnyék/lekerekítés
     --mat-card-elevated-container-shape: 0;
     --mat-card-elevated-container-elevation: 0;
 
     &:hover {
-        background-color: $moneytracker-white;
+        background-color: var(--moneytracker-white);
     }
 
     .transaction-card {
@@ -28,13 +26,13 @@
     flex-shrink: 0;
 
     &.income {
-        color: $moneytracker-green;
-        background-color: rgba($moneytracker-green, 0.12);
+        color: var(--moneytracker-green);
+        background-color: color-mix(in srgb, var(--moneytracker-green) 12%, transparent);
     }
 
     &.outcome {
-        color: $moneytracker-red;
-        background-color: rgba($moneytracker-red, 0.12);
+        color: var(--moneytracker-red);
+        background-color: color-mix(in srgb, var(--moneytracker-red) 12%, transparent);
     }
 }
 
@@ -56,7 +54,7 @@
 
     .transaction-categories {
         font-size: 14px;
-        color: $moneytracker-dark-grey;
+        color: var(--moneytracker-dark-grey);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -66,11 +64,11 @@
         font-weight: 700;
 
         &.income {
-            color: $moneytracker-green;
+            color: var(--moneytracker-green);
         }
 
         &.outcome {
-            color: $moneytracker-red;
+            color: var(--moneytracker-red);
         }
     }
 }
@@ -81,6 +79,6 @@
 
     .transaction-date {
         font-size: 13px;
-        color: $moneytracker-dark-grey;
+        color: var(--moneytracker-dark-grey);
     }
 }

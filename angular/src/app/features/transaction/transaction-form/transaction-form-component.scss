@@ -1,5 +1,3 @@
-@use 'variables' as *;
-
 .form-row {
     display: flex;
     flex-wrap: wrap;
@@ -49,6 +47,6 @@
         content: '';
         flex: 1;
         height: 1px;
-        background-color: $moneytracker-grey;
+        background-color: var(--moneytracker-grey);
     }
 }

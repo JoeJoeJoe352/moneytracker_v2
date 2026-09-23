@@ -1,5 +1,3 @@
-@use 'variables' as *;
-
 .transaction-list {
     border-radius: 20px;
     overflow: hidden;
@@ -19,6 +17,6 @@
     }
 
     .transaction-cards:not(:last-child) {
-        border-bottom: 1px solid $moneytracker-grey;
+        border-bottom: 1px solid var(--moneytracker-grey);
     }
 }
