@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
     selector: 'app-dialog-close-button',
     template: `
         <button class="close-icon" mat-icon-button class="close-button" [mat-dialog-close]="true">
-            <mat-icon >close</mat-icon>
+            <mat-icon>close</mat-icon>
         </button>
     `,
     styles: `

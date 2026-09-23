@@ -7,7 +7,9 @@
                 <button
                     matChipRemove
                     type="button"
-                    [attr.aria-label]="'transaction.category.remove' | translate: { name: category.item_text }"
+                    [attr.aria-label]="
+                        'transaction.category.remove' | translate: { name: category.item_text }
+                    "
                 >
                     <mat-icon aria-hidden="true" fontIcon="cancel"></mat-icon>
                 </button>

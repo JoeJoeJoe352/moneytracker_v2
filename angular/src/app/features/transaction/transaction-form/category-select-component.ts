@@ -31,7 +31,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
  * Kiválasztott érték az "új kategória hozzáadása" opcióhoz, hogy megkülönböztethető legyen
  * egy ténylegesen létező kategóriától
  */
-const ADD_NEW_OPTION = Symbol('add-new-category');
+const ADD_NEW_OPTION_SYMBOL = Symbol('add-new-category');
 
 @Component({
     selector: 'app-category-select',
@@ -93,10 +93,10 @@ export class CategorySelectComponent implements ControlValueAccessor {
     /**
      * Az "új kategória hozzáadása" opció értéke az autocomplete-ban (public, hogy tesztelhető legyen)
      */
-    public readonly addNewOption = ADD_NEW_OPTION;
+    public readonly addNewOption = ADD_NEW_OPTION_SYMBOL;
 
     /**
-     * Opciók a selecthez
+     * Opciók a selecthez. Kiszűrve azok az elemek, amik már benne vannak a listában és a keresési szövegnek megfelelnek
      */
     protected filteredOptions: Signal<DropdownInterface[]> = computed(() => {
         const search = this.searchText().trim().toLowerCase();
@@ -125,9 +125,9 @@ export class CategorySelectComponent implements ControlValueAccessor {
      * a user, vagy az "új kategória hozzáadása" opciót
      */
     protected optionSelected(event: MatAutocompleteSelectedEvent): void {
-        const value = event.option.value as DropdownInterface | typeof ADD_NEW_OPTION;
+        const value = event.option.value as DropdownInterface | typeof ADD_NEW_OPTION_SYMBOL;
 
-        if (value === ADD_NEW_OPTION) {
+        if (value === ADD_NEW_OPTION_SYMBOL) {
             // nyers input adatokból olvassuk ki, mert a this.searchText()-be ilyenkor a symbol kerül be
             const name = this.categoryInput().nativeElement.value.trim();
             if (name && !this.isDisabled()) {
@@ -140,7 +140,7 @@ export class CategorySelectComponent implements ControlValueAccessor {
                         ]);
                         this.emitChange();
                     },
-                    // A hibát (snackbar) a callback már kezelte, itt csak azt előzzük meg, hogy kezeletlen RxJS hibaként felszínre kerüljön
+                    // A hibát a callback már kezelte, itt csak azt előzzük meg, hogy kezeletlen RxJS hibaként felszínre kerüljön
                     error: () => undefined,
                 });
             }
