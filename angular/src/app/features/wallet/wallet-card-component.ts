@@ -9,7 +9,6 @@ import { MatRippleModule } from '@angular/material/core';
     selector: 'app-wallet-card-component',
     templateUrl: './wallet-card-component.html',
     styleUrl: './wallet-card-component.scss',
-    standalone: true,
     imports: [TranslatePipe, CurrencyFormatPipe, MatRippleModule],
 })
 export class WalletCardComponent {

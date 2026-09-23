@@ -26,7 +26,6 @@ export interface TransactionModalInputInterface {
     selector: 'app-create-transaction-modal',
     templateUrl: './transaction-modal.html',
     styleUrl: './transaction-modal.scss',
-    standalone: true,
     imports: [
     TransactionFormComponent,
     TranslatePipe,

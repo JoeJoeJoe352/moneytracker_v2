@@ -20,7 +20,6 @@ import { MatButton } from '@angular/material/button';
     selector: 'app-main-page-component',
     templateUrl: './main-page-component.html',
     styleUrl: './main-page-component.scss',
-    standalone: true,
     imports: [
         TransactionsListComponent,
         TranslatePipe,

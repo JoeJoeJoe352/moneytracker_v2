@@ -17,7 +17,6 @@ import { WalletCardComponent } from './wallet-card-component';
     `,
     styleUrl: './wallets-list-component.scss',
     imports: [WalletCardComponent],
-    standalone: true,
 })
 export class WalletsListComponent {
     /**

@@ -11,7 +11,6 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     selector: 'app-stat-card-component',
     templateUrl: './stat-card-component.html',
     styleUrls: ['./main-page-component.scss'],
-    standalone: true,
     imports: [TranslatePipe, CurrencyFormatPipe, MatCard, MatIcon, MatProgressSpinner],
 })
 export class StatCardComponent {

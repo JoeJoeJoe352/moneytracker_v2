@@ -18,7 +18,6 @@ import { RESOURCE_STATUS_LOADING } from '@shared/constants';
     selector: 'app-wallets-page-component',
     templateUrl: './wallets-page-component.html',
     styleUrl: './wallets-page-component.scss',
-    standalone: true,
     imports: [WalletsListComponent, TranslatePipe, MatProgressSpinner, MatCardModule, MatButton],
 })
 export class WalletsPageComponent {

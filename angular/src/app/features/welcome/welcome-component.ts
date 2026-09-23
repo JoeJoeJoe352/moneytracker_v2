@@ -13,6 +13,5 @@ import { MatButtonModule } from '@angular/material/button';
         }
     `,
     imports: [TranslatePipe, MatCardModule, MatButtonModule],
-    standalone: true,
 })
 export class WelcomeComponent {}

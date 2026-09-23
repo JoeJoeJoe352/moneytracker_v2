@@ -32,7 +32,6 @@ const WALLET_TYPE_TO_DESCRIPTION: Record<WalletTypesEnum, string> = {
     selector: 'app-wallet-form-component',
     templateUrl: './wallet-form-component.html',
     styleUrls: ['./wallet-form-component.scss'],
-    standalone: true,
     imports: [
         ReactiveFormsModule,
         TranslatePipe,

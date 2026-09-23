@@ -26,7 +26,6 @@ export interface FilterData {
     selector: 'app-transactions-list-component',
     templateUrl: './transactions-component.html',
     styleUrl: './transactions-component.scss',
-    standalone: true,
     imports: [TransactionListComponent, TranslatePipe, TransactionFilter, MatCardModule],
     providers: [TransactionModalStateService],
 })

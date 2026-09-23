@@ -8,7 +8,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     selector: 'app-error-component',
     templateUrl: './error-page-component.html',
     styleUrl: './error-page-component.scss',
-    standalone: true,
     imports: [TranslatePipe, MatCardModule, MatButtonModule],
 })
 export class ErrorPageComponent implements AfterViewInit {

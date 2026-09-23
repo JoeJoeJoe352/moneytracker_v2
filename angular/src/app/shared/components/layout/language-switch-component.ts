@@ -8,7 +8,6 @@ import { LanguageService } from '../../services/translate-service';
 
 @Component({
     selector: 'app-language-switcher',
-    standalone: true,
     template: `
         <button
             mat-icon-button

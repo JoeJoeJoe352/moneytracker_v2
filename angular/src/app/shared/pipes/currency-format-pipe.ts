@@ -17,7 +17,6 @@ registerLocaleData(localeHu);
  */
 @Pipe({
     name: 'currencyFormat',
-    standalone: true,
     pure: false,
 })
 export class CurrencyFormatPipe implements PipeTransform {
