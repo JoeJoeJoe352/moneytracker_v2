@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
-    DETAIL_NAME_VALIDATORS,
     POSITIVE_AMOUNT_VALIDATORS,
     TRANSACTION_DATE_VALIDATORS,
     TRANSACTION_NAME_VALIDATORS,
@@ -264,7 +263,7 @@ export class TransactionFormComponent implements OnChanges {
         categories: number[] | null;
     }): FormGroup<DetailForm> {
         const detailGroup = this.fb.nonNullable.group({
-            detailName: [params.name, { validators: DETAIL_NAME_VALIDATORS }],
+            detailName: [params.name, { validators: TRANSACTION_NAME_VALIDATORS }],
             detailPrice: this.fb.control<number | null>(params.price, POSITIVE_AMOUNT_VALIDATORS),
             detailWeight: this.fb.control<number | null>(params.weight, POSITIVE_AMOUNT_VALIDATORS),
             detailUnitPrice: this.fb.control<number | null>(

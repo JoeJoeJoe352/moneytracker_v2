@@ -103,6 +103,8 @@
       "title": "Transaction details",
       "name": "Item name",
       "name.required": "Name is required",
+      "name.minlength": "Transaction name must be at least 3 characters long!",
+      "name.maxlength": "Transaction name must be at most 120 characters long!",
       "price": "Item price",
       "price.required": "Price is required",
       "price.min": "Must be a number greater than 0",

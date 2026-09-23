@@ -12,15 +12,6 @@ export const TRANSACTION_NAME_VALIDATORS: ValidatorFn[] = [
 ];
 
 /**
- * Tranzakció detail név mező validátorai
- */
-export const DETAIL_NAME_VALIDATORS: ValidatorFn[] = [
-    Validators.required,
-    Validators.minLength(3),
-    Validators.maxLength(20),
-];
-
-/**
  * Pozitív összeg mezők validátorai (ár, mennyiség, egységár)
  */
 export const POSITIVE_AMOUNT_VALIDATORS: ValidatorFn[] = [Validators.required, greaterThan(0)];

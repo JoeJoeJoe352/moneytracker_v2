@@ -106,6 +106,8 @@
       "title": "Tranzakció részletei",
       "name": "Tétel neve",
       "name.required": "Név kötelező",
+      "name.minlength": "A név legalább 3 karakter lehet!",
+      "name.maxlength": "A név legfeljebb 120 karakter lehet!",
       "price": "Tétel ára",
       "price.min": "Az 0-nál nagyobb számnak kell lennie",
       "add-detail": "Tétel hozzáadása",
