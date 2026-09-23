@@ -5,15 +5,15 @@ import { WalletDataInterfaceWithoutSum } from '../../features/wallet/interfaces'
 
 interface UserDataState {
     /**
-     * Felhasználónév
+     * Felhasználónév (privát)
      */
     _username: string;
     /**
-     * Store adatai be vannak-e már töltve
+     * Store adatai be vannak-e már töltve (privát)
      */
     _isLoaded: boolean;
     /**
-     * Wallet adatok
+     * Wallet adatok (privát)
      */
     _wallets: WalletDataInterfaceWithoutSum[] | null;
 }
@@ -35,8 +35,8 @@ export const UserDataStore = signalStore(
     })),
     withMethods((store) => ({
         /**
-         * Guard a wallet lekérdezéshez
-         * Külön withMethods, hogy a getDefaultWallet tudjon rá hivatkozni
+         * Wallet getter
+         * Külön withMethods-ban található, hogy a getDefaultWallet tudjon rá hivatkozni
          */
         getWallets(): WalletDataInterfaceWithoutSum[] {
             const wallets = store._wallets();
@@ -84,8 +84,8 @@ export const UserDataStore = signalStore(
             patchState(store, { _wallets: wallets });
         },
 
-        getUsername() {
-            return store._username
+        getUsername(): string {
+            return store._username()
         }
     })),
 );
