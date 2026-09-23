@@ -40,7 +40,7 @@ export interface NewTransaction {
     transactionDate: Date;
     categories: DropdownInterface[];
     walletId: number;
-    details: {
+    details?: {
         detailName: string;
         detailPrice: number;
         detailWeight: number | null;

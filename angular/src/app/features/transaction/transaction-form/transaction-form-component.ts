@@ -39,7 +39,7 @@ import { WalletDataUtil } from '../../wallet/wallet-data-util';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { TransactionUtils } from '../transaction-utils';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-transaction-form-component',
@@ -137,6 +137,14 @@ export class TransactionFormComponent implements OnChanges {
         });
     });
 
+    constructor() {
+        this.applyTransactionModeDisabledState();
+        // A kapcsoló állítása és a meglévő tranzakció betöltése (patchValue) is ide fut be
+        this.isComplexTransaction.valueChanges
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.applyTransactionModeDisabledState());
+    }
+
     ngOnChanges(changes: SimpleChanges): void {
         // Betöltés után ha van kezdőérték beállítva, akkor a formba azokat állítjuk be
         if (changes['isTransactionFormDisabled']) {
@@ -144,14 +152,9 @@ export class TransactionFormComponent implements OnChanges {
                 this.transactionForm.disable();
             } else {
                 this.transactionForm.enable();
-                // enable() minden leszármazott kontrollt enged, ezért az ár megadási mód szerinti
-                // disabled állapotot vissza kell állítani soronként
-                this.details.controls.forEach((detailGroup) =>
-                    this.applyDetailRowPriceModeDisabledState(
-                        detailGroup,
-                        detailGroup.controls.detailIsComplexPriceMode.value,
-                    ),
-                );
+                // enable() minden leszármazott kontrollt enged, ezért a tranzakció típus és az ár
+                // megadási mód szerinti disabled állapotot vissza kell állítani
+                this.applyTransactionModeDisabledState();
             }
         }
 
@@ -184,6 +187,8 @@ export class TransactionFormComponent implements OnChanges {
             'details',
             this.fb.array(inputValues.details.map((detail) => this.generateNewRow(detail))),
         );
+        // az új details tömb enabled állapotban jön létre
+        this.applyTransactionModeDisabledState();
     }
 
     /**
@@ -315,21 +320,47 @@ export class TransactionFormComponent implements OnChanges {
      */
     private applyDetailRowPriceModeDisabledState(
         detailGroup: FormGroup<DetailForm>,
-        isComplexMode: boolean | null,
+        isComplexPriceMode: boolean | null,
     ): void {
         const priceControl = detailGroup.controls.detailPrice;
         const unitControl = detailGroup.controls.detailUnitPrice;
         const weightControl = detailGroup.controls.detailWeight;
 
-        if (isComplexMode) {
+        if (isComplexPriceMode) {
             // emitEvent azért kell, hogy disable ne emiteljen egy újabb change-t, mert akkor végtelen ciklusba kerülünk
             priceControl.disable({ emitEvent: false });
             weightControl.enable({ emitEvent: false });
             unitControl.enable({ emitEvent: false });
         } else {
             priceControl.enable({ emitEvent: false });
-            unitControl.disable({ emitEvent: false });
             weightControl.disable({ emitEvent: false });
+            unitControl.disable({ emitEvent: false });
+        }
+    }
+
+    /**
+     * A tranzakció típusa szerint nem látható rész kontrolljait letiltja, hogy a validátoraik ne
+     * form enable() után újra meg kell hívni.
+     */
+    private applyTransactionModeDisabledState(): void {
+        if (this.transactionForm.disabled) {
+            return;
+        }
+
+        if (this.isComplexTransaction.value) {
+            this.price.disable({ emitEvent: false });
+            this.details.enable({ emitEvent: false });
+            // details.enable() a sorok összes kontrollját engedi, ezért az ár megadási mód szerinti
+            // disabled állapotot vissza kell állítani soronként
+            this.details.controls.forEach((detailGroup) =>
+                this.applyDetailRowPriceModeDisabledState(
+                    detailGroup,
+                    detailGroup.controls.detailIsComplexPriceMode.value,
+                ),
+            );
+        } else {
+            this.price.enable({ emitEvent: false });
+            this.details.disable({ emitEvent: false });
         }
     }
 

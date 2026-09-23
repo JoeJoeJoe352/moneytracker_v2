@@ -108,6 +108,55 @@ describe('TransactionFormComponent (Vitest)', () => {
         expect(emittedValue).toMatchObject({ name: 'Bevásárlás', price: 1000 });
     });
 
+    it('should emit "saved" after toggling the complex mode on and back off (the empty detail row must not block the save)', () => {
+        fixture.detectChanges();
+
+        component.name.setValue('Bevásárlás');
+        component.price.setValue(1000);
+        component.transactionDate.setValue(new Date('2024-01-10'));
+
+        const toggle = (): void => {
+            fixture.nativeElement.querySelector('#transaction-show-details button').click();
+            fixture.detectChanges();
+        };
+        toggle();
+        expect(component.isComplexTransaction.value).toBe(true);
+        expect(component.details.length).toBe(1);
+        toggle();
+        expect(component.isComplexTransaction.value).toBe(false);
+
+        let emittedValue: unknown;
+        component.saved.subscribe((value) => (emittedValue = value));
+        fixture.nativeElement.querySelector('button[type="submit"]').click();
+
+        expect(component.details.disabled).toBe(true);
+        expect(emittedValue).toMatchObject({ name: 'Bevásárlás', price: 1000 });
+    });
+
+    it('should emit "saved" in complex mode without the hidden global price', () => {
+        fixture.detectChanges();
+
+        component.name.setValue('Bevásárlás');
+        component.transactionDate.setValue(new Date('2024-01-10'));
+        fixture.nativeElement.querySelector('#transaction-show-details button').click();
+        fixture.detectChanges();
+
+        const detailRow = component.details.at(0);
+        detailRow.controls.detailName.setValue('Kenyér');
+        detailRow.controls.detailPrice.setValue(500);
+
+        let emittedValue: unknown;
+        component.saved.subscribe((value) => (emittedValue = value));
+        fixture.nativeElement.querySelector('button[type="submit"]').click();
+
+        expect(component.price.disabled).toBe(true);
+        expect(emittedValue).toMatchObject({
+            name: 'Bevásárlás',
+            isComplexTransaction: true,
+            details: [{ detailName: 'Kenyér', detailPrice: 500 }],
+        });
+    });
+
     it('should patch the form from an existing transaction via ngOnChanges', () => {
         const backendTransaction: TransactionDataFromBackend = {
             id: 7,
