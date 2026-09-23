@@ -41,7 +41,7 @@ export class MainPageComponent {
     /**
      * Újra kell-e tölteni az adatokat? Ha ez változik, akkor újra fogja tölteni a listát.
      * Azért számot növelünk és nem boolean értéket, mert ha gyorsan hívódik egymás után,
-     * akkor többször true-ra állítódik az érték és az nem vált ki új letöltés eventet
+     * akkor többször true-ra állítódik az érték (nem érkezik false-ra állítani az első lekérés végén) és az nem vált ki új letöltés eventet
      */
     protected reloadTransactionListTrigger = signal(0);
 
