@@ -236,7 +236,7 @@ describe('TransactionsListComponent (Vitest)', () => {
     it('should not reload again on the initial reloadTrigger change (firstChange guard)', async () => {
         await setup({ isHistoryMode: false });
 
-        // ngOnChanges runs once more right after ngOnInit for the same initial value; must stay a no-op
+        // az ngOnChanges az ngOnInit után még egyszer lefut ugyanarra a kezdőértékre; ilyenkor nem csinálhat semmit
         component.ngOnChanges({
             reloadTrigger: {
                 currentValue: 0,

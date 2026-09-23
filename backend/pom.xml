@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.0.6</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>com.starbuck</groupId>
 	<artifactId>moneytracker</artifactId>
@@ -254,9 +254,9 @@
 				</executions>
         	</plugin>
 
-			<!-- OWASP dependency vulnerability scan. Not bound to a lifecycle phase on purpose
-			     (needs NVD data download, which is slow) - run explicitly via
-			     `mvn org.owasp:dependency-check-maven:check` in CI. -->
+			<!-- OWASP függőség sérülékenység-vizsgálat. Szándékosan nincs lifecycle fázishoz kötve
+			     (NVD adatletöltést igényel, ami lassú) - CI-ban explicit módon fut:
+			     `mvn org.owasp:dependency-check-maven:check` -->
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>

@@ -365,7 +365,7 @@ export class TransactionFormComponent implements OnChanges {
         }
     }
 
-    // Getters
+    // Getterek
 
     /**
      * Utolsó detail sor nem törölhető, ezért a gombot letiltjuk, ha csak 1 sor van

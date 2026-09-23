@@ -6,7 +6,7 @@
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
     <mat-dialog-content>
         <div class="login-form-row">
-            <!-- username -->
+            <!-- felhasználónév -->
             <mat-form-field>
                 <mat-label>
                     {{ 'login.username' | translate }}
@@ -40,7 +40,7 @@
             </mat-form-field>
         </div>
         <div class="login-form-row">
-            <!-- password -->
+            <!-- jelszó -->
             <mat-form-field>
                 <mat-label>
                     {{ 'login.password' | translate }}

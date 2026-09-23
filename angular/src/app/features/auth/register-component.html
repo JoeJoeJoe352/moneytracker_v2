@@ -4,7 +4,7 @@
 </div>
 <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
     <mat-dialog-content>
-        <!-- username-->
+        <!-- felhasználónév -->
         <mat-form-field>
             <mat-label>
                 {{ 'register.username' | translate }}
@@ -42,7 +42,7 @@
             }
         </mat-form-field>
 
-        <!-- email-->
+        <!-- email cím -->
         <mat-form-field>
             <mat-label>
                 {{ 'register.email' | translate }}
@@ -79,7 +79,7 @@
             }
         </mat-form-field>
 
-        <!-- password-->
+        <!-- jelszó -->
         <mat-form-field>
             <mat-label>
                 {{ 'register.password' | translate }}
@@ -111,7 +111,7 @@
             }
         </mat-form-field>
 
-        <!-- confirm password-->
+        <!-- jelszó megerősítése -->
         <mat-form-field>
             <mat-label>
                 {{ 'register.password_again' | translate }}

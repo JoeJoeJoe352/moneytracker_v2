@@ -101,7 +101,7 @@ export class RegisterComponent {
         this.register.emit({ email, username, password });
     }
 
-    // Getters
+    // Getterek
     get username() {
         return this.registerForm.controls.username;
     }
