@@ -15,7 +15,8 @@ export class AuthActionService {
     private readonly notification = inject(NotificationService);
 
     /**
-     * Felhasználó bejelentkezés kérésének kezelése
+     * Felhasználó bejelentkezés kérésének kezelése.
+     * A login csak cookie-t küldi vissza, ezért kell egy külön authentikációs kérést is indítani ugyanitt
      */
     public login(
         params: LoginRequestData,
@@ -37,10 +38,8 @@ export class AuthActionService {
                     return EMPTY;
                 }),
                 switchMap(() => {
-                    // User adatok lekérése, mert a login végpont csak a cookie-t állítja be
                     return this.authService.authenticateUser();
                 }),
-                // minden kimenetnél (siker, hiba, megszakítás) véget ér a töltés
                 finalize(() => loadingSignal.set(false)),
             )
             .subscribe({

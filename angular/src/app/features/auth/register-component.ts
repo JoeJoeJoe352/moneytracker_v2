@@ -5,6 +5,7 @@ import {
     passwordMismatchValidator,
 } from './password-match-validator';
 import { uniqueEmailValidator, uniqueUsernameValidator } from './unique-user-validators';
+import { PASSWORD_VALIDATORS, USERNAME_VALIDATORS } from './auth-field-validators';
 import { AuthService } from './auth-service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -55,11 +56,7 @@ export class RegisterComponent {
             username: [
                 '',
                 {
-                    validators: [
-                        Validators.required,
-                        Validators.minLength(3),
-                        Validators.maxLength(20),
-                    ],
+                    validators: USERNAME_VALIDATORS,
                     asyncValidators: [uniqueUsernameValidator(this.authService)],
                     updateOn: 'blur',
                 },
@@ -76,10 +73,7 @@ export class RegisterComponent {
                     updateOn: 'blur',
                 },
             ],
-            password: [
-                '',
-                [Validators.required, Validators.minLength(6), Validators.maxLength(20)],
-            ],
+            password: ['', PASSWORD_VALIDATORS],
             passwordAgain: ['', [Validators.required]],
         },
         {
