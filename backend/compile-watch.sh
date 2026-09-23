@@ -1,10 +1,6 @@
 #!/bin/sh
-# Recompiles Java sources on every change so Spring DevTools (which only
-# watches target/classes, not .java files) picks up the change and restarts.
-#
-# Uses polling instead of inotify: the source directory is bind-mounted from
-# the Windows host, and Docker Desktop does not propagate real inotify events
-# across that mount, so an event-based watcher (e.g. entr) never fires.
+# Minden változáskor újrafordítja a Java forrásokat, így a Spring DevTools (ami csak
+# a target/classes-t figyeli, a .java fájlokat nem) észleli a változást és újraindul.
 MARKER=/tmp/.last-compile
 touch "$MARKER"
 while true; do

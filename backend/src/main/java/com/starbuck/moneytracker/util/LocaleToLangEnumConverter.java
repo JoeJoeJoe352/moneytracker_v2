@@ -13,7 +13,7 @@ public class LocaleToLangEnumConverter implements Converter<Locale, LangEnum> {
     @Override
     public LangEnum convert(Locale locale) {
         if (locale == null) {
-            return LangEnum.EN; // fallback
+            return LangEnum.EN; // alapértelmezett nyelv
         }
 
         return switch (locale.getLanguage()) {

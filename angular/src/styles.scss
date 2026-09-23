@@ -82,7 +82,7 @@ html {
 }
 
 body {
-    // Default the application to a light color theme
+    // Az alkalmazás alapértelmezetten világos színtémát használ
     color-scheme: light;
 
     // Elrejti a láthatatlan Material touch-target-eket (pl. a fejléc jobb szélén lévő
@@ -190,7 +190,7 @@ html {
     font-weight: 600;
 }
 
-// OVERRIDES
+// FELÜLÍRÁSOK
 
 // mat-slide-toggle "on-off" színtéma (szürke = ki, kék = be)
 .mat-slide-toggle-on-off {

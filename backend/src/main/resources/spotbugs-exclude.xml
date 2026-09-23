@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
-    <!-- Ignore false positives related to Spring DI -->
+    <!-- A Spring DI-hoz kapcsolódó téves riasztások figyelmen kívül hagyása -->
     <Match>
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
@@ -15,7 +15,7 @@
     <Match>
         <Bug pattern="SE_BAD_FIELD"/>
     </Match>
-    <!-- domain objecteknél jön elő, amikor constructorba hibát dobunk. Ez a figyelmeztetés nem vonatkozik a modern Java-ra  -->
+    <!-- domain objecteknél jön elő, amikor constructorba hibát dobunk  -->
     <Match>
         <Bug pattern="CT_CONSTRUCTOR_THROW"/>
     </Match>

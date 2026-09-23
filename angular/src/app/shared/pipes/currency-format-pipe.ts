@@ -24,13 +24,13 @@ export class CurrencyFormatPipe implements PipeTransform {
     private walletUtils = inject(WalletDataUtil);
 
     public transform(amount: number, currencyCode: CurrencyCodesEnum): string {
-        // A CLDR pénznem-adatai a szimbólum pozícióját (elé/mögé) és az ezres elválasztókat a UI nyelvéhez (nem a pénznemhez) igazítják
         const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
         const locale = LANGUAGE_TO_LOCALE[lang ?? ''] ?? LANGUAGE_TO_LOCALE[SupportedLangEnum.en];
         // Az Angular locale-adatai csak a locale "saját" pénznemének szimbólumát ismerik, a többihez az ISO kódot adnak vissza
         // (pl. hu locale-ban EUR -> "EUR", nem "€") - ezért a szimbólumot a WalletDataUtil-ból vesszük
         const symbol = this.walletUtils.getCurrencySymbolForCurrencyCode(currencyCode);
 
+        // A CurrencyPipe a pénznem szimbólum pozícióját (szám elé/mögé) és az ezres elválasztókat a UI nyelvéhez igazítja
         return new CurrencyPipe(locale).transform(amount, currencyCode, symbol, '1.0-3') ?? '';
     }
 }

@@ -14,6 +14,12 @@
                     @if (controls.detailName.hasError('required')) {
                         <mat-error>{{ 'transaction.detail.field.required' | translate }}</mat-error>
                     }
+                    @if (controls.detailName.hasError('minlength')) {
+                        <mat-error>{{ 'transaction.detail.name.minlength' | translate }}</mat-error>
+                    }
+                    @if (controls.detailName.hasError('maxlength')) {
+                        <mat-error>{{ 'transaction.detail.name.maxlength' | translate }}</mat-error>
+                    }
                 }
             </mat-form-field>
         </div>

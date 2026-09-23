@@ -29,13 +29,13 @@ export const UserDataStore = signalStore(
     withState(initialState),
     withComputed(({ _username, _isLoaded }) => ({
         /**
-         * The user is logged in?
+         * Be van-e jelentkezve a user
          */
         isUserLogged: computed(() => _isLoaded() && _username() !== ''),
     })),
     withMethods((store) => ({
         /**
-         * Wallet getter
+         * Walletek lekérése
          * Külön withMethods-ban található, hogy a getDefaultWallet tudjon rá hivatkozni
          */
         getWallets(): WalletDataInterfaceWithoutSum[] {
@@ -48,7 +48,7 @@ export const UserDataStore = signalStore(
     })),
     withMethods((store) => ({
         /**
-         * Reset data (when logged out)
+         * Adatok alaphelyzetbe állítása (kijelentkezéskor)
          */
         resetData(): void {
             patchState(store, initialState);

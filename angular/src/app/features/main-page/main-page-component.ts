@@ -46,24 +46,23 @@ export class MainPageComponent {
     protected reloadTransactionListTrigger = signal(0);
 
     constructor() {
-        // Mentés/törlés után újratöltjük a listát és az összesítést
         this.modal.changed.pipe(takeUntilDestroyed()).subscribe(() => {
             this.reloadTransactionListTrigger.update((value) => value + 1);
-            this.moneySumSummarizedPerCurrency.reload();
+            this.reloadSummaryList();
         });
     }
 
     /**
      * A tranzakciós listában történt változás után újratöltjük az összesítést
      */
-    protected reloadList(): void {
-        this.moneySumSummarizedPerCurrency.reload();
+    protected reloadSummaryList(): void {
+        this.moneySummarizedPerCurrency.reload();
     }
 
     /**
-     * Walletek összegei, valutánként összegezve
+     * Walletek összegei, valutánként csoportosítva
      */
-    protected moneySumSummarizedPerCurrency = resource({
+    protected moneySummarizedPerCurrency = resource({
         loader: async () => {
             const moneySum = await firstValueFrom(this.transactionService.getMoneySum());
 
@@ -83,8 +82,8 @@ export class MainPageComponent {
      * Az egyenleg nettó változása ebben a hónapban
      */
     protected balanceChangeThisMonth: Signal<WalletSummaryInterface[]> = computed(() => {
-        const income = this.moneySumSummarizedPerCurrency.value()?.incomeSumThisMonth;
-        const expense = this.moneySumSummarizedPerCurrency.value()?.expenseSumThisMonth;
+        const income = this.moneySummarizedPerCurrency.value()?.incomeSumThisMonth;
+        const expense = this.moneySummarizedPerCurrency.value()?.expenseSumThisMonth;
         if (!income || !expense) {
             return [];
         }

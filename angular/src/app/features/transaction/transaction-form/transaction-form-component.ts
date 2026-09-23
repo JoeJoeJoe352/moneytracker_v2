@@ -10,8 +10,12 @@ import {
     SimpleChanges,
     viewChild,
 } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { greaterThan } from './greater-than-validator';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+    POSITIVE_AMOUNT_VALIDATORS,
+    TRANSACTION_DATE_VALIDATORS,
+    TRANSACTION_NAME_VALIDATORS,
+} from './transaction-field-validators';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
@@ -30,13 +34,12 @@ import {
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
 } from '../interfaces';
-import { validDate } from './valid-date-validator';
 import { UserDataStore } from '@app/shared/stores/user-data-store';
 import { WalletDataUtil } from '../../wallet/wallet-data-util';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { TransactionUtils } from '../transaction-utils';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
     selector: 'app-transaction-form-component',
@@ -62,6 +65,11 @@ export class TransactionFormComponent implements OnChanges {
     protected readonly userData = inject(UserDataStore);
     protected readonly walletUtil = inject(WalletDataUtil);
     protected readonly transactionUtils = inject(TransactionUtils);
+
+    /**
+     * Az "új tétel" gomb sora, hogy addRow()-nál az oldal aljára tudjunk görgetni
+     */
+    private readonly detailAddButton = viewChild<ElementRef<HTMLElement>>('detailAddButton');
 
     /**
      * Form disabled-e (pl.: töltődéskor)
@@ -90,11 +98,6 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakció törlés gombra kattintott a user
      */
     public deleted = output<number>();
-
-    /**
-     * Az "új tétel" gomb sora, hogy addRow()-nál az oldal aljára tudjunk görgetni
-     */
-    private readonly detailAddButton = viewChild<ElementRef<HTMLElement>>('detailAddButton');
 
     /**
      * Tranzakciós form. A selectedWalletId előtt kell létrehozni, mert annak a valueChanges-ét figyeli
@@ -134,29 +137,31 @@ export class TransactionFormComponent implements OnChanges {
         });
     });
 
-    /**
-     * Changes Betöltés után ha van kezdőérték beállítva, akkor a formba azokat állítjuk be
-     */
+    constructor() {
+        this.applyTransactionModeDisabledState();
+        // A kapcsoló állítása és a meglévő tranzakció betöltése (patchValue) is ide fut be
+        this.isComplexTransaction.valueChanges
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.applyTransactionModeDisabledState());
+    }
+
     ngOnChanges(changes: SimpleChanges): void {
+        // Betöltés után ha van kezdőérték beállítva, akkor a formba azokat állítjuk be
         if (changes['isTransactionFormDisabled']) {
             if (this.isTransactionFormDisabled()) {
                 this.transactionForm.disable();
             } else {
                 this.transactionForm.enable();
-                // enable() minden leszármazott kontrollt enged, ezért az ár megadási mód szerinti
-                // disabled állapotot vissza kell állítani soronként
-                this.details.controls.forEach((detailGroup) =>
-                    this.applyDetailRowPriceModeDisabledState(
-                        detailGroup,
-                        detailGroup.controls.detailIsComplexPriceMode.value,
-                    ),
-                );
+                // enable() minden leszármazott kontrollt enged, ezért a tranzakció típus és az ár
+                // megadási mód szerinti disabled állapotot vissza kell állítani
+                this.applyTransactionModeDisabledState();
             }
         }
+
         if (changes['transaction']) {
             const transaction = this.transaction();
             if (transaction === null) {
-                // Nincs átadva paraméterül transaction (ngOnchanges 1x mindenképp lefut induláskor. Ez nem gond, csak NOOP)
+                // Nincs átadva paraméterül transaction, mert új tranzakciót hozunk létre
                 return;
             }
             const convertedInputValues = this.transactionUtils.convertDataToInput(transaction);
@@ -182,6 +187,8 @@ export class TransactionFormComponent implements OnChanges {
             'details',
             this.fb.array(inputValues.details.map((detail) => this.generateNewRow(detail))),
         );
+        // az új details tömb enabled állapotban jön létre
+        this.applyTransactionModeDisabledState();
     }
 
     /**
@@ -201,8 +208,7 @@ export class TransactionFormComponent implements OnChanges {
             this.transactionForm.markAllAsTouched();
             return;
         }
-        // A form típusa szerint minden mező opcionális (a letiltott kontrollok kimaradnak a .value-ból),
-        // de érvényes formnál a validátorok miatt a kötelező mezők ki vannak töltve
+        // Minden letiltott mezőt kihagyunk az értékek elküldéséből
         this.saved.emit(this.transactionForm.value as NewTransaction);
     }
 
@@ -235,23 +241,14 @@ export class TransactionFormComponent implements OnChanges {
      */
     private createForm() {
         return this.fb.nonNullable.group({
-            name: [
-                '',
-                {
-                    validators: [
-                        Validators.required,
-                        Validators.minLength(3),
-                        Validators.maxLength(120),
-                    ],
-                },
-            ],
+            name: ['', { validators: TRANSACTION_NAME_VALIDATORS }],
             isIncome: [false],
             isComplexTransaction: [false],
             price: this.fb.control<number | null>(null, {
-                validators: [Validators.required, greaterThan(0)],
+                validators: POSITIVE_AMOUNT_VALIDATORS,
             }),
             transactionDate: this.fb.control(new Date(), {
-                validators: [Validators.required, validDate],
+                validators: TRANSACTION_DATE_VALIDATORS,
             }),
             walletId: [this.userData.getDefaultWallet().id],
             details: new FormArray<FormGroup<DetailForm>>([]),
@@ -271,28 +268,13 @@ export class TransactionFormComponent implements OnChanges {
         categories: number[] | null;
     }): FormGroup<DetailForm> {
         const detailGroup = this.fb.nonNullable.group({
-            detailName: [
-                params.name,
-                {
-                    validators: [
-                        Validators.required,
-                        Validators.minLength(3),
-                        Validators.maxLength(20),
-                    ],
-                },
-            ],
-            detailPrice: this.fb.control<number | null>(params.price, [
-                Validators.required,
-                greaterThan(0),
-            ]),
-            detailWeight: this.fb.control<number | null>(params.weight, [
-                Validators.required,
-                greaterThan(0),
-            ]),
-            detailUnitPrice: this.fb.control<number | null>(params.unitPrice, [
-                Validators.required,
-                greaterThan(0),
-            ]),
+            detailName: [params.name, { validators: TRANSACTION_NAME_VALIDATORS }],
+            detailPrice: this.fb.control<number | null>(params.price, POSITIVE_AMOUNT_VALIDATORS),
+            detailWeight: this.fb.control<number | null>(params.weight, POSITIVE_AMOUNT_VALIDATORS),
+            detailUnitPrice: this.fb.control<number | null>(
+                params.unitPrice,
+                POSITIVE_AMOUNT_VALIDATORS,
+            ),
             detailIsComplexPriceMode: [params.isComplexPriceMode ?? false],
             categories: this.fb.nonNullable.control(
                 this.mapCategoryIdsToDropdownData(params.categories ?? []),
@@ -338,21 +320,47 @@ export class TransactionFormComponent implements OnChanges {
      */
     private applyDetailRowPriceModeDisabledState(
         detailGroup: FormGroup<DetailForm>,
-        isComplexMode: boolean | null,
+        isComplexPriceMode: boolean | null,
     ): void {
         const priceControl = detailGroup.controls.detailPrice;
         const unitControl = detailGroup.controls.detailUnitPrice;
         const weightControl = detailGroup.controls.detailWeight;
 
-        if (isComplexMode) {
+        if (isComplexPriceMode) {
             // emitEvent azért kell, hogy disable ne emiteljen egy újabb change-t, mert akkor végtelen ciklusba kerülünk
             priceControl.disable({ emitEvent: false });
             weightControl.enable({ emitEvent: false });
             unitControl.enable({ emitEvent: false });
         } else {
             priceControl.enable({ emitEvent: false });
-            unitControl.disable({ emitEvent: false });
             weightControl.disable({ emitEvent: false });
+            unitControl.disable({ emitEvent: false });
+        }
+    }
+
+    /**
+     * A tranzakció típusa szerint nem látható rész kontrolljait letiltja, hogy a validátoraik ne
+     * form enable() után újra meg kell hívni.
+     */
+    private applyTransactionModeDisabledState(): void {
+        if (this.transactionForm.disabled) {
+            return;
+        }
+
+        if (this.isComplexTransaction.value) {
+            this.price.disable({ emitEvent: false });
+            this.details.enable({ emitEvent: false });
+            // details.enable() a sorok összes kontrollját engedi, ezért az ár megadási mód szerinti
+            // disabled állapotot vissza kell állítani soronként
+            this.details.controls.forEach((detailGroup) =>
+                this.applyDetailRowPriceModeDisabledState(
+                    detailGroup,
+                    detailGroup.controls.detailIsComplexPriceMode.value,
+                ),
+            );
+        } else {
+            this.price.enable({ emitEvent: false });
+            this.details.disable({ emitEvent: false });
         }
     }
 
@@ -365,7 +373,7 @@ export class TransactionFormComponent implements OnChanges {
         }
     }
 
-    // Getters
+    // Getterek
 
     /**
      * Utolsó detail sor nem törölhető, ezért a gombot letiltjuk, ha csak 1 sor van
