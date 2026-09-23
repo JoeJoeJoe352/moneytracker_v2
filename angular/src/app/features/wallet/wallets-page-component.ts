@@ -4,7 +4,7 @@ import { WalletService } from './wallet-service';
 import { WalletsListComponent } from './wallets-list-component';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
-import { UserDataStore } from '@shared/services/user-data-store';
+import { UserDataStore } from '@app/shared/stores/user-data-store';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatButton } from '@angular/material/button';

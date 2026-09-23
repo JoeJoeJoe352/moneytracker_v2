@@ -1,7 +1,6 @@
 import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { AuthService } from '../../../features/auth/auth-service';
 import { Router, RouterLink } from '@angular/router';
-import { UserDataStore } from '../../services/user-data-store';
 import { LinkInterface } from './interfaces';
 import { _, TranslatePipe } from '@ngx-translate/core';
 import { HeaderLinkListComponent } from './header-link-list-component';
@@ -12,6 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { LoginComponent } from '../../../features/auth/login-component';
 import { RegisterComponent } from '../../../features/auth/register-component';
 import { NotificationService } from '../../services/notification-service';
+import { UserDataStore } from '@app/shared/stores/user-data-store';
 
 @Component({
     selector: 'app-sidebar',

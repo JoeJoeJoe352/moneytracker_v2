@@ -31,7 +31,7 @@ import {
     TransactionInputDefaultValuesWithDetails,
 } from '../interfaces';
 import { validDate } from './valid-date-validator';
-import { UserDataStore } from '@shared/services/user-data-store';
+import { UserDataStore } from '@app/shared/stores/user-data-store';
 import { WalletDataUtil } from '../../wallet/wallet-data-util';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';

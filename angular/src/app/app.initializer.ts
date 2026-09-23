@@ -1,11 +1,11 @@
 import { AuthService } from './features/auth/auth-service';
 import { LanguageService } from './shared/services/translate-service';
-import { UserDataStore } from './shared/services/user-data-store';
+import { UserDataStore } from './shared/stores/user-data-store';
 import { SUPPORTED_LANGS } from './shared/utils/language-util';
 
 export function initApp(
     authService: AuthService,
-    userDataStore: UserDataStore,
+    userDataStore: InstanceType<typeof UserDataStore>,
     languageService: LanguageService,
 ) {
     return new Promise<void>((resolve) => {
