@@ -1,0 +1,24 @@
+@use 'variables' as *;
+
+.transaction-list {
+    border-radius: 20px;
+    overflow: hidden;
+
+    .active-card {
+        cursor: pointer;
+    }
+
+    .disabled-card {
+        cursor: wait;
+    }
+
+    .spinner {
+        display: flex;
+        justify-content: center;
+        margin: 12px;
+    }
+
+    .transaction-cards:not(:last-child) {
+        border-bottom: 1px solid $moneytracker-grey;
+    }
+}

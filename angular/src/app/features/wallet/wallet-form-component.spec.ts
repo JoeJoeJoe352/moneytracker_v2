@@ -5,7 +5,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
 import { WalletDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 describe('WalletFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<WalletFormComponent>;

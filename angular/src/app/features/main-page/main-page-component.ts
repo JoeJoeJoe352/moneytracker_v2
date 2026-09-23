@@ -8,9 +8,9 @@ import { TransactionModalStateService } from '../transaction/transaction-modal-s
 import { TransactionsListComponent } from '../transaction/transactions-component';
 import { WalletDataUtil } from '../wallet/wallet-data-util';
 import { WalletSummaryInterface } from '../transaction/interfaces';
-import { CurrencyFormatPipe } from '../../shared/pipes/currency-format-pipe';
+import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { StatCardComponent } from './stat-card-component';
-import { TransactionTypeEnum } from '../../shared/enums';
+import { TransactionTypeEnum } from '@shared/enums';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -20,7 +20,6 @@ import { MatButton } from '@angular/material/button';
     selector: 'app-main-page-component',
     templateUrl: './main-page-component.html',
     styleUrl: './main-page-component.scss',
-    standalone: true,
     imports: [
         TransactionsListComponent,
         TranslatePipe,
@@ -33,7 +32,7 @@ import { MatButton } from '@angular/material/button';
     ],
     providers: [TransactionModalStateService, DecimalPipe],
 })
-export class MainPage {
+export class MainPageComponent {
     private readonly transactionService = inject(TransactionService);
     protected readonly modal = inject(TransactionModalStateService);
     protected readonly walletUtils = inject(WalletDataUtil);

@@ -1,16 +1,16 @@
 import { Component, HostListener, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { Header } from './shared/components/header';
+import { HeaderComponent } from './shared/components/layout/header-component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Sidebar } from './shared/components/sidebar';
+import { SidebarComponent } from './shared/components/layout/sidebar-component';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.html',
-    styleUrls: ['./app.scss', './shared/components/mobile-menu.scss'],
-    imports: [RouterOutlet, Header, ReactiveFormsModule, Sidebar, TranslatePipe],
+    styleUrls: ['./app.scss', './shared/components/layout/mobile-menu.scss'],
+    imports: [RouterOutlet, HeaderComponent, ReactiveFormsModule, SidebarComponent, TranslatePipe],
 })
 export class App {
     private router = inject(Router);

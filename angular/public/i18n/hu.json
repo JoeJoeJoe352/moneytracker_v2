@@ -1,6 +1,7 @@
 {
   "error": {
-    "not_found": "Az oldal nem található"
+    "not_found": "Az oldal nem található",
+    "back_to_main": "Vissza a főoldalra"
   },
   "welcome": {
     "title": "Üdvözlünk a Moneytrackerben!",
@@ -77,7 +78,7 @@
     "name": "Tranzakció neve",
     "name.required": "Kötelező megadni!",
     "name.minlength": "A név legalább 3 karakter lehet!",
-    "name.maxlength": "A név legfeljebb 20 karakter lehet!",
+    "name.maxlength": "A név legfeljebb 120 karakter lehet!",
     "type": "Tranzakció típusa (Ez adja meg a tranzakció előjelét)",
     "price": "Összeg",
     "price.required": "Az összeg megadása kötelező!",

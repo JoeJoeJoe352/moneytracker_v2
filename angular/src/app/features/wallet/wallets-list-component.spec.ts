@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { WalletsListComponent } from './wallets-list-component';
 import { WalletDataInterface } from './interfaces';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 describe('WalletsListComponent (Vitest)', () => {
     let fixture: ComponentFixture<WalletsListComponent>;

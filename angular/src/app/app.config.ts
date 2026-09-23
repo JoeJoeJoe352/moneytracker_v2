@@ -14,7 +14,7 @@ import { MAT_DIALOG_SCROLL_STRATEGY } from '@angular/material/dialog';
 import { routes } from './app.routes';
 import { initApp } from './app.initializer';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { CredentialsInterceptor } from './interceptor';
+import { CredentialsInterceptor } from './credentials-interceptor';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AuthService } from './features/auth/auth-service';

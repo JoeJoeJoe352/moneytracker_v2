@@ -1,4 +1,4 @@
-import { TransactionTypeEnum } from '../../shared/enums';
+import { TransactionTypeEnum } from '@shared/enums';
 import { TransactionUtils } from './transaction-utils';
 
 describe('TransactionUtils', () => {

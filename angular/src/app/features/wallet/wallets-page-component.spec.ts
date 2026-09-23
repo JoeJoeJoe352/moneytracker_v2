@@ -9,10 +9,10 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
 import { WalletsPageComponent } from './wallets-page-component';
 import { WalletFormComponent } from './wallet-form-component';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog-component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { WalletService } from './wallet-service';
 import { WalletDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 @Component({
     selector: 'app-wallets-list-component',

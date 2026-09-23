@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 import { WalletSummaryInterface } from '../transaction/interfaces';
 
 const WALLET_TYPE_KEYS: Record<WalletTypesEnum, string> = {

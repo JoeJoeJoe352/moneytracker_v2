@@ -10,7 +10,7 @@ import {
     TransactionDataFromBackend,
 } from './interfaces';
 import { TransactionModalComponent, TransactionModalInputInterface } from './transaction-modal';
-import { NotificationService } from '../../shared/services/notification-service';
+import { NotificationService } from '@shared/services/notification-service';
 
 interface ModalParams {
     isOpen: boolean;

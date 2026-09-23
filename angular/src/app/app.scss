@@ -1,4 +1,6 @@
-// Emiatt az oldal mérete mindig legalább akkora lesz, mint a monitor mérete
+@use 'variables' as *;
+
+// Emiatt az oldal magassága mindig legalább akkora lesz, mint amennyi a monitoron látszódik
 .app-shell {
     display: flex;
     min-height: 100vh;
@@ -6,22 +8,29 @@
 
 .app-shell-sidebar {
     flex: 0 0 auto;
-    width: 15%;
+    width: $sidebar-width;
+    min-width: 240px;
     position: sticky;
     top: 0;
     height: 100vh;
     overflow-y: auto;
 }
 
-// A jobb oldali oszlop: felül a header, alatta a tartalom
 .app-shell-main {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
-    min-width: 0;
-}
 
-.app-shell-content {
-    flex: 1 1 auto;
-    padding: 12px;
+    .app-shell-header {
+        height: $header-height;
+    }
+
+    .app-shell-content {
+        flex: 1 1 auto;
+        padding: 12px;
+        min-width: 0;
+        @media (min-width: $narrowed-content-breakpoint) {
+            margin-right: $sidebar-width;
+        }
+    }
 }

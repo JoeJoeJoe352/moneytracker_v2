@@ -1,0 +1,21 @@
+<button
+    mat-icon-button
+    [matMenuTriggerFor]="languageMenu"
+    type="button"
+    [aria-label]="'language.title' | translate"
+>
+    <mat-icon aria-hidden="true" fontIcon="language"></mat-icon>
+</button>
+<mat-menu #languageMenu="matMenu">
+    @for (language of languageData(); track $index) {
+        <button
+            mat-menu-item
+            type="button"
+            [class.active]="language.id === currentLanguage()"
+            [attr.aria-current]="language.id === currentLanguage() ? 'true' : null"
+            (click)="switchLanguage(language.id)"
+        >
+            {{ language.name }}
+        </button>
+    }
+</mat-menu>

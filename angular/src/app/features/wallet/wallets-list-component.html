@@ -1,0 +1,9 @@
+<div class="wallet-list">
+    @for (wallet of walletListData(); track wallet.id) {
+        <app-wallet-card-component
+            [walletData]="wallet"
+            [disabled]="disabled()"
+            (cardClicked)="walletCardClicked.emit(wallet)"
+        />
+    }
+</div>

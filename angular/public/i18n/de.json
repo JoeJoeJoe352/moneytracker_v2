@@ -1,6 +1,7 @@
 {
   "error": {
-    "not_found": "Seite nicht gefunden"
+    "not_found": "Seite nicht gefunden",
+    "back_to_main": "Zurück zur Startseite"
   },
   "welcome": {
     "title": "Willkommen bei Moneytracker!",
@@ -73,7 +74,7 @@
     "name": "Transaktionsname",
     "name.required": "Der Transaktionsname ist erforderlich!",
     "name.minlength": "Der Transaktionsname muss mindestens 3 Zeichen lang sein!",
-    "name.maxlength": "Der Transaktionsname darf höchstens 20 Zeichen lang sein!",
+    "name.maxlength": "Der Transaktionsname darf höchstens 120 Zeichen lang sein!",
     "type": "Transaktionstyp",
     "type.hint": "Dies bestimmt das Vorzeichen der Transaktion",
     "price": "Betrag",

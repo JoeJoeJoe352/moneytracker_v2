@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthDialogData, LoginRequestData } from './interfaces';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { DialogCloseButton } from '../../shared/components/mat-modal-close';
+import { DialogCloseButton } from '@app/shared/components/mat-modal-close';
 
 @Component({
     selector: 'app-login-component',

@@ -8,7 +8,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 import { WalletDataUtil } from './wallet-data-util';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,7 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { DialogCloseButton } from '../../shared/components/mat-modal-close';
+import { DialogCloseButton } from '@shared/components/mat-modal-close';
 
 export interface WalletFormInputInterface {
     wallet: WalletDataInterface | null;
@@ -31,8 +31,7 @@ const WALLET_TYPE_TO_DESCRIPTION: Record<WalletTypesEnum, string> = {
 @Component({
     selector: 'app-wallet-form-component',
     templateUrl: './wallet-form-component.html',
-    styleUrls: ['../../shared/components/form-style.scss', './wallet-form-component.scss'],
-    standalone: true,
+    styleUrls: ['./wallet-form-component.scss'],
     imports: [
         ReactiveFormsModule,
         TranslatePipe,

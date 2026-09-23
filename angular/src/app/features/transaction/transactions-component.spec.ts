@@ -9,10 +9,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { TransactionsListComponent } from './transactions-component';
 import { TransactionService } from './transaction-service';
 import { CategoryService } from './category-service';
-import { TransactionListElementData } from '../transaction-list/interfaces';
+import { TransactionListElementData } from './interfaces';
 import { TransactionModalStateService } from './transaction-modal-state-service';
 import { TransactionModalComponent } from './transaction-modal';
-import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
 
 /**
  * A MatDialog.open() valós helyett használt, kézzel vezérelhető dialogRef, ami lehetővé teszi a

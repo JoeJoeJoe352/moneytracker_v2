@@ -9,9 +9,9 @@ import {
     NewTransaction,
     TransactionDataFromBackend,
 } from './interfaces';
-import { TransactionFormComponent } from '../transaction-form/transaction-form-component';
+import { TransactionFormComponent } from './transaction-form/transaction-form-component';
 import { Observable } from 'rxjs';
-import { DialogCloseButton } from '../../shared/components/mat-modal-close';
+import { DialogCloseButton } from '@shared/components/mat-modal-close';
 
 export interface TransactionModalInputInterface {
     transaction: Signal<TransactionDataFromBackend | null>;
@@ -26,7 +26,6 @@ export interface TransactionModalInputInterface {
     selector: 'app-create-transaction-modal',
     templateUrl: './transaction-modal.html',
     styleUrl: './transaction-modal.scss',
-    standalone: true,
     imports: [
     TransactionFormComponent,
     TranslatePipe,

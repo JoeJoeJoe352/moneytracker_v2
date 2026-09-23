@@ -1,4 +1,4 @@
-import { CurrencyCodesEnum, WalletTypesEnum } from '../../shared/enums';
+import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 // Store-ban használt interface, store-ban nem akarjuk tárolni a wallet összegét
 export interface WalletDataInterfaceWithoutSum {

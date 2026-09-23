@@ -1,0 +1,164 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
+import TransactionCardComponent from './transaction-card-component';
+import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
+
+describe('TransactionCardComponent (Vitest)', () => {
+    let fixture: ComponentFixture<TransactionCardComponent>;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [TransactionCardComponent],
+            providers: [provideTranslateService()],
+        }).compileComponents();
+
+        // hu locale-ban a pénznem szimbóluma az összeg mögé kerül (pl. "500 000 Ft")
+        TestBed.inject(TranslateService).use('hu');
+
+        fixture = TestBed.createComponent(TransactionCardComponent);
+    });
+
+    it('should render income transaction correctly. No categories, simple transaction', () => {
+        // GIVEN
+        fixture.componentRef.setInput('transaction', {
+            id: 25,
+            name: 'Fizetés',
+            priceSum: 500000,
+            transactionType: TransactionTypeEnum.INCOME,
+            transactionDate: '2024-01-10',
+            isComplexTransaction: false,
+            transactionDetails: [
+                {
+                    name: 'sum',
+                    price: 500000,
+                    categories: [],
+                    weight: null,
+                    unitPrice: null,
+                    isComplexPriceMode: false,
+                },
+            ],
+            wallet: {
+                id: 1,
+                name: 'Napi költés',
+                currencyCode: CurrencyCodesEnum.huf,
+                type: WalletTypesEnum.default,
+            },
+        });
+
+        // WHEN
+        fixture.detectChanges();
+
+        // THEN
+        const priceEl = fixture.nativeElement.querySelector('.transaction-price');
+        expect(priceEl.classList.contains('income')).toBe(true);
+        expect(priceEl.classList.contains('outcome')).toBe(false);
+        expect(priceEl.textContent.replace(/\s+/g, ' ').trim()).toBe('500 000 Ft');
+
+        const name = fixture.nativeElement.querySelector('.transaction-name');
+        expect(name.textContent.trim()).toBe('Fizetés');
+
+        const walletName = fixture.nativeElement.querySelector('.wallet-name');
+        expect(walletName.textContent.trim()).toBe('(Napi költés)');
+
+        const date = fixture.nativeElement.querySelector('.transaction-date');
+        expect(date.textContent.trim()).toBe('2024-01-10');
+
+        const categoriesEl = fixture.nativeElement.querySelector('.transaction-categories');
+        expect(categoriesEl).toBe(null); // kategória sor nincs a dom-ban
+
+        const badge = fixture.nativeElement.querySelector('.transaction-icon-badge');
+        expect(badge.classList.contains('income')).toBe(true);
+
+        const badgeIcon = fixture.nativeElement.querySelector('.transaction-icon-badge mat-icon');
+        expect(badgeIcon.getAttribute('fontIcon')).toBe('arrow_upward');
+    });
+
+    it('should render nothing but the icon inside the type badge', () => {
+        fixture.componentRef.setInput('transaction', {
+            id: 27,
+            name: 'Bolt',
+            priceSum: -1000,
+            transactionType: TransactionTypeEnum.OUTCOME,
+            transactionDate: '2024-01-12',
+            isComplexTransaction: false,
+            transactionDetails: [],
+            wallet: {
+                id: 1,
+                name: 'Napi költés',
+                currencyCode: CurrencyCodesEnum.huf,
+                type: WalletTypesEnum.default,
+            },
+        });
+
+        fixture.detectChanges();
+
+        const badge = fixture.nativeElement.querySelector('.transaction-icon-badge');
+        // a mat-icon a fontIcon attribútumból rajzol, ezért a badge-ben nem lehet szöveg
+        expect(badge.textContent.trim()).toBe('');
+    });
+
+    it('should render outcome transaction correctly. Categories and ', () => {
+        // GIVEN
+        fixture.componentRef.setInput('transaction', {
+            id: 26,
+            isComplexTransaction: true,
+            name: 'Bevásárlás',
+            priceSum: -1000,
+            transactionType: TransactionTypeEnum.OUTCOME,
+            transactionDate: '2024-01-11',
+            transactionDetails: [
+                {
+                    name: 'kakaós csiga',
+                    price: -500,
+                    categories: ['élelmiszer', 'nasi'],
+                    weight: null,
+                    unitPrice: null,
+                    isComplexPriceMode: false,
+                },
+                {
+                    name: 'kenyér',
+                    price: -500,
+                    categories: ['élelmiszer'],
+                    weight: 0.5,
+                    unitPrice: 1000,
+                    isComplexPriceMode: true,
+                },
+            ],
+            wallet: {
+                id: 2,
+                name: 'Közös',
+                currencyCode: CurrencyCodesEnum.eur,
+                type: WalletTypesEnum.default,
+            },
+        });
+
+        // WHEN
+        fixture.detectChanges();
+
+        // THEN
+        const priceEl = fixture.nativeElement.querySelector('.transaction-price');
+        expect(priceEl.classList.contains('outcome')).toBe(true);
+        expect(priceEl.classList.contains('income')).toBe(false);
+        expect(priceEl.textContent.replace(/\s+/g, ' ').trim()).toBe('-1 000 €');
+
+        const name = fixture.nativeElement.querySelector('.transaction-name');
+        expect(name.textContent.trim()).toBe('Bevásárlás');
+
+        const walletName = fixture.nativeElement.querySelector('.wallet-name');
+        expect(walletName.textContent.trim()).toBe('(Közös)');
+
+        const date = fixture.nativeElement.querySelector('.transaction-date');
+        expect(date.textContent.trim()).toBe('2024-01-11');
+
+        const categoriesEl = fixture.nativeElement.querySelector('.transaction-categories');
+        expect(categoriesEl.textContent.trim()).toBe('élelmiszer, nasi');
+
+        const badge = fixture.nativeElement.querySelector('.transaction-icon-badge');
+        expect(badge.classList.contains('outcome')).toBe(true);
+
+        const badgeIcon = fixture.nativeElement.querySelector('.transaction-icon-badge mat-icon');
+        expect(badgeIcon.getAttribute('fontIcon')).toBe('arrow_downward');
+    });
+
+});

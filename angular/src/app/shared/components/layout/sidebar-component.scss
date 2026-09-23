@@ -1,0 +1,71 @@
+@use 'variables' as *;
+
+.sidebar-wrapper {
+    background-color: $moneytracker-green;
+    height: 100%;
+    padding: 1rem;
+    display: flex;
+}
+
+.sidebar-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 1rem;
+
+    li {
+        text-decoration: none;
+    }
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem 1rem;
+    color: $moneytracker-black;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: $moneytracker-white;
+    border-radius: 20px;
+    padding: 5px 10px;
+    color: $moneytracker-black;
+    margin-bottom: 12px;
+
+    img {
+        height: 25px;
+    }
+}
+
+.sidebar-links {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid $moneytracker-form-grey;
+
+    .sidebar-footer-text {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: $moneytracker-white;
+        font-size: 0.9rem;
+    }
+
+    .logout-btn {
+        flex: 0 0 auto;
+        color: $moneytracker-white;
+    }
+}

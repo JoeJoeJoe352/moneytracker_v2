@@ -2,7 +2,7 @@ import { inject, Injectable, WritableSignal } from '@angular/core';
 import { TransactionService } from './transaction-service';
 import { _, TranslateService } from '@ngx-translate/core';
 import { NewTransaction } from './interfaces';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog-component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, map } from 'rxjs';
 

@@ -12,7 +12,7 @@ import { TransactionService } from '../transaction/transaction-service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
-import TransactionListComponent from '../transaction-list/transaction-list-component';
+import TransactionListComponent from './transaction-list/transaction-list-component';
 import { TransactionFilter } from './transaction-filter-component';
 import { MatCardModule } from '@angular/material/card';
 import { firstValueFrom, map } from 'rxjs';
@@ -26,7 +26,6 @@ export interface FilterData {
     selector: 'app-transactions-list-component',
     templateUrl: './transactions-component.html',
     styleUrl: './transactions-component.scss',
-    standalone: true,
     imports: [TransactionListComponent, TranslatePipe, TransactionFilter, MatCardModule],
     providers: [TransactionModalStateService],
 })

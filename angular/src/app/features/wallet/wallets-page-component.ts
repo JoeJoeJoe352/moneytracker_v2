@@ -4,21 +4,20 @@ import { WalletService } from './wallet-service';
 import { WalletsListComponent } from './wallets-list-component';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
-import { UserDataStore } from '../../shared/services/user-data-store';
+import { UserDataStore } from '@shared/services/user-data-store';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatButton } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog-component';
-import { NotificationService } from '../../shared/services/notification-service';
-import { RESOURCE_STATUS_LOADING } from '../../shared/constants';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
+import { NotificationService } from '@shared/services/notification-service';
+import { RESOURCE_STATUS_LOADING } from '@shared/constants';
 
 @Component({
     selector: 'app-wallets-page-component',
     templateUrl: './wallets-page-component.html',
     styleUrl: './wallets-page-component.scss',
-    standalone: true,
     imports: [WalletsListComponent, TranslatePipe, MatProgressSpinner, MatCardModule, MatButton],
 })
 export class WalletsPageComponent {

@@ -1,6 +1,7 @@
 import { FormControl } from '@angular/forms';
-import { DropdownInterface } from '../../shared/interfaces';
-import { CurrencyCodesEnum, TransactionTypeEnum } from '../../shared/enums';
+import { DropdownInterface } from '@shared/interfaces';
+import { CurrencyCodesEnum, TransactionTypeEnum } from '@shared/enums';
+import { WalletDataInterfaceWithoutSum } from '../wallet/interfaces';
 
 /**
  * Detail form elemei
@@ -119,4 +120,30 @@ export interface CategoryResponseInterface {
     id: number;
     name: string;
     isDefaultCategory: boolean;
+}
+
+/**
+ * Egy, a listában szereplő elem adatai
+ */
+export interface TransactionListElementData {
+    id: number;
+    name: string;
+    priceSum: number;
+    transactionDate: string;
+    transactionType: TransactionTypeEnum;
+    isComplexTransaction: boolean;
+    transactionDetails: TransactionDetailListElementData[];
+    wallet: WalletDataInterfaceWithoutSum;
+}
+
+/**
+ * Egy, a listában szereplő tranzakcióhoz kapcsolodó egyik detail adatai
+ */
+export interface TransactionDetailListElementData {
+    name: string;
+    price: number;
+    weight: number | null;
+    unitPrice: number | null;
+    isComplexPriceMode: boolean;
+    categories: string[];
 }

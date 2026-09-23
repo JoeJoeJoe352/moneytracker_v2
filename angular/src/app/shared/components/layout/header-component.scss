@@ -1,0 +1,23 @@
+@use 'variables' as *;
+
+mat-toolbar {
+    position: relative;
+    z-index: 2;
+    height: $header-height;
+    padding: 0;
+    justify-content: end;
+    box-shadow: $shadow-sm;
+    --mat-toolbar-container-background-color: #{$moneytracker-white};
+
+    .header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 1140px;
+        // mobilnézeten az ikon kattintható felülete ki tud lógni a tartalomból
+        // és ez oldalra görgetést tud okozni. 
+        padding-right: 12px;
+    }
+}
