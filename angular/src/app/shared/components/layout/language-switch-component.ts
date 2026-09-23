@@ -8,29 +8,7 @@ import { LanguageService } from '../../services/translate-service';
 
 @Component({
     selector: 'app-language-switcher',
-    template: `
-        <button
-            mat-icon-button
-            [matMenuTriggerFor]="languageMenu"
-            type="button"
-            [aria-label]="'language.title' | translate"
-        >
-            <mat-icon aria-hidden="true" fontIcon="language"></mat-icon>
-        </button>
-        <mat-menu #languageMenu="matMenu">
-            @for (language of languageData(); track $index) {
-                <button
-                    mat-menu-item
-                    type="button"
-                    [class.active]="language.id === currentLanguage()"
-                    [attr.aria-current]="language.id === currentLanguage() ? 'true' : null"
-                    (click)="switchLanguage(language.id)"
-                >
-                    {{ language.name }}
-                </button>
-            }
-        </mat-menu>
-    `,
+    templateUrl: './language-switch-component.html',
     imports: [MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, TranslatePipe],
 })
 export class LanguageSwitcherComponent {
@@ -63,7 +41,7 @@ export class LanguageSwitcherComponent {
             },
         ];
     });
-    
+
     /**
      * Jelenlegi nyelv megváltoztatása
      */
@@ -71,7 +49,7 @@ export class LanguageSwitcherComponent {
         if (lang === this.translateService.currentLang()) {
             return;
         }
-        
+
         this.languageService.setLanguage(lang);
         this.currentLanguage.set(lang);
     }

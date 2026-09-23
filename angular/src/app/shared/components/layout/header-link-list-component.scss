@@ -1,0 +1,24 @@
+@use 'variables' as *;
+
+.nav-link {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.65rem 1rem;
+    border-radius: $border-radius-lg;
+    color: $moneytracker-white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: $transition-base;
+    margin-bottom: 6px;
+
+    &:hover:not(.active) {
+        background: $moneytracker-darker-green;
+    }
+
+    &.active {
+        background: $moneytracker-darker-green;
+        color: $moneytracker-white;
+    }
+}
