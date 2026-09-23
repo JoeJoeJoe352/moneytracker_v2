@@ -1,5 +1,4 @@
 @use '@angular/material' as mat;
-@use 'variables' as *;
 @use './app/styles/moneytracker-colors' as colors;
 
 // Roboto saját kiszolgálása a Google Fonts helyett
@@ -100,6 +99,29 @@ body {
 }
 
 :root {
+    // Színpaletta és egyéb, témától függő értékek. 
+    --moneytracker-green: #297b2f;
+    --moneytracker-darker-green: #246d29;
+    --moneytracker-darkest-green: #1e5e23;
+    --moneytracker-white: white;
+    --moneytracker-dark-grey: #6b7280;
+    --moneytracker-grey: lightgrey;
+    --moneytracker-form-grey: #dee2e6;
+    --moneytracker-red: #dc2626;
+    --moneytracker-secondary-color: #3ba473;
+    --moneytracker-black: black;
+    --moneytracker-blue: #3b82f6;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.14);
+    --transition-base: all 0.15s ease-in-out;
+
+    --border-radius: 8px;
+    --border-radius-lg: 14px;
+    --header-height: 50px;
+    --sidebar-width: 20%;
+
     // Slider méretek felülírása (0.625x skála).
     --mat-slide-toggle-track-height: 20px; // eredetileg ez 32px
     --mat-slide-toggle-track-width: 33px;
@@ -130,18 +152,18 @@ html {
 .btn,
 .transaction-card-wrapper,
 .stat-card {
-    transition: $transition-base;
+    transition: var(--transition-base);
 }
 
 .stat-card:hover {
-    box-shadow: $shadow-lg;
+    box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
 }
 
 .btn {
     &:hover:not(:disabled) {
         transform: translateY(-1px);
-        box-shadow: $shadow-sm;
+        box-shadow: var(--shadow-sm);
     }
 }
 
@@ -157,11 +179,11 @@ html {
 }
 
 .red-text {
-    color: $moneytracker-red;
+    color: var(--moneytracker-red);
 }
 
 .green-text {
-    color: $moneytracker-green;
+    color: var(--moneytracker-green);
 }
 
 .active-text {
@@ -172,55 +194,55 @@ html {
 
 // mat-slide-toggle "on-off" színtéma (szürke = ki, kék = be)
 .mat-slide-toggle-on-off {
-    --mat-slide-toggle-selected-track-color: #{$moneytracker-blue};
-    --mat-slide-toggle-selected-hover-track-color: #{$moneytracker-blue};
-    --mat-slide-toggle-selected-focus-track-color: #{$moneytracker-blue};
-    --mat-slide-toggle-selected-pressed-track-color: #{$moneytracker-blue};
-    --mat-slide-toggle-selected-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-selected-hover-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-selected-focus-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-selected-pressed-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-unselected-track-color: #{$moneytracker-grey};
-    --mat-slide-toggle-unselected-hover-track-color: #{$moneytracker-grey};
-    --mat-slide-toggle-unselected-focus-track-color: #{$moneytracker-grey};
-    --mat-slide-toggle-unselected-pressed-track-color: #{$moneytracker-grey};
-    --mat-slide-toggle-unselected-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-unselected-hover-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-unselected-focus-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-unselected-pressed-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-selected-track-color: var(--moneytracker-blue);
+    --mat-slide-toggle-selected-hover-track-color: var(--moneytracker-blue);
+    --mat-slide-toggle-selected-focus-track-color: var(--moneytracker-blue);
+    --mat-slide-toggle-selected-pressed-track-color: var(--moneytracker-blue);
+    --mat-slide-toggle-selected-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-selected-hover-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-selected-focus-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-selected-pressed-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-unselected-track-color: var(--moneytracker-grey);
+    --mat-slide-toggle-unselected-hover-track-color: var(--moneytracker-grey);
+    --mat-slide-toggle-unselected-focus-track-color: var(--moneytracker-grey);
+    --mat-slide-toggle-unselected-pressed-track-color: var(--moneytracker-grey);
+    --mat-slide-toggle-unselected-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-unselected-hover-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-unselected-focus-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-unselected-pressed-handle-color: var(--moneytracker-white);
 }
 // mat-slide-toggle "bevétel-kiadás" színtéma (zöld = bevétel, piros = kiadás)
 .mat-slide-toggle-income-expense {
-    --mat-slide-toggle-selected-track-color: #{$moneytracker-green};
-    --mat-slide-toggle-selected-hover-track-color: #{$moneytracker-green};
-    --mat-slide-toggle-selected-focus-track-color: #{$moneytracker-green};
-    --mat-slide-toggle-selected-pressed-track-color: #{$moneytracker-green};
-    --mat-slide-toggle-selected-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-selected-hover-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-selected-focus-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-selected-pressed-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-unselected-track-color: #{$moneytracker-red};
-    --mat-slide-toggle-unselected-hover-track-color: #{$moneytracker-red};
-    --mat-slide-toggle-unselected-focus-track-color: #{$moneytracker-red};
-    --mat-slide-toggle-unselected-pressed-track-color: #{$moneytracker-red};
-    --mat-slide-toggle-unselected-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-unselected-hover-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-unselected-focus-handle-color: #{$moneytracker-white};
-    --mat-slide-toggle-unselected-pressed-handle-color: #{$moneytracker-white};
+    --mat-slide-toggle-selected-track-color: var(--moneytracker-green);
+    --mat-slide-toggle-selected-hover-track-color: var(--moneytracker-green);
+    --mat-slide-toggle-selected-focus-track-color: var(--moneytracker-green);
+    --mat-slide-toggle-selected-pressed-track-color: var(--moneytracker-green);
+    --mat-slide-toggle-selected-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-selected-hover-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-selected-focus-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-selected-pressed-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-unselected-track-color: var(--moneytracker-red);
+    --mat-slide-toggle-unselected-hover-track-color: var(--moneytracker-red);
+    --mat-slide-toggle-unselected-focus-track-color: var(--moneytracker-red);
+    --mat-slide-toggle-unselected-pressed-track-color: var(--moneytracker-red);
+    --mat-slide-toggle-unselected-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-unselected-hover-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-unselected-focus-handle-color: var(--moneytracker-white);
+    --mat-slide-toggle-unselected-pressed-handle-color: var(--moneytracker-white);
 }
 
 // piros (veszély) mat-button szín
 .mat-button-danger {
-    --mat-button-filled-container-color: #{$moneytracker-red};
-    --mat-button-filled-label-text-color: #{$moneytracker-white};
-    --mat-button-filled-state-layer-color: #{$moneytracker-white};
+    --mat-button-filled-container-color: var(--moneytracker-red);
+    --mat-button-filled-label-text-color: var(--moneytracker-white);
+    --mat-button-filled-state-layer-color: var(--moneytracker-white);
 
-    --mat-button-outlined-outline-color: #{$moneytracker-red};
-    --mat-button-outlined-label-text-color: #{$moneytracker-red};
-    --mat-button-outlined-state-layer-color: #{$moneytracker-red};
+    --mat-button-outlined-outline-color: var(--moneytracker-red);
+    --mat-button-outlined-label-text-color: var(--moneytracker-red);
+    --mat-button-outlined-state-layer-color: var(--moneytracker-red);
 
-    --mat-button-text-label-text-color: #{$moneytracker-red};
-    --mat-button-text-state-layer-color: #{$moneytracker-red};
+    --mat-button-text-label-text-color: var(--moneytracker-red);
+    --mat-button-text-state-layer-color: var(--moneytracker-red);
 }
 
 // ha egyetlen gomb van a dialog actions-ben, jobbra igazodik (space-between mellett)
@@ -230,13 +252,13 @@ html {
 
 // zöld mat-fab / mat-mini-fab szín
 .mat-fab-green {
-    --mat-fab-container-color: #{$moneytracker-green};
-    --mat-fab-foreground-color: #{$moneytracker-white};
-    --mat-fab-state-layer-color: #{$moneytracker-white};
-    --mat-fab-ripple-color: #{$moneytracker-white};
+    --mat-fab-container-color: var(--moneytracker-green);
+    --mat-fab-foreground-color: var(--moneytracker-white);
+    --mat-fab-state-layer-color: var(--moneytracker-white);
+    --mat-fab-ripple-color: var(--moneytracker-white);
 
-    --mat-fab-small-container-color: #{$moneytracker-green};
-    --mat-fab-small-foreground-color: #{$moneytracker-white};
-    --mat-fab-small-state-layer-color: #{$moneytracker-white};
-    --mat-fab-small-ripple-color: #{$moneytracker-white};
+    --mat-fab-small-container-color: var(--moneytracker-green);
+    --mat-fab-small-foreground-color: var(--moneytracker-white);
+    --mat-fab-small-state-layer-color: var(--moneytracker-white);
+    --mat-fab-small-ripple-color: var(--moneytracker-white);
 }

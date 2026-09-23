@@ -1,9 +1,7 @@
-@use 'variables' as *;
-
 .sidebar-wrapper {
-    background-color: $moneytracker-green;
+    background-color: var(--moneytracker-green);
     height: 100%;
-    padding: 1rem;
+    padding: 16px;
     display: flex;
 }
 
@@ -11,7 +9,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    padding: 1rem;
+    padding: 16px;
 
     li {
         text-decoration: none;
@@ -21,16 +19,16 @@
 .brand {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0 0.5rem 1rem;
-    color: $moneytracker-black;
+    gap: 8px;
+    padding: 0 8px 16px;
+    color: var(--moneytracker-black);
     text-decoration: none;
     font-weight: 700;
-    font-size: 1.1rem;
-    background: $moneytracker-white;
+    font-size: 18px;
+    background: var(--moneytracker-white);
     border-radius: 20px;
     padding: 5px 10px;
-    color: $moneytracker-black;
+    color: var(--moneytracker-black);
     margin-bottom: 12px;
 
     img {
@@ -49,10 +47,10 @@
 .sidebar-footer {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     margin-top: auto;
-    padding-top: 1rem;
-    border-top: 1px solid $moneytracker-form-grey;
+    padding-top: 16px;
+    border-top: 1px solid var(--moneytracker-form-grey);
 
     .sidebar-footer-text {
         flex: 1 1 auto;
@@ -60,12 +58,12 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        color: $moneytracker-white;
-        font-size: 0.9rem;
+        color: var(--moneytracker-white);
+        font-size: 14px;
     }
 
     .logout-btn {
         flex: 0 0 auto;
-        color: $moneytracker-white;
+        color: var(--moneytracker-white);
     }
 }

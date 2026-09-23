@@ -1,9 +1,7 @@
-@use 'variables' as *;
-
 .stats-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 12px;
 }
 
 .stats-col {
@@ -12,7 +10,7 @@
 }
 
 .transactions-row {
-    margin-top: 1rem;
+    margin-top: 16px;
 }
 
 .transactions-col {
@@ -21,24 +19,24 @@
 
 .stat-card {
     // a saját háttér/lekerekítés/árnyék felülírja a mat-card alapértelmezett megjelenéséért
-    --mat-card-elevated-container-shape: #{$border-radius-lg};
+    --mat-card-elevated-container-shape: var(--border-radius-lg);
     --mat-card-elevated-container-elevation: none;
 
     height: 100%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 1.25rem 1.5rem;
-    background-color: $moneytracker-white;
-    border-radius: $border-radius-lg;
-    box-shadow: $shadow;
+    gap: 12px;
+    padding: 20px 24px;
+    background-color: var(--moneytracker-white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
 }
 
 .stat-card-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 12px;
 }
 
 .stat-icon-badge {
@@ -46,31 +44,30 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    font-size: 1.15rem;
-    color: $moneytracker-white;
+    font-size: 18px;
+    color: var(--moneytracker-white);
 
     &.blue {
-        background-color: $moneytracker-blue;
+        background-color: var(--moneytracker-blue);
     }
 
     &.green {
-        background-color: $moneytracker-green;
+        background-color: var(--moneytracker-green);
     }
 
     &.red {
-        background-color: $moneytracker-red;
+        background-color: var(--moneytracker-red);
     }
 }
 
 .stat-label {
-    color: $moneytracker-dark-grey;
-    font-size: 0.85rem;
+    color: var(--moneytracker-dark-grey);
+    font-size: 14px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
 }
 
 .stat-value {
@@ -79,19 +76,19 @@
     font-weight: 700;
 
     &.income {
-        color: $moneytracker-green;
+        color: var(--moneytracker-green);
     }
 
     &.expense {
-        color: $moneytracker-red;
+        color: var(--moneytracker-red);
     }
 }
 
 .stat-trend {
     display: flex;
     align-items: center;
-    gap: 0.15rem;
-    font-size: 0.85rem;
+    gap: 2px;
+    font-size: 14px;
     font-weight: 500;
 }
 
@@ -99,16 +96,16 @@
 .balance-card {
     position: relative;
     overflow: hidden;
-    color: $moneytracker-white;
-    background: linear-gradient(135deg, $moneytracker-green 0%, $moneytracker-darkest-green 100%);
+    color: var(--moneytracker-white);
+    background: linear-gradient(135deg, var(--moneytracker-green) 0%, var(--moneytracker-darkest-green) 100%);
 
     &::after {
         content: '';
         position: absolute;
-        top: -3.5rem;
-        right: -3.5rem;
-        width: 11rem;
-        height: 11rem;
+        top: -56px;
+        right: -56px;
+        width: 176px;
+        height: 176px;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.08);
     }
@@ -120,7 +117,7 @@
 
     .stat-icon-badge {
         background-color: rgba(255, 255, 255, 0.18);
-        color: $moneytracker-white;
+        color: var(--moneytracker-white);
     }
 
     .stat-label {
@@ -132,8 +129,8 @@
     }
 
     .stat-action-button {
-        --mat-button-outlined-outline-color: #{$moneytracker-white};
-        --mat-button-outlined-label-text-color: #{$moneytracker-white};
-        --mat-button-outlined-state-layer-color: #{$moneytracker-white};
+        --mat-button-outlined-outline-color: var(--moneytracker-white);
+        --mat-button-outlined-label-text-color: var(--moneytracker-white);
+        --mat-button-outlined-state-layer-color: var(--moneytracker-white);
     }
 }

@@ -1,19 +1,17 @@
-@use 'variables' as *;
-
 .transaction-card-wrapper {
     // a lista maga már egy mat-card, ezért a soroknak nem kell saját árnyék/lekerekítés
     --mat-card-elevated-container-shape: 0;
     --mat-card-elevated-container-elevation: 0;
 
     &:hover {
-        background-color: $moneytracker-white;
+        background-color: var(--moneytracker-white);
     }
 
     .transaction-card {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 1rem 1.25rem;
+        gap: 16px;
+        padding: 16px 20px;
     }
 }
 
@@ -21,20 +19,20 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    font-size: 1.4rem;
+    font-size: 22px;
     flex-shrink: 0;
 
     &.income {
-        color: $moneytracker-green;
-        background-color: rgba($moneytracker-green, 0.12);
+        color: var(--moneytracker-green);
+        background-color: color-mix(in srgb, var(--moneytracker-green) 12%, transparent);
     }
 
     &.outcome {
-        color: $moneytracker-red;
-        background-color: rgba($moneytracker-red, 0.12);
+        color: var(--moneytracker-red);
+        background-color: color-mix(in srgb, var(--moneytracker-red) 12%, transparent);
     }
 }
 
@@ -47,7 +45,7 @@
 
         .transaction-name {
             font-weight: 600;
-            margin-right: 0.25rem;
+            margin-right: 4px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -55,8 +53,8 @@
     }
 
     .transaction-categories {
-        font-size: 0.85rem;
-        color: $moneytracker-dark-grey;
+        font-size: 14px;
+        color: var(--moneytracker-dark-grey);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -66,11 +64,11 @@
         font-weight: 700;
 
         &.income {
-            color: $moneytracker-green;
+            color: var(--moneytracker-green);
         }
 
         &.outcome {
-            color: $moneytracker-red;
+            color: var(--moneytracker-red);
         }
     }
 }
@@ -80,7 +78,7 @@
     text-align: right;
 
     .transaction-date {
-        font-size: 0.8rem;
-        color: $moneytracker-dark-grey;
+        font-size: 13px;
+        color: var(--moneytracker-dark-grey);
     }
 }

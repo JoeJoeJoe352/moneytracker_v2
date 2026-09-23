@@ -1,14 +1,12 @@
-@use 'variables' as *;
-
 .filter-card {
     margin-bottom: 12px;
-    --mat-card-elevated-container-color: #{$moneytracker-green};
-    color: $moneytracker-white;
+    --mat-card-elevated-container-color: var(--moneytracker-green);
+    color: var(--moneytracker-white);
 
     .filter-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 16px;
         margin-bottom: 12px;
 
         .filter {
@@ -19,14 +17,14 @@
     }
 
     .filter-submit {
-        margin-right: 0.5rem;
+        margin-right: 8px;
 
-        --mat-button-filled-container-color: #{$moneytracker-white};
-        --mat-button-filled-label-text-color: #{$moneytracker-green};
+        --mat-button-filled-container-color: var(--moneytracker-white);
+        --mat-button-filled-label-text-color: var(--moneytracker-green);
     }
 
     .filter-clear {
-        --mat-button-outlined-outline-color: #{$moneytracker-white};
-        --mat-button-outlined-label-text-color: #{$moneytracker-white};
+        --mat-button-outlined-outline-color: var(--moneytracker-white);
+        --mat-button-outlined-label-text-color: var(--moneytracker-white);
     }
 }

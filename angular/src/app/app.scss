@@ -8,7 +8,7 @@
 
 .app-shell-sidebar {
     flex: 0 0 auto;
-    width: $sidebar-width;
+    width: var(--sidebar-width);
     min-width: 240px;
     position: sticky;
     top: 0;
@@ -22,7 +22,7 @@
     flex: 1 1 auto;
 
     .app-shell-header {
-        height: $header-height;
+        height: var(--header-height);
     }
 
     .app-shell-content {
@@ -30,7 +30,7 @@
         padding: 12px;
         min-width: 0;
         @media (min-width: $narrowed-content-breakpoint) {
-            margin-right: $sidebar-width;
+            margin-right: var(--sidebar-width);
         }
     }
 }

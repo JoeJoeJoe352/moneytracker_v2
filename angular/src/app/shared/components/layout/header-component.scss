@@ -1,13 +1,11 @@
-@use 'variables' as *;
-
 mat-toolbar {
     position: relative;
     z-index: 2;
-    height: $header-height;
+    height: var(--header-height);
     padding: 0;
     justify-content: end;
-    box-shadow: $shadow-sm;
-    --mat-toolbar-container-background-color: #{$moneytracker-white};
+    box-shadow: var(--shadow-sm);
+    --mat-toolbar-container-background-color: var(--moneytracker-white);
 
     .header-bar {
         display: flex;

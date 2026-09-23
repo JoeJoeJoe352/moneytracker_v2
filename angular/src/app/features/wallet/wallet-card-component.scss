@@ -1,15 +1,13 @@
-@use 'variables' as *;
-
 .wallet-card {
     position: relative;
     width: 100%;
     max-width: 320px;
-    padding-top: 1.5rem;
+    padding-top: 24px;
     cursor: pointer;
-    transition: $transition-base;
+    transition: var(--transition-base);
     // hogy a matRipple ne lógjon ki a kártya lekerekített sarkain
     overflow: hidden;
-    border-radius: $border-radius-lg;
+    border-radius: var(--border-radius-lg);
 
     &:hover {
         transform: translateY(-4px);
@@ -30,24 +28,24 @@
     position: relative;
     z-index: 0;
     width: 62%;
-    height: 2.75rem;
-    margin-bottom: -1.1rem;
-    border-radius: $border-radius $border-radius 0 0;
-    background: $moneytracker-darker-green;
+    height: 44px;
+    margin-bottom: -18px;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    background: var(--moneytracker-darker-green);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding-right: 1rem;
+    padding-right: 16px;
 }
 
 .savings .wallet-flap {
-    background: $moneytracker-blue;
+    background: var(--moneytracker-blue);
 }
 
 .wallet-clasp {
-    width: 0.6rem;
-    height: 0.6rem;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.65);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -57,40 +55,39 @@
     position: relative;
     z-index: 1;
     min-height: 160px;
-    padding: 1.5rem;
-    border-radius: $border-radius-lg;
-    background: linear-gradient(135deg, $moneytracker-green 0%, $moneytracker-darkest-green 100%);
-    color: $moneytracker-white;
-    box-shadow: $shadow;
+    padding: 24px;
+    border-radius: var(--border-radius-lg);
+    background: linear-gradient(135deg, var(--moneytracker-green) 0%, var(--moneytracker-darkest-green) 100%);
+    color: var(--moneytracker-white);
+    box-shadow: var(--shadow);
 }
 
 .savings .wallet-body {
-    background: linear-gradient(135deg, $moneytracker-blue 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--moneytracker-blue) 0%, #1d4ed8 100%);
 }
 
 .wallet-type-badge {
-    padding: 0.25rem 0.7rem;
+    padding: 4px 11px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.18);
-    font-size: 0.7rem;
-    letter-spacing: 0.05em;
+    font-size: 11px;
     text-transform: uppercase;
 }
 
 .wallet-balance {
-    margin-top: 1.25rem;
+    margin-top: 20px;
     display: flex;
     align-items: baseline;
-    gap: 0.35rem;
+    gap: 5px;
 
     .wallet-balance-amount {
-        font-size: 1.8rem;
+        font-size: 28px;
         font-weight: 700;
         letter-spacing: 0.02em;
     }
 
     .wallet-balance-currency {
-        font-size: 1rem;
+        font-size: 16px;
         font-weight: 500;
         opacity: 0.85;
     }
@@ -100,18 +97,18 @@
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    margin-top: 1.25rem;
+    margin-top: 20px;
 
     .wallet-name {
         max-width: 70%;
-        font-size: 1rem;
+        font-size: 16px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
     .wallet-currency-code {
-        font-size: 0.75rem;
+        font-size: 12px;
         letter-spacing: 0.05em;
         opacity: 0.75;
     }

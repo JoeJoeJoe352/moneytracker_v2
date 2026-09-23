@@ -32,11 +32,11 @@
 @media (max-width: $sidebar-menu-breakpoint) {
     .mobile-menu-open,
     .mobile-menu-closed {
-        top: $header-height;
+        top: var(--header-height);
         width: 100%;
         position: absolute;
         z-index: 3;
-        height: calc(100vh - $header-height);
+        height: calc(100vh - var(--header-height));
         transition: transform 0.25s ease-in-out;
     }
 

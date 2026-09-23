@@ -1,9 +1,7 @@
-@use 'variables' as *;
-
 .form-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 16px;
 
     mat-form-field,
     .toggle-field,
@@ -23,7 +21,7 @@
 .toggle-field-control {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     margin-top: 6px;
 }
 
@@ -32,8 +30,8 @@
 }
 
 .detail-inputs-title {
-    margin: 0 0 0.75rem;
-    font-size: 1rem;
+    margin: 0 0 12px;
+    font-size: 16px;
     font-weight: 600;
 }
 
@@ -41,14 +39,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-    margin: 1rem 0;
+    gap: 16px;
+    margin: 16px 0;
 
     &::before,
     &::after {
         content: '';
         flex: 1;
         height: 1px;
-        background-color: $moneytracker-grey;
+        background-color: var(--moneytracker-grey);
     }
 }
