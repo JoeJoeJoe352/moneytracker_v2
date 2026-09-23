@@ -19,7 +19,7 @@
         @if (userData.isUserLogged()) {
             <div class="sidebar-footer">
                 <span class="sidebar-footer-text">
-                    {{ 'header.welcome' | translate }}, {{ userData.username() }}
+                    {{ 'header.welcome' | translate }}, {{ userData.getUsername() }}
                 </span>
 
                 <button

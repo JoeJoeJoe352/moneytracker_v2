@@ -9,7 +9,7 @@ import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction-service';
 import { TransactionUtils } from '../transaction-utils';
 import { TransactionDataFromBackend } from '../interfaces';
-import { UserDataStore } from '@shared/services/user-data-store';
+import { UserDataStore } from '@app/shared/stores/user-data-store';
 import { WalletDataInterface } from '../../wallet/interfaces';
 import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
 

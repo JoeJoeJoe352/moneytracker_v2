@@ -18,7 +18,7 @@ import { CredentialsInterceptor } from './credentials-interceptor';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AuthService } from './features/auth/auth-service';
-import { UserDataStore } from './shared/services/user-data-store';
+import { UserDataStore } from './shared/stores/user-data-store';
 import { LanguageInterceptor } from './language-interceptor';
 import { SupportedLangEnum } from './shared/enums';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
