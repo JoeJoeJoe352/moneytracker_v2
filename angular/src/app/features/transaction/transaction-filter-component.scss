@@ -8,7 +8,7 @@
     .filter-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 16px;
         margin-bottom: 12px;
 
         .filter {
@@ -19,7 +19,7 @@
     }
 
     .filter-submit {
-        margin-right: 0.5rem;
+        margin-right: 8px;
 
         --mat-button-filled-container-color: #{$moneytracker-white};
         --mat-button-filled-label-text-color: #{$moneytracker-green};

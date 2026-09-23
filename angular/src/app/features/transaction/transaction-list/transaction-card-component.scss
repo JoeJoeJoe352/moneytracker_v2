@@ -12,8 +12,8 @@
     .transaction-card {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 1rem 1.25rem;
+        gap: 16px;
+        padding: 16px 20px;
     }
 }
 
@@ -21,10 +21,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    font-size: 1.4rem;
+    font-size: 22px;
     flex-shrink: 0;
 
     &.income {
@@ -47,7 +47,7 @@
 
         .transaction-name {
             font-weight: 600;
-            margin-right: 0.25rem;
+            margin-right: 4px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -55,7 +55,7 @@
     }
 
     .transaction-categories {
-        font-size: 0.85rem;
+        font-size: 14px;
         color: $moneytracker-dark-grey;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -80,7 +80,7 @@
     text-align: right;
 
     .transaction-date {
-        font-size: 0.8rem;
+        font-size: 13px;
         color: $moneytracker-dark-grey;
     }
 }

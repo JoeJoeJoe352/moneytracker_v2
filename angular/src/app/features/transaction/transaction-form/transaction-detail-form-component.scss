@@ -8,21 +8,21 @@
     background-color: var(--mat-sys-surface-container-low);
     border: 1px solid #eef0f1;
     border-radius: $border-radius;
-    padding: 1rem;
+    padding: 16px;
 
     &:not(:last-child) {
-        margin-bottom: 1rem;
+        margin-bottom: 16px;
     }
 }
 
 .detail-row {
     display: flex;
-    gap: 0.75rem;
+    gap: 12px;
     align-items: flex-start;
     width: 100%;
 
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 16px;
 
     mat-form-field,
     .toggle-field,
@@ -47,14 +47,14 @@
 .price-mode-toggle {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     margin: 6px 0 12px 0;
 }
 
 .detail-price-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 12px;
 
     mat-form-field {
         flex: 1 1 160px;
@@ -64,5 +64,5 @@
 .detail-actions {
     display: flex;
     justify-content: center;
-    margin-top: 1rem;
+    margin-top: 16px;
 }
