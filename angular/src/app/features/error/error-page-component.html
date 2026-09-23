@@ -1,0 +1,12 @@
+<mat-card>
+    <h1 mat-card-title class="text-center">{{ 'error.not_found' | translate }}</h1>
+    <div class="image-wrapper text-center">
+        <img src="/assets/images/404.png" alt="error-image" />
+    </div>
+    <mat-card-actions>
+        <button #mainPageButton mat-flat-button (click)="redirectToMainPage()">
+            {{ 'error.back_to_main' | translate }}
+        </button>
+    </mat-card-actions>
+</mat-card>
+<!-- TODO aria tagok???? -->

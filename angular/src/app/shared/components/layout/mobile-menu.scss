@@ -1,7 +1,7 @@
 @use 'variables' as *;
 
 .mobile-menu-button {
-    @media (min-width: 768px) {
+    @media (min-width: $sidebar-menu-breakpoint) {
         display: none;
     }
 }
@@ -9,7 +9,7 @@
 .mobile-menu-backdrop {
     display: none;
 
-    @media (max-width: 768px) {
+    @media (max-width: $sidebar-menu-breakpoint) {
         display: block;
         position: fixed;
         inset: 0;
@@ -29,7 +29,7 @@
 }
 
 // app-shell-sidebar class-t egészítik ki
-@media (max-width: 768px) {
+@media (max-width: $sidebar-menu-breakpoint) {
     .mobile-menu-open,
     .mobile-menu-closed {
         top: $header-height;

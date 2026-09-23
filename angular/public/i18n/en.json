@@ -1,6 +1,7 @@
 {
   "error": {
-    "not_found": "Page not found"
+    "not_found": "Page not found",
+    "back_to_main": "Back to homepage"
   },
   "welcome": {
     "title": "Welcome to Moneytracker!",

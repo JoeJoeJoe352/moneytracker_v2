@@ -1,6 +1,7 @@
 {
   "error": {
-    "not_found": "Az oldal nem található"
+    "not_found": "Az oldal nem található",
+    "back_to_main": "Vissza a főoldalra"
   },
   "welcome": {
     "title": "Üdvözlünk a Moneytrackerben!",
