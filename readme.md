@@ -1,8 +1,8 @@
 screenshots:
-![Alt text](/screenshots/screenshot1?raw=true "dasboard")
-![Alt text](/screenshots/screenshot2?raw=true "form")
-![Alt text](/screenshots/screenshot3?raw=true "wallet")
-![Alt text](/screenshots/screenshot4?raw=true "mobile")
+![Alt text](https://github.com/user-attachments/assets/ac4d500f-41b1-4862-a15b-5cdb4385b7e8 "dashboard")
+![Alt text](https://github.com/user-attachments/assets/869e74b2-6212-417d-8433-8f7efb9b30de "wallet")
+![Alt text](https://github.com/user-attachments/assets/2f15deb4-a366-4c9c-a1dc-54ba218d4474 "form")
+![Alt text](https://github.com/user-attachments/assets/8a78f9f6-17cf-4133-a068-e893f8487566 "mobile")
 
 indítás: gyökérmappában kiadni a parancsot:
 
