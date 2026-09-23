@@ -1,5 +1,6 @@
 @use '@angular/material' as mat;
 @use './app/styles/moneytracker-colors' as colors;
+@use './app/styles/variables' as *;
 
 // Roboto saját kiszolgálása a Google Fonts helyett
 @font-face {
@@ -79,6 +80,15 @@ html {
 .cdk-global-scrollblock {
     // backdrop miatt megjelenhet alól egy üres scrollbar. Mivel nincs oldalra scrollozás az oldalon egyáltalán, ezért a legegyszerűbb ezt kikapcsolni
     overflow-y: hidden !important;
+}
+
+// Nyitott mobil menü alatt nem görgethető az oldal. Csak mobil nézetben, hogy átméretezéskor
+// (nyitott menüvel desktop szélességre váltva) ne ragadjon be a görgetés tiltása
+@media (max-width: $sidebar-menu-breakpoint) {
+    html.mobile-menu-scroll-lock,
+    html.mobile-menu-scroll-lock body {
+        overflow: hidden;
+    }
 }
 
 body {

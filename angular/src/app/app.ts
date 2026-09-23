@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, DOCUMENT, effect, HostListener, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { HeaderComponent } from './shared/components/layout/header-component';
@@ -14,10 +14,19 @@ import { SidebarComponent } from './shared/components/layout/sidebar-component';
 })
 export class App {
     private router = inject(Router);
+    private readonly document = inject(DOCUMENT);
 
     protected isMobileMenuOpen = signal(false);
 
     constructor() {
+        // Nyitott mobil menü alatt letiltjuk az oldal görgetését
+        effect(() => {
+            this.document.documentElement.classList.toggle(
+                'mobile-menu-scroll-lock',
+                this.isMobileMenuOpen(),
+            );
+        });
+
         this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
             this.isMobileMenuOpen.set(false);
         });
