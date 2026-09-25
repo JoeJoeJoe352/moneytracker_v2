@@ -26,6 +26,7 @@ import { MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS } from '@angular/material/progress
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { provideServiceWorker } from '@angular/service-worker';
 import { LanguageService } from './shared/services/translate-service';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -33,6 +34,7 @@ export const appConfig: ApplicationConfig = {
         provideZonelessChangeDetection(),
         provideRouter(routes),
         provideNativeDateAdapter(),
+        provideCharts(withDefaultRegisterables()),
         // A dialog megnyitásakor ne fagyassza be a html-t (position: fixed), mert az levágja
         // a viewporton túli tartalmat, ha a lap le van görgetve. A noop() miatt a háttér
         // görgetési pozíciója egyszerűen nem változik, amíg a dialog nyitva van.
