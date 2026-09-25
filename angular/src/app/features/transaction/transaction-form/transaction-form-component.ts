@@ -12,10 +12,14 @@ import {
 } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
-    POSITIVE_AMOUNT_VALIDATORS,
+    DETAIL_NAME_VALIDATORS,
+    DETAIL_PRICE_VALIDATORS,
+    DETAIL_WEIGHT_AND_UNIT_PRICE_VALIDATORS,
+    GLOBAL_PRICE_VALIDATORS,
     TRANSACTION_DATE_VALIDATORS,
     TRANSACTION_NAME_VALIDATORS,
 } from './transaction-field-validators';
+import { updateTreeValidity } from '@shared/utils/form-util';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
@@ -138,11 +142,13 @@ export class TransactionFormComponent implements OnChanges {
     });
 
     constructor() {
-        this.applyTransactionModeDisabledState();
-        // A kapcsoló állítása és a meglévő tranzakció betöltése (patchValue) is ide fut be
-        this.isComplexTransaction.valueChanges
+        // A mezők validátorai a tranzakció és a detail sorok ár megadási módjától függenek
+        // (lásd transaction-field-validators), ezért bármilyen változás után újravalidálunk.
+        // Ide fut be a kapcsolók állítása, sor hozzáadás/törlés és a tranzakció betöltése is
+        updateTreeValidity(this.transactionForm);
+        this.transactionForm.valueChanges
             .pipe(takeUntilDestroyed())
-            .subscribe(() => this.applyTransactionModeDisabledState());
+            .subscribe(() => updateTreeValidity(this.transactionForm));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -152,9 +158,6 @@ export class TransactionFormComponent implements OnChanges {
                 this.transactionForm.disable();
             } else {
                 this.transactionForm.enable();
-                // enable() minden leszármazott kontrollt enged, ezért a tranzakció típus és az ár
-                // megadási mód szerinti disabled állapotot vissza kell állítani
-                this.applyTransactionModeDisabledState();
             }
         }
 
@@ -187,8 +190,6 @@ export class TransactionFormComponent implements OnChanges {
             'details',
             this.fb.array(inputValues.details.map((detail) => this.generateNewRow(detail))),
         );
-        // az új details tömb enabled állapotban jön létre
-        this.applyTransactionModeDisabledState();
     }
 
     /**
@@ -208,8 +209,9 @@ export class TransactionFormComponent implements OnChanges {
             this.transactionForm.markAllAsTouched();
             return;
         }
-        // Minden letiltott mezőt kihagyunk az értékek elküldéséből
-        this.saved.emit(this.transactionForm.value as NewTransaction);
+        // Minden mező értékét elküldjük, a transactionUtils a módok alapján választja ki a mérvadókat.
+        // A cast azért kell, mert az érvényes form kötelező mezői már nem lehetnek null-ok
+        this.saved.emit(this.transactionForm.getRawValue() as NewTransaction);
     }
 
     /**
@@ -245,7 +247,7 @@ export class TransactionFormComponent implements OnChanges {
             isIncome: [false],
             isComplexTransaction: [false],
             price: this.fb.control<number | null>(null, {
-                validators: POSITIVE_AMOUNT_VALIDATORS,
+                validators: GLOBAL_PRICE_VALIDATORS,
             }),
             transactionDate: this.fb.control(new Date(), {
                 validators: TRANSACTION_DATE_VALIDATORS,
@@ -267,22 +269,22 @@ export class TransactionFormComponent implements OnChanges {
         isComplexPriceMode: boolean | null;
         categories: number[] | null;
     }): FormGroup<DetailForm> {
-        const detailGroup = this.fb.nonNullable.group({
-            detailName: [params.name, { validators: TRANSACTION_NAME_VALIDATORS }],
-            detailPrice: this.fb.control<number | null>(params.price, POSITIVE_AMOUNT_VALIDATORS),
-            detailWeight: this.fb.control<number | null>(params.weight, POSITIVE_AMOUNT_VALIDATORS),
+        return this.fb.nonNullable.group({
+            detailName: [params.name, { validators: DETAIL_NAME_VALIDATORS }],
+            detailPrice: this.fb.control<number | null>(params.price, DETAIL_PRICE_VALIDATORS),
+            detailWeight: this.fb.control<number | null>(
+                params.weight,
+                DETAIL_WEIGHT_AND_UNIT_PRICE_VALIDATORS,
+            ),
             detailUnitPrice: this.fb.control<number | null>(
                 params.unitPrice,
-                POSITIVE_AMOUNT_VALIDATORS,
+                DETAIL_WEIGHT_AND_UNIT_PRICE_VALIDATORS,
             ),
             detailIsComplexPriceMode: [params.isComplexPriceMode ?? false],
             categories: this.fb.nonNullable.control(
                 this.mapCategoryIdsToDropdownData(params.categories ?? []),
             ),
         });
-
-        this.setupDetailReactiveLogic(detailGroup);
-        return detailGroup;
     }
 
     /**
@@ -297,71 +299,6 @@ export class TransactionFormComponent implements OnChanges {
             isComplexPriceMode: false,
             categories: [],
         });
-    }
-
-    /**
-     * A detailhez tartozó logikát beállítja (ha a price inputba gépelünk, akkor a weight és unit price inputok letiltódnak, és fordítva)
-     */
-    private setupDetailReactiveLogic(detailGroup: FormGroup<DetailForm>) {
-        const isComplexModeControl = detailGroup.controls.detailIsComplexPriceMode;
-
-        // már létező tranzakciónál a disabled/enabled-ek beállítása
-        this.applyDetailRowPriceModeDisabledState(detailGroup, isComplexModeControl.value);
-
-        // PRICE inputba gépelés
-        isComplexModeControl.valueChanges.subscribe((isComplexMode) => {
-            this.applyDetailRowPriceModeDisabledState(detailGroup, isComplexMode);
-        });
-    }
-
-    /**
-     * A price/weight/unitPrice kontrollok disabled állapotát állítja be az ár megadási mód alapján.
-     * Kell akkor is, ha a teljes form disable()/enable()-je felülírná ezt az állapotot.
-     */
-    private applyDetailRowPriceModeDisabledState(
-        detailGroup: FormGroup<DetailForm>,
-        isComplexPriceMode: boolean | null,
-    ): void {
-        const priceControl = detailGroup.controls.detailPrice;
-        const unitControl = detailGroup.controls.detailUnitPrice;
-        const weightControl = detailGroup.controls.detailWeight;
-
-        if (isComplexPriceMode) {
-            // emitEvent azért kell, hogy disable ne emiteljen egy újabb change-t, mert akkor végtelen ciklusba kerülünk
-            priceControl.disable({ emitEvent: false });
-            weightControl.enable({ emitEvent: false });
-            unitControl.enable({ emitEvent: false });
-        } else {
-            priceControl.enable({ emitEvent: false });
-            weightControl.disable({ emitEvent: false });
-            unitControl.disable({ emitEvent: false });
-        }
-    }
-
-    /**
-     * A tranzakció típusa szerint nem látható rész kontrolljait letiltja, hogy a validátoraik ne
-     * form enable() után újra meg kell hívni.
-     */
-    private applyTransactionModeDisabledState(): void {
-        if (this.transactionForm.disabled) {
-            return;
-        }
-
-        if (this.isComplexTransaction.value) {
-            this.price.disable({ emitEvent: false });
-            this.details.enable({ emitEvent: false });
-            // details.enable() a sorok összes kontrollját engedi, ezért az ár megadási mód szerinti
-            // disabled állapotot vissza kell állítani soronként
-            this.details.controls.forEach((detailGroup) =>
-                this.applyDetailRowPriceModeDisabledState(
-                    detailGroup,
-                    detailGroup.controls.detailIsComplexPriceMode.value,
-                ),
-            );
-        } else {
-            this.price.enable({ emitEvent: false });
-            this.details.disable({ emitEvent: false });
-        }
     }
 
     /**

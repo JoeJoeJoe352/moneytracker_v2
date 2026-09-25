@@ -52,7 +52,7 @@ export class TransactionUtils {
             : TransactionTypeEnum.OUTCOME;
 
         // Ha egyszerű transaction-ról van szó, akkor nem küldjük el a detail adatokat, mert a globalPrice input érték lesz a mérvadó
-        const details = input.isComplexTransaction ? (input.details ?? []) : [];
+        const details = input.isComplexTransaction ? input.details : [];
         const transactionDetailsFormatted = details.map((detail) => ({
             name: detail.detailName,
             price: detail.detailIsComplexPriceMode

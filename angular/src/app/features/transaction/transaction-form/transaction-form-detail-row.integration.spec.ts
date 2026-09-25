@@ -168,13 +168,17 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         expect(fixture.nativeElement.querySelector('#detail-weight-0')).toBeTruthy();
         expect(fixture.nativeElement.querySelector('#detail-unitprice-0')).toBeTruthy();
 
-        // a szimpla price control letiltódik, amíg komplex módban vagyunk
-        expect(rowDetailGroup.controls.detailPrice.disabled).toBe(true);
-        expect(rowDetailGroup.controls.detailWeight.disabled).toBe(false);
-        expect(rowDetailGroup.controls.detailUnitPrice.disabled).toBe(false);
+        // komplex ár módban a szimpla price nem validálódik, a (üres) mennyiség és egységár viszont igen
+        rowDetailGroup.controls.detailPrice.setValue(null);
+        expect(rowDetailGroup.controls.detailPrice.valid).toBe(true);
+        expect(rowDetailGroup.controls.detailWeight.hasError('required')).toBe(true);
+        expect(rowDetailGroup.controls.detailUnitPrice.hasError('required')).toBe(true);
 
-        // a másik sor nem érintett
-        expect(component.details.at(1).controls.detailPrice.disabled).toBe(false);
+        // a másik sor nem érintett: ott a price validálódik, a mennyiség és egységár nem
+        const otherRow = component.details.at(1);
+        otherRow.controls.detailPrice.setValue(null);
+        expect(otherRow.controls.detailPrice.hasError('required')).toBe(true);
+        expect(otherRow.controls.detailWeight.valid).toBe(true);
     });
 
     it('should pass addCategoryCallback from the form component down through a detail row to the category select', () => {

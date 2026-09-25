@@ -129,8 +129,36 @@ describe('TransactionFormComponent (Vitest)', () => {
         component.saved.subscribe((value) => (emittedValue = value));
         fixture.nativeElement.querySelector('button[type="submit"]').click();
 
-        expect(component.details.disabled).toBe(true);
+        // az üres detail sor egyszerű tranzakciónál nem validálódik
+        expect(component.details.valid).toBe(true);
         expect(emittedValue).toMatchObject({ name: 'Bevásárlás', price: 1000 });
+    });
+
+    it('should keep the mode dependent validation after the form is disabled and re-enabled (e.g. during a save)', () => {
+        fixture.detectChanges();
+
+        component.name.setValue('Bevásárlás');
+        component.transactionDate.setValue(new Date('2024-01-10'));
+        fixture.nativeElement.querySelector('#transaction-show-details button').click();
+        fixture.detectChanges();
+        const detailRow = component.details.at(0);
+        detailRow.controls.detailName.setValue('Kenyér');
+        detailRow.controls.detailPrice.setValue(500);
+
+        fixture.componentRef.setInput('isTransactionFormDisabled', true);
+        fixture.detectChanges();
+        fixture.componentRef.setInput('isTransactionFormDisabled', false);
+        fixture.detectChanges();
+
+        expect(component.price.enabled).toBe(true);
+        expect(component.price.valid).toBe(true);
+        expect(detailRow.controls.detailWeight.valid).toBe(true);
+
+        let emittedValue: unknown;
+        component.saved.subscribe((value) => (emittedValue = value));
+        fixture.nativeElement.querySelector('button[type="submit"]').click();
+
+        expect(emittedValue).toMatchObject({ isComplexTransaction: true });
     });
 
     it('should emit "saved" in complex mode without the hidden global price', () => {
@@ -149,7 +177,8 @@ describe('TransactionFormComponent (Vitest)', () => {
         component.saved.subscribe((value) => (emittedValue = value));
         fixture.nativeElement.querySelector('button[type="submit"]').click();
 
-        expect(component.price.disabled).toBe(true);
+        // az üres globális ár komplex tranzakciónál nem validálódik
+        expect(component.price.valid).toBe(true);
         expect(emittedValue).toMatchObject({
             name: 'Bevásárlás',
             isComplexTransaction: true,
