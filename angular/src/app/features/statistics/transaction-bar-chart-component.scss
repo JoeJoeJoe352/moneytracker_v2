@@ -1,5 +1,22 @@
 .chart-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 12px;
+}
+
+.chart-total {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.chart-empty {
+    margin: 0;
+    padding: 24px 0;
+    text-align: center;
+    color: var(--moneytracker-dark-grey);
 }
 
 .expense-toggle {

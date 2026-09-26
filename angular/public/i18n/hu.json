@@ -182,7 +182,8 @@
     "chart": {
       "type": "Diagram tartalma",
       "summary": "{{type}}: {{count}} tranzakció, összesen {{total}}. Legnagyobb: {{name}}, {{amount}}.",
-      "summary.empty": "{{type}}: ebben az időszakban nincs tranzakció."
+      "summary.empty": "{{type}}: ebben az időszakban nincs tranzakció.",
+      "total": "Összesen: {{total}}"
     }
   },
   "language": {

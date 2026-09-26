@@ -173,7 +173,8 @@
     "chart": {
       "type": "Chart content",
       "summary": "{{type}}: {{count}} transactions, {{total}} in total. Largest: {{name}}, {{amount}}.",
-      "summary.empty": "{{type}}: no transactions in this period."
+      "summary.empty": "{{type}}: no transactions in this period.",
+      "total": "Total: {{total}}"
     }
   },
   "language": {

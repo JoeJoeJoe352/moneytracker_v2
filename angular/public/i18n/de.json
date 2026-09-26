@@ -173,7 +173,8 @@
     "chart": {
       "type": "Diagramminhalt",
       "summary": "{{type}}: {{count}} Transaktionen, insgesamt {{total}}. Größte: {{name}}, {{amount}}.",
-      "summary.empty": "{{type}}: keine Transaktionen in diesem Zeitraum."
+      "summary.empty": "{{type}}: keine Transaktionen in diesem Zeitraum.",
+      "total": "Gesamt: {{total}}"
     }
   },
   "language": {
