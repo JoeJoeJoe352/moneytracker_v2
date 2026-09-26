@@ -14,7 +14,11 @@
         (resetForm)="clearInputs()"
     />
 }
-
+@if (isHistoryMode()) {
+    <app-transaction-grid-view-component
+        [transactionList]="transactionListData.hasValue() ? transactionListData.value() : []"
+    />
+} 
 <app-transaction-list
     [title]="isHistoryMode() ? null : ('mainpage.last_transactions' | translate)"
     [listStatus]="transactionListData.status()"
