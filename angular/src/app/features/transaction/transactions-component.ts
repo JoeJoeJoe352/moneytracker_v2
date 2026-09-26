@@ -16,7 +16,7 @@ import TransactionListComponent from './transaction-list/transaction-list-compon
 import { TransactionFilter } from './transaction-filter-component';
 import { MatCardModule } from '@angular/material/card';
 import { firstValueFrom, map } from 'rxjs';
-import { TransactionGridViewComponent } from '../statistics/transaction-grid-view-component';
+import { TransactionBarChartComponent } from '../statistics/transaction-bar-chart-component';
 
 export interface FilterData {
     name: string;
@@ -27,7 +27,7 @@ export interface FilterData {
     selector: 'app-transactions-list-component',
     templateUrl: './transactions-component.html',
     styleUrl: './transactions-component.scss',
-    imports: [TransactionListComponent, TranslatePipe, TransactionFilter, MatCardModule, TransactionGridViewComponent],
+    imports: [TransactionListComponent, TranslatePipe, TransactionFilter, MatCardModule, TransactionBarChartComponent],
     providers: [TransactionModalStateService],
 })
 export class TransactionsListComponent implements OnChanges {

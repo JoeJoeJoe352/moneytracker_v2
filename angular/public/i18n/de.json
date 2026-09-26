@@ -168,6 +168,12 @@
       "date.open-calendar": "Kalender öffnen",
       "submit": "Suchen",
       "clear": "Filter zurücksetzen"
+    },
+
+    "chart": {
+      "type": "Diagramminhalt",
+      "summary": "{{type}}: {{count}} Transaktionen, insgesamt {{total}}. Größte: {{name}}, {{amount}}.",
+      "summary.empty": "{{type}}: keine Transaktionen in diesem Zeitraum."
     }
   },
   "language": {

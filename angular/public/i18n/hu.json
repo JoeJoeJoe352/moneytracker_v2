@@ -177,6 +177,12 @@
       "date.open-calendar": "Naptár megnyitása",
       "submit": "Keresés",
       "clear": "Filterek törlése"
+    },
+
+    "chart": {
+      "type": "Diagram tartalma",
+      "summary": "{{type}}: {{count}} tranzakció, összesen {{total}}. Legnagyobb: {{name}}, {{amount}}.",
+      "summary.empty": "{{type}}: ebben az időszakban nincs tranzakció."
     }
   },
   "language": {

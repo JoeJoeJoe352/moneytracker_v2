@@ -168,6 +168,12 @@
       "date.open-calendar": "Open calendar",
       "submit": "Search",
       "clear": "Clear filters"
+    },
+
+    "chart": {
+      "type": "Chart content",
+      "summary": "{{type}}: {{count}} transactions, {{total}} in total. Largest: {{name}}, {{amount}}.",
+      "summary.empty": "{{type}}: no transactions in this period."
     }
   },
   "language": {

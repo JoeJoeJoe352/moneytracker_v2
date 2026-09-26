@@ -1,8 +1,15 @@
-.toggle-field-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.chart-toolbar {
     margin-bottom: 12px;
+}
+
+.expense-toggle {
+    --mat-button-toggle-selected-state-background-color: var(--moneytracker-red);
+    --mat-button-toggle-selected-state-text-color: var(--moneytracker-white);
+}
+
+.income-toggle {
+    --mat-button-toggle-selected-state-background-color: var(--moneytracker-green);
+    --mat-button-toggle-selected-state-text-color: var(--moneytracker-white);
 }
 
 .chart-container {

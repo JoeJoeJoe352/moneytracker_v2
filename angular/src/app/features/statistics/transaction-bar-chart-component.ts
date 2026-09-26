@@ -3,7 +3,7 @@ import { TransactionListElementData } from '../transaction/interfaces';
 import { CurrencyCodesEnum, TransactionTypeEnum } from '@app/shared/enums';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@app/shared/pipes/currency-format-pipe';
 
@@ -12,13 +12,13 @@ const CONVERTING_VALUE_FROM_EUR = 365;
 const CONVERTING_VALUE_FROM_USD = 320;
 
 @Component({
-    selector: 'app-transaction-grid-view-component',
-    templateUrl: './transaction-grid-view-component.html',
-    styleUrl: './transaction-grid-view-component.scss',
-    imports: [BaseChartDirective, MatSlideToggle, TranslatePipe],
+    selector: 'app-transaction-bar-chart-component',
+    templateUrl: './transaction-bar-chart-component.html',
+    styleUrl: './transaction-bar-chart-component.scss',
+    imports: [BaseChartDirective, MatButtonToggleGroup, MatButtonToggle, TranslatePipe],
     providers: [CurrencyFormatPipe],
 })
-export class TransactionGridViewComponent {
+export class TransactionBarChartComponent {
     private readonly currencyFormatPipe = inject(CurrencyFormatPipe);
     private readonly translateService = inject(TranslateService);
 
@@ -58,6 +58,37 @@ export class TransactionGridViewComponent {
                 return transaction.priceSum * CONVERTING_VALUE_FROM_USD;
         }
     }
+
+    /**
+     * A megjelenített tranzakció típus fordítási kulcsa
+     */
+    protected typeLabelKey = computed(() =>
+        this.isExpenseMode() ? 'transaction.expenses' : 'transaction.incomes',
+    );
+
+    /**
+     * A diagram szöveges összefoglalója a felolvasóknak (a canvas tartalmát nem tudják felolvasni)
+     */
+    protected summary = computed(() => {
+        const data = this.transactionDataFilteredByType();
+        if (data.length === 0) {
+            return { key: 'transaction_page.chart.summary.empty', params: {} };
+        }
+
+        const hufPrices = data.map((transaction) => Math.abs(this.getPriceInHuf(transaction)));
+        const largestIndex = hufPrices.indexOf(Math.max(...hufPrices));
+        const total = hufPrices.reduce((sum, price) => sum + price, 0);
+
+        return {
+            key: 'transaction_page.chart.summary',
+            params: {
+                count: data.length,
+                total: this.currencyFormatPipe.transform(total, CurrencyCodesEnum.huf),
+                name: data[largestIndex].name,
+                amount: this.currencyFormatPipe.transform(hufPrices[largestIndex], CurrencyCodesEnum.huf),
+            },
+        };
+    });
 
     /**
      * Adatok átalakítása a chartjs számára

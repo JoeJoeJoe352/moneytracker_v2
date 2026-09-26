@@ -1,17 +1,34 @@
-<div class="toggle-field">
-    <div class="toggle-field-control">
-        <span>{{ 'transaction.expenses' | translate }}</span>
-        <mat-slide-toggle
-            hideIcon
-            class="mat-slide-toggle-income-expense"
-            [aria-label]="'transaction.incomes' | translate"
-            [checked]="!isExpenseMode()"
-            (change)="isExpenseMode.set(!$event.checked)"
-        />
-        <span>{{ 'transaction.incomes' | translate }}</span>
-    </div>
+<div class="chart-toolbar">
+    <!-- két egyenrangú opció közti választás: a felolvasó a kiválasztottat mondja be, nem egy ki/be kapcsolót -->
+    <mat-button-toggle-group
+        hideSingleSelectionIndicator
+        [attr.aria-label]="'transaction_page.chart.type' | translate"
+        [value]="isExpenseMode() ? 'expense' : 'income'"
+        (change)="isExpenseMode.set($event.value === 'expense')"
+    >
+        <mat-button-toggle value="expense" class="expense-toggle">{{ 'transaction.expenses' | translate }}</mat-button-toggle>
+        <mat-button-toggle value="income" class="income-toggle">{{ 'transaction.incomes' | translate }}</mat-button-toggle>
+    </mat-button-toggle-group>
 </div>
 
 <div class="chart-container">
-    <canvas baseChart type="bar" [data]="chartData()" [options]="options()"></canvas>
+    <!-- a canvas tartalmát a felolvasók nem látják, ezért szöveges összefoglalót kap -->
+    <canvas
+        baseChart
+        type="bar"
+        role="img"
+        [attr.aria-label]="
+            summary().key
+                | translate
+                    : {
+                          type: (typeLabelKey() | translate),
+                          count: summary().params.count,
+                          total: summary().params.total,
+                          name: summary().params.name,
+                          amount: summary().params.amount,
+                      }
+        "
+        [data]="chartData()"
+        [options]="options()"
+    ></canvas>
 </div>

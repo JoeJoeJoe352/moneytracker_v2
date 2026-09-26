@@ -15,7 +15,7 @@
     />
 }
 @if (isHistoryMode() && transactionListData.hasValue() && transactionListData.value().length > 0) {
-    <app-transaction-grid-view-component
+    <app-transaction-bar-chart-component
         [transactionList]="transactionListData.value()"
     />
 } 
