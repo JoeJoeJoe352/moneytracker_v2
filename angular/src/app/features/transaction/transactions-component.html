@@ -14,9 +14,9 @@
         (resetForm)="clearInputs()"
     />
 }
-@if (isHistoryMode()) {
+@if (isHistoryMode() && transactionListData.hasValue() && transactionListData.value().length > 0) {
     <app-transaction-grid-view-component
-        [transactionList]="transactionListData.hasValue() ? transactionListData.value() : []"
+        [transactionList]="transactionListData.value()"
     />
 } 
 <app-transaction-list

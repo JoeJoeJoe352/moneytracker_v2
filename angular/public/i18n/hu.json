@@ -89,6 +89,8 @@
     "date.invalid": "A dátum érvénytelen!",
     "expense": "Kiadás",
     "income": "Bevétel",
+    "expenses": "Kiadások",
+    "incomes": "Bevételek",
     "detail_state_label": "Rögzítés módja",
     "hide_details": "Egyszeri",
     "show_details": "Tételenként",
