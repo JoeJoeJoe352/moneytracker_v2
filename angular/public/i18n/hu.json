@@ -89,6 +89,8 @@
     "date.invalid": "A dátum érvénytelen!",
     "expense": "Kiadás",
     "income": "Bevétel",
+    "expenses": "Kiadások",
+    "incomes": "Bevételek",
     "detail_state_label": "Rögzítés módja",
     "hide_details": "Egyszeri",
     "show_details": "Tételenként",
@@ -175,6 +177,13 @@
       "date.open-calendar": "Naptár megnyitása",
       "submit": "Keresés",
       "clear": "Filterek törlése"
+    },
+
+    "chart": {
+      "type": "Diagram tartalma",
+      "summary": "{{type}}: {{count}} tranzakció, összesen {{total}}. Legnagyobb: {{name}}, {{amount}}.",
+      "summary.empty": "{{type}}: ebben az időszakban nincs tranzakció.",
+      "total": "Összesen: {{total}}"
     }
   },
   "language": {

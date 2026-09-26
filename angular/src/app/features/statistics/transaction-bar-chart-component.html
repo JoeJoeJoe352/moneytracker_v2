@@ -1,0 +1,46 @@
+<div class="chart-toolbar">
+    <!-- két egyenrangú opció közti választás: a felolvasó a kiválasztottat mondja be, nem egy ki/be kapcsolót -->
+    <mat-button-toggle-group
+        hideSingleSelectionIndicator
+        [attr.aria-label]="'transaction_page.chart.type' | translate"
+        [value]="isExpenseMode() ? 'expense' : 'income'"
+        (change)="isExpenseMode.set($event.value === 'expense')"
+    >
+        <mat-button-toggle value="expense" class="expense-toggle">{{ 'transaction.expenses' | translate }}</mat-button-toggle>
+        <mat-button-toggle value="income" class="income-toggle">{{ 'transaction.incomes' | translate }}</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (!isEmpty()) {
+        <span class="chart-total">
+            {{ 'transaction_page.chart.total' | translate: { total: formattedTotal() } }}
+        </span>
+    }
+</div>
+
+@if (isEmpty()) {
+    <p class="chart-empty">
+        {{ 'transaction_page.chart.summary.empty' | translate: { type: (typeLabelKey() | translate) } }}
+    </p>
+} @else {
+    <div class="chart-container">
+        <!-- a canvas tartalmát a felolvasók nem látják, ezért szöveges összefoglalót kap -->
+        <canvas
+            baseChart
+            type="bar"
+            role="img"
+            [attr.aria-label]="
+                summary().key
+                    | translate
+                        : {
+                              type: (typeLabelKey() | translate),
+                              count: summary().params.count,
+                              total: summary().params.total,
+                              name: summary().params.name,
+                              amount: summary().params.amount,
+                          }
+            "
+            [data]="chartData()"
+            [options]="options()"
+        ></canvas>
+    </div>
+}

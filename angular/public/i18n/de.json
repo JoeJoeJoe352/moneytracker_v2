@@ -86,6 +86,8 @@
     "date.invalid": "Das Datum ist ungültig!",
     "expense": "Ausgabe",
     "income": "Einnahme",
+    "expenses": "Ausgaben",
+    "incomes": "Einnahmen",
     "detail_state_label": "Erfassungsart",
     "hide_details": "Einzelbetrag",
     "show_details": "Posten",
@@ -166,6 +168,13 @@
       "date.open-calendar": "Kalender öffnen",
       "submit": "Suchen",
       "clear": "Filter zurücksetzen"
+    },
+
+    "chart": {
+      "type": "Diagramminhalt",
+      "summary": "{{type}}: {{count}} Transaktionen, insgesamt {{total}}. Größte: {{name}}, {{amount}}.",
+      "summary.empty": "{{type}}: keine Transaktionen in diesem Zeitraum.",
+      "total": "Gesamt: {{total}}"
     }
   },
   "language": {
