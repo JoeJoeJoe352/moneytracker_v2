@@ -51,7 +51,8 @@ export class TransactionBarChartComponent {
         const type = this.isExpenseMode()
             ? TransactionTypeEnum.OUTCOME
             : TransactionTypeEnum.INCOME;
-        // a diagramon balról jobbra haladjon az idő, ezért a legrégebbi kerül előre
+
+        // A diagramon a legrégebbi elem legyen bal oldalt
         return filterByType(this.transactionList(), type).reverse();
     });
 
