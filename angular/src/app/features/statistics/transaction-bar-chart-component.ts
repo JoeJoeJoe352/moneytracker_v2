@@ -8,10 +8,8 @@ import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@app/shared/pipes/currency-format-pipe';
 import { LANGUAGE_TO_LOCALE } from '@app/shared/utils/language-util';
-
-// TODO ezeket majd éles adatokkal számolni
-const CONVERTING_VALUE_FROM_EUR = 365;
-const CONVERTING_VALUE_FROM_USD = 320;
+import { CurrencyConversionService } from '@app/shared/services/currency-conversion-service';
+import { filterByType, indexOfMax, sum } from '@app/shared/utils/transaction-util';
 
 @Component({
     selector: 'app-transaction-bar-chart-component',
@@ -23,6 +21,7 @@ const CONVERTING_VALUE_FROM_USD = 320;
 export class TransactionBarChartComponent {
     private readonly currencyFormatPipe = inject(CurrencyFormatPipe);
     private readonly translateService = inject(TranslateService);
+    private readonly currencyConversionService = inject(CurrencyConversionService);
     private readonly document = inject(DOCUMENT);
 
     /**
@@ -40,7 +39,7 @@ export class TransactionBarChartComponent {
      */
     protected isExpenseMode = signal(true);
 
-    // a canvas nem érti a CSS változókat, ezért egyszer kiolvassuk a tényleges színeket
+    // a canvas nem érti a CSS változókat, ezért itt kiolvassuk a tényleges színeket
     private readonly rootStyle = getComputedStyle(this.document.documentElement);
     private readonly expenseColor = this.rootStyle.getPropertyValue('--moneytracker-red').trim();
     private readonly incomeColor = this.rootStyle.getPropertyValue('--moneytracker-green').trim();
@@ -49,34 +48,25 @@ export class TransactionBarChartComponent {
      * Tranzakciós adatok, a tranzakció típus által szűrve
      */
     private transactionDataFilteredByType = computed(() => {
-        const values = this.transactionList().filter((transaction) => {
-            return this.isExpenseMode()
-                ? transaction.transactionType === TransactionTypeEnum.OUTCOME
-                : transaction.transactionType === TransactionTypeEnum.INCOME;
-        });
-        values.reverse();
-        return values;
+        const type = this.isExpenseMode()
+            ? TransactionTypeEnum.OUTCOME
+            : TransactionTypeEnum.INCOME;
+        // a diagramon balról jobbra haladjon az idő, ezért a legrégebbi kerül előre
+        return filterByType(this.transactionList(), type).reverse();
     });
 
     /**
-     * Valuták közti átváltás
-     */
-    private getPriceInHuf(transaction: TransactionListElementData) {
-        switch (transaction.wallet.currencyCode) {
-            case CurrencyCodesEnum.huf:
-                return transaction.priceSum;
-            case CurrencyCodesEnum.eur:
-                return transaction.priceSum * CONVERTING_VALUE_FROM_EUR;
-            case CurrencyCodesEnum.usd:
-                return transaction.priceSum * CONVERTING_VALUE_FROM_USD;
-        }
-    }
-
-    /**
-     * Az oszlopok értékei forintban (a diagram, az összesítés és az összefoglaló is ezt használja)
+     * Az oszlopok értékei forintban. Minden érték pozitív
      */
     private hufPrices = computed(() =>
-        this.transactionDataFilteredByType().map((transaction) => Math.abs(this.getPriceInHuf(transaction))),
+        this.transactionDataFilteredByType().map((transaction) =>
+            Math.abs(
+                this.currencyConversionService.toHuf(
+                    transaction.priceSum,
+                    transaction.wallet.currencyCode,
+                ),
+            ),
+        ),
     );
 
     /**
@@ -88,8 +78,7 @@ export class TransactionBarChartComponent {
      * A megjelenített tranzakciók forintos összege, formázva
      */
     protected formattedTotal = computed(() => {
-        const total = this.hufPrices().reduce((sum, price) => sum + price, 0);
-        return this.currencyFormatPipe.transform(total, CurrencyCodesEnum.huf);
+        return this.currencyFormatPipe.transform(sum(this.hufPrices()), CurrencyCodesEnum.huf);
     });
 
     /**
@@ -109,7 +98,7 @@ export class TransactionBarChartComponent {
         }
 
         const hufPrices = this.hufPrices();
-        const largestIndex = hufPrices.indexOf(Math.max(...hufPrices));
+        const largestIndex = indexOfMax(hufPrices);
 
         return {
             key: 'transaction_page.chart.summary',
@@ -117,7 +106,10 @@ export class TransactionBarChartComponent {
                 count: data.length,
                 total: this.formattedTotal(),
                 name: data[largestIndex].name,
-                amount: this.currencyFormatPipe.transform(hufPrices[largestIndex], CurrencyCodesEnum.huf),
+                amount: this.currencyFormatPipe.transform(
+                    hufPrices[largestIndex],
+                    CurrencyCodesEnum.huf,
+                ),
             },
         };
     });
@@ -129,7 +121,9 @@ export class TransactionBarChartComponent {
         const color = this.isExpenseMode() ? this.expenseColor : this.incomeColor;
 
         return {
-            labels: this.transactionDataFilteredByType().map((transactionData) => transactionData.name),
+            labels: this.transactionDataFilteredByType().map(
+                (transactionData) => transactionData.name,
+            ),
             datasets: [
                 {
                     data: this.hufPrices(),
@@ -142,10 +136,9 @@ export class TransactionBarChartComponent {
     });
 
     /**
-     * Chart beállítások. Computed, mert a nyelv olvasása miatt nyelvváltáskor új objektum jön létre,
-     * és a chart újrarajzolja a tengely feliratait az új formátummal
+     * Chart beállítások. Azért computed, mert a nyelv változhat és akkor újra kell generálni a beállításokat
      */
-    protected options = computed<ChartOptions<'bar'>>(() => {
+    protected chartOptions = computed<ChartOptions<'bar'>>(() => {
         const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
         const dateFormat = new Intl.DateTimeFormat(
             LANGUAGE_TO_LOCALE[lang ?? ''] ?? LANGUAGE_TO_LOCALE[SupportedLangEnum.en],
@@ -186,14 +179,18 @@ export class TransactionBarChartComponent {
                 },
                 tooltip: {
                     callbacks: {
-                        // az azonos nevű tranzakciókat (pl. több "Lidl") a dátum különbözteti meg
+                        // az azonos nevű tranzakciókat a dátum különbözteti meg
                         title: (contexts) => {
-                            const transaction = this.transactionDataFilteredByType()[contexts[0].dataIndex];
-                            const [year, month, day] = transaction.transactionDate.split('-').map(Number);
+                            const transaction =
+                                this.transactionDataFilteredByType()[contexts[0].dataIndex];
+                            const [year, month, day] = transaction.transactionDate
+                                .split('-')
+                                .map(Number);
                             return `${transaction.name} · ${dateFormat.format(new Date(year, month - 1, day))}`;
                         },
                         label: (context) => {
-                            const transaction = this.transactionDataFilteredByType()[context.dataIndex];
+                            const transaction =
+                                this.transactionDataFilteredByType()[context.dataIndex];
                             const hufPrice = this.currencyFormatPipe.transform(
                                 context.parsed.y ?? 0,
                                 CurrencyCodesEnum.huf,
