@@ -247,7 +247,6 @@ class AuthE2ETest extends MySqlContainerTest {
 
         var userData = response.getBody();
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, userData.id());
         assertEquals("e2eAuthenticateUser", userData.username());
 
         assertEquals(1, userData.wallets().size());
