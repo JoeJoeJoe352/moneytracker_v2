@@ -11,22 +11,22 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { Overlay } from '@angular/cdk/overlay';
 import { MAT_DIALOG_SCROLL_STRATEGY } from '@angular/material/dialog';
 
-import { routes } from './app.routes';
-import { initApp } from './app.initializer';
+import { routes } from '@app/app.routes';
+import { initApp } from '@app/app.initializer';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { CredentialsInterceptor } from './credentials-interceptor';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
-import { AuthService } from './features/auth/auth-service';
-import { UserDataStore } from './shared/stores/user-data-store';
-import { LanguageInterceptor } from './language-interceptor';
-import { SupportedLangEnum } from './shared/enums';
+import { AuthService } from '@features/auth/auth-service';
+import { UserDataStore } from '@shared/stores/user-data-store';
+import { SupportedLangEnum } from '@shared/enums';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_PROGRESS_SPINNER_DEFAULT_OPTIONS } from '@angular/material/progress-spinner';
 import { MAT_SNACK_BAR_DEFAULT_OPTIONS } from '@angular/material/snack-bar';
 import { provideServiceWorker } from '@angular/service-worker';
-import { LanguageService } from './shared/services/translate-service';
+import { LanguageService } from '@shared/services/translate-service';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { CredentialsInterceptor } from '@core/interceptors/credentials-interceptor';
+import { LanguageInterceptor } from '@core/interceptors/language-interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [

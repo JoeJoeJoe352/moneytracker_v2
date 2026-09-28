@@ -2,7 +2,7 @@ import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { UserData } from '../../features/auth/interfaces';
 import { WalletDataInterfaceWithoutSum } from '../../features/wallet/interfaces';
-import { db, User } from '../db/db';
+import { db } from '../db/db';
 
 interface UserDataState {
     /**
@@ -106,10 +106,25 @@ export const UserDataStore = signalStore(
         },
 
         /**
-         * A lokális (IndexedDB) adatbázisban tárolt user lekérése
+         * User és walletek betöltése a lokális (IndexedDB) adatbázisból
+         * Visszaadja, hogy volt-e tárolt adat
          */
-        getStoredUser(): Promise<User | undefined> {
-            return db.user.toCollection().first();
+        async loadUserFromDb(): Promise<boolean> {
+            const [user, wallets] = await db.transaction('r', db.user, db.wallet, () =>
+                Promise.all([db.user.toCollection().first(), db.wallet.toArray()]),
+            );
+
+            if (!user || wallets.length === 0) {
+                return false;
+            }
+
+            patchState(store, {
+                _id: user.id,
+                _username: user.username,
+                _wallets: wallets,
+                _isLoaded: true,
+            });
+            return true;
         },
 
         /**

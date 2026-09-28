@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { LOCALSTORAGE_KEY_LANG } from './shared/services/translate-service';
+import { LOCALSTORAGE_KEY_LANG } from '@app/shared/services/translate-service';
 
 /**
  * Beállítja a requestek nyelvi headerjét

@@ -1,15 +1,15 @@
 import { Component, DOCUMENT, effect, HostListener, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { HeaderComponent } from './shared/components/layout/header-component';
+import { HeaderComponent } from './core/layout/header-component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { SidebarComponent } from './shared/components/layout/sidebar-component';
+import { SidebarComponent } from './core/layout/sidebar-component'; 
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.html',
-    styleUrls: ['./app.scss', './shared/components/layout/mobile-menu.scss'],
+    styleUrls: ['./app.scss', './core/layout/mobile-menu.scss'],
     imports: [RouterOutlet, HeaderComponent, ReactiveFormsModule, SidebarComponent, TranslatePipe],
 })
 export class App {
