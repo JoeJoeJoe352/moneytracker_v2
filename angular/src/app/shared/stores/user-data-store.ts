@@ -72,6 +72,12 @@ export const UserDataStore = signalStore(
                 console.error('failed to save wallets to local db', error),
             );
         },
+        /**
+         * User és walletek beállítása, betöltöttnek jelöli a store-t (privát)
+         */
+        _setUser(id: number, username: string, wallets: WalletDataInterfaceWithoutSum[]): void {
+            patchState(store, { _id: id, _username: username, _wallets: wallets, _isLoaded: true });
+        },
     })),
     withMethods((store) => ({
         /**
@@ -90,12 +96,7 @@ export const UserDataStore = signalStore(
          * User betöltése
          */
         loadUserData(userData: UserData): void {
-            patchState(store, {
-                _id: userData.id,
-                _username: userData.username,
-                _wallets: userData.wallets,
-                _isLoaded: true,
-            });
+            store._setUser(userData.id, userData.username, userData.wallets);
 
             // a bejelentkezett usert és walletjait a lokális (IndexedDB) adatbázisba is elmentjük
             db.transaction('rw', db.user, db.wallet, async () => {
@@ -118,12 +119,7 @@ export const UserDataStore = signalStore(
                 return false;
             }
 
-            patchState(store, {
-                _id: user.id,
-                _username: user.username,
-                _wallets: wallets,
-                _isLoaded: true,
-            });
+            store._setUser(user.id, user.username, wallets);
             return true;
         },
 
