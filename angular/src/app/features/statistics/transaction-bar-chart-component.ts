@@ -2,8 +2,16 @@ import { Component, computed, inject, input, output, signal } from '@angular/cor
 import { DOCUMENT } from '@angular/common';
 import { TransactionListElementData } from '../transaction/interfaces';
 import { CurrencyCodesEnum, TransactionTypeEnum } from '@app/shared/enums';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartData, ChartOptions } from 'chart.js';
+import { BaseChartDirective, provideCharts } from 'ng2-charts';
+import {
+    BarController,
+    BarElement,
+    CategoryScale,
+    ChartData,
+    ChartOptions,
+    LinearScale,
+    Tooltip,
+} from 'chart.js';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@app/shared/pipes/currency-format-pipe';
@@ -16,7 +24,13 @@ import { filterByType, indexOfMax, sum } from '@app/shared/utils/transaction-uti
     templateUrl: './transaction-bar-chart-component.html',
     styleUrl: './transaction-bar-chart-component.scss',
     imports: [BaseChartDirective, MatButtonToggleGroup, MatButtonToggle, TranslatePipe],
-    providers: [CurrencyFormatPipe],
+    providers: [
+        CurrencyFormatPipe,
+        // Így a bundle size türhető mértéken marad, mert akkor tölti csak be, ahol használva van a diagram
+        provideCharts({
+            registerables: [BarController, BarElement, CategoryScale, LinearScale, Tooltip],
+        }),
+    ],
 })
 export class TransactionBarChartComponent {
     private readonly currencyFormatPipe = inject(CurrencyFormatPipe);
