@@ -29,6 +29,6 @@ public class UserMapper {
     public UserDataResponseDto toDto(User user, List<Wallet> wallets) {
         List<WalletResponseDto> walletDtos = walletMapper.toDtoList(wallets);
 
-        return new UserDataResponseDto(user.getUsername(), walletDtos);
+        return new UserDataResponseDto(user.getId(), user.getUsername(), walletDtos);
     }
 }

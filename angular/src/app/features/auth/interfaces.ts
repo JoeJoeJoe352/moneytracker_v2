@@ -2,6 +2,7 @@ import { WritableSignal } from '@angular/core';
 import { WalletDataInterface } from '../wallet/interfaces';
 
 export interface UserData {
+    id: number;
     username: string;
     wallets: WalletDataInterface[];
 }
