@@ -18,8 +18,8 @@ export const LANGUAGE_TO_LOCALE: Record<string, string> = {
 /**
  * A nyelvhez tartozó locale, ismeretlen vagy hiányzó nyelvnél az angol
  */
-export function getLocaleForLang(lang: string): string {
-    return (lang && LANGUAGE_TO_LOCALE[lang]) ?? 'en';
+export function getLocaleForLang(lang: string | null): string {
+    return (lang !== null ? LANGUAGE_TO_LOCALE[lang] : undefined) ?? 'en';
 }
 
 @Injectable({

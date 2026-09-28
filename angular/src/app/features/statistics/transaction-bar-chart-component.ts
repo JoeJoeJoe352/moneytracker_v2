@@ -149,7 +149,7 @@ export class TransactionBarChartComponent {
      * Chart beállítások. Azért computed, mert a nyelv változhat és akkor újra kell generálni a beállításokat
      */
     protected chartOptions = computed<ChartOptions<'bar'>>(() => {
-        const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang() as string;
+        const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
         const dateFormat = new Intl.DateTimeFormat(getLocaleForLang(lang), {
             year: 'numeric',
             month: 'short',

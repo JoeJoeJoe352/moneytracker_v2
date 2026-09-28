@@ -24,7 +24,7 @@ export class CurrencyFormatPipe implements PipeTransform {
     private walletUtils = inject(WalletDataUtil);
 
     public transform(amount: number, currencyCode: CurrencyCodesEnum): string {
-        const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang() as string;
+        const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
         const locale = getLocaleForLang(lang);
         // Az Angular locale-adatai csak a locale "saját" pénznemének szimbólumát ismerik, a többihez az ISO kódot adnak vissza
         // (pl. hu locale-ban EUR -> "EUR", nem "€") - ezért a szimbólumot a WalletDataUtil-ból vesszük
