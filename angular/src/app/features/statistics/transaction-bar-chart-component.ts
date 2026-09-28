@@ -1,13 +1,13 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { TransactionListElementData } from '../transaction/interfaces';
-import { CurrencyCodesEnum, SupportedLangEnum, TransactionTypeEnum } from '@app/shared/enums';
+import { CurrencyCodesEnum, TransactionTypeEnum } from '@app/shared/enums';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@app/shared/pipes/currency-format-pipe';
-import { LANGUAGE_TO_LOCALE } from '@app/shared/utils/language-util';
+import { getLocaleForLang } from '@app/shared/utils/language-util';
 import { CurrencyConversionService } from '@app/shared/services/currency-conversion-service';
 import { filterByType, indexOfMax, sum } from '@app/shared/utils/transaction-util';
 
@@ -100,20 +100,29 @@ export class TransactionBarChartComponent {
 
         const hufPrices = this.hufPrices();
         const largestIndex = indexOfMax(hufPrices);
+        const largest = data[largestIndex];
+        const largestPrice = hufPrices[largestIndex];
+        if (largest === undefined || largestPrice === undefined) {
+            return { key: 'transaction_page.chart.summary.empty', params: {} };
+        }
 
         return {
             key: 'transaction_page.chart.summary',
             params: {
                 count: data.length,
                 total: this.formattedTotal(),
-                name: data[largestIndex].name,
-                amount: this.currencyFormatPipe.transform(
-                    hufPrices[largestIndex],
-                    CurrencyCodesEnum.huf,
-                ),
+                name: largest.name,
+                amount: this.currencyFormatPipe.transform(largestPrice, CurrencyCodesEnum.huf),
             },
         };
     });
+
+    /**
+     * A chart adott indexű oszlopához tartozó tranzakció
+     */
+    private transactionAt(index: number | undefined): TransactionListElementData | undefined {
+        return index === undefined ? undefined : this.transactionDataFilteredByType()[index];
+    }
 
     /**
      * Adatok átalakítása a chartjs számára
@@ -140,11 +149,12 @@ export class TransactionBarChartComponent {
      * Chart beállítások. Azért computed, mert a nyelv változhat és akkor újra kell generálni a beállításokat
      */
     protected chartOptions = computed<ChartOptions<'bar'>>(() => {
-        const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
-        const dateFormat = new Intl.DateTimeFormat(
-            LANGUAGE_TO_LOCALE[lang ?? ''] ?? LANGUAGE_TO_LOCALE[SupportedLangEnum.en],
-            { year: 'numeric', month: 'short', day: 'numeric' },
-        );
+        const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang() as string;
+        const dateFormat = new Intl.DateTimeFormat(getLocaleForLang(lang), {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
 
         return {
             responsive: true,
@@ -154,8 +164,8 @@ export class TransactionBarChartComponent {
             interaction: { mode: 'index', intersect: false },
 
             onClick: (_event, elements) => {
-                if (elements.length > 0) {
-                    const transaction = this.transactionDataFilteredByType()[elements[0].index];
+                const transaction = this.transactionAt(elements[0]?.index);
+                if (transaction) {
                     this.editTransaction.emit({ transactionId: transaction.id });
                 }
             },
@@ -182,20 +192,25 @@ export class TransactionBarChartComponent {
                     callbacks: {
                         // az azonos nevű tranzakciókat a dátum különbözteti meg
                         title: (contexts) => {
-                            const transaction =
-                                this.transactionDataFilteredByType()[contexts[0].dataIndex];
-                            const [year, month, day] = transaction.transactionDate
+                            const transaction = this.transactionAt(contexts[0]?.dataIndex);
+                            if (!transaction) {
+                                return '';
+                            }
+                            // nem new Date(string), mert az UTC-ként értelmezné a dátumot
+                            const [year = 0, month = 1, day = 1] = transaction.transactionDate
                                 .split('-')
                                 .map(Number);
                             return `${transaction.name} · ${dateFormat.format(new Date(year, month - 1, day))}`;
                         },
                         label: (context) => {
-                            const transaction =
-                                this.transactionDataFilteredByType()[context.dataIndex];
+                            const transaction = this.transactionAt(context.dataIndex);
                             const hufPrice = this.currencyFormatPipe.transform(
                                 context.parsed.y ?? 0,
                                 CurrencyCodesEnum.huf,
                             );
+                            if (!transaction) {
+                                return `${hufPrice}`;
+                            }
                             const currencyCode = transaction.wallet.currencyCode;
 
                             if (currencyCode === CurrencyCodesEnum.huf) {

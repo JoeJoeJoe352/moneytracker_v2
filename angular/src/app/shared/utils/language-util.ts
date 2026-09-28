@@ -15,6 +15,13 @@ export const LANGUAGE_TO_LOCALE: Record<string, string> = {
     [SupportedLangEnum.de]: 'de',
 };
 
+/**
+ * A nyelvhez tartozó locale, ismeretlen vagy hiányzó nyelvnél az angol
+ */
+export function getLocaleForLang(lang: string): string {
+    return (lang && LANGUAGE_TO_LOCALE[lang]) ?? 'en';
+}
+
 @Injectable({
     providedIn: 'root',
 })

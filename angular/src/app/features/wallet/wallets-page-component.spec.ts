@@ -126,11 +126,19 @@ describe('WalletsPageComponent (Vitest)', () => {
     }
 
     function lastWalletFormDialogRef() {
-        return walletFormDialogRefs[walletFormDialogRefs.length - 1];
+        const dialogRef = walletFormDialogRefs.at(-1);
+        if (!dialogRef) {
+            throw new Error('No wallet form dialog was opened');
+        }
+        return dialogRef;
     }
 
     function lastConfirmDialogRef() {
-        return confirmDialogRefs[confirmDialogRefs.length - 1];
+        const dialogRef = confirmDialogRefs.at(-1);
+        if (!dialogRef) {
+            throw new Error('No confirm dialog was opened');
+        }
+        return dialogRef;
     }
 
     it('should load the wallet list on init', async () => {

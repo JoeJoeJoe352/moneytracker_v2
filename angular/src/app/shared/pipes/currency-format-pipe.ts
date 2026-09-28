@@ -4,9 +4,9 @@ import localeEn from '@angular/common/locales/en';
 import localeDe from '@angular/common/locales/de';
 import localeHu from '@angular/common/locales/hu';
 import { TranslateService } from '@ngx-translate/core';
-import { CurrencyCodesEnum, SupportedLangEnum } from '../enums';
+import { CurrencyCodesEnum } from '../enums';
 import { WalletDataUtil } from '../../features/wallet/wallet-data-util';
-import { LANGUAGE_TO_LOCALE } from '../utils/language-util';
+import { getLocaleForLang } from '../utils/language-util';
 
 registerLocaleData(localeEn);
 registerLocaleData(localeDe);
@@ -24,8 +24,8 @@ export class CurrencyFormatPipe implements PipeTransform {
     private walletUtils = inject(WalletDataUtil);
 
     public transform(amount: number, currencyCode: CurrencyCodesEnum): string {
-        const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
-        const locale = LANGUAGE_TO_LOCALE[lang ?? ''] ?? LANGUAGE_TO_LOCALE[SupportedLangEnum.en];
+        const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang() as string;
+        const locale = getLocaleForLang(lang);
         // Az Angular locale-adatai csak a locale "saját" pénznemének szimbólumát ismerik, a többihez az ISO kódot adnak vissza
         // (pl. hu locale-ban EUR -> "EUR", nem "€") - ezért a szimbólumot a WalletDataUtil-ból vesszük
         const symbol = this.walletUtils.getCurrencySymbolForCurrencyCode(currencyCode);

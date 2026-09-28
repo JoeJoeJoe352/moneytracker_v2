@@ -32,10 +32,6 @@ export class App {
         });
     }
 
-    protected toggleMobileMenu() {
-        this.isMobileMenuOpen.set(!this.isMobileMenuOpen());
-    }
-
     protected closeMobileMenu() {
         this.isMobileMenuOpen.set(false);
     }

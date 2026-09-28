@@ -35,7 +35,7 @@ export class TransactionUtils {
             walletId: transaction.walletId,
             categories: transaction.isComplexTransaction
                 ? []
-                : transaction.transactionDetails[0].categories,
+                : (transaction.transactionDetails[0]?.categories ?? []),
         };
     }
 

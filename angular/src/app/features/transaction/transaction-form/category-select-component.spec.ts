@@ -81,7 +81,7 @@ describe('CategorySelectComponent (Vitest)', () => {
         component.registerOnChange((value) => (changedValue = value));
 
         const removeButtons = fixture.debugElement.queryAll(By.css('button[matChipRemove]'));
-        removeButtons[0].nativeElement.click();
+        removeButtons[0]?.nativeElement.click();
         fixture.detectChanges();
 
         expect(chipTexts()).toEqual(['Transport']);

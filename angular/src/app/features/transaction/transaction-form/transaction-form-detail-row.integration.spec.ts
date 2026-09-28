@@ -107,10 +107,10 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         const rows = fixture.debugElement.queryAll(By.directive(TransactionDetailFormComponent));
 
         expect(rows.length).toBe(2);
-        expect((rows[0].componentInstance as TransactionDetailFormComponent).detail()).toBe(
+        expect((rows[0]?.componentInstance as TransactionDetailFormComponent).detail()).toBe(
             component.details.at(0),
         );
-        expect((rows[1].componentInstance as TransactionDetailFormComponent).detail()).toBe(
+        expect((rows[1]?.componentInstance as TransactionDetailFormComponent).detail()).toBe(
             component.details.at(1),
         );
         expect(fixture.nativeElement.querySelector('#detail-name-0').value).toBe('Kenyér');

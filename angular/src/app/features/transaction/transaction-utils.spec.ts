@@ -40,12 +40,12 @@ describe('TransactionUtils', () => {
             expect(result.categories).toEqual([10, 20]);
             expect(result.walletId).toBe(1);
             expect(result.details.length).toBe(1);
-            expect(result.details[0].name).toBe('Részlet 1');
-            expect(result.details[0].price).toBe(5000);
-            expect(result.details[0].weight).toBe(null);
-            expect(result.details[0].unitPrice).toBe(null);
-            expect(result.details[0].isComplexPriceMode).toBe(false);
-            expect(result.details[0].categories).toEqual([10, 20]);
+            expect(result.details[0]?.name).toBe('Részlet 1');
+            expect(result.details[0]?.price).toBe(5000);
+            expect(result.details[0]?.weight).toBe(null);
+            expect(result.details[0]?.unitPrice).toBe(null);
+            expect(result.details[0]?.isComplexPriceMode).toBe(false);
+            expect(result.details[0]?.categories).toEqual([10, 20]);
         });
 
         it('should convert backend OUTCOME transaction and normalize prices to positive', () => {
@@ -73,7 +73,7 @@ describe('TransactionUtils', () => {
             const result = utils.convertDataToInput(backendData);
 
             expect(result.price).toBe(3000); // outcome → pozitívvá alakítjuk
-            expect(result.details[0].price).toBe(1000);
+            expect(result.details[0]?.price).toBe(1000);
             expect(result.categories).toEqual([]);
         });
     });
@@ -118,19 +118,19 @@ describe('TransactionUtils', () => {
             expect(result.categories).toEqual([]);
             expect(result.details.length).toBe(2);
 
-            expect(result.details[0].name).toBe('Részlet 1');
-            expect(result.details[0].price).toBe(5000);
-            expect(result.details[0].weight).toBe(null);
-            expect(result.details[0].unitPrice).toBe(null);
-            expect(result.details[0].isComplexPriceMode).toBe(false);
-            expect(result.details[0].categories).toEqual([10, 20]);
+            expect(result.details[0]?.name).toBe('Részlet 1');
+            expect(result.details[0]?.price).toBe(5000);
+            expect(result.details[0]?.weight).toBe(null);
+            expect(result.details[0]?.unitPrice).toBe(null);
+            expect(result.details[0]?.isComplexPriceMode).toBe(false);
+            expect(result.details[0]?.categories).toEqual([10, 20]);
 
-            expect(result.details[1].name).toBe('Részlet 2');
-            expect(result.details[1].price).toBe(3000);
-            expect(result.details[1].weight).toBe(0.5);
-            expect(result.details[1].unitPrice).toBe(6000);
-            expect(result.details[1].isComplexPriceMode).toBe(true);
-            expect(result.details[1].categories).toEqual([10, 20]);
+            expect(result.details[1]?.name).toBe('Részlet 2');
+            expect(result.details[1]?.price).toBe(3000);
+            expect(result.details[1]?.weight).toBe(0.5);
+            expect(result.details[1]?.unitPrice).toBe(6000);
+            expect(result.details[1]?.isComplexPriceMode).toBe(true);
+            expect(result.details[1]?.categories).toEqual([10, 20]);
         });
 
         it('should convert backend OUTCOME transaction and normalize prices to positive', () => {
@@ -158,7 +158,7 @@ describe('TransactionUtils', () => {
             const result = utils.convertDataToInput(backendData);
 
             expect(result.price).toBe(3000); // outcome → pozitívvá alakítjuk
-            expect(result.details[0].price).toBe(1000);
+            expect(result.details[0]?.price).toBe(1000);
             expect(result.categories).toEqual([]);
         });
     });
