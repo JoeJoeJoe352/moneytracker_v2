@@ -11,17 +11,7 @@ export async function initApp(
     languageService: LanguageService,
 ): Promise<void> {
     setLang(languageService);
-
-    const isLoadedFromDb = await userDataStore.loadUserFromDb().catch((error) => {
-        console.error('failed to read user data from local db', error);
-        return false;
-    });
-
-    // Mindenképpen újra lekérjük a user adatokat, (hátha változtak az előző óta). Ezek a háttérben fognak frissülni
-    const authCheck = initUserData(authService, userDataStore, isLoadedFromDb);
-    if (!isLoadedFromDb) {
-        await authCheck;
-    }
+    await initUserData(authService, userDataStore);
 }
 
 /**
@@ -41,7 +31,6 @@ function setLang(languageService: LanguageService) {
 async function initUserData(
     authService: AuthService,
     userDataStore: InstanceType<typeof UserDataStore>,
-    isLoadedFromDb: boolean,
 ): Promise<void> {
     try {
         userDataStore.loadUserData(await firstValueFrom(authService.authenticateUser()));
@@ -55,9 +44,6 @@ async function initUserData(
             console.error('unknown error during authcheck!', error);
         }
 
-        // egyéb hibánál (pl. offline) a lokálisan betöltött adatok maradnak
-        if (isAuthError || !isLoadedFromDb) {
-            userDataStore.resetData();
-        }
+        userDataStore.resetData();
     }
 }
