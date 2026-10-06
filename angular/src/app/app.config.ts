@@ -10,7 +10,6 @@ import { provideRouter } from '@angular/router';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { Overlay } from '@angular/cdk/overlay';
 import { MAT_DIALOG_SCROLL_STRATEGY } from '@angular/material/dialog';
-
 import { routes } from '@app/app.routes';
 import { initApp } from '@app/app.initializer';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -36,8 +35,8 @@ export const appConfig: ApplicationConfig = {
         provideNativeDateAdapter(),
         provideCharts(withDefaultRegisterables()),
         // A dialog megnyitásakor ne fagyassza be a html-t (position: fixed), mert az levágja
-        // a viewporton túli tartalmat, ha a lap le van görgetve. A noop() miatt a háttér
-        // görgetési pozíciója egyszerűen nem változik, amíg a dialog nyitva van.
+        // a viewporton túli tartalmat, ha a lap le van görgetve (és emiatt megjelenik egy üres, fehér sáv az oldal alján).
+        // A noop() miatt a háttér görgetési pozíciója egyszerűen nem változik, amíg a dialog nyitva van.
         {
             provide: MAT_DIALOG_SCROLL_STRATEGY,
             useFactory: (overlay: Overlay) => () => overlay.scrollStrategies.noop(),
@@ -63,7 +62,9 @@ export const appConfig: ApplicationConfig = {
             }),
             fallbackLang: SupportedLangEnum.en,
         }),
-        provideAppInitializer(() => initApp(inject(AuthService), inject(UserDataStore), inject(LanguageService))),
+        provideAppInitializer(() =>
+            initApp(inject(AuthService), inject(UserDataStore), inject(LanguageService)),
+        ),
         provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000',
