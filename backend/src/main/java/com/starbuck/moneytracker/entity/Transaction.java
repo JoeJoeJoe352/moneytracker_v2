@@ -11,6 +11,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 import jakarta.persistence.Id;
@@ -46,6 +47,10 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionTypeEnum transactionType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private TransactionSpecialTypeEnum specialType;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal priceSum;
@@ -207,5 +212,13 @@ public class Transaction {
 
     public void setWallet(Wallet wallet) {
         this.wallet = wallet;
+    }
+
+    public TransactionSpecialTypeEnum getSpecialType() {
+        return specialType;
+    }
+
+    public void setSpecialType(TransactionSpecialTypeEnum specialType) {
+        this.specialType = specialType;
     }
 }

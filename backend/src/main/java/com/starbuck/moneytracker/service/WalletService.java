@@ -83,8 +83,6 @@ public class WalletService {
 
     /**
      * Visszatér a user tárcáival
-     *
-     * Kilistázza a felhasználó walletjait
      */
     public List<WalletListResponseDto> listWalletsForUser() {
         return walletRepo.listWalletsWithSumByUserId(userUtil.getUser().getId());
