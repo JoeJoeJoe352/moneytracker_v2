@@ -37,12 +37,10 @@ public class BalanceSync {
     public BalanceSync() {
     }
 
-    public BalanceSync(LocalDate syncDate, Wallet wallet, BigDecimal actualBalance,
-            Transaction syncTransaction) {
+    public BalanceSync(LocalDate syncDate, Wallet wallet, BigDecimal actualBalance) {
         this.syncDate = syncDate;
         this.wallet = wallet;
         this.actualBalance = actualBalance;
-        this.syncTransaction = syncTransaction;
     }
 
     public Long getId() {
