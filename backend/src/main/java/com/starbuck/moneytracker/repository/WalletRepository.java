@@ -31,7 +31,10 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     List<Wallet> findByUserId(long userId);
 
     /**
-     * Walleteket lekérdezi, kiírja hozzá az összeget
+     * Walleteket lekérdezi, kiírja hozzá az összeget és az utolsó szinkronizálás
+     * dátumát (ha még nem volt, akkor a wallet létrehozásának dátumát).
+     * A sync dátum subquery-ből jön, mert egy második JOIN megsokszorozná a
+     * tranzakció sorokat, és elrontaná a SUM-ot.
      */
     @Query("""
                 SELECT new com.starbuck.moneytracker.dto.WalletListResponseDto(
@@ -39,7 +42,11 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                     w.name,
                     w.currencyCode,
                     w.type,
-                    COALESCE(SUM(t.priceSum), 0)
+                    COALESCE(SUM(t.priceSum), 0),
+                    COALESCE(
+                        (SELECT MAX(bs.syncDate) FROM BalanceSync bs WHERE bs.wallet = w),
+                        CAST(w.createdAt AS LocalDate)
+                    )
                 )
                 FROM Wallet w
                 LEFT JOIN w.transactions t ON t.status = 0

@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 
-import com.starbuck.moneytracker.commands.SyncWalletCommand;
+import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Transaction;
@@ -80,7 +80,7 @@ public class BalanceSyncServiceTest {
     void testSyncWalletNotExistingWallet() {
         when(walletService.getWalletById(5L)).thenThrow(new EntityNotFoundException("no wallet found"));
 
-        SyncWalletCommand command = new SyncWalletCommand(5, LocalDate.now(), new BigDecimal(50));
+        BalanceSyncCommand command = new BalanceSyncCommand(5, LocalDate.now(), new BigDecimal(50));
         assertThrowsExactly(EntityNotFoundException.class, () -> {
             balanceSyncService.syncWallet(command);
         });
@@ -93,7 +93,7 @@ public class BalanceSyncServiceTest {
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("50.00"));
 
         var actualDate = LocalDate.now();
-        SyncWalletCommand command = new SyncWalletCommand(1L, actualDate, new BigDecimal("50.00"));
+        BalanceSyncCommand command = new BalanceSyncCommand(1L, actualDate, new BigDecimal("50.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptor = ArgumentCaptor.forClass(BalanceSync.class);
 
@@ -124,7 +124,7 @@ public class BalanceSyncServiceTest {
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("60.00"));
         var createdTransaction = new Transaction();
         when(transactionService.createTransaction(any())).thenReturn(createdTransaction);
-        SyncWalletCommand command = new SyncWalletCommand(1, actualDate, new BigDecimal("50.00"));
+        BalanceSyncCommand command = new BalanceSyncCommand(1, actualDate, new BigDecimal("50.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
         ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor
@@ -165,7 +165,7 @@ public class BalanceSyncServiceTest {
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("60.00"));
         var createdTransaction = new Transaction();
         when(transactionService.createTransaction(any())).thenReturn(createdTransaction);
-        SyncWalletCommand command = new SyncWalletCommand(1, actualDate, new BigDecimal("100.00"));
+        BalanceSyncCommand command = new BalanceSyncCommand(1, actualDate, new BigDecimal("100.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
         ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor

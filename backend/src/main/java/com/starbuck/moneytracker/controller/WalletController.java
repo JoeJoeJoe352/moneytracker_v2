@@ -13,12 +13,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
+import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
+import com.starbuck.moneytracker.dto.BalanceSyncDto;
 import com.starbuck.moneytracker.dto.WalletCreateDto;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
 import com.starbuck.moneytracker.dto.WalletResponseDto;
 import com.starbuck.moneytracker.dto.WalletUpdateDto;
 import com.starbuck.moneytracker.mapper.WalletMapper;
+import com.starbuck.moneytracker.service.BalanceSyncService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
@@ -30,11 +33,13 @@ public class WalletController {
     private final WalletService walletService;
     private final WalletMapper walletMapper;
     private final CurrentUserUtil userUtil;
+    private final BalanceSyncService syncService;
 
-    public WalletController(WalletService walletService, WalletMapper walletMapper, CurrentUserUtil userUtil) {
+    public WalletController(WalletService walletService, WalletMapper walletMapper, CurrentUserUtil userUtil, BalanceSyncService syncService) {
         this.walletService = walletService;
         this.walletMapper = walletMapper;
         this.userUtil = userUtil;
+        this.syncService = syncService;
     }
 
     /**
@@ -57,6 +62,13 @@ public class WalletController {
     public void createWallet(@Valid @RequestBody WalletCreateDto dto) {
         var command = new CreateWalletCommand(dto.name(), dto.currencyCode(), dto.walletType(), userUtil.getUser());
         this.walletService.createWallet(command);
+    }
+
+    @PostMapping(path = "wallet/sync")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void syncWallet(@Valid @RequestBody BalanceSyncDto dto) {
+        var command = new BalanceSyncCommand(dto.walletId(), dto.syncDate(), dto.currentBalance());
+        syncService.syncWallet(command);
     }
 
     /**

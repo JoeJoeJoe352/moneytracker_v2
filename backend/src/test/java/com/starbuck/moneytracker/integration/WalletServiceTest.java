@@ -22,6 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
+import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -29,6 +30,7 @@ import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
@@ -53,6 +55,9 @@ public class WalletServiceTest extends MySqlContainerTest {
 
     @Autowired
     WalletRepository walletRepo;
+
+    @Autowired
+    BalanceSyncRepository balanceSyncRepo;
 
     @MockitoBean
     CurrentUserUtil currentUser;
@@ -172,6 +177,43 @@ public class WalletServiceTest extends MySqlContainerTest {
         walletRepo.delete(wallet3);
         walletRepo.delete(wallet4);
         userRepository.delete(savedAnotherUser);
+    }
+
+    /**
+     * A listában az utolsó szinkronizálás dátuma jelenik meg, ha még nem volt,
+     * akkor a wallet létrehozásának dátuma
+     */
+    @Test
+    public void testListWalletsLastSyncDate() {
+        // Given
+        var syncedWallet = walletService.createWallet(
+                new CreateWalletCommand("SyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+        var notSyncedWallet = walletService.createWallet(
+                new CreateWalletCommand("NotSyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+
+        var olderSync = balanceSyncRepo
+                .save(new BalanceSync(LocalDate.of(2026, 9, 1), syncedWallet, new BigDecimal("10.00")));
+        var latestSync = balanceSyncRepo
+                .save(new BalanceSync(LocalDate.of(2026, 9, 15), syncedWallet, new BigDecimal("20.00")));
+
+        // When
+        List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
+
+        // Then
+        assertEquals(2, wallets.size());
+
+        assertEquals("SyncedWallet", wallets.get(0).name());
+        assertEquals(LocalDate.of(2026, 9, 15), wallets.get(0).lastSyncDate());
+        // A sync bejegyzések nem befolyásolják az összeget
+        assertEquals(new BigDecimal("0.00"), wallets.get(0).sum());
+
+        assertEquals("NotSyncedWallet", wallets.get(1).name());
+        assertEquals(LocalDate.now(), wallets.get(1).lastSyncDate());
+
+        balanceSyncRepo.delete(olderSync);
+        balanceSyncRepo.delete(latestSync);
+        walletRepo.delete(syncedWallet);
+        walletRepo.delete(notSyncedWallet);
     }
 
     @Test

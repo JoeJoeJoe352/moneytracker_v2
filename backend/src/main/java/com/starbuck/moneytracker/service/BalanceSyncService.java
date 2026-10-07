@@ -3,7 +3,7 @@ package com.starbuck.moneytracker.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.starbuck.moneytracker.commands.SyncWalletCommand;
+import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.util.TransactionFactory;
@@ -31,7 +31,7 @@ public class BalanceSyncService {
      * @param command
      */
     @Transactional
-    public void syncWallet(SyncWalletCommand command) {
+    public void syncWallet(BalanceSyncCommand command) {
         if (command == null) {
             throw new IllegalArgumentException("SyncWalletCommand is null");
         }

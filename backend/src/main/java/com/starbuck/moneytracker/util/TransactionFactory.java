@@ -7,7 +7,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.starbuck.moneytracker.commands.SyncWalletCommand;
+import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
@@ -28,7 +28,7 @@ public class TransactionFactory {
      * @param wallet
      * @param balanceOfWalletInDb
      */
-    public TransactionSaveCommand createTransactionEntryFromBalanceChange(SyncWalletCommand command, Wallet wallet,
+    public TransactionSaveCommand createTransactionEntryFromBalanceChange(BalanceSyncCommand command, Wallet wallet,
             BigDecimal balanceOfWalletInDb) {
 
         if (wallet == null || balanceOfWalletInDb == null) {

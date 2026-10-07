@@ -21,7 +21,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
-import com.starbuck.moneytracker.commands.SyncWalletCommand;
+import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
@@ -105,7 +105,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         var syncDate = LocalDate.of(2026, 10, 1);
 
         // When
-        balanceSyncService.syncWallet(new SyncWalletCommand(wallet.getId(), syncDate, new BigDecimal("60.00")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), syncDate, new BigDecimal("60.00")));
 
         // Then
         var balanceSync = findSyncForWallet(wallet);
@@ -132,7 +132,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         var syncDate = LocalDate.of(2026, 10, 1);
 
         // When
-        balanceSyncService.syncWallet(new SyncWalletCommand(wallet.getId(), syncDate, new BigDecimal("50.00")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), syncDate, new BigDecimal("50.00")));
 
         // Then
         var balanceSync = findSyncForWallet(wallet);
@@ -169,7 +169,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         var syncDate = LocalDate.of(2026, 10, 1);
 
         // When
-        balanceSyncService.syncWallet(new SyncWalletCommand(wallet.getId(), syncDate, new BigDecimal("100.00")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), syncDate, new BigDecimal("100.00")));
 
         // Then
         var balanceSync = findSyncForWallet(wallet);
@@ -199,7 +199,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         var syncDate = LocalDate.of(2026, 10, 1);
 
         // When
-        balanceSyncService.syncWallet(new SyncWalletCommand(wallet.getId(), syncDate, new BigDecimal("25.50")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), syncDate, new BigDecimal("25.50")));
 
         // Then
         var balanceSync = findSyncForWallet(wallet);
@@ -231,7 +231,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         // When
         assertThrows(EntityNotFoundException.class, () -> {
             balanceSyncService.syncWallet(
-                    new SyncWalletCommand(anotherUserWallet.getId(), LocalDate.now(), new BigDecimal("50.00")));
+                    new BalanceSyncCommand(anotherUserWallet.getId(), LocalDate.now(), new BigDecimal("50.00")));
         });
 
         // Then

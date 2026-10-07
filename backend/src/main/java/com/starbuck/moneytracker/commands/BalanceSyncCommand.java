@@ -3,13 +3,13 @@ package com.starbuck.moneytracker.commands;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class SyncWalletCommand {
+public class BalanceSyncCommand {
 
     private long walletId;
     private LocalDate syncDate;
     private BigDecimal balanceFromUser;
 
-    public SyncWalletCommand(long walletId, LocalDate syncDate, BigDecimal balanceFromUser) {
+    public BalanceSyncCommand(long walletId, LocalDate syncDate, BigDecimal balanceFromUser) {
         if (syncDate == null) {
             throw new IllegalArgumentException("SyncDate code cannot be null");
         }
