@@ -9,54 +9,64 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
-/**
- * A TransactionSaveCommand absztrakt osztályt a konkrét TransactionCreateCommand
- * leszármazottján keresztül teszteli, mert az alaposztálynak nincs saját
- * extra validációja.
- */
 class TransactionSaveCommandTest {
+
+    @Test
+    void nullDetailList_throws() {
+        assertThrowsExactly(IllegalArgumentException.class,
+                () -> new TransactionSaveCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                        null, List.of(), 1L));
+    }
+
+    @Test
+    void allowsEmptyDetailList() {
+        var command = new TransactionSaveCommand("teszt", new BigDecimal("10"), LocalDate.now(),
+                TransactionTypeEnum.INCOME, List.of(), List.of(), 1L);
+
+        assertEquals(0, command.getDetailCommands().size());
+    }
 
     @Test
     void nullName_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand(null, new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionSaveCommand(null, new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
                         List.of(), List.of(), 1L));
     }
 
     @Test
     void blankName_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand("   ", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionSaveCommand("   ", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
                         List.of(), List.of(), 1L));
     }
 
     @Test
     void nullDate_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), null, TransactionTypeEnum.INCOME,
+                () -> new TransactionSaveCommand("teszt", new BigDecimal("300"), null, TransactionTypeEnum.INCOME,
                         List.of(), List.of(), 1L));
     }
 
     @Test
     void nullType_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), LocalDate.now(), null,
+                () -> new TransactionSaveCommand("teszt", new BigDecimal("300"), LocalDate.now(), null,
                         List.of(), List.of(), 1L));
     }
     @Test
     void noGlobalPriceAndNoDetails_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionSaveCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
                         List.of(), List.of(), 1L));
     }
     @Test
     void globalPriceAndDetails_throws() {
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionCreateCommand("teszt", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
+                () -> new TransactionSaveCommand("teszt", new BigDecimal("300"), LocalDate.now(), TransactionTypeEnum.INCOME,
                         List.of(new TransactionDetailSaveCommand("teszt", new BigDecimal("400"), List.of(), TransactionTypeEnum.INCOME)), List.of(), 1L));
     }
 
@@ -66,7 +76,7 @@ class TransactionSaveCommandTest {
                 List.of(), TransactionTypeEnum.INCOME);
         LocalDate date = LocalDate.of(2026, 3, 1);
 
-        var command = new TransactionCreateCommand("teszt", null, date,
+        var command = new TransactionSaveCommand("teszt", null, date,
                 TransactionTypeEnum.INCOME, List.of(detail), List.of(1L, 2L), 1L);
 
         assertEquals("teszt", command.getTransactionName());

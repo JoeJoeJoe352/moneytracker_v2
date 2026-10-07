@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -49,7 +49,7 @@ public class IntegrityConfig {
         List<Transaction> transactions = transactionRepository.getAllTransaction();
 
         for (Transaction transaction : transactions) {
-            TransactionUpdateCommand command = mapper.entityToCommand(transaction);
+            TransactionSaveCommand command = mapper.entityToCommand(transaction);
 
             BigDecimal calculated = costCalculator.calculateTransactionCost(command);
             BigDecimal cached = transaction.getPriceSum();

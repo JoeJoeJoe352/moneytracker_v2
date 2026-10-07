@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.SyncWalletCommand;
-import com.starbuck.moneytracker.commands.TransactionCreateCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
 import com.starbuck.moneytracker.entity.BalanceSync;
@@ -142,7 +142,7 @@ public class WalletService {
 
         balanceSyncRepo.save(balanceSync);
 
-        //var transaction = new TransactionCreateCommand("sync", command.getBalanceFromUser(), command.getSyncDate(), TransactionTypeEnum.OUTCOME, null, null, wallet.getId());
+        //var transaction = new TransactionSaveCommand("sync", command.getBalanceFromUser(), command.getSyncDate(), TransactionTypeEnum.OUTCOME, null, null, wallet.getId());
     }
 
 }
