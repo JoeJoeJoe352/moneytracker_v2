@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,9 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
             """)
     List<Wallet> findByUserId(long userId);
 
+    /**
+     * Walleteket lekérdezi, kiírja hozzá az összeget
+     */
     @Query("""
                 SELECT new com.starbuck.moneytracker.dto.WalletListResponseDto(
                     w.id,
@@ -38,7 +42,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                     COALESCE(SUM(t.priceSum), 0)
                 )
                 FROM Wallet w
-                LEFT JOIN w.transactions t
+                LEFT JOIN w.transactions t ON t.status = 0
                 WHERE w.user.id = ?1 AND w.status = 0
                 GROUP BY w.id
                 ORDER BY w.id ASC
@@ -46,7 +50,18 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     List<WalletListResponseDto> listWalletsWithSumByUserId(long userId);
 
     /**
-     * Visszatér a user összes pénzével, walletenként
+     * Adott walletről lekérdezi, hogy mekkora a balance rajta
+     */
+    @Query("""
+                SELECT COALESCE(SUM(t.priceSum), 0)
+                FROM Wallet w
+                LEFT JOIN w.transactions t ON t.status = 0
+                WHERE w.user.id = ?2 AND w.status = 0 AND w.id = ?1
+            """)
+    BigDecimal getBalanceOfWallet(long walletId, long userId);
+
+    /**
+     * Visszatér a user összes pénzével, valutánként
      * Lehet null, hogyha még nincs neki tranzakciója adott walleten
      */
     @Query("""
@@ -55,7 +70,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                     COALESCE(SUM(t.priceSum), 0)
                 )
                 FROM Wallet w
-                LEFT JOIN w.transactions t
+                LEFT JOIN w.transactions t ON t.status = 0
                 WHERE w.user.id = ?1 AND w.status = 0
                 GROUP BY w.id
                 ORDER BY w.id

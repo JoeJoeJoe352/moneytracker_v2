@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
+import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 public class TransactionSaveCommand {
@@ -15,6 +16,7 @@ public class TransactionSaveCommand {
     private List<TransactionDetailSaveCommand> detailCommands;
     private List<Long> categories;
     private Long walletId;
+    private TransactionSpecialTypeEnum specialType;
 
     /**
      * @param name              Tranzakció neve
@@ -70,6 +72,14 @@ public class TransactionSaveCommand {
         this.walletId = walletId;
     }
 
+    /**
+     * Hozzáadja az opcionális specialType paramétert. Builder pattern
+     */
+    public TransactionSaveCommand withSpecialType(TransactionSpecialTypeEnum specialType) {
+        this.specialType = specialType;
+        return this;
+    }
+
     public String getTransactionName() {
         return transactionName;
     }
@@ -96,6 +106,10 @@ public class TransactionSaveCommand {
 
     public Long getWalletId() {
         return walletId;
+    }
+
+    public TransactionSpecialTypeEnum getSpecialType() {
+        return specialType;
     }
 
 }

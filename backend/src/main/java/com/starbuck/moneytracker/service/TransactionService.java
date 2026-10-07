@@ -72,6 +72,7 @@ public class TransactionService {
                 createCommand.getTransactionType(),
                 costCalculator.calculateTransactionCost(createCommand),
                 wallet);
+        transaction.setSpecialType(createCommand.getSpecialType());
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
 
         this.saveDetails(savedTransactionModel, createCommand);

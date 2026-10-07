@@ -69,6 +69,14 @@ public class Wallet {
         this.type = type;
     }
 
+    public Wallet(long id, String name, User user, CurrencyEnum currencyCode, WalletTypeEnum type) {
+        this.id = id;
+        this.name = name;
+        this.user = user;
+        this.currencyCode = currencyCode;
+        this.type = type;
+    }
+
     public Long getId() {
         return id;
     }

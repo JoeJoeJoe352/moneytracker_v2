@@ -1,27 +1,20 @@
 package com.starbuck.moneytracker.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
-import com.starbuck.moneytracker.commands.SyncWalletCommand;
-import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
-import com.starbuck.moneytracker.entity.BalanceSync;
-import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
-import com.starbuck.moneytracker.repository.BalanceSyncRepository;
-import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
@@ -33,16 +26,11 @@ public class WalletService {
     private final WalletRepository walletRepo;
     private final MessageSource messageSource;
     private final CurrentUserUtil userUtil;
-    private final BalanceSyncRepository balanceSyncRepo;
-    private final TransactionRepository transactionRepo;
 
-    public WalletService(WalletRepository walletRepo, MessageSource messageSource, CurrentUserUtil userUtil,
-            BalanceSyncRepository syncRepo, TransactionRepository transactionRepo) {
+    public WalletService(WalletRepository walletRepo, MessageSource messageSource, CurrentUserUtil userUtil) {
         this.walletRepo = walletRepo;
         this.messageSource = messageSource;
         this.userUtil = userUtil;
-        this.balanceSyncRepo = syncRepo;
-        this.transactionRepo = transactionRepo;
     }
 
     /**
@@ -118,6 +106,7 @@ public class WalletService {
      * @param id
      */
     public void softDeleteWallet(long id) {
+        // TODO itt miért nem a this.getWalletById van használva?
         Wallet walletFromDb = walletRepo.getWalletById(id, userUtil.getUser().getId())
                 .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
 
@@ -127,22 +116,15 @@ public class WalletService {
     }
 
     /**
-     * Walletben található összes pénzt összeveti a user által megadott, valós
-     * pénzösszeggel, az eltérést rögzíti
+     * Adott wallethez lekérdezi a rajta lévő balance-ot
      * 
-     * @param command
+     * @param walletId
+     * @return
      */
-    @Transactional
-    public void syncWallet(SyncWalletCommand command) {
-        if (command == null) {
-            throw new IllegalArgumentException("SyncWalletCommand is null");
-        }
-        var wallet = getWalletById(command.getWalletId());
-        var balanceSync = new BalanceSync(command.getSyncDate(), wallet, command.getBalanceFromUser());
+    public BigDecimal getBalanceForWallet(long walletId) {
+        var wallet = this.getWalletById(walletId);
 
-        balanceSyncRepo.save(balanceSync);
-
-        //var transaction = new TransactionSaveCommand("sync", command.getBalanceFromUser(), command.getSyncDate(), TransactionTypeEnum.OUTCOME, null, null, wallet.getId());
+        return walletRepo.getBalanceOfWallet(wallet.getId(), userUtil.getUser().getId());
     }
 
 }
