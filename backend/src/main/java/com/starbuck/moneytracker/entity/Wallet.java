@@ -56,6 +56,9 @@ public class Wallet {
     @OneToMany(mappedBy = "wallet")
     private List<Transaction> transactions;
 
+    @OneToMany(mappedBy = "wallet")
+    private List<BalanceSync> balanceSyncs;
+
     public Wallet() {
     }
 
@@ -137,4 +140,13 @@ public class Wallet {
     public void setType(WalletTypeEnum type) {
         this.type = type;
     }
+
+    public List<BalanceSync> getBalanceSyncs() {
+        return balanceSyncs;
+    }
+
+    public void setBalanceSyncs(List<BalanceSync> balanceSyncs) {
+        this.balanceSyncs = balanceSyncs;
+    }
+
 }
