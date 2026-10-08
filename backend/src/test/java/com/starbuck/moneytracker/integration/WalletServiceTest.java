@@ -207,8 +207,11 @@ public class WalletServiceTest extends MySqlContainerTest {
         // A sync bejegyzések nem befolyásolják az összeget
         assertEquals(new BigDecimal("0.00"), wallets.get(0).sum());
 
+        // A db-ben tárolt létrehozási dátumhoz assertál, nem a LocalDate.now()-hoz,
+        // így éjfélkor és eltérő időzónáknál sem bukik el
+        var notSyncedCreatedAt = walletRepo.findById(notSyncedWallet.getId()).orElseThrow().getCreatedAt();
         assertEquals("NotSyncedWallet", wallets.get(1).name());
-        assertEquals(LocalDate.now(), wallets.get(1).lastSyncDate());
+        assertEquals(notSyncedCreatedAt.toLocalDate(), wallets.get(1).lastSyncDate());
 
         balanceSyncRepo.delete(olderSync);
         balanceSyncRepo.delete(latestSync);

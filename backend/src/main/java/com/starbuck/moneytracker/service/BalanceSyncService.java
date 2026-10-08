@@ -33,10 +33,12 @@ public class BalanceSyncService {
     @Transactional
     public void syncWallet(BalanceSyncCommand command) {
         if (command == null) {
-            throw new IllegalArgumentException("SyncWalletCommand is null");
+            throw new IllegalArgumentException("BalanceSyncCommand is null");
         }
 
-        var wallet = walletService.getWalletById(command.getWalletId());
+        // Zárolja a walletet, így egy dupla beküldés nem hozhat létre két korrekciót:
+        // (a második kérés megvárja az elsőt, és már a korrigált egyenleget látja)
+        var wallet = walletService.getWalletByIdForUpdate(command.getWalletId());
         var balanceSync = new BalanceSync(command.getSyncDate(), wallet, command.getBalanceFromUser());
 
         var balanceOfWalletInDb = walletService.getBalanceForWallet(command.getWalletId());

@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
 import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.Wallet;
+
+import jakarta.persistence.LockModeType;
 
 public interface WalletRepository extends JpaRepository<Wallet, Long> {
 
@@ -18,6 +21,14 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
      */
     @Query("SELECT w FROM Wallet w WHERE w.id=?1 AND w.user.id = ?2 AND w.status = 0")
     Optional<Wallet> getWalletById(long walletId, long userId);
+
+    /**
+     * Mint a getWalletById, de a tranzakció végéig zárolja a wallet sorát
+     * így két párhuzamos művelet nem futhat egyszerre ugyanazon a walleten
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT w FROM Wallet w WHERE w.id=?1 AND w.user.id = ?2 AND w.status = 0")
+    Optional<Wallet> getWalletByIdForUpdate(long walletId, long userId);
 
     /**
      * A user walletjeinek lekérdezése

@@ -64,10 +64,17 @@ public class WalletController {
         this.walletService.createWallet(command);
     }
 
-    @PostMapping(path = "wallet/sync")
+    /**
+     * Szinkronizálja a wallet egyenlegét a user által megadott valós
+     * egyenleggel, az eltérést korrekciós tranzakcióként rögzíti
+     *
+     * @param dto
+     * @param id
+     */
+    @PostMapping(path = "wallet/{id}/sync")
     @ResponseStatus(HttpStatus.CREATED)
-    public void syncWallet(@Valid @RequestBody BalanceSyncDto dto) {
-        var command = new BalanceSyncCommand(dto.walletId(), dto.syncDate(), dto.currentBalance());
+    public void syncWallet(@Valid @RequestBody BalanceSyncDto dto, @PathVariable long id) {
+        var command = new BalanceSyncCommand(id, dto.syncDate(), dto.currentBalance());
         syncService.syncWallet(command);
     }
 

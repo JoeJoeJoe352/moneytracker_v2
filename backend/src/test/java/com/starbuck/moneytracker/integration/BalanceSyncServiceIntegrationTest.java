@@ -7,7 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -211,6 +218,54 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
 
         balanceSyncRepo.delete(balanceSync);
         deleteSyncTransaction(syncTransaction);
+        walletRepo.delete(wallet);
+    }
+
+    /**
+     * Két egyszerre beérkező (pl. dupla kattintásos) sync kérésnél a wallet
+     * zárolása miatt csak egy korrekció jön létre: a második kérés már a
+     * korrigált egyenleget látja
+     */
+    @Test
+    public void testConcurrentSyncsCreateOnlyOneCorrection() throws Exception {
+        // Given
+        var wallet = createWallet("concurrentSyncWallet");
+        var initialTransaction = saveIncome(wallet, new BigDecimal("60.00"));
+        var command = new BalanceSyncCommand(wallet.getId(), LocalDate.of(2026, 10, 1), new BigDecimal("50.00"));
+
+        var executor = Executors.newFixedThreadPool(2);
+        var start = new CountDownLatch(1);
+        List<Future<?>> futures = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            futures.add(executor.submit(() -> {
+                start.await();
+                balanceSyncService.syncWallet(command);
+                return null;
+            }));
+        }
+
+        // When
+        start.countDown();
+        for (var future : futures) {
+            future.get(30, TimeUnit.SECONDS);
+        }
+        executor.shutdown();
+
+        // Then
+        var syncs = balanceSyncRepo.findAll().stream()
+                .filter(sync -> sync.getWallet().getId().equals(wallet.getId()))
+                .toList();
+        var syncTransactions = syncs.stream()
+                .map(BalanceSync::getSyncTransaction)
+                .filter(Objects::nonNull)
+                .toList();
+        assertEquals(2, syncs.size());
+        assertEquals(1, syncTransactions.size());
+        assertEquals(new BigDecimal("50.00"), walletService.getBalanceForWallet(wallet.getId()));
+
+        balanceSyncRepo.deleteAll(syncs);
+        syncTransactions.forEach(this::deleteSyncTransaction);
+        transactionRepo.hardDeleteTransaction(initialTransaction.getId());
         walletRepo.delete(wallet);
     }
 

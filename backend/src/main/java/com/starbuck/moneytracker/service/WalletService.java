@@ -101,6 +101,18 @@ public class WalletService {
     }
 
     /**
+     * Visszaadja a user egy walletjét id alapján, és a tranzakció végéig zárolja.
+     * Csak @Transactional metóduson belülről hívható.
+     *
+     * @param id
+     * @return
+     */
+    public Wallet getWalletByIdForUpdate(long id) {
+        return walletRepo.getWalletByIdForUpdate(id, userUtil.getUser().getId())
+                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+    }
+
+    /**
      * Soft delete-eli a walletet
      *
      * @param id

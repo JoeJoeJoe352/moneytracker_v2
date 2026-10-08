@@ -11,12 +11,12 @@ public class BalanceSyncCommand {
 
     public BalanceSyncCommand(long walletId, LocalDate syncDate, BigDecimal balanceFromUser) {
         if (syncDate == null) {
-            throw new IllegalArgumentException("SyncDate code cannot be null");
+            throw new IllegalArgumentException("SyncDate cannot be null");
         }
         // TODO validálni, hogy user a saját időzónájához képest ne tudjon jövőbeni időt beállítani
         // Itt lehet 0 is, ha még nincs egyáltalán pénz a tárcában
         if (balanceFromUser == null) {
-            throw new IllegalArgumentException("currentBalance cannot be null");
+            throw new IllegalArgumentException("BalanceFromUser cannot be null");
         }
 
         this.walletId = walletId;

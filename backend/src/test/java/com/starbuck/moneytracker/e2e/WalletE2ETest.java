@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -38,6 +40,9 @@ import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.repository.BalanceSyncRepository;
+import com.starbuck.moneytracker.repository.TransactionDetailRepository;
+import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
@@ -54,6 +59,15 @@ class WalletE2ETest extends MySqlContainerTest {
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @Autowired
+    private BalanceSyncRepository balanceSyncRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private TransactionDetailRepository transactionDetailRepository;
 
     private String authCookie;
     private User user;
@@ -82,6 +96,17 @@ class WalletE2ETest extends MySqlContainerTest {
 
     @AfterEach
     void cleanupCreatedData() {
+        Long userId = this.user.getId();
+        balanceSyncRepository.findAll().stream()
+                .filter(sync -> sync.getWallet().getUser().getId().equals(userId))
+                .forEach(balanceSyncRepository::delete);
+        transactionDetailRepository.findAll().stream()
+                .filter(detail -> detail.getTransaction().getWallet().getUser().getId().equals(userId))
+                .forEach(transactionDetailRepository::delete);
+        transactionRepository.findAll().stream()
+                .filter(transaction -> transaction.getWallet().getUser().getId().equals(userId))
+                .forEach(transaction -> transactionRepository.hardDeleteTransaction(transaction.getId()));
+
         walletRepository.findAll().stream()
                 .filter(wallet -> wallet.getUser().getId().equals(this.user.getId()))
                 .forEach(walletRepository::delete);
@@ -304,6 +329,84 @@ class WalletE2ETest extends MySqlContainerTest {
         }
     }
 
+    // ---- POST /wallet/{id}/sync ----
+
+    /**
+     * Sikeres szinkronizálásnál létrejön a sync bejegyzés, és a korrekció után a
+     * wallet egyenlege megegyezik a user által megadottal
+     */
+    @Test
+    void syncWallet_createsSyncAndCorrectsBalance() {
+        Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
+        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("25.50"), "syncDate", "2026-10-01");
+
+        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
+                HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(1, countSyncsForWallet(wallet));
+        assertEquals(new BigDecimal("25.50"), walletRepository.getBalanceOfWallet(wallet.getId(), this.user.getId()));
+    }
+
+    /**
+     * Hibás bemenetnél a DTO validáció 400-at ad, és nem jön létre sync bejegyzés
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("invalidSyncRequests")
+    void syncWallet_returnsBadRequestForInvalidInput(String description, Map<String, Object> request) {
+        Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
+
+        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
+                HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(0, countSyncsForWallet(wallet));
+    }
+
+    private static Stream<Arguments> invalidSyncRequests() {
+        return Stream.of(
+                Arguments.of("hiányzó egyenleg", Map.of("syncDate", "2026-10-01")),
+                Arguments.of("hiányzó dátum", Map.of("currentBalance", new BigDecimal("50.00"))),
+                Arguments.of("jövőbeli dátum", Map.of("currentBalance", new BigDecimal("50.00"),
+                        "syncDate", LocalDate.now().plusDays(2).toString())),
+                Arguments.of("3 tizedesjegy", Map.of("currentBalance", new BigDecimal("50.004"),
+                        "syncDate", "2026-10-01")),
+                Arguments.of("túl nagy összeg", Map.of("currentBalance", new BigDecimal("1000000000.00"),
+                        "syncDate", "2026-10-01")));
+    }
+
+    /**
+     * Másik user walletjét nem lehet szinkronizálni, a GlobalExceptionHandler
+     * 404-et ad
+     */
+    @Test
+    void syncWallet_returnsNotFoundForOtherUsersWallet() {
+        User otherUser = new User("e2eOtherSyncWalletUser", "irrelevantEncodedPassword",
+                "othersyncwallet@email.com");
+        otherUser.generateUuid();
+        otherUser = userRepository.save(otherUser);
+        Wallet otherUsersWallet = walletRepository
+                .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("50.00"), "syncDate", "2026-10-01");
+
+        try {
+            ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + otherUsersWallet.getId() + "/sync",
+                    HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
+
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            assertEquals(0, countSyncsForWallet(otherUsersWallet));
+        } finally {
+            walletRepository.delete(otherUsersWallet);
+            userRepository.delete(otherUser);
+        }
+    }
+
+    private long countSyncsForWallet(Wallet wallet) {
+        return balanceSyncRepository.findAll().stream()
+                .filter(sync -> sync.getWallet().getId().equals(wallet.getId()))
+                .count();
+    }
+
     // ---- Security határ ----
 
     /**
@@ -324,6 +427,7 @@ class WalletE2ETest extends MySqlContainerTest {
                 Arguments.of(HttpMethod.GET, "/wallet"),
                 Arguments.of(HttpMethod.GET, "/wallet/1"),
                 Arguments.of(HttpMethod.PUT, "/wallet/1"),
-                Arguments.of(HttpMethod.DELETE, "/wallet/1"));
+                Arguments.of(HttpMethod.DELETE, "/wallet/1"),
+                Arguments.of(HttpMethod.POST, "/wallet/1/sync"));
     }
 }

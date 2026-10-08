@@ -78,7 +78,7 @@ public class BalanceSyncServiceTest {
 
     @Test
     void testSyncWalletNotExistingWallet() {
-        when(walletService.getWalletById(5L)).thenThrow(new EntityNotFoundException("no wallet found"));
+        when(walletService.getWalletByIdForUpdate(5L)).thenThrow(new EntityNotFoundException("no wallet found"));
 
         BalanceSyncCommand command = new BalanceSyncCommand(5, LocalDate.now(), new BigDecimal(50));
         assertThrowsExactly(EntityNotFoundException.class, () -> {
@@ -89,7 +89,7 @@ public class BalanceSyncServiceTest {
     @Test
     void testSyncWalletCreateOnlySyncEntry() {
         // GIVEN
-        when(walletService.getWalletById(1L)).thenReturn(wallet);
+        when(walletService.getWalletByIdForUpdate(1L)).thenReturn(wallet);
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("50.00"));
 
         var actualDate = LocalDate.now();
@@ -118,7 +118,7 @@ public class BalanceSyncServiceTest {
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
                 .thenReturn("Szinkronizálás");
 
-        when(walletService.getWalletById(1L)).thenReturn(wallet);
+        when(walletService.getWalletByIdForUpdate(1L)).thenReturn(wallet);
         // 60 a balance, de a user szerint 50-et számolt össze magánál, tehát egy 10-es
         // kiadású tranzakciónak kell létrejönnie
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("60.00"));
@@ -159,7 +159,7 @@ public class BalanceSyncServiceTest {
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
                 .thenReturn("Szinkronizálás");
 
-        when(walletService.getWalletById(1L)).thenReturn(wallet);
+        when(walletService.getWalletByIdForUpdate(1L)).thenReturn(wallet);
         // 60 a balance, de a user szerint 100-at számolt össze magánál, tehát egy 40-es
         // bevételi tranzakciónak kell létrejönnie
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("60.00"));
