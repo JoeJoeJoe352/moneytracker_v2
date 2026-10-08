@@ -159,13 +159,6 @@ public class TransactionService {
     }
 
     /**
-     * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
-     */
-    public List<WalletSummaryDto> sumAllMoney() {
-        return this.walletRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
-    }
-
-    /**
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
      * Pozitív értékkel tér vissza (értelmetlen az, hogy negatív előjeles kiadás)
      */
@@ -264,11 +257,10 @@ public class TransactionService {
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
 
         if (transaction.isSyncTransaction()) {
-            // Töröljük a 
-            // Adatintegritási hiba, nem "nem található" eset, ezért nem EntityNotFoundException
             var balanceSync = balanceSyncRepo.findBySyncTransactionId(transaction.getId())
                     .orElseThrow(() -> new IllegalStateException(
                             "Transaction " + transactionId + " is a sync transaction, but has no BalanceSync"));
+
             this.balanceSyncRepo.delete(balanceSync);
 
             transaction.setSpecialType(null);

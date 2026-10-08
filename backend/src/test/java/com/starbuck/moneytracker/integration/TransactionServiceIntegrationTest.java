@@ -44,6 +44,7 @@ import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.UserService;
+import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
@@ -78,6 +79,9 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
     @Autowired
     private WalletRepository walletRepo;
+
+    @Autowired
+    private WalletService walletService;
 
     @MockitoBean
     private CurrentUserUtil currentUser;
@@ -289,7 +293,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         Transaction incomeEur = this.persistSimpleTransaction("income", TransactionTypeEnum.INCOME,
                 new BigDecimal(1000), LocalDate.now(), savedEuroWallet);
         // WHEN
-        List<WalletSummaryDto> result = transactionService.sumAllMoney();
+        List<WalletSummaryDto> result = walletService.sumAllMoney();
 
         // THEN
         assertEquals(3, result.size());
@@ -314,8 +318,10 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void sumAllExpenseForMonth_returnsOnlyCurrentMonthExpenses() {
         // Given
-        var secondWallet = walletRepo.save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
-        var emptyWallet = walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        var secondWallet = walletRepo
+                .save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        var emptyWallet = walletRepo
+                .save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
         Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth",
                 TransactionTypeEnum.OUTCOME,
@@ -356,8 +362,10 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void sumAllIncomeForMonth_returnsOnlyCurrentMonthIncome() {
         // Given
-        var secondWallet = walletRepo.save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
-        var emptyWallet = walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        var secondWallet = walletRepo
+                .save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        var emptyWallet = walletRepo
+                .save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
         Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth",
                 TransactionTypeEnum.INCOME,
@@ -389,12 +397,14 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     }
 
     /**
-     * A soft delete-elt (letiltott) wallet tranzakciói nem számítanak bele a havi kiadásokba és bevételekbe
+     * A soft delete-elt (letiltott) wallet tranzakciói nem számítanak bele a havi
+     * kiadásokba és bevételekbe
      */
     @Test
     void sumForMonth_ignoresDisabledWallets() {
         // Given
-        var disabledWallet = walletRepo.save(new Wallet("disabled", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        var disabledWallet = walletRepo
+                .save(new Wallet("disabled", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
         Transaction expenseInActiveWallet = this.persistSimpleTransaction("expenseActive",
                 TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-100), LocalDate.now(), this.wallet);
@@ -407,7 +417,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         Transaction incomeInDisabledWallet = this.persistSimpleTransaction("incomeDisabled",
                 TransactionTypeEnum.INCOME,
                 new BigDecimal(900), LocalDate.now(), disabledWallet);
-        // Tranzakciót csak aktív walleten lehet létrehozni, ezért csak a tranzakciók után tiltjuk le
+        // Tranzakciót csak aktív walleten lehet létrehozni, ezért csak a tranzakciók
+        // után tiltjuk le
         disabledWallet.setStatus(GeneralStatusEnum.DISABLED);
         walletRepo.save(disabledWallet);
 

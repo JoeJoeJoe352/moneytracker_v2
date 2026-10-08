@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
+import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
@@ -137,6 +138,13 @@ public class WalletService {
         var wallet = this.getWalletById(walletId);
 
         return walletRepo.getBalanceOfWallet(wallet.getId(), userUtil.getUser().getId());
+    }
+
+    /**
+     * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
+     */
+    public List<WalletSummaryDto> sumAllMoney() {
+        return this.walletRepo.summarizeTotalMoneyForUser(userUtil.getUser().getId());
     }
 
 }
