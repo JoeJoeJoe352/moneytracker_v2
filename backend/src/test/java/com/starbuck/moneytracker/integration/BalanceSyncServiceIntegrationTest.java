@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
@@ -43,6 +45,7 @@ import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.BalanceSyncService;
+import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -73,6 +76,12 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
 
     @Autowired
     BalanceSyncRepository balanceSyncRepo;
+
+    @Autowired
+    TransactionService transactionService;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @MockitoBean
     CurrentUserUtil currentUser;
@@ -122,7 +131,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         assertNull(balanceSync.getSyncTransaction());
         assertEquals(new BigDecimal("60.00"), walletService.getBalanceForWallet(wallet.getId()));
 
-        balanceSyncRepo.delete(balanceSync);
+        balanceSyncRepo.hardDeleteAllForWallet(wallet.getId());
         transactionRepo.hardDeleteTransaction(initialTransaction.getId());
         walletRepo.delete(wallet);
     }
@@ -158,7 +167,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         // A korrekció után a wallet egyenlege megegyezik a user által megadottal
         assertEquals(new BigDecimal("50.00"), walletService.getBalanceForWallet(wallet.getId()));
 
-        balanceSyncRepo.delete(balanceSync);
+        balanceSyncRepo.hardDeleteAllForWallet(wallet.getId());
         deleteSyncTransaction(syncTransaction);
         transactionRepo.hardDeleteTransaction(initialTransaction.getId());
         walletRepo.delete(wallet);
@@ -190,7 +199,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
 
         assertEquals(new BigDecimal("100.00"), walletService.getBalanceForWallet(wallet.getId()));
 
-        balanceSyncRepo.delete(balanceSync);
+        balanceSyncRepo.hardDeleteAllForWallet(wallet.getId());
         deleteSyncTransaction(syncTransaction);
         transactionRepo.hardDeleteTransaction(initialTransaction.getId());
         walletRepo.delete(wallet);
@@ -216,7 +225,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(new BigDecimal("25.50"), syncTransaction.getPriceSum());
         assertEquals(new BigDecimal("25.50"), walletService.getBalanceForWallet(wallet.getId()));
 
-        balanceSyncRepo.delete(balanceSync);
+        balanceSyncRepo.hardDeleteAllForWallet(wallet.getId());
         deleteSyncTransaction(syncTransaction);
         walletRepo.delete(wallet);
     }
@@ -263,8 +272,52 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(1, syncTransactions.size());
         assertEquals(new BigDecimal("50.00"), walletService.getBalanceForWallet(wallet.getId()));
 
-        balanceSyncRepo.deleteAll(syncs);
+        balanceSyncRepo.hardDeleteAllForWallet(wallet.getId());
         syncTransactions.forEach(this::deleteSyncTransaction);
+        transactionRepo.hardDeleteTransaction(initialTransaction.getId());
+        walletRepo.delete(wallet);
+    }
+
+    /**
+     * Sync tranzakció törlésekor a hozzá tartozó BalanceSync is soft delete-elődik:
+     * a sor megmarad a db-ben (status = 1), de a lekérdezésekből eltűnik, a wallet
+     * egyenlege visszaáll, és a lastSyncDate a létrehozás dátumára esik vissza
+     */
+    @Test
+    public void testDeleteSyncTransactionSoftDeletesBalanceSync() {
+        // Given
+        var wallet = createWallet("deleteSyncWallet");
+        var initialTransaction = saveIncome(wallet, new BigDecimal("60.00"));
+        balanceSyncService.syncWallet(
+                new BalanceSyncCommand(wallet.getId(), LocalDate.of(2026, 10, 1), new BigDecimal("50.00")));
+        var balanceSync = findSyncForWallet(wallet);
+        var syncTransaction = balanceSync.getSyncTransaction();
+
+        // When
+        transactionService.deleteTransaction(syncTransaction.getId());
+
+        // Then
+        // A sync bejegyzés nem látszik a lekérdezésekben...
+        assertTrue(balanceSyncRepo.findById(balanceSync.getId()).isEmpty());
+        assertTrue(balanceSyncRepo.findBySyncTransactionId(syncTransaction.getId()).isEmpty());
+        // ...de a sor soft delete-tel megmaradt
+        Integer status = jdbcTemplate.queryForObject("SELECT status FROM balance_sync WHERE id = ?",
+                Integer.class, balanceSync.getId());
+        assertEquals(1, status);
+
+        // A korrekció törlése után az eredeti egyenleg látszik
+        assertEquals(new BigDecimal("60.00"), walletService.getBalanceForWallet(wallet.getId()));
+
+        // A törölt sync nem számít bele az utolsó szinkronizálás dátumába
+        var walletCreatedAt = walletRepo.findById(wallet.getId()).orElseThrow().getCreatedAt();
+        var listedWallet = walletService.listWalletsForUser().stream()
+                .filter(w -> w.id().equals(wallet.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals(walletCreatedAt.toLocalDate(), listedWallet.lastSyncDate());
+
+        balanceSyncRepo.hardDeleteAllForWallet(wallet.getId());
+        deleteSyncTransaction(syncTransaction);
         transactionRepo.hardDeleteTransaction(initialTransaction.getId());
         walletRepo.delete(wallet);
     }
@@ -315,13 +368,11 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
 
     /**
      * A TransactionService a korrekciós tranzakcióhoz detailt is ment, ezt a
-     * tranzakció előtt törölni kell
+     * tranzakció előtt törölni kell. Bulk delete-tel, mert ha a tranzakció már soft
+     * delete-elt, a detail entitás betöltése ObjectNotFoundException-t dobna
      */
     private void deleteSyncTransaction(Transaction syncTransaction) {
-        var details = transactionDetailRepo.findAll().stream()
-                .filter(detail -> detail.getTransaction().getId().equals(syncTransaction.getId()))
-                .toList();
-        transactionDetailRepo.deleteAll(details);
+        transactionDetailRepo.hardDeleteAllByTransactionId(syncTransaction.getId());
         transactionRepo.hardDeleteTransaction(syncTransaction.getId());
     }
 

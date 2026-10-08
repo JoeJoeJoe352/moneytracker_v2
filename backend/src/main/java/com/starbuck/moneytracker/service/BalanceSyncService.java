@@ -38,6 +38,7 @@ public class BalanceSyncService {
 
         // Zárolja a walletet, így egy dupla beküldés nem hozhat létre két korrekciót:
         // (a második kérés megvárja az elsőt, és már a korrigált egyenleget látja)
+        // TODO háromszor kéri le a walletet id alapján. Itt, a getBalanceForWallet-ban és a createtransaction-ben 
         var wallet = walletService.getWalletByIdForUpdate(command.getWalletId());
         var balanceSync = new BalanceSync(command.getSyncDate(), wallet, command.getBalanceFromUser());
 

@@ -213,8 +213,7 @@ public class WalletServiceTest extends MySqlContainerTest {
         assertEquals("NotSyncedWallet", wallets.get(1).name());
         assertEquals(notSyncedCreatedAt.toLocalDate(), wallets.get(1).lastSyncDate());
 
-        balanceSyncRepo.delete(olderSync);
-        balanceSyncRepo.delete(latestSync);
+        balanceSyncRepo.hardDeleteAllForWallet(syncedWallet.getId());
         walletRepo.delete(syncedWallet);
         walletRepo.delete(notSyncedWallet);
     }

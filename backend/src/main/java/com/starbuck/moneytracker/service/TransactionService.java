@@ -13,6 +13,13 @@ import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
+import com.starbuck.moneytracker.entity.TransactionDetail;
+import com.starbuck.moneytracker.entity.TransactionDetailCategory;
+import com.starbuck.moneytracker.entity.TransactionFilter;
+import com.starbuck.moneytracker.entity.User;
+import com.starbuck.moneytracker.entity.Wallet;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
@@ -25,13 +32,6 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 import jakarta.persistence.EntityNotFoundException;
 
-import com.starbuck.moneytracker.entity.TransactionDetail;
-import com.starbuck.moneytracker.entity.TransactionDetailCategory;
-import com.starbuck.moneytracker.entity.TransactionFilter;
-import com.starbuck.moneytracker.entity.User;
-import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
-
 @Service
 public class TransactionService {
 
@@ -42,12 +42,13 @@ public class TransactionService {
     private final CurrentUserUtil currentUser;
     private final WalletRepository walletRepo;
     private final TransactionDetailFactory detailFactory;
-
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
+    private final BalanceSyncRepository balanceSyncRepo;
 
     public TransactionService(TransactionRepository transactionRepo, TransactionDetailRepository transactionDetailRepo,
             CategoryRepository categoryRepo, TransactionDetailCategoryRepository transactionDetailCategoryRepository,
-            CurrentUserUtil currentUser, WalletRepository walletRepo, TransactionDetailFactory detailFactory) {
+            CurrentUserUtil currentUser, WalletRepository walletRepo, TransactionDetailFactory detailFactory,
+            BalanceSyncRepository balanceSyncRepo) {
         this.transactionRepo = transactionRepo;
         this.transactionDetailRepo = transactionDetailRepo;
         this.categoryRepo = categoryRepo;
@@ -55,6 +56,7 @@ public class TransactionService {
         this.currentUser = currentUser;
         this.walletRepo = walletRepo;
         this.detailFactory = detailFactory;
+        this.balanceSyncRepo = balanceSyncRepo;
     }
 
     /**
@@ -64,7 +66,7 @@ public class TransactionService {
     public Transaction createTransaction(TransactionSaveCommand createCommand) {
         User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
         Wallet wallet = walletRepo.getWalletById(createCommand.getWalletId(), user.getId()).orElseThrow(
-                () -> new EntityNotFoundException("Wallet doesn't exists"));
+                () -> new EntityNotFoundException("Wallet doesn't exist"));
 
         Transaction transaction = new Transaction(
                 createCommand.getTransactionName(),
@@ -90,7 +92,7 @@ public class TransactionService {
         User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
 
         Wallet wallet = walletRepo.getWalletById(updateCommand.getWalletId(), user.getId()).orElseThrow(
-                () -> new EntityNotFoundException("Wallet doesn't exists"));
+                () -> new EntityNotFoundException("Wallet doesn't exist"));
 
         Transaction transaction = this.getTransactionByIdForActualUser(id);
         transaction.setName(updateCommand.getTransactionName());
@@ -145,7 +147,7 @@ public class TransactionService {
         var foundCategories = categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
         boolean isAllCategoryAvailableForUser = foundCategories.size() == categoryIds.size();
         if (!isAllCategoryAvailableForUser) {
-            throw new IllegalArgumentException("Input contain id not belongs to the user");
+            throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
         }
         categoryIds.forEach((id) -> {
             Category categoryDummyObject = new Category();
@@ -252,13 +254,27 @@ public class TransactionService {
      * 
      * @param transactionId
      */
+    @Transactional
     public void deleteTransaction(long transactionId) {
         // getTransactionByIdForActualUser itt nem használható, mert itt feleslegesen
-        // töltené be a detailokat és ez törléskor bizonyos esetekben problémát okoz
+        // töltené be a detailokat
         Long userId = currentUser.getUser().getId();
         Transaction transaction = this.transactionRepo.findById(transactionId)
                 .filter(t -> t.getWallet().getUser().getId().equals(userId))
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
+
+        if (transaction.isSyncTransaction()) {
+            // Töröljük a 
+            // Adatintegritási hiba, nem "nem található" eset, ezért nem EntityNotFoundException
+            var balanceSync = balanceSyncRepo.findBySyncTransactionId(transaction.getId())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Transaction " + transactionId + " is a sync transaction, but has no BalanceSync"));
+            this.balanceSyncRepo.delete(balanceSync);
+
+            transaction.setSpecialType(null);
+            this.transactionRepo.save(transaction);
+        }
+
         this.transactionRepo.delete(transaction);
     }
 }

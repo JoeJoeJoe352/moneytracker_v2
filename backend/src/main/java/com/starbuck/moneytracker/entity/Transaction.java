@@ -82,10 +82,19 @@ public class Transaction {
     }
 
     /**
+     * Szinkronizáció során létrejött tranzakció-e
+     * 
+     * @return boolean
+     */
+    public boolean isSyncTransaction() {
+        return this.specialType == TransactionSpecialTypeEnum.SYNC;
+    }
+
+    /**
      * Meghatározza, hogy a tranzakció komplex-e, azaz több tételből áll-e, vagy egy
      * tétel van, de annak a neve kézzel lett felvéve
      * 
-     * @return
+     * @return boolean
      */
     public boolean isComplexTransaction() {
         if (transactionDetails == null || transactionDetails.isEmpty()) {
@@ -103,7 +112,7 @@ public class Transaction {
     /**
      * Kiadás-e az adott tranzakció
      * 
-     * @return
+     * @return boolean
      */
     public boolean isOutcome() {
         return this.transactionType.equals(TransactionTypeEnum.OUTCOME);

@@ -97,9 +97,10 @@ class WalletE2ETest extends MySqlContainerTest {
     @AfterEach
     void cleanupCreatedData() {
         Long userId = this.user.getId();
-        balanceSyncRepository.findAll().stream()
-                .filter(sync -> sync.getWallet().getUser().getId().equals(userId))
-                .forEach(balanceSyncRepository::delete);
+        // A sync bejegyzések soft delete-el törlődnének, ezért hard delete
+        walletRepository.findAll().stream()
+                .filter(wallet -> wallet.getUser().getId().equals(userId))
+                .forEach(wallet -> balanceSyncRepository.hardDeleteAllForWallet(wallet.getId()));
         transactionDetailRepository.findAll().stream()
                 .filter(detail -> detail.getTransaction().getWallet().getUser().getId().equals(userId))
                 .forEach(transactionDetailRepository::delete);

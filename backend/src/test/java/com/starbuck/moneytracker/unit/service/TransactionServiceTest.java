@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
@@ -32,8 +33,10 @@ import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
@@ -70,6 +73,9 @@ class TransactionServiceTest {
     @Mock
     private WalletRepository walletRepo;
 
+    @Mock
+    private BalanceSyncRepository balanceSyncRepo;
+
     private TransactionService transactionService;
 
     private AssertUtil assertUtil;
@@ -85,7 +91,8 @@ class TransactionServiceTest {
     @BeforeEach
     void setUp() {
         transactionService = new TransactionService(transactionRepo, transactionDetailRepo, categoryRepo,
-                transactionDetailCategoryRepository, currentUser, walletRepo, detailFactory);
+                transactionDetailCategoryRepository, currentUser, walletRepo, detailFactory,
+                balanceSyncRepo);
     }
 
     @BeforeEach
@@ -539,5 +546,62 @@ class TransactionServiceTest {
         });
 
         Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
+    }
+
+    /**
+     * Sima (nem sync) tranzakció törlésénél nem nyúl a sync bejegyzésekhez
+     */
+    @Test
+    void deleteTransaction_deletesNormalTransactionWithoutTouchingBalanceSync() {
+        Transaction transaction = createTransactionForUser1(5L);
+        Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
+
+        transactionService.deleteTransaction(5L);
+
+        Mockito.verify(transactionRepo).delete(transaction);
+        Mockito.verifyNoInteractions(balanceSyncRepo);
+    }
+
+    /**
+     * Sync tranzakció törlésénél a hozzá tartozó BalanceSync is törlődik
+     */
+    @Test
+    void deleteTransaction_deletesBalanceSyncOfSyncTransaction() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        BalanceSync balanceSync = new BalanceSync(LocalDate.now(), transaction.getWallet(), new BigDecimal("50.00"));
+        Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
+        Mockito.when(balanceSyncRepo.findBySyncTransactionId(5L)).thenReturn(Optional.of(balanceSync));
+
+        transactionService.deleteTransaction(5L);
+
+        Mockito.verify(balanceSyncRepo).delete(balanceSync);
+        Mockito.verify(transactionRepo).delete(transaction);
+    }
+
+    /**
+     * Ha egy sync tranzakcióhoz nincs BalanceSync, az adatintegritási hiba:
+     * IllegalStateException-t dob, és semmi nem törlődik
+     */
+    @Test
+    void deleteTransaction_throwsWhenSyncTransactionHasNoBalanceSync() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
+        Mockito.when(balanceSyncRepo.findBySyncTransactionId(5L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () -> {
+            transactionService.deleteTransaction(5L);
+        });
+
+        Mockito.verify(balanceSyncRepo, Mockito.never()).delete(any(BalanceSync.class));
+        Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
+    }
+
+    private Transaction createTransactionForUser1(Long id) {
+        Wallet wallet = new Wallet("wallet", new User(1L, "name", "password", "email"), CurrencyEnum.HUF,
+                WalletTypeEnum.DEFAULT);
+        return new Transaction(id, "teszt", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal("-10.00"),
+                0, wallet);
     }
 }

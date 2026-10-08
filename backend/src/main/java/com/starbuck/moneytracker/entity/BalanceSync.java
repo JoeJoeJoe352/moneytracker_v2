@@ -3,6 +3,12 @@ package com.starbuck.moneytracker.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
+import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +19,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
+// soft delete (logikai törlés)
+@SQLDelete(sql = "UPDATE balance_sync SET status = 1 WHERE id = ?")
+// autogenerált sql-ekben csak a nem töröltek jelennek meg
+@SQLRestriction("status = 0")
 @Entity
 @Table(name = "balance_sync")
 public class BalanceSync {
@@ -27,12 +37,20 @@ public class BalanceSync {
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
+    /**
+     * Az egyenleg, a sync bejegyzés létrejöttekor
+     * TODO kitalálni, hogy ez kell-e a későbbiekben, vagy törölhető-e
+     */
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal actualBalance;
 
     @OneToOne(optional = true)
     @JoinColumn(name = "sync_transaction_id", referencedColumnName = "id", nullable = true)
     private Transaction syncTransaction;
+
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
 
     public BalanceSync() {
     }
@@ -81,6 +99,14 @@ public class BalanceSync {
 
     public void setSyncTransaction(Transaction syncTransaction) {
         this.syncTransaction = syncTransaction;
+    }
+
+    public GeneralStatusEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(GeneralStatusEnum status) {
+        this.status = status;
     }
 
 }
