@@ -75,7 +75,7 @@ public class WalletService {
             throw new IllegalArgumentException("updateCommand is null");
         }
         Wallet walletFromDb = walletRepo.getWalletById(id, userUtil.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
 
         walletFromDb.setName(command.getName());
         walletFromDb.setType(command.getType());
@@ -98,7 +98,7 @@ public class WalletService {
      */
     public Wallet getWalletById(long id) {
         return walletRepo.getWalletById(id, userUtil.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
     }
 
     /**
@@ -110,7 +110,7 @@ public class WalletService {
      */
     public Wallet getWalletByIdForUpdate(long id) {
         return walletRepo.getWalletByIdForUpdate(id, userUtil.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
     }
 
     /**
@@ -121,7 +121,7 @@ public class WalletService {
     public void softDeleteWallet(long id) {
         // TODO itt miért nem a this.getWalletById van használva?
         Wallet walletFromDb = walletRepo.getWalletById(id, userUtil.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
 
         walletFromDb.setStatus(GeneralStatusEnum.DISABLED);
 

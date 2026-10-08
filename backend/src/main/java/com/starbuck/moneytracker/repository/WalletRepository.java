@@ -79,7 +79,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     BigDecimal getBalanceOfWallet(long walletId, long userId);
 
     /**
-     * Visszatér a user összes pénzével, valutánként
+     * Visszatér a user összes pénzével, walletenként
      * Lehet null, hogyha még nincs neki tranzakciója adott walleten
      */
     @Query("""

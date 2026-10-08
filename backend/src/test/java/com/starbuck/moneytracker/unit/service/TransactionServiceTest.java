@@ -41,8 +41,8 @@ import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
-import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.TransactionService;
+import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testutils.AssertUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionDetailFactory;
@@ -71,7 +71,7 @@ class TransactionServiceTest {
     private CategoryRepository categoryRepo;
 
     @Mock
-    private WalletRepository walletRepo;
+    private WalletService walletService;
 
     @Mock
     private BalanceSyncRepository balanceSyncRepo;
@@ -91,7 +91,7 @@ class TransactionServiceTest {
     @BeforeEach
     void setUp() {
         transactionService = new TransactionService(transactionRepo, transactionDetailRepo, categoryRepo,
-                transactionDetailCategoryRepository, currentUser, walletRepo, detailFactory,
+                transactionDetailCategoryRepository, currentUser, walletService, detailFactory,
                 balanceSyncRepo);
     }
 
@@ -107,10 +107,10 @@ class TransactionServiceTest {
             return invocatedTransaction;
         });
         Mockito.lenient().when(currentUser.getUser()).thenReturn(new User(1L, "name", "password", "email"));
-        Mockito.lenient().when(walletRepo.getWalletById(anyLong(), anyLong()))
-                .thenReturn(Optional.of(
+        Mockito.lenient().when(walletService.getWalletById(anyLong()))
+                .thenReturn(
                         new Wallet("wallet", new User(1L, "name", "password", "email"), null,
-                                WalletTypeEnum.DEFAULT)));
+                                WalletTypeEnum.DEFAULT));
     }
 
     /**
@@ -569,7 +569,8 @@ class TransactionServiceTest {
     void deleteTransaction_deletesBalanceSyncOfSyncTransaction() {
         Transaction transaction = createTransactionForUser1(5L);
         transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
-        BalanceSync balanceSync = new BalanceSync(LocalDate.now(), transaction.getWallet(), new BigDecimal("50.00"));
+        BalanceSync balanceSync = new BalanceSync(LocalDate.now(), transaction.getWallet(),
+                new BigDecimal("50.00"));
         Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
         Mockito.when(balanceSyncRepo.findBySyncTransactionId(5L)).thenReturn(Optional.of(balanceSync));
 
@@ -601,7 +602,8 @@ class TransactionServiceTest {
     private Transaction createTransactionForUser1(Long id) {
         Wallet wallet = new Wallet("wallet", new User(1L, "name", "password", "email"), CurrencyEnum.HUF,
                 WalletTypeEnum.DEFAULT);
-        return new Transaction(id, "teszt", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal("-10.00"),
+        return new Transaction(id, "teszt", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-10.00"),
                 0, wallet);
     }
 }

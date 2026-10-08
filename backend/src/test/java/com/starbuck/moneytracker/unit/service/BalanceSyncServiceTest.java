@@ -78,7 +78,7 @@ public class BalanceSyncServiceTest {
 
     @Test
     void testSyncWalletNotExistingWallet() {
-        when(walletService.getWalletByIdForUpdate(5L)).thenThrow(new EntityNotFoundException("no wallet found"));
+        when(walletService.getWalletByIdForUpdate(5L)).thenThrow(new EntityNotFoundException("Wallet not found"));
 
         BalanceSyncCommand command = new BalanceSyncCommand(5, LocalDate.now(), new BigDecimal(50));
         assertThrowsExactly(EntityNotFoundException.class, () -> {

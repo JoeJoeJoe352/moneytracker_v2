@@ -44,7 +44,6 @@ import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.UserService;
-import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
@@ -80,8 +79,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Autowired
     private WalletRepository walletRepo;
 
-    @Autowired
-    private WalletService walletService;
 
     @MockitoBean
     private CurrentUserUtil currentUser;
@@ -273,42 +270,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         // rollback miatt nincs egy sem a db-ben
         assertEquals(0, transactionRepo.count());
         assertEquals(0, transactionDetailRepo.count());
-    }
-
-    /**
-     * A user aktív tranzakcióinak összegét adja vissza
-     */
-    @Test
-    void sumAllMoney_returnsSumOfActiveTransactions() {
-        // GIVEN
-        Transaction income = this.persistSimpleTransaction("income", TransactionTypeEnum.INCOME,
-                new BigDecimal(500), LocalDate.now(), this.wallet);
-        Transaction expense = this.persistSimpleTransaction("expense", TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-200), LocalDate.now(), this.wallet);
-
-        var savedEuroWallet = walletRepo
-                .save(new Wallet("Euro tárca", this.user, CurrencyEnum.EUR, WalletTypeEnum.DEFAULT));
-        var savedEmptyWallet = walletRepo
-                .save(new Wallet("Üres tárca", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
-        Transaction incomeEur = this.persistSimpleTransaction("income", TransactionTypeEnum.INCOME,
-                new BigDecimal(1000), LocalDate.now(), savedEuroWallet);
-        // WHEN
-        List<WalletSummaryDto> result = walletService.sumAllMoney();
-
-        // THEN
-        assertEquals(3, result.size());
-        assertEquals(CurrencyEnum.HUF, result.get(0).getCurrencyCode());
-        assertEquals(new BigDecimal("300.00"), result.get(0).getTotal());
-        assertEquals(CurrencyEnum.EUR, result.get(1).getCurrencyCode());
-        assertEquals(new BigDecimal("1000.00"), result.get(1).getTotal());
-        assertEquals(CurrencyEnum.HUF, result.get(2).getCurrencyCode());
-        assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
-
-        this.deleteData(income);
-        this.deleteData(expense);
-        this.deleteData(incomeEur);
-        walletRepo.delete(savedEuroWallet);
-        walletRepo.delete(savedEmptyWallet);
     }
 
     /**

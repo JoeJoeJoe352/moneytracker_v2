@@ -218,6 +218,49 @@ public class WalletServiceTest extends MySqlContainerTest {
         walletRepo.delete(notSyncedWallet);
     }
 
+    /**
+     * A user aktív tranzakcióinak összegét adja vissza walletenként, az üres
+     * wallet 0-val szerepel
+     */
+    @Test
+    public void testSumAllMoney() {
+        // Given
+        var hufWallet = walletService.createWallet(
+                new CreateWalletCommand("HufWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+        var eurWallet = walletService.createWallet(
+                new CreateWalletCommand("EurWallet", CurrencyEnum.EUR, WalletTypeEnum.DEFAULT, this.user));
+        var emptyWallet = walletService.createWallet(
+                new CreateWalletCommand("EmptyWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+
+        var income = transactionRepo.save(new Transaction("income", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(500), hufWallet));
+        var expense = transactionRepo.save(new Transaction("expense", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-200), hufWallet));
+        var incomeEur = transactionRepo.save(new Transaction("income", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(1000), eurWallet));
+
+        try {
+            // When
+            var result = walletService.sumAllMoney();
+
+            // Then
+            assertEquals(3, result.size());
+            assertEquals(CurrencyEnum.HUF, result.get(0).getCurrencyCode());
+            assertEquals(new BigDecimal("300.00"), result.get(0).getTotal());
+            assertEquals(CurrencyEnum.EUR, result.get(1).getCurrencyCode());
+            assertEquals(new BigDecimal("1000.00"), result.get(1).getTotal());
+            assertEquals(CurrencyEnum.HUF, result.get(2).getCurrencyCode());
+            assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
+        } finally {
+            transactionRepo.hardDeleteTransaction(income.getId());
+            transactionRepo.hardDeleteTransaction(expense.getId());
+            transactionRepo.hardDeleteTransaction(incomeEur.getId());
+            walletRepo.delete(hufWallet);
+            walletRepo.delete(eurWallet);
+            walletRepo.delete(emptyWallet);
+        }
+    }
+
     @Test
     public void updateWallet() {
         // Given
@@ -232,7 +275,7 @@ public class WalletServiceTest extends MySqlContainerTest {
 
         // Then
         Wallet updatedWallet = walletRepo.findById(wallet.getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
 
         assertEquals("UpdatedCustomWallet", updatedWallet.getName());
         assertEquals(WalletTypeEnum.DEFAULT, updatedWallet.getType());
@@ -271,7 +314,7 @@ public class WalletServiceTest extends MySqlContainerTest {
 
         // Then
         var deletedWallet = walletRepo.findById(wallet.getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
         assertEquals(GeneralStatusEnum.DISABLED, deletedWallet.getStatus());
 
         assertThrows(EntityNotFoundException.class, () -> {

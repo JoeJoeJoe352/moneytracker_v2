@@ -16,7 +16,6 @@ import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
-import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
@@ -24,7 +23,6 @@ import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
-import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionDetailFactory;
@@ -40,21 +38,22 @@ public class TransactionService {
     private final CategoryRepository categoryRepo;
     private final TransactionDetailCategoryRepository transactionDetailCategoryRepository;
     private final CurrentUserUtil currentUser;
-    private final WalletRepository walletRepo;
+    private final WalletService walletService;
     private final TransactionDetailFactory detailFactory;
-    private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
     private final BalanceSyncRepository balanceSyncRepo;
+    
+    private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
     public TransactionService(TransactionRepository transactionRepo, TransactionDetailRepository transactionDetailRepo,
             CategoryRepository categoryRepo, TransactionDetailCategoryRepository transactionDetailCategoryRepository,
-            CurrentUserUtil currentUser, WalletRepository walletRepo, TransactionDetailFactory detailFactory,
+            CurrentUserUtil currentUser, WalletService walletService, TransactionDetailFactory detailFactory,
             BalanceSyncRepository balanceSyncRepo) {
         this.transactionRepo = transactionRepo;
         this.transactionDetailRepo = transactionDetailRepo;
         this.categoryRepo = categoryRepo;
         this.transactionDetailCategoryRepository = transactionDetailCategoryRepository;
         this.currentUser = currentUser;
-        this.walletRepo = walletRepo;
+        this.walletService = walletService;
         this.detailFactory = detailFactory;
         this.balanceSyncRepo = balanceSyncRepo;
     }
@@ -64,9 +63,7 @@ public class TransactionService {
      */
     @Transactional
     public Transaction createTransaction(TransactionSaveCommand createCommand) {
-        User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
-        Wallet wallet = walletRepo.getWalletById(createCommand.getWalletId(), user.getId()).orElseThrow(
-                () -> new EntityNotFoundException("Wallet doesn't exist"));
+        Wallet wallet = walletService.getWalletById(createCommand.getWalletId());
 
         Transaction transaction = new Transaction(
                 createCommand.getTransactionName(),
@@ -89,10 +86,7 @@ public class TransactionService {
      */
     @Transactional
     public void updateTransaction(Long id, TransactionSaveCommand updateCommand) {
-        User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
-
-        Wallet wallet = walletRepo.getWalletById(updateCommand.getWalletId(), user.getId()).orElseThrow(
-                () -> new EntityNotFoundException("Wallet doesn't exist"));
+        Wallet wallet = walletService.getWalletById(updateCommand.getWalletId());
 
         Transaction transaction = this.getTransactionByIdForActualUser(id);
         transaction.setName(updateCommand.getTransactionName());

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 
+import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
@@ -50,6 +52,18 @@ public class WalletServiceTest {
     void setUp() {
         walletService = new WalletService(walletRepo, messageSource, currentUser);
         when(currentUser.getUser()).thenReturn(user);
+    }
+
+    /**
+     * A bejelentkezett user id-jával kérdezi le az összesítést, és változtatás
+     * nélkül adja vissza
+     */
+    @Test
+    void testSumAllMoney() {
+        var summary = List.of(new WalletSummaryDto(CurrencyEnum.HUF, new BigDecimal("300.00")));
+        when(walletRepo.summarizeTotalMoneyForUser(1L)).thenReturn(summary);
+
+        assertSame(summary, walletService.sumAllMoney());
     }
 
     @Test
