@@ -41,6 +41,7 @@ import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
+import com.starbuck.moneytracker.service.TransactionDetailService;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testutils.AssertUtil;
@@ -90,9 +91,12 @@ class TransactionServiceTest {
 
     @BeforeEach
     void setUp() {
-        transactionService = new TransactionService(transactionRepo, transactionDetailRepo, categoryRepo,
-                transactionDetailCategoryRepository, currentUser, walletService, detailFactory,
-                balanceSyncRepo);
+        // Valódi TransactionDetailService a mockolt repókkal, így a detail mentést
+        // ellenőrző tesztek változatlanul működnek
+        var transactionDetailService = new TransactionDetailService(transactionDetailRepo, categoryRepo,
+                transactionDetailCategoryRepository, currentUser, detailFactory);
+        transactionService = new TransactionService(transactionRepo, transactionDetailService, currentUser,
+                walletService, balanceSyncRepo);
     }
 
     @BeforeEach

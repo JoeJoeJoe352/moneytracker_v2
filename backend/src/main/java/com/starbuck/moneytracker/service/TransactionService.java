@@ -7,25 +7,17 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.dto.WalletSummaryDto;
-import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.entity.TransactionDetail;
-import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
-import com.starbuck.moneytracker.repository.CategoryRepository;
-import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
-import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
-import com.starbuck.moneytracker.util.TransactionDetailFactory;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -34,27 +26,19 @@ import jakarta.persistence.EntityNotFoundException;
 public class TransactionService {
 
     private final TransactionRepository transactionRepo;
-    private final TransactionDetailRepository transactionDetailRepo;
-    private final CategoryRepository categoryRepo;
-    private final TransactionDetailCategoryRepository transactionDetailCategoryRepository;
+    private final TransactionDetailService transactionDetailService;
     private final CurrentUserUtil currentUser;
     private final WalletService walletService;
-    private final TransactionDetailFactory detailFactory;
     private final BalanceSyncRepository balanceSyncRepo;
-    
+
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
-    public TransactionService(TransactionRepository transactionRepo, TransactionDetailRepository transactionDetailRepo,
-            CategoryRepository categoryRepo, TransactionDetailCategoryRepository transactionDetailCategoryRepository,
-            CurrentUserUtil currentUser, WalletService walletService, TransactionDetailFactory detailFactory,
-            BalanceSyncRepository balanceSyncRepo) {
+    public TransactionService(TransactionRepository transactionRepo, TransactionDetailService transactionDetailService,
+            CurrentUserUtil currentUser, WalletService walletService, BalanceSyncRepository balanceSyncRepo) {
         this.transactionRepo = transactionRepo;
-        this.transactionDetailRepo = transactionDetailRepo;
-        this.categoryRepo = categoryRepo;
-        this.transactionDetailCategoryRepository = transactionDetailCategoryRepository;
+        this.transactionDetailService = transactionDetailService;
         this.currentUser = currentUser;
         this.walletService = walletService;
-        this.detailFactory = detailFactory;
         this.balanceSyncRepo = balanceSyncRepo;
     }
 
@@ -74,7 +58,7 @@ public class TransactionService {
         transaction.setSpecialType(createCommand.getSpecialType());
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
 
-        this.saveDetails(savedTransactionModel, createCommand);
+        transactionDetailService.saveDetails(savedTransactionModel, createCommand);
         return savedTransactionModel;
     }
 
@@ -98,58 +82,8 @@ public class TransactionService {
 
         // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
         // kikeresni a meglévőket és frissíteni.
-        // Cascade delete miatt ez törli a detailCategory táblában lévők kapcsolat
-        // bejegyzéseket is TODO ez legyen direktben törlés inkább, ne cascade delete
-        transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
-        this.saveDetails(transaction, updateCommand);
-    }
-
-    /**
-     * Feltölti és elmenti a tranzakciós részleteket
-     * 
-     * @param savedTransaction
-     * @param transactionDetails
-     */
-    private void saveDetails(Transaction savedTransaction, TransactionSaveCommand createCommand) {
-        List<TransactionDetailSaveCommand> details = detailFactory.resolveDetailCommands(createCommand,
-                savedTransaction);
-
-        for (TransactionDetailSaveCommand detailCommand : details) {
-            TransactionDetail detail = new TransactionDetail(
-                    detailCommand.getName(),
-                    costCalculator.calculateCost(detailCommand, savedTransaction.getTransactionType()),
-                    detailCommand.getWeight(),
-                    detailCommand.getUnitPrice(),
-                    savedTransaction);
-            var detailAfterSave = this.transactionDetailRepo.save(detail);
-
-            if (detailCommand.getCategories() != null && !detailCommand.getCategories().isEmpty()) {
-                this.saveCategoryDetailEntries(detailAfterSave, detailCommand.getCategories());
-            }
-        }
-
-    }
-
-    /**
-     * Kapcsolatokat létrehozzuk a detail és a hozzá tartozó kategóriák között
-     * 
-     * @param savedDetail
-     * @param categoryLinkModels
-     */
-    private void saveCategoryDetailEntries(TransactionDetail savedDetail,
-            List<Long> categoryIds) {
-        var foundCategories = categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
-        boolean isAllCategoryAvailableForUser = foundCategories.size() == categoryIds.size();
-        if (!isAllCategoryAvailableForUser) {
-            throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
-        }
-        categoryIds.forEach((id) -> {
-            Category categoryDummyObject = new Category();
-            categoryDummyObject.setId(id);
-            TransactionDetailCategory detailCategoryModel = new TransactionDetailCategory(categoryDummyObject,
-                    savedDetail);
-            transactionDetailCategoryRepository.save(detailCategoryModel);
-        });
+        transactionDetailService.deleteDetails(transaction);
+        transactionDetailService.saveDetails(transaction, updateCommand);
     }
 
     /**
