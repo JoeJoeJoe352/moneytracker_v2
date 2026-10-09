@@ -146,6 +146,15 @@
         "default": "Alapértelmezett típus, amelyet a mindennapi kiadásokhoz használhatsz.",
         "savings": "Megtakarítás típus, amelyet hosszú távú célokra használhatsz, például lakásvásárlásra vagy utazásra."
       }
+    },
+    "sync": {
+      "modal_title": "Egyenleg szinkronizálása",
+      "current_balance": "Jelenlegi pénzösszeg",
+      "current_balance.required": "Jelenlegi pénzösszeg kitöltése kötelező",
+      "current_balance.min": "Jelenlegi pénzösszegnek legalább 0-nak kell lennie",
+      "save_succes": "Egyenleg szinkron mentése sikeres",
+      "sync_button": "Szinkronizálás",
+      "last_sync": "Utolsó szinkron"
     }
   },
   "currency": {

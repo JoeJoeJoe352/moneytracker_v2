@@ -1,7 +1,6 @@
 .wallet-card {
     position: relative;
-    width: 100%;
-    max-width: 320px;
+    min-width: 200px;
     padding-top: 24px;
     cursor: pointer;
     transition: var(--transition-base);
@@ -57,7 +56,11 @@
     min-height: 160px;
     padding: 24px;
     border-radius: var(--border-radius-lg);
-    background: linear-gradient(135deg, var(--moneytracker-green) 0%, var(--moneytracker-darkest-green) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--moneytracker-green) 0%,
+        var(--moneytracker-darkest-green) 100%
+    );
     color: var(--moneytracker-white);
     box-shadow: var(--shadow);
 }
@@ -94,22 +97,41 @@
 }
 
 .wallet-card-bottom {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-top: 20px;
+    div {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
 
-    .wallet-name {
-        max-width: 70%;
-        font-size: 16px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        span:nth-child(1) {
+            max-width: 70%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        span:nth-child(2) {
+            letter-spacing: 0.05em;
+            opacity: 0.75;
+        }
     }
 
-    .wallet-currency-code {
-        font-size: 12px;
-        letter-spacing: 0.05em;
-        opacity: 0.75;
+    .wallet-data-row {
+        margin-top: 20px;
+
+        span:nth-child(2) {
+            font-size: 16px;
+        }
+        span:nth-child(2) {
+            font-size: 12px;
+        }
     }
+
+    .sync-date-row {
+        font-size: 10px;
+        flex-wrap: wrap;
+    }
+}
+
+.sync-button {
+    width: 100%;
 }

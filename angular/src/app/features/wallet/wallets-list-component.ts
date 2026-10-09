@@ -23,4 +23,9 @@ export class WalletsListComponent {
      * Event, hogy user rákattintott valamelyik elemre
      */
     public walletCardClicked = output<WalletDataInterface>();
+
+    /**
+     * Balance sync event, a modal felnyitására
+     */
+    public syncRequested = output<WalletDataInterface>();
 }

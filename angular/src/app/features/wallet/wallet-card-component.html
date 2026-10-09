@@ -26,10 +26,23 @@
         </div>
 
         <div class="wallet-card-bottom">
-            <span class="wallet-name">{{ wallet.name }}</span>
-            <span class="wallet-currency-code">{{
-                walletDataUtil.getCurrencyTextForCurrencyCode(wallet.currencyCode) | translate
-            }}</span>
+            <div class="wallet-data-row">
+                <span class="wallet-name">{{ wallet.name }}</span>
+                <span class="wallet-currency-code">{{
+                    walletDataUtil.getCurrencyTextForCurrencyCode(wallet.currencyCode) | translate
+                }}</span>
+            </div>
+            <div class="sync-date-row">
+                <span>
+                    {{ 'wallet.sync.last_sync' | translate }}
+                </span>
+                <span>
+                    {{ wallet.lastSyncDate }}
+                </span>
+            </div>
         </div>
     </div>
 </div>
+<button matButton class="sync-button" (click)="syncRequested.emit()">
+    {{ 'wallet.sync.sync_button' | translate }}
+</button>

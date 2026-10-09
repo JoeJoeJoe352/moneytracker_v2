@@ -1,14 +1,12 @@
+import { Signal } from '@angular/core';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
-// Store-ban használt interface, store-ban nem akarjuk tárolni a wallet összegét
-export interface WalletDataInterfaceWithoutSum {
+export interface WalletDataInterface {
     id: number;
     name: string;
     currencyCode: CurrencyCodesEnum;
     type: WalletTypesEnum;
-}
-
-export interface WalletDataInterface extends WalletDataInterfaceWithoutSum {
+    lastSyncDate: number;
     sum: number;
 }
 
@@ -21,4 +19,19 @@ export interface WalletCreateRequest {
 export interface WalletUpdateRequest {
     name: string;
     walletType: WalletTypesEnum;
+}
+
+export interface WalletSyncFormInputInterface {
+    wallet: WalletDataInterface;
+    isLoading: Signal<boolean>;
+}
+
+export interface WalletSyncData {
+    walletId: number;
+    currentBalance: number;
+}
+
+export interface WalletSyncDataToBackend extends WalletSyncData {
+    // user dátuma, az időzónában, ez a user időzónájától függ
+    currentDate: string;
 }

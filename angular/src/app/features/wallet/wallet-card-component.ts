@@ -4,12 +4,13 @@ import { WalletDataUtil } from './wallet-data-util';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { MatRippleModule } from '@angular/material/core';
+import { MatAnchor, MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-wallet-card-component',
     templateUrl: './wallet-card-component.html',
     styleUrl: './wallet-card-component.scss',
-    imports: [TranslatePipe, CurrencyFormatPipe, MatRippleModule],
+    imports: [MatButtonModule, TranslatePipe, CurrencyFormatPipe, MatRippleModule, MatAnchor],
 })
 export class WalletCardComponent {
     protected readonly walletDataUtil = inject(WalletDataUtil);
@@ -18,24 +19,26 @@ export class WalletCardComponent {
      * Egy wallet adatai
      */
     public walletData = input.required<WalletDataInterface>();
-
     /**
      * Ha true, a kártya nem kattintható (pl. amíg a lista újratölt)
      */
     public disabled = input(false);
-
     /**
      * Walletra rákattintott a user
      */
-    public cardClicked = output<number>();
+    public cardClicked = output<void>();
+    /**
+     * Szinkronizációs gombra kattintott-e a user
+     */
+    public syncRequested = output<void>();
 
     /**
-     * Kártyára kattintáskor lefutó műveletek 
+     * Kártyára kattintáskor lefutó műveletek
      */
     protected onActivate(): void {
         if (this.disabled()) {
             return;
         }
-        this.cardClicked.emit(this.walletData().id);
+        this.cardClicked.emit();
     }
 }

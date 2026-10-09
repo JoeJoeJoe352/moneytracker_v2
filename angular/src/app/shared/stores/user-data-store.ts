@@ -1,7 +1,7 @@
 import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { UserData } from '../../features/auth/interfaces';
-import { WalletDataInterfaceWithoutSum } from '../../features/wallet/interfaces';
+import { WalletDataInterface } from '../../features/wallet/interfaces';
 
 interface UserDataState {
     /**
@@ -19,7 +19,7 @@ interface UserDataState {
     /**
      * Wallet adatok (privát)
      */
-    _wallets: WalletDataInterfaceWithoutSum[] | null;
+    _wallets: WalletDataInterface[] | null;
 }
 
 const initialState: UserDataState = {
@@ -43,7 +43,7 @@ export const UserDataStore = signalStore(
          * Walletek lekérése
          * Külön withMethods-ban található, hogy a második blokkban lévő függvények meg tudják hívni őket
          */
-        getWallets(): WalletDataInterfaceWithoutSum[] {
+        getWallets(): WalletDataInterface[] {
             const wallets = store._wallets();
             if (!wallets) {
                 throw new Error('Wallets are not loaded');
@@ -53,7 +53,7 @@ export const UserDataStore = signalStore(
         /**
          * Beállítja a wallet adatokat
          */
-        setWallets(wallets: WalletDataInterfaceWithoutSum[]): void {
+        setWallets(wallets: WalletDataInterface[]): void {
             patchState(store, { _wallets: wallets });
         },
     })),
@@ -80,7 +80,7 @@ export const UserDataStore = signalStore(
         /**
          * Visszaadja az alapértelmezett Walletet
          */
-        getDefaultWallet(): WalletDataInterfaceWithoutSum {
+        getDefaultWallet(): WalletDataInterface {
             const firstWallet = store.getWallets()[0];
 
             if (!firstWallet) {
