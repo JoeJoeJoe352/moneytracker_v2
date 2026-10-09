@@ -152,6 +152,7 @@
       "save_succes": "Balance synced successfully",
       "sync_button": "Sync",
       "last_sync": "Last sync",
+      "outdated": "(last sync was more than 30 days ago)",
       "submit": "Sync"
     }
   },

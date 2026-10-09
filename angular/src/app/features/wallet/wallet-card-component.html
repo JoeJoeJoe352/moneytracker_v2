@@ -43,6 +43,19 @@
         </div>
     </div>
 </div>
-<button matButton class="sync-button" (click)="syncRequested.emit()">
+<button
+    matButton
+    class="sync-button"
+    [class.mat-button-danger]="isSyncOutdated()"
+    (click)="syncRequested.emit()"
+>
     {{ 'wallet.sync.sync_button' | translate }}
+    <!-- külön @if-ekben, hogy a mat-icon a gomb ikon slotjába vetüljön -->
+    @if (isSyncOutdated()) {
+        <mat-icon fontIcon="warning" />
+    }
+    <!-- az ikon aria-hidden, ezért a figyelmeztetést szövegesen is megadjuk a képernyőolvasóknak -->
+    @if (isSyncOutdated()) {
+        <span class="cdk-visually-hidden">{{ 'wallet.sync.outdated' | translate }}</span>
+    }
 </button>

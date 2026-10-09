@@ -152,6 +152,7 @@
       "save_succes": "Guthaben erfolgreich synchronisiert",
       "sync_button": "Synchronisieren",
       "last_sync": "Letzte Synchronisierung",
+      "outdated": "(letzte Synchronisierung liegt mehr als 30 Tage zurück)",
       "submit": "Synchronisieren"
     }
   },

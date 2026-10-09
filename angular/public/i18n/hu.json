@@ -160,6 +160,7 @@
       "save_succes": "Egyenleg szinkron mentése sikeres",
       "sync_button": "Szinkronizálás",
       "last_sync": "Utolsó szinkron",
+      "outdated": "(az utolsó szinkronizáció több mint 30 napja volt)",
       "submit": "Szinkronizálás"
     }
   },
