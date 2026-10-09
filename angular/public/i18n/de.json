@@ -141,9 +141,12 @@
     },
     "sync": {
       "modal_title": "Guthaben synchronisieren",
+      "modal_description": "Laut System beträgt das aktuelle Guthaben dieses Wallets {{balance}}. Gib ein, wie viel du tatsächlich hast, um die Daten im System mit den realen Daten abzugleichen!",
+      "modal_result_description": "Nach dem Speichern wird eine Transaktion vom Typ {{type}} mit einem Wert von {{value}} erstellt.",
+      "modal_no_result_description": "Glückwunsch! Das Guthaben im System stimmt mit dem eingegebenen überein, nach dem Speichern ändert sich nur das Datum der letzten Synchronisierung.",
       "current_balance": "Aktuelles Guthaben",
       "current_balance.required": "Aktuelles Guthaben ist erforderlich!",
-      "current_balance.min": "Aktuelles Guthaben muss mindestens 0 sein!",
+      "current_balance.min": "Aktuelles Guthaben muss bei diesem Wallet-Typ mindestens 0 sein!",
       "save_succes": "Guthaben erfolgreich synchronisiert",
       "sync_button": "Synchronisieren",
       "last_sync": "Letzte Synchronisierung",

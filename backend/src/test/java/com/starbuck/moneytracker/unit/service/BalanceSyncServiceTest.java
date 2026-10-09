@@ -18,6 +18,8 @@ import java.util.Locale;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -191,6 +193,83 @@ public class BalanceSyncServiceTest {
         assertTrue(BigDecimal.valueOf(40.00).compareTo(transactionCreateCommand.getGlobalPrice()) == 0);
         assertEquals(actualDate, transactionCreateCommand.getTransactionDate());
         assertEquals(wallet.getId(), transactionCreateCommand.getWalletId());
+    }
+
+    /**
+     * Negatív egyenlegnél (pl. hitelkártya, folyószámlahitel) is a különbség
+     * előjele dönti el a korrekciós tranzakció típusát
+     */
+    @ParameterizedTest(name = "rendszer: {0}, user: {1} -> {2} {3}")
+    @CsvSource({
+            // pozitívból negatívba
+            "20.00, -30.00, OUTCOME, -50.00",
+            // negatívból pozitívba
+            "-20.00, 30.00, INCOME, 50.00",
+            // negatívból kevésbé negatívba
+            "-50.00, -20.00, INCOME, 30.00",
+            // negatívból még negatívabba
+            "-50.00, -80.00, OUTCOME, -30.00",
+            // nullából negatívba
+            "0.00, -15.50, OUTCOME, -15.50",
+    })
+    void testSyncWalletCreateSyncAndTransactionEntryWithNegativeBalance(String balanceInDb, String balanceFromUser,
+            TransactionTypeEnum expectedType, String expectedPrice) {
+        // GIVEN
+        var actualDate = LocalDate.now();
+        when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
+                .thenReturn("Szinkronizálás");
+
+        when(walletService.getWalletByIdForUpdate(1L)).thenReturn(wallet);
+        when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal(balanceInDb));
+        var createdTransaction = new Transaction();
+        when(transactionService.createTransaction(any())).thenReturn(createdTransaction);
+        BalanceSyncCommand command = new BalanceSyncCommand(1, actualDate, new BigDecimal(balanceFromUser));
+
+        ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
+        ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor
+                .forClass(TransactionSaveCommand.class);
+
+        // WHEN
+        balanceSyncService.syncWallet(command);
+
+        // THEN
+        verify(balanceSyncRepo, times(1)).save(argumentCaptorBalanceSync.capture());
+        verify(transactionService, times(1)).createTransaction(argumentCaptorTransactionCreate.capture());
+
+        var savedSyncEntry = argumentCaptorBalanceSync.getValue();
+        assertEquals(new BigDecimal(balanceFromUser), savedSyncEntry.getActualBalance());
+        assertEquals(actualDate, savedSyncEntry.getSyncDate());
+        assertSame(createdTransaction, savedSyncEntry.getSyncTransaction());
+
+        var transactionCreateCommand = argumentCaptorTransactionCreate.getValue();
+        assertEquals(expectedType, transactionCreateCommand.getTransactionType());
+        assertEquals(TransactionSpecialTypeEnum.SYNC, transactionCreateCommand.getSpecialType());
+        assertTrue(new BigDecimal(expectedPrice).compareTo(transactionCreateCommand.getGlobalPrice()) == 0);
+        assertEquals(actualDate, transactionCreateCommand.getTransactionDate());
+        assertEquals(wallet.getId(), transactionCreateCommand.getWalletId());
+    }
+
+    @Test
+    void testSyncWalletCreateOnlySyncEntryWithNegativeBalance() {
+        // GIVEN
+        when(walletService.getWalletByIdForUpdate(1L)).thenReturn(wallet);
+        when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("-50.00"));
+
+        var actualDate = LocalDate.now();
+        BalanceSyncCommand command = new BalanceSyncCommand(1L, actualDate, new BigDecimal("-50.00"));
+
+        ArgumentCaptor<BalanceSync> argumentCaptor = ArgumentCaptor.forClass(BalanceSync.class);
+
+        // WHEN
+        balanceSyncService.syncWallet(command);
+
+        // THEN
+        verify(balanceSyncRepo, times(1)).save(argumentCaptor.capture());
+        verify(transactionService, times(0)).createTransaction(any());
+
+        var savedSyncEntry = argumentCaptor.getValue();
+        assertEquals(new BigDecimal("-50.00"), savedSyncEntry.getActualBalance());
+        assertNull(savedSyncEntry.getSyncTransaction());
     }
 
 }

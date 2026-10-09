@@ -141,9 +141,12 @@
     },
     "sync": {
       "modal_title": "Sync balance",
+      "modal_description": "According to the system, the current balance of this wallet is {{balance}}. Enter how much you actually have, to bring the system and the real data in sync!",
+      "modal_result_description": "After saving, an {{type}} transaction will be created with a value of {{value}}.",
+      "modal_no_result_description": "Congratulations! The system balance matches the entered balance, so after saving only the last sync date will change.",
       "current_balance": "Current balance",
       "current_balance.required": "Current balance is required!",
-      "current_balance.min": "Current balance must be at least 0!",
+      "current_balance.min": "Current balance must be at least 0 for this wallet type!",
       "save_succes": "Balance synced successfully",
       "sync_button": "Sync",
       "last_sync": "Last sync",

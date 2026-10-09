@@ -5,6 +5,13 @@
 
 <form [formGroup]="syncForm" (ngSubmit)="submitForm()">
     <mat-dialog-content>
+        <p class="text">
+            {{
+                'wallet.sync.modal_description'
+                    | translate
+                        : { balance: (data.wallet.sum | currencyFormat: data.wallet.currencyCode) }
+            }}
+        </p>
         <div class="form-row">
             <!-- Egyenleg -->
             <mat-form-field>
@@ -27,15 +34,15 @@
                             'wallet.sync.current_balance.required' | translate
                         }}</mat-error>
                     }
-                    @if (syncForm.controls.currentBalance.hasError('min')) {
-                        <mat-error>{{ 'wallet.sync.current_balance.min' | translate }}</mat-error>
-                    }
                 }
             </mat-form-field>
         </div>
+        <p class="text">
+            {{ resultText() }}
+        </p>
     </mat-dialog-content>
     <mat-dialog-actions [align]="'end'">
-        <button matButton type="submit" [disabled]="data.isLoading()">
+        <button matButton="filled" type="submit" [disabled]="data.isLoading()">
             {{ 'wallet.sync.submit' | translate }}
         </button>
     </mat-dialog-actions>
