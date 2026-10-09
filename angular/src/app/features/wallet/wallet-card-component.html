@@ -26,10 +26,36 @@
         </div>
 
         <div class="wallet-card-bottom">
-            <span class="wallet-name">{{ wallet.name }}</span>
-            <span class="wallet-currency-code">{{
-                walletDataUtil.getCurrencyTextForCurrencyCode(wallet.currencyCode) | translate
-            }}</span>
+            <div class="wallet-data-row">
+                <span class="wallet-name">{{ wallet.name }}</span>
+                <span class="wallet-currency-code">{{
+                    walletDataUtil.getCurrencyTextForCurrencyCode(wallet.currencyCode) | translate
+                }}</span>
+            </div>
+            <div class="sync-date-row">
+                <span>
+                    {{ 'wallet.sync.last_sync' | translate }}
+                </span>
+                <span>
+                    {{ wallet.lastSyncDate }}
+                </span>
+            </div>
         </div>
     </div>
 </div>
+<button
+    matButton
+    class="sync-button"
+    [class.mat-button-danger]="isSyncOutdated()"
+    (click)="syncRequested.emit()"
+>
+    {{ 'wallet.sync.sync_button' | translate }}
+    <!-- külön @if-ekben, hogy a mat-icon a gomb ikon slotjába vetüljön -->
+    @if (isSyncOutdated()) {
+        <mat-icon fontIcon="warning" />
+    }
+    <!-- az ikon aria-hidden, ezért a figyelmeztetést szövegesen is megadjuk a képernyőolvasóknak -->
+    @if (isSyncOutdated()) {
+        <span class="cdk-visually-hidden">{{ 'wallet.sync.outdated' | translate }}</span>
+    }
+</button>

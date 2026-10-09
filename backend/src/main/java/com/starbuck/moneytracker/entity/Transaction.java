@@ -11,6 +11,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 import jakarta.persistence.Id;
@@ -47,6 +48,10 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionTypeEnum transactionType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private TransactionSpecialTypeEnum specialType;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal priceSum;
 
@@ -77,10 +82,19 @@ public class Transaction {
     }
 
     /**
+     * Szinkronizáció során létrejött tranzakció-e
+     * 
+     * @return boolean
+     */
+    public boolean isSyncTransaction() {
+        return this.specialType == TransactionSpecialTypeEnum.SYNC;
+    }
+
+    /**
      * Meghatározza, hogy a tranzakció komplex-e, azaz több tételből áll-e, vagy egy
      * tétel van, de annak a neve kézzel lett felvéve
      * 
-     * @return
+     * @return boolean
      */
     public boolean isComplexTransaction() {
         if (transactionDetails == null || transactionDetails.isEmpty()) {
@@ -98,7 +112,7 @@ public class Transaction {
     /**
      * Kiadás-e az adott tranzakció
      * 
-     * @return
+     * @return boolean
      */
     public boolean isOutcome() {
         return this.transactionType.equals(TransactionTypeEnum.OUTCOME);
@@ -207,5 +221,13 @@ public class Transaction {
 
     public void setWallet(Wallet wallet) {
         this.wallet = wallet;
+    }
+
+    public TransactionSpecialTypeEnum getSpecialType() {
+        return specialType;
+    }
+
+    public void setSpecialType(TransactionSpecialTypeEnum specialType) {
+        this.specialType = specialType;
     }
 }

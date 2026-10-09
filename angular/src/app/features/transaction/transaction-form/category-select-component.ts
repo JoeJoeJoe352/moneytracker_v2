@@ -62,17 +62,18 @@ export class CategorySelectComponent implements ControlValueAccessor {
      */
     public categoryData = input.required<DropdownInterface[]>();
     /**
-     * Kategória mentése folyamatban van-e (ez alatt az egész komponens le van tiltva)
+     * Kategória mentése folyamatban van-e (ez alatt az egész komponens le van tiltva).
+     * Nem lehet "disabled" a neve, mert a formControlName direktívának is van ilyen inputja
      */
-    public disabled = input(false);
+    public isCategorySaveInProgress = input(false);
     /**
      * A form (ControlValueAccessor.setDisabledState) letiltotta-e a mezőt
      */
     private formDisabled = signal(false);
     /**
-     * Ténylegesen le van-e tiltva a komponens (a disabled input vagy a form letiltása miatt)
+     * Ténylegesen le van-e tiltva a komponens (mentés folyamatban vagy a form letiltása miatt)
      */
-    protected isDisabled = computed(() => this.disabled() || this.formDisabled());
+    protected isDisabled = computed(() => this.isCategorySaveInProgress() || this.formDisabled());
 
     public addCategoryCallback =
         input.required<(name: string) => Observable<CategoryResponseInterface>>();

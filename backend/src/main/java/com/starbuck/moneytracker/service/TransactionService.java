@@ -1,61 +1,46 @@
 package com.starbuck.moneytracker.service;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.dto.WalletSummaryDto;
-import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.repository.CategoryRepository;
-import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
-import com.starbuck.moneytracker.repository.TransactionDetailRepository;
+import com.starbuck.moneytracker.entity.TransactionFilter;
+import com.starbuck.moneytracker.entity.Wallet;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
-import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
-import com.starbuck.moneytracker.util.TransactionDetailFactory;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 import jakarta.persistence.EntityNotFoundException;
-
-import com.starbuck.moneytracker.entity.TransactionDetail;
-import com.starbuck.moneytracker.entity.TransactionDetailCategory;
-import com.starbuck.moneytracker.entity.TransactionFilter;
-import com.starbuck.moneytracker.entity.User;
-import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 @Service
 public class TransactionService {
 
     private final TransactionRepository transactionRepo;
-    private final TransactionDetailRepository transactionDetailRepo;
-    private final CategoryRepository categoryRepo;
-    private final TransactionDetailCategoryRepository transactionDetailCategoryRepository;
+    private final TransactionDetailService transactionDetailService;
     private final CurrentUserUtil currentUser;
-    private final WalletRepository walletRepo;
-    private final TransactionDetailFactory detailFactory;
+    private final WalletService walletService;
+    private final BalanceSyncRepository balanceSyncRepo;
 
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
-    public TransactionService(TransactionRepository transactionRepo, TransactionDetailRepository transactionDetailRepo,
-            CategoryRepository categoryRepo, TransactionDetailCategoryRepository transactionDetailCategoryRepository,
-            CurrentUserUtil currentUser, WalletRepository walletRepo, TransactionDetailFactory detailFactory) {
+    public TransactionService(TransactionRepository transactionRepo, TransactionDetailService transactionDetailService,
+            CurrentUserUtil currentUser, WalletService walletService, BalanceSyncRepository balanceSyncRepo) {
         this.transactionRepo = transactionRepo;
-        this.transactionDetailRepo = transactionDetailRepo;
-        this.categoryRepo = categoryRepo;
-        this.transactionDetailCategoryRepository = transactionDetailCategoryRepository;
+        this.transactionDetailService = transactionDetailService;
         this.currentUser = currentUser;
-        this.walletRepo = walletRepo;
-        this.detailFactory = detailFactory;
+        this.walletService = walletService;
+        this.balanceSyncRepo = balanceSyncRepo;
     }
 
     /**
@@ -63,9 +48,7 @@ public class TransactionService {
      */
     @Transactional
     public Transaction createTransaction(TransactionSaveCommand createCommand) {
-        User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
-        Wallet wallet = walletRepo.getWalletById(createCommand.getWalletId(), user.getId()).orElseThrow(
-                () -> new EntityNotFoundException("Wallet doesn't exists"));
+        Wallet wallet = walletService.getWalletById(createCommand.getWalletId());
 
         Transaction transaction = new Transaction(
                 createCommand.getTransactionName(),
@@ -73,9 +56,10 @@ public class TransactionService {
                 createCommand.getTransactionType(),
                 costCalculator.calculateTransactionCost(createCommand),
                 wallet);
+        transaction.setSpecialType(createCommand.getSpecialType());
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
 
-        this.saveDetails(savedTransactionModel, createCommand);
+        transactionDetailService.saveDetails(savedTransactionModel, createCommand);
         return savedTransactionModel;
     }
 
@@ -87,12 +71,17 @@ public class TransactionService {
      */
     @Transactional
     public void updateTransaction(Long id, TransactionSaveCommand updateCommand) {
-        User user = currentUser.getUser(); // TODO EZ KÉSŐBB NEM KELL, HA A TRANZAKCIÓHOZ NEM KELL MAJD USERID
-
-        Wallet wallet = walletRepo.getWalletById(updateCommand.getWalletId(), user.getId()).orElseThrow(
-                () -> new EntityNotFoundException("Wallet doesn't exists"));
+        Wallet wallet = walletService.getWalletById(updateCommand.getWalletId());
 
         Transaction transaction = this.getTransactionByIdForActualUser(id);
+
+        // A szinkronizációs tranzakció a BalanceSync-en keresztül egy wallethez kötött,
+        // áthelyezve rossz wallet egyenlegét korrigálná
+        if (transaction.isSyncTransaction()
+                && !Objects.equals(transaction.getWallet().getId(), updateCommand.getWalletId())) {
+            throw new IllegalArgumentException("Wallet of sync transaction " + id + " cannot be changed");
+        }
+
         transaction.setName(updateCommand.getTransactionName());
         transaction.setTransactionDate(updateCommand.getTransactionDate());
         transaction.setTransactionType(updateCommand.getTransactionType());
@@ -102,65 +91,8 @@ public class TransactionService {
 
         // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
         // kikeresni a meglévőket és frissíteni.
-        // Cascade delete miatt ez törli a detailCategory táblában lévők kapcsolat
-        // bejegyzéseket is TODO ez legyen direktben törlés inkább, ne cascade delete
-        transactionDetailRepo.deleteAll(transaction.getTransactionDetails());
-        this.saveDetails(transaction, updateCommand);
-    }
-
-    /**
-     * Feltölti és elmenti a tranzakciós részleteket
-     * 
-     * @param savedTransaction
-     * @param transactionDetails
-     */
-    private void saveDetails(Transaction savedTransaction, TransactionSaveCommand createCommand) {
-        List<TransactionDetailSaveCommand> details = detailFactory.resolveDetailCommands(createCommand,
-                savedTransaction);
-
-        for (TransactionDetailSaveCommand detailCommand : details) {
-            TransactionDetail detail = new TransactionDetail(
-                    detailCommand.getName(),
-                    costCalculator.calculateCost(detailCommand, savedTransaction.getTransactionType()),
-                    detailCommand.getWeight(),
-                    detailCommand.getUnitPrice(),
-                    savedTransaction);
-            var detailAfterSave = this.transactionDetailRepo.save(detail);
-
-            if (detailCommand.getCategories() != null && !detailCommand.getCategories().isEmpty()) {
-                this.saveCategoryDetailEntries(detailAfterSave, detailCommand.getCategories());
-            }
-        }
-
-    }
-
-    /**
-     * Kapcsolatokat létrehozzuk a detail és a hozzá tartozó kategóriák között
-     * 
-     * @param savedDetail
-     * @param categoryLinkModels
-     */
-    private void saveCategoryDetailEntries(TransactionDetail savedDetail,
-            List<Long> categoryIds) {
-        var foundCategories = categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
-        boolean isAllCategoryAvailableForUser = foundCategories.size() == categoryIds.size();
-        if (!isAllCategoryAvailableForUser) {
-            throw new IllegalArgumentException("Input contain id not belongs to the user");
-        }
-        categoryIds.forEach((id) -> {
-            Category categoryDummyObject = new Category();
-            categoryDummyObject.setId(id);
-            TransactionDetailCategory detailCategoryModel = new TransactionDetailCategory(categoryDummyObject,
-                    savedDetail);
-            transactionDetailCategoryRepository.save(detailCategoryModel);
-        });
-    }
-
-    /**
-     * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
-     */
-    public List<WalletSummaryDto> sumAllMoney() {
-        return this.walletRepo.summarizeTotalMoneyForUser(currentUser.getUser().getId());
+        transactionDetailService.deleteDetails(transaction);
+        transactionDetailService.saveDetails(transaction, updateCommand);
     }
 
     /**
@@ -252,13 +184,26 @@ public class TransactionService {
      * 
      * @param transactionId
      */
+    @Transactional
     public void deleteTransaction(long transactionId) {
         // getTransactionByIdForActualUser itt nem használható, mert itt feleslegesen
-        // töltené be a detailokat és ez törléskor bizonyos esetekben problémát okoz
+        // töltené be a detailokat
         Long userId = currentUser.getUser().getId();
         Transaction transaction = this.transactionRepo.findById(transactionId)
                 .filter(t -> t.getWallet().getUser().getId().equals(userId))
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
+
+        if (transaction.isSyncTransaction()) {
+            var balanceSync = balanceSyncRepo.findBySyncTransactionId(transaction.getId())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Transaction " + transactionId + " is a sync transaction, but has no BalanceSync"));
+
+            this.balanceSyncRepo.delete(balanceSync);
+
+            transaction.setSpecialType(null);
+            this.transactionRepo.save(transaction);
+        }
+
         this.transactionRepo.delete(transaction);
     }
 }

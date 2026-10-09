@@ -10,8 +10,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 
@@ -79,7 +79,7 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void emptyDetailArray_returnsZero() {
-        var transaction = new TransactionCreateCommand("bevásárlás", new BigDecimal("300.00"), LocalDate.now(),
+        var transaction = new TransactionSaveCommand("bevásárlás", new BigDecimal("300.00"), LocalDate.now(),
                 TransactionTypeEnum.INCOME, List.of(), List.of(), 1L);
 
         assertEquals(new BigDecimal("300.00"), service.calculateTransactionCost(transaction));
@@ -145,7 +145,7 @@ class CostCalculatorDomainServiceTest {
                 List.of());
         var detail2 = new TransactionDetailSaveCommand("tej", new BigDecimal("-300"), List.of(),
                 TransactionTypeEnum.OUTCOME);
-        var transaction = new TransactionCreateCommand("bevásárlás", null, LocalDate.now(),
+        var transaction = new TransactionSaveCommand("bevásárlás", null, LocalDate.now(),
                 TransactionTypeEnum.OUTCOME, List.of(detail1, detail2), List.of(), 1L);
 
         var result = service.calculateTransactionCost(transaction);

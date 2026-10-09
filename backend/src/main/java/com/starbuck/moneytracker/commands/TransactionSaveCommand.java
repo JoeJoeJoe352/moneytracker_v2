@@ -5,24 +5,27 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
+import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
-public abstract class TransactionSaveCommand {
-    protected BigDecimal globalPrice;
-    protected String transactionName;
-    protected LocalDate transactionDate;
-    protected TransactionTypeEnum transactionType;
-    protected List<TransactionDetailSaveCommand> detailCommands;
-    protected List<Long> categories;
-    protected Long walletId;
+public class TransactionSaveCommand {
+    private BigDecimal globalPrice;
+    private String transactionName;
+    private LocalDate transactionDate;
+    private TransactionTypeEnum transactionType;
+    private List<TransactionDetailSaveCommand> detailCommands;
+    private List<Long> categories;
+    private Long walletId;
+    private TransactionSpecialTypeEnum specialType;
 
     /**
-     * @param name
-     * @param globalPrice
-     * @param date
-     * @param type
-     * @param detailCommands
-     * @param categories
+     * @param name              Tranzakció neve
+     * @param globalPrice       Tranzakció ára (lehet null, ha detailban lesz)
+     * @param date              Tranzakció ideje
+     * @param type              Tranzakció típusa
+     * @param detailCommands    Tranzakcióhoz tartozó detail-ek (lehet üres)
+     * @param categories        Tranzakcióhoz kategóriái (lehet üres)
+     * @param walletId          Tranzakcióhoz tartozó wallet
      */
     public TransactionSaveCommand(String name, BigDecimal globalPrice, LocalDate date, TransactionTypeEnum type,
             List<TransactionDetailSaveCommand> detailCommands, List<Long> categories, Long walletId) {
@@ -49,6 +52,8 @@ public abstract class TransactionSaveCommand {
         if (date == null) {
             throw new IllegalArgumentException("Transaction date cannot be null");
         }
+        // TODO validálni, hogy user a saját időzónájához képest ne tudjon jövőbeni időt
+        // beállítani
         if (walletId == null) {
             throw new IllegalArgumentException("WalletId cannot be null");
         }
@@ -65,6 +70,14 @@ public abstract class TransactionSaveCommand {
         this.detailCommands = detailCommands;
         this.categories = categories;
         this.walletId = walletId;
+    }
+
+    /**
+     * Hozzáadja az opcionális specialType paramétert. Builder pattern
+     */
+    public TransactionSaveCommand withSpecialType(TransactionSpecialTypeEnum specialType) {
+        this.specialType = specialType;
+        return this;
     }
 
     public String getTransactionName() {
@@ -93,6 +106,10 @@ public abstract class TransactionSaveCommand {
 
     public Long getWalletId() {
         return walletId;
+    }
+
+    public TransactionSpecialTypeEnum getSpecialType() {
+        return specialType;
     }
 
 }

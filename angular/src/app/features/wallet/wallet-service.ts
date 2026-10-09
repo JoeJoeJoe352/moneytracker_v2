@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { WalletDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
+import {
+    WalletDataInterface,
+    WalletCreateRequest,
+    WalletUpdateRequest,
+    WalletSyncData,
+    WalletSyncDataToBackend,
+} from './interfaces';
 
 @Injectable({
     providedIn: 'root',
@@ -35,5 +41,17 @@ export class WalletService {
      */
     softDeleteWallet(id: number): Observable<void> {
         return this.http.delete<void>('/api/wallet/' + id);
+    }
+
+    /**
+     * Balance szinkronizációs kérést indít a backend felé
+     */
+    syncWallet(data: WalletSyncData): Observable<void> {
+        const walletDataWithDate: WalletSyncDataToBackend = {
+            currentBalance: data.currentBalance,
+            syncDate: new Date().toLocaleDateString('sv-SE'),
+        };
+
+        return this.http.post<void>('/api/wallet/' + data.walletId + '/sync', walletDataWithDate);
     }
 }

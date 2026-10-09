@@ -10,8 +10,8 @@ describe('WalletsListComponent (Vitest)', () => {
     let component: WalletsListComponent;
 
     const wallets: WalletDataInterface[] = [
-        { id: 1, name: 'Napi költés', currencyCode: CurrencyCodesEnum.huf, type: WalletTypesEnum.default, sum: 0 },
-        { id: 2, name: 'Megtakarítás', currencyCode: CurrencyCodesEnum.eur, type: WalletTypesEnum.savings, sum: 0 },
+        { id: 1, name: 'Napi költés', currencyCode: CurrencyCodesEnum.huf, type: WalletTypesEnum.default, sum: 0, lastSyncDate: '2026-09-15' },
+        { id: 2, name: 'Megtakarítás', currencyCode: CurrencyCodesEnum.eur, type: WalletTypesEnum.savings, sum: 0, lastSyncDate: '2026-09-15' },
     ];
 
     beforeEach(async () => {
@@ -54,5 +54,17 @@ describe('WalletsListComponent (Vitest)', () => {
         fixture.nativeElement.querySelector('app-wallet-card-component .wallet-card').click();
 
         expect(clicked).toBeUndefined();
+    });
+
+    it('should emit syncRequested with the wallet whose sync button was clicked', () => {
+        fixture.detectChanges();
+
+        let synced: WalletDataInterface | undefined;
+        component.syncRequested.subscribe((wallet) => (synced = wallet));
+
+        const cards = fixture.nativeElement.querySelectorAll('app-wallet-card-component');
+        cards[1].querySelector('.sync-button').click();
+
+        expect(synced).toEqual(wallets[1]);
     });
 });

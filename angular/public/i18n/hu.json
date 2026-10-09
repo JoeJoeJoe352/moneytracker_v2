@@ -96,6 +96,8 @@
     "show_details": "Tételenként",
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
+    "is_sync_transaction": "Szinkronizáció során létrejött tranzakció",
+    "wallet.sync_locked": "Szinkronizációs tranzakció tárcája nem módosítható",
     "category": {
       "add": "Új kategória hozzáadásához kattints ide!",
       "remove": "{{name}} eltávolítása"
@@ -146,6 +148,20 @@
         "default": "Alapértelmezett típus, amelyet a mindennapi kiadásokhoz használhatsz.",
         "savings": "Megtakarítás típus, amelyet hosszú távú célokra használhatsz, például lakásvásárlásra vagy utazásra."
       }
+    },
+    "sync": {
+      "modal_title": "Egyenleg szinkronizálása",
+      "modal_description": "A rendszer szerint jelenleg a tárca egyenlege {{balance}}. Add meg a mezőbe, hogy valójában mennyi van, hogy szinkronba hozd a rendszerben lévő és a valós adatokat!",
+      "modal_result_description": "Mentés után létre fog jönni egy {{type}} tranzakció, {{value}} értékkel.",
+      "modal_no_result_description": "Gratulálunk! A rendszerbeli és a megadott egyenleg megegyezik, mentés után csak az utolsó szinkronizáció dátuma fog változni.",
+      "current_balance": "Jelenlegi pénzösszeg",
+      "current_balance.required": "Jelenlegi pénzösszeg kitöltése kötelező",
+      "current_balance.min": "Jelenlegi pénzösszegnek legalább 0-nak kell lennie ebben a tárcatípusban",
+      "save_succes": "Egyenleg szinkron mentése sikeres",
+      "sync_button": "Szinkronizálás",
+      "last_sync": "Utolsó szinkron",
+      "outdated": "(az utolsó szinkronizáció több mint 30 napja volt)",
+      "submit": "Szinkronizálás"
     }
   },
   "currency": {

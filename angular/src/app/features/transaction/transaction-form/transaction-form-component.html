@@ -27,7 +27,7 @@
         </div>
         <div class="form-row">
             <!-- Wallet -->
-            <mat-form-field>
+            <mat-form-field [subscriptSizing]="isSyncTransaction() ? 'dynamic' : 'fixed'">
                 <mat-label>{{ 'transaction.wallet' | translate }}</mat-label>
                 <mat-select id="transaction-wallet" formControlName="walletId">
                     @for (item of userData.getWallets(); track item.id) {
@@ -36,6 +36,11 @@
                         >
                     }
                 </mat-select>
+                @if (isSyncTransaction()) {
+                    <mat-hint class="wallet-sync-locked-hint">{{
+                        'transaction.wallet.sync_locked' | translate
+                    }}</mat-hint>
+                }
             </mat-form-field>
 
             <!-- Dátum -->
@@ -142,7 +147,7 @@
                     <app-category-select
                         formControlName="categories"
                         [categoryData]="categoryData()"
-                        [disabled]="isCategorySaveInProgress()"
+                        [isCategorySaveInProgress]="isCategorySaveInProgress()"
                         [addCategoryCallback]="addCategoryCallback()"
                     />
                 </div>

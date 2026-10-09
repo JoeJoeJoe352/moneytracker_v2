@@ -1,6 +1,10 @@
 @use '@angular/material' as mat;
+@use '@angular/cdk' as cdk;
 @use './app/styles/moneytracker-colors' as colors;
 @use './app/styles/variables' as *;
+
+// .cdk-visually-hidden: képernyőolvasónak szóló, vizuálisan rejtett szövegekhez
+@include cdk.a11y-visually-hidden();
 
 // Roboto saját kiszolgálása a Google Fonts helyett
 @font-face {

@@ -22,6 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
+import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -29,6 +30,7 @@ import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
@@ -53,6 +55,9 @@ public class WalletServiceTest extends MySqlContainerTest {
 
     @Autowired
     WalletRepository walletRepo;
+
+    @Autowired
+    BalanceSyncRepository balanceSyncRepo;
 
     @MockitoBean
     CurrentUserUtil currentUser;
@@ -174,6 +179,88 @@ public class WalletServiceTest extends MySqlContainerTest {
         userRepository.delete(savedAnotherUser);
     }
 
+    /**
+     * A listában az utolsó szinkronizálás dátuma jelenik meg, ha még nem volt,
+     * akkor a wallet létrehozásának dátuma
+     */
+    @Test
+    public void testListWalletsLastSyncDate() {
+        // Given
+        var syncedWallet = walletService.createWallet(
+                new CreateWalletCommand("SyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+        var notSyncedWallet = walletService.createWallet(
+                new CreateWalletCommand("NotSyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+
+        var olderSync = balanceSyncRepo
+                .save(new BalanceSync(LocalDate.of(2026, 9, 1), syncedWallet, new BigDecimal("10.00")));
+        var latestSync = balanceSyncRepo
+                .save(new BalanceSync(LocalDate.of(2026, 9, 15), syncedWallet, new BigDecimal("20.00")));
+
+        // When
+        List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
+
+        // Then
+        assertEquals(2, wallets.size());
+
+        assertEquals("SyncedWallet", wallets.get(0).name());
+        assertEquals(LocalDate.of(2026, 9, 15), wallets.get(0).lastSyncDate());
+        // A sync bejegyzések nem befolyásolják az összeget
+        assertEquals(new BigDecimal("0.00"), wallets.get(0).sum());
+
+        // A db-ben tárolt létrehozási dátumhoz assertál, nem a LocalDate.now()-hoz,
+        // így éjfélkor és eltérő időzónáknál sem bukik el
+        var notSyncedCreatedAt = walletRepo.findById(notSyncedWallet.getId()).orElseThrow().getCreatedAt();
+        assertEquals("NotSyncedWallet", wallets.get(1).name());
+        assertEquals(notSyncedCreatedAt.toLocalDate(), wallets.get(1).lastSyncDate());
+
+        balanceSyncRepo.hardDeleteAllForWallet(syncedWallet.getId());
+        walletRepo.delete(syncedWallet);
+        walletRepo.delete(notSyncedWallet);
+    }
+
+    /**
+     * A user aktív tranzakcióinak összegét adja vissza walletenként, az üres
+     * wallet 0-val szerepel
+     */
+    @Test
+    public void testSumAllMoney() {
+        // Given
+        var hufWallet = walletService.createWallet(
+                new CreateWalletCommand("HufWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+        var eurWallet = walletService.createWallet(
+                new CreateWalletCommand("EurWallet", CurrencyEnum.EUR, WalletTypeEnum.DEFAULT, this.user));
+        var emptyWallet = walletService.createWallet(
+                new CreateWalletCommand("EmptyWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+
+        var income = transactionRepo.save(new Transaction("income", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(500), hufWallet));
+        var expense = transactionRepo.save(new Transaction("expense", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-200), hufWallet));
+        var incomeEur = transactionRepo.save(new Transaction("income", LocalDate.now(), TransactionTypeEnum.INCOME,
+                new BigDecimal(1000), eurWallet));
+
+        try {
+            // When
+            var result = walletService.sumAllMoney();
+
+            // Then
+            assertEquals(3, result.size());
+            assertEquals(CurrencyEnum.HUF, result.get(0).getCurrencyCode());
+            assertEquals(new BigDecimal("300.00"), result.get(0).getTotal());
+            assertEquals(CurrencyEnum.EUR, result.get(1).getCurrencyCode());
+            assertEquals(new BigDecimal("1000.00"), result.get(1).getTotal());
+            assertEquals(CurrencyEnum.HUF, result.get(2).getCurrencyCode());
+            assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
+        } finally {
+            transactionRepo.hardDeleteTransaction(income.getId());
+            transactionRepo.hardDeleteTransaction(expense.getId());
+            transactionRepo.hardDeleteTransaction(incomeEur.getId());
+            walletRepo.delete(hufWallet);
+            walletRepo.delete(eurWallet);
+            walletRepo.delete(emptyWallet);
+        }
+    }
+
     @Test
     public void updateWallet() {
         // Given
@@ -188,7 +275,7 @@ public class WalletServiceTest extends MySqlContainerTest {
 
         // Then
         Wallet updatedWallet = walletRepo.findById(wallet.getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
 
         assertEquals("UpdatedCustomWallet", updatedWallet.getName());
         assertEquals(WalletTypeEnum.DEFAULT, updatedWallet.getType());
@@ -227,7 +314,7 @@ public class WalletServiceTest extends MySqlContainerTest {
 
         // Then
         var deletedWallet = walletRepo.findById(wallet.getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
         assertEquals(GeneralStatusEnum.DISABLED, deletedWallet.getStatus());
 
         assertThrows(EntityNotFoundException.class, () -> {

@@ -9,7 +9,12 @@ import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction-service';
 import { TransactionUtils } from '../transaction-utils';
 import { TransactionDataFromBackend } from '../interfaces';
-import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
+import {
+    CurrencyCodesEnum,
+    TransactionSpecialTypeEnum,
+    TransactionTypeEnum,
+    WalletTypesEnum,
+} from '@shared/enums';
 import { WalletDataInterface } from '../../wallet/interfaces';
 import { UserDataStore } from '@app/shared/stores/user-data-store';
 
@@ -195,6 +200,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             transactionDate: '2024-02-01',
             isComplexTransaction: false,
             walletId: 1,
+            specialType: null,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -254,6 +260,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             transactionDate: '2024-02-01',
             isComplexTransaction: false,
             walletId: 1,
+            specialType: null,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -343,6 +350,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             transactionDate: '2024-02-01',
             isComplexTransaction: false,
             walletId: 2,
+            specialType: null,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -380,5 +388,73 @@ describe('TransactionFormComponent (Vitest)', () => {
 
         const priceSuffix = fixture.nativeElement.querySelector('[matTextSuffix]');
         expect(priceSuffix.textContent.trim()).toBe('Ft');
+    });
+
+    function createBackendTransaction(
+        specialType: TransactionSpecialTypeEnum | null,
+    ): TransactionDataFromBackend {
+        return {
+            id: 9,
+            name: 'Szinkronizálás: Euro Wallet',
+            priceSum: -1000,
+            transactionType: TransactionTypeEnum.OUTCOME,
+            transactionDate: '2024-02-01',
+            isComplexTransaction: false,
+            walletId: 2,
+            specialType,
+            transactionDetails: [
+                {
+                    name: 'sum',
+                    price: -1000,
+                    weight: null,
+                    unitPrice: null,
+                    isComplexPriceMode: false,
+                    categories: [],
+                },
+            ],
+        };
+    }
+
+    it('should lock the wallet select and show a hint for a sync transaction, but still submit its wallet id', () => {
+        fixture.componentRef.setInput(
+            'transaction',
+            createBackendTransaction(TransactionSpecialTypeEnum.SYNC),
+        );
+        fixture.detectChanges();
+
+        expect(component.walletId.disabled).toBe(true);
+        expect(fixture.nativeElement.querySelector('.wallet-sync-locked-hint').textContent).toContain(
+            'transaction.wallet.sync_locked',
+        );
+
+        let emittedValue: unknown;
+        component.saved.subscribe((value) => (emittedValue = value));
+        fixture.nativeElement.querySelector('button[type="submit"]').click();
+
+        expect(emittedValue).toMatchObject({ walletId: 2 });
+    });
+
+    it('should keep the wallet select locked for a sync transaction after the form is re-enabled', () => {
+        fixture.componentRef.setInput(
+            'transaction',
+            createBackendTransaction(TransactionSpecialTypeEnum.SYNC),
+        );
+        fixture.detectChanges();
+
+        fixture.componentRef.setInput('isTransactionFormDisabled', true);
+        fixture.detectChanges();
+        fixture.componentRef.setInput('isTransactionFormDisabled', false);
+        fixture.detectChanges();
+
+        expect(component.name.enabled).toBe(true);
+        expect(component.walletId.disabled).toBe(true);
+    });
+
+    it('should leave the wallet select enabled for a normal transaction', () => {
+        fixture.componentRef.setInput('transaction', createBackendTransaction(null));
+        fixture.detectChanges();
+
+        expect(component.walletId.enabled).toBe(true);
+        expect(fixture.nativeElement.querySelector('.wallet-sync-locked-hint')).toBeNull();
     });
 });

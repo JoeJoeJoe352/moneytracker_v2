@@ -1,9 +1,15 @@
-import { Component, inject, resource } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { Component, computed, inject, resource, signal } from '@angular/core';
+import { outputToObservable } from '@angular/core/rxjs-interop';
+import { catchError, EMPTY, exhaustMap, finalize, firstValueFrom, Observable } from 'rxjs';
 import { WalletService } from './wallet-service';
 import { WalletsListComponent } from './wallets-list-component';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
+import {
+    WalletCreateRequest,
+    WalletDataInterface,
+    WalletSyncFormInputInterface,
+    WalletUpdateRequest,
+} from './interfaces';
 import { UserDataStore } from '@app/shared/stores/user-data-store';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
@@ -13,6 +19,7 @@ import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-com
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { NotificationService } from '@shared/services/notification-service';
 import { RESOURCE_STATUS_LOADING } from '@shared/constants';
+import { WalletSyncFormComponent } from './wallet-sync-form-component';
 
 @Component({
     selector: 'app-wallets-page-component',
@@ -44,6 +51,8 @@ export class WalletsPageComponent {
                     name: wallet.name,
                     currencyCode: wallet.currencyCode,
                     type: wallet.type,
+                    sum: wallet.sum,
+                    lastSyncDate: wallet.lastSyncDate,
                 })),
             );
             return wallets;
@@ -69,6 +78,46 @@ export class WalletsPageComponent {
         dialogRef.componentInstance.deleted.subscribe((walletId) =>
             this.onWalletDeleted(walletId, dialogRef),
         );
+    }
+
+    /**
+     * Megnyitja a balance szinkronizáló modalt
+     */
+    protected openSyncModal(walletData: WalletDataInterface): void {
+        // a lista csak a sikeres kérés után tölt újra, ezért a kérés idejére külön tiltjuk a formot
+        const isSyncing = signal(false);
+
+        const dialogRef = this.dialog.open(WalletSyncFormComponent, {
+            restoreFocus: true,
+            data: {
+                wallet: walletData,
+                isLoading: computed(() => isSyncing() || this.walletListResource.isLoading()),
+            } as WalletSyncFormInputInterface,
+        });
+
+        // exhaustMap: amíg egy kérés fut, az újabb submitokat eldobja, így nem jöhet létre dupla szinkron.
+        // A hibát a belső streamben kezeljük, hogy a külső stream életben maradjon és lehessen újrapróbálni
+        outputToObservable(dialogRef.componentInstance.syncFormSended)
+            .pipe(
+                // exhaustmap amíg dolgozik drop-ol minden új kérést, ezért nem kell az isSyncing flag-et használni
+                exhaustMap((payload) => {
+                    isSyncing.set(true);
+
+                    return this.walletService.syncWallet(payload).pipe(
+                        catchError((error) => {
+                            console.error(error);
+                            this.notification.showGeneralError();
+                            return EMPTY;
+                        }),
+                        finalize(() => isSyncing.set(false)),
+                    );
+                }),
+            )
+            .subscribe(() => {
+                this.notification.show(this.translateService.instant(_('wallet.sync.save_succes')));
+                this.walletListResource.reload();
+                dialogRef.close();
+            });
     }
 
     /**

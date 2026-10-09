@@ -21,6 +21,7 @@ import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
+import com.starbuck.moneytracker.service.WalletService;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,10 +33,12 @@ public class TransactionController {
 
     private final TransactionService transactionService;
     private final TransactionMapper transactionMapper;
+    private final WalletService walletService;
 
-    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper) {
+    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper, WalletService walletService) {
         this.transactionService = transactionService;
         this.transactionMapper = transactionMapper;
+        this.walletService = walletService;
     }
 
     @PostMapping(path = "/transaction")
@@ -68,7 +71,7 @@ public class TransactionController {
     @GetMapping(path = "/transaction/sum")
     public MoneySumResponseDto sumAllMoney() {
         return new MoneySumResponseDto(
-                this.transactionService.sumAllMoney(),
+                this.walletService.sumAllMoney(),
                 this.transactionService.sumAllIncomeForMonth(),
                 this.transactionService.sumAllExpenseForMonth());
     }

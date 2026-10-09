@@ -27,7 +27,7 @@
             <app-category-select
                 formControlName="categories"
                 [categoryData]="categoryData()"
-                [disabled]="isCategorySaveInProgress()"
+                [isCategorySaveInProgress]="isCategorySaveInProgress()"
                 [addCategoryCallback]="addCategoryCallback()"
             />
         </div>

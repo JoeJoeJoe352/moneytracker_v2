@@ -20,10 +20,10 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.starbuck.moneytracker.commands.TransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
-import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
@@ -33,14 +33,17 @@ import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
-import com.starbuck.moneytracker.repository.WalletRepository;
+import com.starbuck.moneytracker.service.TransactionDetailService;
 import com.starbuck.moneytracker.service.TransactionService;
+import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testutils.AssertUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionDetailFactory;
@@ -69,7 +72,10 @@ class TransactionServiceTest {
     private CategoryRepository categoryRepo;
 
     @Mock
-    private WalletRepository walletRepo;
+    private WalletService walletService;
+
+    @Mock
+    private BalanceSyncRepository balanceSyncRepo;
 
     private TransactionService transactionService;
 
@@ -85,8 +91,12 @@ class TransactionServiceTest {
 
     @BeforeEach
     void setUp() {
-        transactionService = new TransactionService(transactionRepo, transactionDetailRepo, categoryRepo,
-                transactionDetailCategoryRepository, currentUser, walletRepo, detailFactory);
+        // Valódi TransactionDetailService a mockolt repókkal, így a detail mentést
+        // ellenőrző tesztek változatlanul működnek
+        var transactionDetailService = new TransactionDetailService(transactionDetailRepo, categoryRepo,
+                transactionDetailCategoryRepository, currentUser, detailFactory);
+        transactionService = new TransactionService(transactionRepo, transactionDetailService, currentUser,
+                walletService, balanceSyncRepo);
     }
 
     @BeforeEach
@@ -101,10 +111,10 @@ class TransactionServiceTest {
             return invocatedTransaction;
         });
         Mockito.lenient().when(currentUser.getUser()).thenReturn(new User(1L, "name", "password", "email"));
-        Mockito.lenient().when(walletRepo.getWalletById(anyLong(), anyLong()))
-                .thenReturn(Optional.of(
+        Mockito.lenient().when(walletService.getWalletById(anyLong()))
+                .thenReturn(
                         new Wallet("wallet", new User(1L, "name", "password", "email"), null,
-                                WalletTypeEnum.DEFAULT)));
+                                WalletTypeEnum.DEFAULT));
     }
 
     /**
@@ -116,7 +126,7 @@ class TransactionServiceTest {
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
                 TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal(100), List.of(),
                 TransactionTypeEnum.INCOME);
-        TransactionCreateCommand command = new TransactionCreateCommand(
+        TransactionSaveCommand command = new TransactionSaveCommand(
                 "simpleTransaction",
                 null,
                 LocalDate.now(),
@@ -152,7 +162,7 @@ class TransactionServiceTest {
                 List.of(), TransactionTypeEnum.INCOME);
         TransactionDetailSaveCommand detail2 = new TransactionDetailSaveCommand("detail2", new BigDecimal(200),
                 List.of(), TransactionTypeEnum.INCOME);
-        TransactionCreateCommand command = new TransactionCreateCommand("multipleDetailedTransaction", null,
+        TransactionSaveCommand command = new TransactionSaveCommand("multipleDetailedTransaction", null,
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail, detail2), List.of(), 1L);
 
         ArgumentCaptor<TransactionDetail> captor = ArgumentCaptor.forClass(TransactionDetail.class);
@@ -180,7 +190,7 @@ class TransactionServiceTest {
      */
     @Test
     void createTransaction_withNoDetails_createsDefaultDetail() {
-        TransactionCreateCommand command = new TransactionCreateCommand("noDetailTransaction",
+        TransactionSaveCommand command = new TransactionSaveCommand("noDetailTransaction",
                 new BigDecimal("300.00"),
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(), List.of(), 1L);
 
@@ -228,7 +238,7 @@ class TransactionServiceTest {
                 new BigDecimal(-200), List.of(), TransactionTypeEnum.OUTCOME);
         TransactionDetailSaveCommand updatedDetailCommand2 = new TransactionDetailSaveCommand("updatedDetail2",
                 new BigDecimal(-300), List.of(), TransactionTypeEnum.OUTCOME);
-        TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("updated", null,
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand("updated", null,
                 LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME,
                 List.of(updatedDetailCommand, updatedDetailCommand2), List.of(), 1L);
 
@@ -271,7 +281,7 @@ class TransactionServiceTest {
         TransactionDetailSaveCommand detail2 = new TransactionDetailSaveCommand("Simadetail",
                 new BigDecimal("200"),
                 List.of(), TransactionTypeEnum.INCOME);
-        TransactionCreateCommand createCommand = new TransactionCreateCommand(
+        TransactionSaveCommand createCommand = new TransactionSaveCommand(
                 "multipleDetailedTransactionWithWeightAndUnitPrice", null, LocalDate.now(),
                 TransactionTypeEnum.INCOME, List.of(detail1, detail2), List.of(), 1L);
 
@@ -319,7 +329,7 @@ class TransactionServiceTest {
                 new BigDecimal(-200), List.of(), TransactionTypeEnum.OUTCOME);
         TransactionDetailSaveCommand updatedDetail2 = new TransactionDetailSaveCommand("weightresDetail2",
                 new BigDecimal("0.7"), new BigDecimal("300"), List.of());
-        TransactionUpdateCommand updatedTransaction = new TransactionUpdateCommand("updated", null,
+        TransactionSaveCommand updatedTransaction = new TransactionSaveCommand("updated", null,
                 LocalDate.of(2023, 1, 1), TransactionTypeEnum.OUTCOME,
                 List.of(updatedDetail, updatedDetail2),
                 List.of(), 1L);
@@ -360,7 +370,7 @@ class TransactionServiceTest {
         // GIVEN
         TransactionDetailSaveCommand detail = new TransactionDetailSaveCommand("detailWithCategory",
                 new BigDecimal(100), List.of(5L), TransactionTypeEnum.INCOME);
-        TransactionCreateCommand command = new TransactionCreateCommand("categorizedTransaction", null,
+        TransactionSaveCommand command = new TransactionSaveCommand("categorizedTransaction", null,
                 LocalDate.now(), TransactionTypeEnum.INCOME, List.of(detail), List.of(), 1L);
         User userInDB = new User(1l, "alma", "pass", "email");
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
@@ -417,7 +427,7 @@ class TransactionServiceTest {
     @Test
     void updateTransaction_throwsWhenNoDetailsProvided() {
         assertThrows(IllegalArgumentException.class, () -> {
-            new TransactionUpdateCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
+            new TransactionSaveCommand("teszt", null, LocalDate.now(), TransactionTypeEnum.INCOME,
                     List.of(),
                     List.of(), 1L);
         });
@@ -432,7 +442,7 @@ class TransactionServiceTest {
         TransactionDetailSaveCommand updatedDetail = new TransactionDetailSaveCommand("detail",
                 new BigDecimal(100),
                 List.of(), TransactionTypeEnum.INCOME);
-        TransactionUpdateCommand updateCommand = new TransactionUpdateCommand("updated", null, LocalDate.now(),
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand("updated", null, LocalDate.now(),
                 TransactionTypeEnum.INCOME, List.of(updatedDetail), List.of(), 1L);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
@@ -540,5 +550,112 @@ class TransactionServiceTest {
         });
 
         Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
+    }
+
+    /**
+     * Sima (nem sync) tranzakció törlésénél nem nyúl a sync bejegyzésekhez
+     */
+    @Test
+    void deleteTransaction_deletesNormalTransactionWithoutTouchingBalanceSync() {
+        Transaction transaction = createTransactionForUser1(5L);
+        Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
+
+        transactionService.deleteTransaction(5L);
+
+        Mockito.verify(transactionRepo).delete(transaction);
+        Mockito.verifyNoInteractions(balanceSyncRepo);
+    }
+
+    /**
+     * Sync tranzakció törlésénél a hozzá tartozó BalanceSync is törlődik
+     */
+    @Test
+    void deleteTransaction_deletesBalanceSyncOfSyncTransaction() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        BalanceSync balanceSync = new BalanceSync(LocalDate.now(), transaction.getWallet(),
+                new BigDecimal("50.00"));
+        Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
+        Mockito.when(balanceSyncRepo.findBySyncTransactionId(5L)).thenReturn(Optional.of(balanceSync));
+
+        transactionService.deleteTransaction(5L);
+
+        Mockito.verify(balanceSyncRepo).delete(balanceSync);
+        Mockito.verify(transactionRepo).delete(transaction);
+    }
+
+    /**
+     * Ha egy sync tranzakcióhoz nincs BalanceSync, az adatintegritási hiba:
+     * IllegalStateException-t dob, és semmi nem törlődik
+     */
+    @Test
+    void deleteTransaction_throwsWhenSyncTransactionHasNoBalanceSync() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
+        Mockito.when(balanceSyncRepo.findBySyncTransactionId(5L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () -> {
+            transactionService.deleteTransaction(5L);
+        });
+
+        Mockito.verify(balanceSyncRepo, Mockito.never()).delete(any(BalanceSync.class));
+        Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
+    }
+
+    /**
+     * Szinkronizációs tranzakció szerkesztésekor a special type megmarad, ha a
+     * wallet nem változik
+     */
+    @Test
+    void updateTransaction_keepsSpecialTypeOfSyncTransaction() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.getWallet().setId(3L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        transaction.setTransactionDetails(List.of());
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
+                .thenReturn(Optional.of(transaction));
+
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand("renamed", new BigDecimal("-20.00"),
+                LocalDate.now(), TransactionTypeEnum.OUTCOME, List.of(), List.of(), 3L);
+
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+
+        transactionService.updateTransaction(5L, updateCommand);
+
+        Mockito.verify(transactionRepo).save(captor.capture());
+        assertEquals("renamed", captor.getValue().getName());
+        assertEquals(TransactionSpecialTypeEnum.SYNC, captor.getValue().getSpecialType());
+    }
+
+    /**
+     * Szinkronizációs tranzakciót nem lehet másik walletbe áthelyezni, mert a
+     * BalanceSync az eredeti wallethez tartozik
+     */
+    @Test
+    void updateTransaction_throwsWhenSyncTransactionWalletChanged() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.getWallet().setId(3L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
+                .thenReturn(Optional.of(transaction));
+
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand("moved", new BigDecimal("-10.00"),
+                LocalDate.now(), TransactionTypeEnum.OUTCOME, List.of(), List.of(), 4L);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.updateTransaction(5L, updateCommand);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).save(any(Transaction.class));
+        assertEquals(3L, transaction.getWallet().getId());
+    }
+
+    private Transaction createTransactionForUser1(Long id) {
+        Wallet wallet = new Wallet("wallet", new User(1L, "name", "password", "email"), CurrencyEnum.HUF,
+                WalletTypeEnum.DEFAULT);
+        return new Transaction(id, "teszt", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-10.00"),
+                0, wallet);
     }
 }

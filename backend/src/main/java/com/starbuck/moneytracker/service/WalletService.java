@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.context.MessageSource;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
+import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
@@ -73,7 +75,7 @@ public class WalletService {
             throw new IllegalArgumentException("updateCommand is null");
         }
         Wallet walletFromDb = walletRepo.getWalletById(id, userUtil.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
 
         walletFromDb.setName(command.getName());
         walletFromDb.setType(command.getType());
@@ -83,8 +85,6 @@ public class WalletService {
 
     /**
      * Visszatér a user tárcáival
-     *
-     * Kilistázza a felhasználó walletjait
      */
     public List<WalletListResponseDto> listWalletsForUser() {
         return walletRepo.listWalletsWithSumByUserId(userUtil.getUser().getId());
@@ -98,7 +98,19 @@ public class WalletService {
      */
     public Wallet getWalletById(long id) {
         return walletRepo.getWalletById(id, userUtil.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
+    }
+
+    /**
+     * Visszaadja a user egy walletjét id alapján, és a tranzakció végéig zárolja.
+     * Csak @Transactional metóduson belülről hívható.
+     *
+     * @param id
+     * @return
+     */
+    public Wallet getWalletByIdForUpdate(long id) {
+        return walletRepo.getWalletByIdForUpdate(id, userUtil.getUser().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
     }
 
     /**
@@ -107,12 +119,32 @@ public class WalletService {
      * @param id
      */
     public void softDeleteWallet(long id) {
+        // TODO itt miért nem a this.getWalletById van használva?
         Wallet walletFromDb = walletRepo.getWalletById(id, userUtil.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("no wallet found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
 
         walletFromDb.setStatus(GeneralStatusEnum.DISABLED);
 
         walletRepo.save(walletFromDb);
+    }
+
+    /**
+     * Adott wallethez lekérdezi a rajta lévő balance-ot
+     * 
+     * @param walletId
+     * @return
+     */
+    public BigDecimal getBalanceForWallet(long walletId) {
+        var wallet = this.getWalletById(walletId);
+
+        return walletRepo.getBalanceOfWallet(wallet.getId(), userUtil.getUser().getId());
+    }
+
+    /**
+     * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
+     */
+    public List<WalletSummaryDto> sumAllMoney() {
+        return this.walletRepo.summarizeTotalMoneyForUser(userUtil.getUser().getId());
     }
 
 }

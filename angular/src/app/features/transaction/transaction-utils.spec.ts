@@ -18,6 +18,7 @@ describe('TransactionUtils', () => {
                 transactionDate: '2024-01-10',
                 isComplexTransaction: false,
                 walletId: 1,
+                specialType: null,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -58,6 +59,7 @@ describe('TransactionUtils', () => {
                 isComplexTransaction: true,
                 categories: [],
                 walletId: 1,
+                specialType: null,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -88,6 +90,7 @@ describe('TransactionUtils', () => {
                 transactionDate: '2024-01-10',
                 isComplexTransaction: true,
                 walletId: 1,
+                specialType: null,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -143,6 +146,7 @@ describe('TransactionUtils', () => {
                 isComplexTransaction: true,
                 categories: [],
                 walletId: 1,
+                specialType: null,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',

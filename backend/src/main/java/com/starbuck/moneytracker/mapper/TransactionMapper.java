@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
-import com.starbuck.moneytracker.commands.TransactionUpdateCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
 import com.starbuck.moneytracker.dto.TransactionDetailEditResponseDto;
@@ -54,7 +53,7 @@ public class TransactionMapper {
                 .collect(Collectors.toList());
 
         var walletDto = walletMapper.toDto(entity.getWallet());
-        
+
         TransactionResponseDto dto = new TransactionResponseDto(
                 entity.getId(),
                 entity.getName(),
@@ -63,7 +62,8 @@ public class TransactionMapper {
                 entity.getTransactionType(),
                 entity.isComplexTransaction(),
                 detailDto,
-                walletDto);
+                walletDto,
+                entity.getSpecialType());
 
         return dto;
     }
@@ -98,7 +98,8 @@ public class TransactionMapper {
                 entity.getTransactionType(),
                 entity.isComplexTransaction(),
                 detailDto,
-                entity.getWallet().getId());
+                entity.getWallet().getId(),
+                entity.getSpecialType());
 
         return dto;
     }
@@ -126,7 +127,7 @@ public class TransactionMapper {
                 request.transactionDetails(),
                 request.transactionType());
 
-        TransactionUpdateCommand command = new TransactionUpdateCommand(
+        TransactionSaveCommand command = new TransactionSaveCommand(
                 request.name(),
                 request.globalPrice(),
                 request.transactionDate(),
@@ -172,7 +173,7 @@ public class TransactionMapper {
      * @param transaction
      * @return
      */
-    public TransactionUpdateCommand entityToCommand(Transaction transaction) {
+    public TransactionSaveCommand entityToCommand(Transaction transaction) {
         List<TransactionDetailSaveCommand> details = transaction.getTransactionDetails().stream()
                 .map((detail) -> {
                     if (detail.isComplexPriceMode()) {
@@ -189,7 +190,7 @@ public class TransactionMapper {
                             transaction.getTransactionType());
                 }).collect(Collectors.toList());
 
-        return new TransactionUpdateCommand(
+        return new TransactionSaveCommand(
                 transaction.getName(),
                 details.size() > 0 ? null : transaction.getPriceSum(),
                 transaction.getTransactionDate(),

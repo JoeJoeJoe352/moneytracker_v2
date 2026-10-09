@@ -84,6 +84,7 @@ describe('WalletFormComponent (Vitest)', () => {
             currencyCode: CurrencyCodesEnum.usd,
             type: WalletTypesEnum.default,
             sum: 0,
+            lastSyncDate: '2026-09-15',
         };
 
         beforeEach(() => setup(existingWallet));

@@ -4,6 +4,7 @@
             [walletData]="wallet"
             [disabled]="disabled()"
             (cardClicked)="walletCardClicked.emit(wallet)"
+            (syncRequested)="syncRequested.emit(wallet)"
         />
     }
 </div>

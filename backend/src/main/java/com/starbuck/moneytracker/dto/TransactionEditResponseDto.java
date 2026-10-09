@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 public record TransactionEditResponseDto(
@@ -14,6 +15,6 @@ public record TransactionEditResponseDto(
     TransactionTypeEnum transactionType,
     boolean isComplexTransaction,
     List<TransactionDetailEditResponseDto> transactionDetails,
-    Long walletId
-) {
+    Long walletId,
+    TransactionSpecialTypeEnum specialType) {
 }
