@@ -1,4 +1,4 @@
-import { Component, inject, output, Signal } from '@angular/core';
+import { Component, computed, inject, output, Signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,7 @@ import {
 import { TransactionFormComponent } from './transaction-form/transaction-form-component';
 import { Observable } from 'rxjs';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
+import { TransactionSpecialTypeEnum } from '@app/shared/enums';
 
 export interface TransactionModalInputInterface {
     transaction: Signal<TransactionDataFromBackend | null>;
@@ -27,18 +28,25 @@ export interface TransactionModalInputInterface {
     templateUrl: './transaction-modal.html',
     styleUrl: './transaction-modal.scss',
     imports: [
-    TransactionFormComponent,
-    TranslatePipe,
-    MatDialogModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
-    MatButtonModule,
-    DialogCloseButton
-],
+        TransactionFormComponent,
+        TranslatePipe,
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        MatIconModule,
+        MatButtonModule,
+        DialogCloseButton,
+    ],
 })
 export class TransactionModalComponent {
     public data = inject<TransactionModalInputInterface>(MAT_DIALOG_DATA);
 
     public deleteTransactionRequested = output<number>();
     public saved = output<NewTransaction>();
+
+    /**
+     * Szinkronizációs tranzakció-e
+     */
+    protected isSyncTransaction = computed(() => {
+        return this.data.transaction()?.specialType === TransactionSpecialTypeEnum.SYNC;
+    });
 }

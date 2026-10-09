@@ -603,6 +603,54 @@ class TransactionServiceTest {
         Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
     }
 
+    /**
+     * Szinkronizációs tranzakció szerkesztésekor a special type megmarad, ha a
+     * wallet nem változik
+     */
+    @Test
+    void updateTransaction_keepsSpecialTypeOfSyncTransaction() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.getWallet().setId(3L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        transaction.setTransactionDetails(List.of());
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
+                .thenReturn(Optional.of(transaction));
+
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand("renamed", new BigDecimal("-20.00"),
+                LocalDate.now(), TransactionTypeEnum.OUTCOME, List.of(), List.of(), 3L);
+
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+
+        transactionService.updateTransaction(5L, updateCommand);
+
+        Mockito.verify(transactionRepo).save(captor.capture());
+        assertEquals("renamed", captor.getValue().getName());
+        assertEquals(TransactionSpecialTypeEnum.SYNC, captor.getValue().getSpecialType());
+    }
+
+    /**
+     * Szinkronizációs tranzakciót nem lehet másik walletbe áthelyezni, mert a
+     * BalanceSync az eredeti wallethez tartozik
+     */
+    @Test
+    void updateTransaction_throwsWhenSyncTransactionWalletChanged() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.getWallet().setId(3L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
+                .thenReturn(Optional.of(transaction));
+
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand("moved", new BigDecimal("-10.00"),
+                LocalDate.now(), TransactionTypeEnum.OUTCOME, List.of(), List.of(), 4L);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.updateTransaction(5L, updateCommand);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).save(any(Transaction.class));
+        assertEquals(3L, transaction.getWallet().getId());
+    }
+
     private Transaction createTransactionForUser1(Long id) {
         Wallet wallet = new Wallet("wallet", new User(1L, "name", "password", "email"), CurrencyEnum.HUF,
                 WalletTypeEnum.DEFAULT);

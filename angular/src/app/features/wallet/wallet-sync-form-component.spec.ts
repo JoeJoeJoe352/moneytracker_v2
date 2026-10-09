@@ -90,18 +90,14 @@ describe('WalletSyncFormComponent (Vitest)', () => {
         );
     });
 
-    it('should not emit and should show the min error when the balance is negative', async () => {
+    it('should accept a negative balance', async () => {
         await setup();
         const emitted = collectEmits();
 
-        typeBalance('-1');
+        typeBalance('-25.5');
         submitButton().click();
-        fixture.detectChanges();
 
-        expect(emitted).toEqual([]);
-        expect(fixture.nativeElement.querySelector('mat-error').textContent).toContain(
-            'wallet.sync.current_balance.min',
-        );
+        expect(emitted).toEqual([{ walletId: 7, currentBalance: -25.5 }]);
     });
 
     it('should disable the submit button while loading', async () => {

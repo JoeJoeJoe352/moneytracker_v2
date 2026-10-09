@@ -40,6 +40,7 @@ import {
 } from '../interfaces';
 import { UserDataStore } from '@app/shared/stores/user-data-store';
 import { WalletDataUtil } from '../../wallet/wallet-data-util';
+import { TransactionSpecialTypeEnum } from '@shared/enums';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { TransactionUtils } from '../transaction-utils';
@@ -130,6 +131,13 @@ export class TransactionFormComponent implements OnChanges {
     });
 
     /**
+     * Szinkronizációs tranzakció-e
+     */
+    protected readonly isSyncTransaction = computed(
+        () => this.transaction()?.specialType === TransactionSpecialTypeEnum.SYNC,
+    );
+
+    /**
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
      */
     protected categoryData: Signal<DropdownInterface[]> = computed(() => {
@@ -169,6 +177,13 @@ export class TransactionFormComponent implements OnChanges {
             }
             const convertedInputValues = this.transactionUtils.convertDataToInput(transaction);
             this.refreshFormWithData(convertedInputValues);
+        }
+
+        // A szinkronizációs tranzakció walletja nem módosítható (a backend is elutasítja).
+        // A végén kell, mert a fenti enable() újra engedélyezné. A getRawValue() a letiltott
+        // mező értékét is elküldi, így az eredeti wallet id megy a backendre
+        if (this.isSyncTransaction()) {
+            this.walletId.disable({ emitEvent: false });
         }
     }
 

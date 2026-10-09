@@ -25,6 +25,7 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         transactionDate: '2024-03-01',
         isComplexTransaction: true,
         walletId: 1,
+        specialType: null,
         transactionDetails: [
             {
                 name: 'Kenyér',

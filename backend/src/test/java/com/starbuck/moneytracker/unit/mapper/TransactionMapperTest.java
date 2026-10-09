@@ -29,6 +29,7 @@ import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
@@ -86,6 +87,7 @@ class TransactionMapperTest {
         // egy detail van, alapértelmezett névvel, ezért nem komplex
         assertFalse(dto.isComplexTransaction());
         assertEquals(1, dto.transactionDetails().size());
+        assertNull(dto.specialType());
 
         TransactionDetailResponseDto detailDto = dto.transactionDetails().iterator().next();
         assertEquals(TransactionDetail.DEFAULT_DETAIL_NAME, detailDto.name());
@@ -122,6 +124,39 @@ class TransactionMapperTest {
     }
 
     /**
+     * Special type helyesen jelenik meg a dto-ban
+     */
+    @Test
+    void toDto_mapsSpecialType() {
+        TransactionResponseDto dto = mapper.toDto(createSyncTransaction());
+
+        assertEquals(TransactionSpecialTypeEnum.SYNC, dto.specialType());
+    }
+
+    /**
+     * Special type helyesen jelenik meg a szerkesztéshez használt dto-ban is
+     */
+    @Test
+    void toEditDto_mapsSpecialType() {
+        TransactionEditResponseDto dto = mapper.toEditDto(createSyncTransaction());
+
+        assertEquals(TransactionSpecialTypeEnum.SYNC, dto.specialType());
+    }
+
+    private Transaction createSyncTransaction() {
+        Transaction transaction = new Transaction(1L, "sync", LocalDate.now(), TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-10.00"), 0, defaultWallet);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+
+        TransactionDetail detail = new TransactionDetail(1L, TransactionDetail.DEFAULT_DETAIL_NAME,
+                new BigDecimal("-10.00"), null, null, transaction);
+        detail.setCategoryLinks(List.of());
+        transaction.setTransactionDetails(List.of(detail));
+
+        return transaction;
+    }
+
+    /**
      * Több detail esetén a tranzakció komplexnek számít, és a category id-k is
      * átkerülnek a DTO-ba
      */
@@ -147,6 +182,7 @@ class TransactionMapperTest {
 
         assertTrue(dto.isComplexTransaction());
         assertEquals(2, dto.transactionDetails().size());
+        assertNull(dto.specialType());
 
         var detail1Dto = dto.transactionDetails().stream()
                 .filter(d -> d.name().equals("detail1")).findFirst().orElseThrow();

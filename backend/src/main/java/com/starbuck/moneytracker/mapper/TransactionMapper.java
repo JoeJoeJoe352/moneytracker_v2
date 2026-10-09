@@ -53,7 +53,7 @@ public class TransactionMapper {
                 .collect(Collectors.toList());
 
         var walletDto = walletMapper.toDto(entity.getWallet());
-        
+
         TransactionResponseDto dto = new TransactionResponseDto(
                 entity.getId(),
                 entity.getName(),
@@ -62,7 +62,8 @@ public class TransactionMapper {
                 entity.getTransactionType(),
                 entity.isComplexTransaction(),
                 detailDto,
-                walletDto);
+                walletDto,
+                entity.getSpecialType());
 
         return dto;
     }
@@ -97,7 +98,8 @@ public class TransactionMapper {
                 entity.getTransactionType(),
                 entity.isComplexTransaction(),
                 detailDto,
-                entity.getWallet().getId());
+                entity.getWallet().getId(),
+                entity.getSpecialType());
 
         return dto;
     }

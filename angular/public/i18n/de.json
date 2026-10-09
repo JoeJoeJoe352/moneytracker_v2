@@ -94,6 +94,8 @@
     "detail_state.hint": "Bei der Posten-Erfassung kannst du Betrag und Kategorie für jeden Posten einzeln angeben",
     "categories": "Kategorien",
     "categories.add": "Kategorien hinzufügen",
+    "is_sync_transaction": "Bei einer Guthaben-Synchronisierung erstellte Transaktion",
+    "wallet.sync_locked": "Das Wallet einer Synchronisierungstransaktion kann nicht geändert werden",
     "category": {
       "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!",
       "remove": "{{name}} entfernen"

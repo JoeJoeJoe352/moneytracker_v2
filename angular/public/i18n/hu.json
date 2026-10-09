@@ -96,6 +96,8 @@
     "show_details": "Tételenként",
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
+    "is_sync_transaction": "Szinkronizáció során létrejött tranzakció",
+    "wallet.sync_locked": "Szinkronizációs tranzakció tárcája nem módosítható",
     "category": {
       "add": "Új kategória hozzáadásához kattints ide!",
       "remove": "{{name}} eltávolítása"

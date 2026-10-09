@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -73,6 +74,14 @@ public class TransactionService {
         Wallet wallet = walletService.getWalletById(updateCommand.getWalletId());
 
         Transaction transaction = this.getTransactionByIdForActualUser(id);
+
+        // A szinkronizációs tranzakció a BalanceSync-en keresztül egy wallethez kötött,
+        // áthelyezve rossz wallet egyenlegét korrigálná
+        if (transaction.isSyncTransaction()
+                && !Objects.equals(transaction.getWallet().getId(), updateCommand.getWalletId())) {
+            throw new IllegalArgumentException("Wallet of sync transaction " + id + " cannot be changed");
+        }
+
         transaction.setName(updateCommand.getTransactionName());
         transaction.setTransactionDate(updateCommand.getTransactionDate());
         transaction.setTransactionType(updateCommand.getTransactionType());

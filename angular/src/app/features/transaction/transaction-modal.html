@@ -13,6 +13,15 @@
             </div>
         </mat-dialog-content>
     } @else {
+        @if (isSyncTransaction()) {
+            <mat-dialog-content>
+                <div class="warning-block">
+                    <div>
+                        {{ 'transaction.is_sync_transaction' | translate }}
+                    </div>
+                </div>
+            </mat-dialog-content>
+        }
         <app-transaction-form-component
             [isTransactionFormDisabled]="data.isTransactionFormDisabled()"
             [categoryList]="data.categories()"

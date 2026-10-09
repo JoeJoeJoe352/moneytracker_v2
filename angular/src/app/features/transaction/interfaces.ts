@@ -1,6 +1,6 @@
 import { FormControl } from '@angular/forms';
 import { DropdownInterface } from '@shared/interfaces';
-import { CurrencyCodesEnum, TransactionTypeEnum } from '@shared/enums';
+import { CurrencyCodesEnum, TransactionSpecialTypeEnum, TransactionTypeEnum } from '@shared/enums';
 import { WalletDataInterface } from '../wallet/interfaces';
 
 /**
@@ -87,6 +87,7 @@ export interface TransactionDataFromBackend {
     isComplexTransaction: boolean;
     transactionDetails: TransactionDetailsDataFromBackend[];
     walletId: number;
+    specialType: TransactionSpecialTypeEnum | null;
 }
 
 /**

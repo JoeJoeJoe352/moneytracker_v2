@@ -16,6 +16,11 @@ export enum SupportedLangEnum {
 }
 
 export enum TransactionTypeEnum {
-  INCOME = 'INCOME',
-  OUTCOME = 'OUTCOME'
+    INCOME = 'INCOME',
+    OUTCOME = 'OUTCOME',
+}
+
+export enum TransactionSpecialTypeEnum {
+    SYNC = 'SYNC',
+    RECURRING = 'RECURRING',
 }

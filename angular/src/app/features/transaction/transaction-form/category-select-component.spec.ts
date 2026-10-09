@@ -143,6 +143,20 @@ describe('CategorySelectComponent (Vitest)', () => {
         expect(addCategoryCallback).not.toHaveBeenCalled();
     });
 
+    it('should not call addCategoryCallback while a category save is in progress', () => {
+        const addCategoryCallback = vi.fn(() =>
+            of<CategoryResponseInterface>({ id: 3, name: 'Health', isDefaultCategory: false }),
+        );
+        fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
+        fixture.componentRef.setInput('isCategorySaveInProgress', true);
+        fixture.detectChanges();
+        setSearchText('Health');
+
+        selectOption(component.addNewOption);
+
+        expect(addCategoryCallback).not.toHaveBeenCalled();
+    });
+
     it('should clear the search text after a selection', () => {
         fixture.detectChanges();
         setSearchText('Foo');
