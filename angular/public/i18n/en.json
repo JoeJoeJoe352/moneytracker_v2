@@ -138,6 +138,16 @@
     "type": {
       "default": "Default",
       "savings": "Savings"
+    },
+    "sync": {
+      "modal_title": "Sync balance",
+      "current_balance": "Current balance",
+      "current_balance.required": "Current balance is required!",
+      "current_balance.min": "Current balance must be at least 0!",
+      "save_succes": "Balance synced successfully",
+      "sync_button": "Sync",
+      "last_sync": "Last sync",
+      "submit": "Sync"
     }
   },
   "currency": {

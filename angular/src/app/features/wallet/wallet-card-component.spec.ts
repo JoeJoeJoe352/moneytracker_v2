@@ -15,6 +15,7 @@ describe('WalletCardComponent (Vitest)', () => {
         currencyCode: CurrencyCodesEnum.huf,
         type: WalletTypesEnum.default,
         sum: 550,
+        lastSyncDate: '2026-09-15',
     };
 
     beforeEach(async () => {
@@ -51,41 +52,63 @@ describe('WalletCardComponent (Vitest)', () => {
         );
     });
 
-    it('should emit cardClicked with the wallet id when clicked', () => {
+    it('should emit cardClicked when clicked', () => {
         fixture.detectChanges();
 
-        let clickedId: number | undefined;
-        component.cardClicked.subscribe((id) => (clickedId = id));
+        let clickCount = 0;
+        component.cardClicked.subscribe(() => clickCount++);
 
         fixture.nativeElement.querySelector('.wallet-card').click();
 
-        expect(clickedId).toBe(5);
+        expect(clickCount).toBe(1);
     });
 
-    it('should emit cardClicked with the wallet id on enter keydown', () => {
+    it('should emit cardClicked on enter keydown', () => {
         fixture.detectChanges();
 
-        let clickedId: number | undefined;
-        component.cardClicked.subscribe((id) => (clickedId = id));
+        let clickCount = 0;
+        component.cardClicked.subscribe(() => clickCount++);
 
         const card = fixture.nativeElement.querySelector('.wallet-card');
         card.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 
-        expect(clickedId).toBe(5);
+        expect(clickCount).toBe(1);
     });
 
     it('should not emit cardClicked when disabled', () => {
         fixture.componentRef.setInput('disabled', true);
         fixture.detectChanges();
 
-        let clickedId: number | undefined;
-        component.cardClicked.subscribe((id) => (clickedId = id));
+        let clickCount = 0;
+        component.cardClicked.subscribe(() => clickCount++);
 
         const card = fixture.nativeElement.querySelector('.wallet-card');
         card.click();
         card.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 
-        expect(clickedId).toBeUndefined();
+        expect(clickCount).toBe(0);
         expect(card.getAttribute('aria-disabled')).toBe('true');
+    });
+
+    it('should render the last sync date', () => {
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.querySelector('.sync-date-row').textContent).toContain(
+            '2026-09-15',
+        );
+    });
+
+    it('should emit syncRequested, but not cardClicked, when the sync button is clicked', () => {
+        fixture.detectChanges();
+
+        let syncCount = 0;
+        let clickCount = 0;
+        component.syncRequested.subscribe(() => syncCount++);
+        component.cardClicked.subscribe(() => clickCount++);
+
+        fixture.nativeElement.querySelector('.sync-button').click();
+
+        expect(syncCount).toBe(1);
+        expect(clickCount).toBe(0);
     });
 });

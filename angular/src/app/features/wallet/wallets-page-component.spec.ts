@@ -11,7 +11,14 @@ import { WalletsPageComponent } from './wallets-page-component';
 import { WalletFormComponent } from './wallet-form-component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { WalletService } from './wallet-service';
-import { WalletDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
+import { WalletSyncFormComponent } from './wallet-sync-form-component';
+import {
+    WalletDataInterface,
+    WalletCreateRequest,
+    WalletSyncData,
+    WalletSyncFormInputInterface,
+    WalletUpdateRequest,
+} from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 @Component({
@@ -24,6 +31,8 @@ class StubWalletsListComponent {
     disabled = input(false);
 
     walletCardClicked = output<WalletDataInterface>();
+
+    syncRequested = output<WalletDataInterface>();
 }
 
 /**
@@ -48,6 +57,7 @@ const sampleWallet: WalletDataInterface = {
     currencyCode: CurrencyCodesEnum.huf,
     type: WalletTypesEnum.default,
     sum: 0,
+    lastSyncDate: '2026-09-15',
 };
 
 describe('WalletsPageComponent (Vitest)', () => {
@@ -58,6 +68,7 @@ describe('WalletsPageComponent (Vitest)', () => {
         createWallet: ReturnType<typeof vi.fn>;
         updateWallet: ReturnType<typeof vi.fn>;
         softDeleteWallet: ReturnType<typeof vi.fn>;
+        syncWallet: ReturnType<typeof vi.fn>;
     };
     let dialogOpenSpy: ReturnType<typeof vi.fn>;
     let walletFormDialogRefs: FakeDialogRef<{
@@ -65,6 +76,8 @@ describe('WalletsPageComponent (Vitest)', () => {
         deleted: EventEmitter<number>;
     }>[];
     let confirmDialogRefs: FakeDialogRef<unknown>[];
+    let syncDialogRefs: FakeDialogRef<{ syncFormSended: EventEmitter<WalletSyncData> }>[];
+    let syncDialogData: WalletSyncFormInputInterface | undefined;
 
     async function setup(listWalletsResult: Observable<WalletDataInterface[]> = of([sampleWallet])) {
         walletServiceMock = {
@@ -72,11 +85,22 @@ describe('WalletsPageComponent (Vitest)', () => {
             createWallet: vi.fn(() => of(undefined)),
             updateWallet: vi.fn(() => of(undefined)),
             softDeleteWallet: vi.fn(() => of(undefined)),
+            syncWallet: vi.fn(() => of(undefined)),
         };
         walletFormDialogRefs = [];
         confirmDialogRefs = [];
+        syncDialogRefs = [];
+        syncDialogData = undefined;
 
-        dialogOpenSpy = vi.fn((componentType: unknown) => {
+        dialogOpenSpy = vi.fn((componentType: unknown, config?: { data?: unknown }) => {
+            if (componentType === WalletSyncFormComponent) {
+                const dialogRef = new FakeDialogRef({
+                    syncFormSended: new EventEmitter<WalletSyncData>(),
+                });
+                syncDialogRefs.push(dialogRef);
+                syncDialogData = config?.data as WalletSyncFormInputInterface;
+                return dialogRef;
+            }
             if (componentType === WalletFormComponent) {
                 const dialogRef = new FakeDialogRef({
                     saved: new EventEmitter<WalletCreateRequest | WalletUpdateRequest>(),
@@ -129,6 +153,14 @@ describe('WalletsPageComponent (Vitest)', () => {
         const dialogRef = walletFormDialogRefs.at(-1);
         if (!dialogRef) {
             throw new Error('No wallet form dialog was opened');
+        }
+        return dialogRef;
+    }
+
+    function lastSyncDialogRef() {
+        const dialogRef = syncDialogRefs.at(-1);
+        if (!dialogRef) {
+            throw new Error('No sync dialog was opened');
         }
         return dialogRef;
     }
@@ -293,5 +325,63 @@ describe('WalletsPageComponent (Vitest)', () => {
         expect(walletServiceMock.softDeleteWallet).toHaveBeenCalledWith(sampleWallet.id);
         expect(walletServiceMock.listWallets).toHaveBeenCalledTimes(1);
         expect(formDialogRef.close).toHaveBeenCalled();
+    });
+
+    it('should open the sync dialog with the wallet when a sync is requested from the list', async () => {
+        await setup();
+
+        getListStub().syncRequested.emit(sampleWallet);
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(
+            WalletSyncFormComponent,
+            expect.objectContaining({ data: expect.objectContaining({ wallet: sampleWallet }) }),
+        );
+    });
+
+    it('should sync the wallet, reload the list and close the sync dialog', async () => {
+        await setup();
+        walletServiceMock.listWallets.mockClear();
+
+        component['openSyncModal'](sampleWallet);
+        const payload: WalletSyncData = { walletId: sampleWallet.id, currentBalance: 1500 };
+        lastSyncDialogRef().componentInstance.syncFormSended.emit(payload);
+        await fixture.whenStable();
+
+        expect(walletServiceMock.syncWallet).toHaveBeenCalledWith(payload);
+        expect(walletServiceMock.listWallets).toHaveBeenCalledTimes(1);
+        expect(lastSyncDialogRef().close).toHaveBeenCalled();
+    });
+
+    it('should keep the sync dialog open and re-enable the form if syncing fails', async () => {
+        await setup();
+        walletServiceMock.syncWallet.mockReturnValue(throwError(() => new Error('boom')));
+
+        component['openSyncModal'](sampleWallet);
+        lastSyncDialogRef().componentInstance.syncFormSended.emit({
+            walletId: sampleWallet.id,
+            currentBalance: 1500,
+        });
+
+        expect(lastSyncDialogRef().close).not.toHaveBeenCalled();
+        expect(syncDialogData?.isLoading()).toBe(false);
+    });
+
+    // amíg a kérés fut, a form le van tiltva, és az újabb submit nem indít még egy szinkront
+    it('should disable the sync form and ignore repeated submits while the sync request is pending', async () => {
+        await setup();
+        const pendingRequest = new Subject<void>();
+        walletServiceMock.syncWallet.mockReturnValue(pendingRequest);
+
+        component['openSyncModal'](sampleWallet);
+        const payload: WalletSyncData = { walletId: sampleWallet.id, currentBalance: 1500 };
+        lastSyncDialogRef().componentInstance.syncFormSended.emit(payload);
+        lastSyncDialogRef().componentInstance.syncFormSended.emit(payload);
+
+        expect(walletServiceMock.syncWallet).toHaveBeenCalledTimes(1);
+        expect(syncDialogData?.isLoading()).toBe(true);
+
+        pendingRequest.error(new Error('boom'));
+
+        expect(syncDialogData?.isLoading()).toBe(false);
     });
 });

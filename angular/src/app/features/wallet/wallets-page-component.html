@@ -20,6 +20,7 @@
                 [walletListData]="walletListResource.hasValue() ? walletListResource.value() : []"
                 [disabled]="walletListResource.isLoading()"
                 (walletCardClicked)="openWalletModal($event)"
+                (syncRequested)="openSyncModal($event)"
             />
         }
     </mat-card-content>

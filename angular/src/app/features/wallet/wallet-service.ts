@@ -46,16 +46,12 @@ export class WalletService {
     /**
      * Balance szinkronizációs kérést indít a backend felé
      */
-    syncWallet(data: WalletSyncData) {
+    syncWallet(data: WalletSyncData): Observable<void> {
         const walletDataWithDate: WalletSyncDataToBackend = {
             currentBalance: data.currentBalance,
-            walletId: data.walletId,
-            currentDate: new Date(Date.now()).toLocaleDateString('sv-SE'),
+            syncDate: new Date().toLocaleDateString('sv-SE'),
         };
 
-        return this.http.post<WalletSyncDataToBackend>(
-            '/api/wallet/' + data.walletId + '/sync',
-            walletDataWithDate,
-        );
+        return this.http.post<void>('/api/wallet/' + data.walletId + '/sync', walletDataWithDate);
     }
 }

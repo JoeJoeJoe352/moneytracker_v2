@@ -350,6 +350,23 @@ class WalletE2ETest extends MySqlContainerTest {
     }
 
     /**
+     * Jövőbeli dátum is elfogadott, mert a dátum a user időzónájától függ, ami
+     * eltérhet a szerverétől
+     */
+    @Test
+    void syncWallet_acceptsFutureSyncDate() {
+        Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
+        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("25.50"),
+                "syncDate", LocalDate.now().plusDays(1).toString());
+
+        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
+                HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(1, countSyncsForWallet(wallet));
+    }
+
+    /**
      * Hibás bemenetnél a DTO validáció 400-at ad, és nem jön létre sync bejegyzés
      */
     @ParameterizedTest(name = "{0}")
@@ -368,8 +385,8 @@ class WalletE2ETest extends MySqlContainerTest {
         return Stream.of(
                 Arguments.of("hiányzó egyenleg", Map.of("syncDate", "2026-10-01")),
                 Arguments.of("hiányzó dátum", Map.of("currentBalance", new BigDecimal("50.00"))),
-                Arguments.of("jövőbeli dátum", Map.of("currentBalance", new BigDecimal("50.00"),
-                        "syncDate", LocalDate.now().plusDays(2).toString())),
+                Arguments.of("negatív egyenleg", Map.of("currentBalance", new BigDecimal("-0.01"),
+                        "syncDate", "2026-10-01")),
                 Arguments.of("3 tizedesjegy", Map.of("currentBalance", new BigDecimal("50.004"),
                         "syncDate", "2026-10-01")),
                 Arguments.of("túl nagy összeg", Map.of("currentBalance", new BigDecimal("1000000000.00"),

@@ -154,7 +154,8 @@
       "current_balance.min": "Jelenlegi pénzösszegnek legalább 0-nak kell lennie",
       "save_succes": "Egyenleg szinkron mentése sikeres",
       "sync_button": "Szinkronizálás",
-      "last_sync": "Utolsó szinkron"
+      "last_sync": "Utolsó szinkron",
+      "submit": "Szinkronizálás"
     }
   },
   "currency": {

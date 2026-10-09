@@ -4,13 +4,13 @@ import { WalletDataUtil } from './wallet-data-util';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { MatRippleModule } from '@angular/material/core';
-import { MatAnchor, MatButtonModule } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
     selector: 'app-wallet-card-component',
     templateUrl: './wallet-card-component.html',
     styleUrl: './wallet-card-component.scss',
-    imports: [MatButtonModule, TranslatePipe, CurrencyFormatPipe, MatRippleModule, MatAnchor],
+    imports: [MatButtonModule, TranslatePipe, CurrencyFormatPipe, MatRippleModule],
 })
 export class WalletCardComponent {
     protected readonly walletDataUtil = inject(WalletDataUtil);

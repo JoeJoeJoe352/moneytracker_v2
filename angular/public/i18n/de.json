@@ -138,6 +138,16 @@
     "type": {
       "default": "Standard",
       "savings": "Sparen"
+    },
+    "sync": {
+      "modal_title": "Guthaben synchronisieren",
+      "current_balance": "Aktuelles Guthaben",
+      "current_balance.required": "Aktuelles Guthaben ist erforderlich!",
+      "current_balance.min": "Aktuelles Guthaben muss mindestens 0 sein!",
+      "save_succes": "Guthaben erfolgreich synchronisiert",
+      "sync_button": "Synchronisieren",
+      "last_sync": "Letzte Synchronisierung",
+      "submit": "Synchronisieren"
     }
   },
   "currency": {

@@ -6,7 +6,9 @@ export interface WalletDataInterface {
     name: string;
     currencyCode: CurrencyCodesEnum;
     type: WalletTypesEnum;
-    lastSyncDate: number;
+    lastSyncDate: string;
+     // note: ez lehet elavult tranzakció változás esetén. 
+     // Akkor használható csak biztonsággal, ha előtte valami betölti a garantáltan frisset
     sum: number;
 }
 
@@ -31,7 +33,7 @@ export interface WalletSyncData {
     currentBalance: number;
 }
 
-export interface WalletSyncDataToBackend extends WalletSyncData {
-    // user dátuma, az időzónában, ez a user időzónájától függ
-    currentDate: string;
+export interface WalletSyncDataToBackend {
+    currentBalance: number;
+    syncDate: string;
 }

@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
 
 /**
  * @param currentBalance A user által megszámolt, valós egyenleg. Max 2
@@ -15,7 +15,11 @@ import jakarta.validation.constraints.PastOrPresent;
  * @param syncDate       A szinkronizálás napja, nem lehet jövőbeli
  */
 public record BalanceSyncDto(
-        @NotNull @Digits(integer = 8, fraction = 2) BigDecimal currentBalance,
-        @NotNull @PastOrPresent LocalDate syncDate) {
+        @NotNull 
+        @Min(0) 
+        @Digits(integer = 8, fraction = 2) 
+        BigDecimal currentBalance,
 
+        @NotNull 
+        LocalDate syncDate) {
 }
