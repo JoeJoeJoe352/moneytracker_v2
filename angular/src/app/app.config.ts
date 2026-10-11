@@ -12,7 +12,7 @@ import { Overlay } from '@angular/cdk/overlay';
 import { MAT_DIALOG_SCROLL_STRATEGY } from '@angular/material/dialog';
 import { routes } from '@app/app.routes';
 import { initApp } from '@app/app.initializer';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AuthService } from '@features/auth/auth-service';
@@ -54,7 +54,10 @@ export const appConfig: ApplicationConfig = {
             provide: MAT_SNACK_BAR_DEFAULT_OPTIONS,
             useValue: { duration: 2500 },
         },
-        provideHttpClient(withInterceptors([CredentialsInterceptor, LanguageInterceptor])),
+        provideHttpClient(
+            withXhr(),
+            withInterceptors([CredentialsInterceptor, LanguageInterceptor]),
+        ),
         provideTranslateService({
             loader: provideTranslateHttpLoader({
                 prefix: './i18n/',

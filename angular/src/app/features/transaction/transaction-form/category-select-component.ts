@@ -7,6 +7,7 @@ import {
     Signal,
     signal,
     viewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import {
     ControlValueAccessor,
@@ -45,6 +46,7 @@ const ADD_NEW_OPTION_SYMBOL = Symbol('add-new-category');
         MatIconModule,
         TranslatePipe,
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

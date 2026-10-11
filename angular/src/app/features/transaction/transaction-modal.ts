@@ -1,4 +1,11 @@
-import { Component, computed, inject, output, Signal } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    output,
+    Signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,6 +34,7 @@ export interface TransactionModalInputInterface {
     selector: 'app-create-transaction-modal',
     templateUrl: './transaction-modal.html',
     styleUrl: './transaction-modal.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         TransactionFormComponent,
         TranslatePipe,

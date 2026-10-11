@@ -1,4 +1,12 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    input,
+    output,
+    signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { TransactionListElementData } from '../transaction/interfaces';
 import { CurrencyCodesEnum, TransactionTypeEnum } from '@app/shared/enums';
@@ -24,6 +32,7 @@ import { filterByType, indexOfMax, sum } from '@app/shared/utils/transaction-uti
     templateUrl: './transaction-bar-chart-component.html',
     styleUrl: './transaction-bar-chart-component.scss',
     imports: [BaseChartDirective, MatButtonToggleGroup, MatButtonToggle, TranslatePipe],
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [
         CurrencyFormatPipe,
         // Így a bundle size türhető mértéken marad, mert akkor tölti csak be, ahol használva van a diagram

@@ -1,15 +1,24 @@
-import { Component, DOCUMENT, effect, HostListener, inject, signal } from '@angular/core';
+import {
+    Component,
+    DOCUMENT,
+    effect,
+    HostListener,
+    inject,
+    signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { HeaderComponent } from './core/layout/header-component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { SidebarComponent } from './core/layout/sidebar-component'; 
+import { SidebarComponent } from './core/layout/sidebar-component';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.html',
     styleUrls: ['./app.scss', './core/layout/mobile-menu.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterOutlet, HeaderComponent, ReactiveFormsModule, SidebarComponent, TranslatePipe],
 })
 export class App {

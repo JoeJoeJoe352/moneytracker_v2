@@ -1,4 +1,4 @@
-import { Component, computed, inject, output } from '@angular/core';
+import { Component, computed, inject, output, ChangeDetectionStrategy } from '@angular/core';
 import { WalletSyncFormInputInterface, WalletSyncData } from './interfaces';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -26,6 +26,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
         TranslatePipe,
         CurrencyFormatPipe,
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [CurrencyFormatPipe],
 })
 export class WalletSyncFormComponent {

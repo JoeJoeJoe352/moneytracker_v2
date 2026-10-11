@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { WalletDataInterface } from './interfaces';
 import { WalletDataUtil } from './wallet-data-util';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -18,6 +18,7 @@ const SYNC_OUTDATED_AFTER_DAYS = 30;
     selector: 'app-wallet-card-component',
     templateUrl: './wallet-card-component.html',
     styleUrl: './wallet-card-component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatButtonModule, TranslatePipe, CurrencyFormatPipe, MatRippleModule, MatIconModule],
 })
 export class WalletCardComponent {

@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { TransactionListElementData } from '../interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -10,6 +10,7 @@ import { RESOURCE_STATUS_LOADING, RESOURCE_STATUS_RELOADING } from '@shared/cons
     selector: 'app-transaction-list',
     templateUrl: './transaction-list-component.html',
     styleUrl: './transaction-list-component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TransactionCardComponent, TranslatePipe, MatProgressSpinner, MatCardModule],
 })
 export default class TransactionListComponent {

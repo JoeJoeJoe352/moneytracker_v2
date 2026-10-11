@@ -1,4 +1,12 @@
-import { Component, computed, inject, resource, Signal, signal } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    resource,
+    Signal,
+    signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
@@ -30,6 +38,7 @@ import { MatButton } from '@angular/material/button';
         MatProgressSpinner,
         MatButton,
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [TransactionModalStateService, DecimalPipe],
 })
 export class MainPageComponent {

@@ -9,6 +9,7 @@ import {
     Signal,
     SimpleChanges,
     viewChild,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -50,6 +51,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
     selector: 'app-transaction-form-component',
     templateUrl: './transaction-form-component.html',
     styleUrls: ['./transaction-form-component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         ReactiveFormsModule,
         MatDatepickerModule,

@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { WalletSummaryInterface } from '../transaction/interfaces';
@@ -11,21 +11,22 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     selector: 'app-stat-card-component',
     templateUrl: './stat-card-component.html',
     styleUrls: ['./main-page-component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TranslatePipe, CurrencyFormatPipe, MatCard, MatIcon, MatProgressSpinner],
 })
 export class StatCardComponent {
     /**
      * Tranzakció típusa
      */
-    transactionType = input.required<TransactionTypeEnum>()
+    transactionType = input.required<TransactionTypeEnum>();
     /**
      * Töltődés alatt vannak-e az adatok
-    */
-    isMoneySumLoading = input.required<boolean>()
+     */
+    isMoneySumLoading = input.required<boolean>();
     /**
      * Kártya adatai
-    */
-    walletSummaries = input.required<WalletSummaryInterface[]>()
+     */
+    walletSummaries = input.required<WalletSummaryInterface[]>();
 
     /**
      * Kártya címe, a tranzakció típus függvényében

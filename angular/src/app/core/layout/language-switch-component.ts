@@ -1,4 +1,11 @@
-import { Component, computed, inject, Signal, signal } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    Signal,
+    signal,
+    ChangeDetectionStrategy,
+} from '@angular/core';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SupportedLangEnum } from '../../shared/enums';
 import { MatIconButton } from '@angular/material/button';
@@ -9,6 +16,7 @@ import { LanguageService } from '../../shared/services/translate-service';
 @Component({
     selector: 'app-language-switcher',
     templateUrl: './language-switch-component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, TranslatePipe],
 })
 export class LanguageSwitcherComponent {

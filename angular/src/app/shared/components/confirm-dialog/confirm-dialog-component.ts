@@ -1,5 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+    MAT_DIALOG_DATA,
+    MatDialog,
+    MatDialogModule,
+    MatDialogRef,
+} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -29,6 +34,7 @@ export interface ConfirmDialogData {
 @Component({
     selector: 'app-confirm-dialog',
     templateUrl: './confirm-dialog-component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatDialogModule, MatButtonModule, TranslatePipe],
 })
 export class ConfirmDialogComponent {
@@ -37,11 +43,17 @@ export class ConfirmDialogComponent {
     /**
      * Megerősítő dialog megnyitása a megfelelő ARIA role-lal
      */
-    static open(dialog: MatDialog, data: ConfirmDialogData): MatDialogRef<ConfirmDialogComponent, boolean> {
-        return dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {
-            data,
-            role: data.danger ? 'alertdialog' : 'dialog',
-            ariaLabel: data.title ?? data.message,
-        });
+    static open(
+        dialog: MatDialog,
+        data: ConfirmDialogData,
+    ): MatDialogRef<ConfirmDialogComponent, boolean> {
+        return dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(
+            ConfirmDialogComponent,
+            {
+                data,
+                role: data.danger ? 'alertdialog' : 'dialog',
+                ariaLabel: data.title ?? data.message,
+            },
+        );
     }
 }

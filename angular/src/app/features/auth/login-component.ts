@@ -1,4 +1,4 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, inject, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -13,6 +13,7 @@ import { PASSWORD_VALIDATORS, USERNAME_VALIDATORS } from './auth-field-validator
     selector: 'app-login-component',
     templateUrl: './login-component.html',
     styleUrl: './login-component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         ReactiveFormsModule,
         TranslatePipe,
