@@ -1,4 +1,4 @@
-import { Component, computed, inject, output } from '@angular/core';
+import { Component, computed, debounced, inject, output } from '@angular/core';
 import { WalletSyncFormInputInterface, WalletSyncData } from './interfaces';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -52,6 +52,11 @@ export class WalletSyncFormComponent {
     });
 
     /**
+     * 500ms-es késleltetés az input változáshoz képest, hogy a szöveges üzenet ne változzon állandóan
+     */
+    private debouncedCurrentBalance = debounced(this.currentBalance, 500);
+
+    /**
      * Form validálás és elküldése
      */
     protected submitForm(): void {
@@ -96,8 +101,8 @@ export class WalletSyncFormComponent {
     /**
      * Megadja, hogy mekkora az egyenleg eltérés a user által megadott és a rendszerben tárolt között
      */
-    protected balanceDifference = computed(() => {
-        const currentBalanceLocal = this.currentBalance();
+    private balanceDifference = computed(() => {
+        const currentBalanceLocal = this.debouncedCurrentBalance.value();
         if (currentBalanceLocal === null) {
             return null;
         }
