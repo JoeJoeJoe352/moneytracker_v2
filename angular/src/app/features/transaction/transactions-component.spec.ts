@@ -13,6 +13,8 @@ import { TransactionListElementData } from './interfaces';
 import { TransactionModalStateService } from './transaction-modal-state-service';
 import { TransactionModalComponent } from './transaction-modal';
 import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
+import { HttpErrorResponse } from '@angular/common/http';
+import { NotificationService } from '@shared/services/notification-service';
 
 /**
  * A MatDialog.open() valós helyett használt, kézzel vezérelhető dialogRef, ami lehetővé teszi a
@@ -59,6 +61,7 @@ describe('TransactionsListComponent (Vitest)', () => {
         getTransactionById: ReturnType<typeof vi.fn>;
     };
     let routerMock: { navigate: ReturnType<typeof vi.fn> };
+    let notificationMock: { show: ReturnType<typeof vi.fn>; showGeneralError: ReturnType<typeof vi.fn> };
     let queryParamsSubject: BehaviorSubject<Record<string, string>>;
     let dialogOpenSpy: ReturnType<typeof vi.fn>;
     let transactionModalDialogRefs: FakeDialogRef<{
@@ -70,14 +73,17 @@ describe('TransactionsListComponent (Vitest)', () => {
         isHistoryMode?: boolean;
         needSearchField?: boolean;
         queryParams?: Record<string, string>;
+        routeParams?: Record<string, string>;
         getLastTransactionsResult?: ReturnType<typeof of> | ReturnType<typeof throwError>;
+        getTransactionByIdResult?: ReturnType<typeof of> | ReturnType<typeof throwError>;
     } = {}) {
         transactionServiceMock = {
             getLastTransactions: vi.fn(() => options.getLastTransactionsResult ?? of(sampleTransactions)),
             getTransactionHistory: vi.fn(() => of(sampleTransactions)),
-            getTransactionById: vi.fn(() => of(null)),
+            getTransactionById: vi.fn(() => options.getTransactionByIdResult ?? of(null)),
         };
         routerMock = { navigate: vi.fn() };
+        notificationMock = { show: vi.fn(), showGeneralError: vi.fn() };
         queryParamsSubject = new BehaviorSubject<Record<string, string>>(options.queryParams ?? {});
 
         transactionModalDialogRefs = [];
@@ -110,11 +116,16 @@ describe('TransactionsListComponent (Vitest)', () => {
                 {
                     provide: ActivatedRoute,
                     useValue: {
-                        snapshot: { queryParams: options.queryParams ?? {} },
+                        snapshot: {
+                            queryParams: options.queryParams ?? {},
+                            params: options.routeParams ?? {},
+                        },
                         queryParams: queryParamsSubject,
+                        params: of(options.routeParams ?? {}),
                     },
                 },
                 { provide: MatDialog, useValue: { open: dialogOpenSpy } },
+                { provide: NotificationService, useValue: notificationMock },
             ],
         });
 
@@ -276,5 +287,70 @@ describe('TransactionsListComponent (Vitest)', () => {
         expect(transactionServiceMock.getTransactionById).toHaveBeenCalledWith(1);
         expect(dialogOpenSpy).toHaveBeenCalledWith(TransactionModalComponent, expect.anything());
         expect(transactionModalDialogRefs).toHaveLength(1);
+    });
+
+    it('should open the modal with the transaction id from the route param', async () => {
+        await setup({ routeParams: { id: '5' } });
+
+        expect(transactionServiceMock.getTransactionById).toHaveBeenCalledWith(5);
+        expect(dialogOpenSpy).toHaveBeenCalledWith(TransactionModalComponent, expect.anything());
+        expect(transactionModalDialogRefs).toHaveLength(1);
+    });
+
+    it('should not open the modal nor navigate when there is no id route param', async () => {
+        await setup();
+
+        expect(dialogOpenSpy).not.toHaveBeenCalled();
+        expect(routerMock.navigate).not.toHaveBeenCalled();
+    });
+
+    it.each(['abc', '0', '-3', '1.5'])(
+        'should navigate back to the transaction list without opening the modal when the id route param is invalid (%s)',
+        async (invalidId) => {
+            await setup({ routeParams: { id: invalidId } });
+
+            expect(dialogOpenSpy).not.toHaveBeenCalled();
+            expect(transactionServiceMock.getTransactionById).not.toHaveBeenCalled();
+            expect(routerMock.navigate).toHaveBeenCalledWith(['/transactions'], { replaceUrl: true });
+        },
+    );
+
+    it('should show a not found message, close the modal and remove the id from the url when the transaction does not exist', async () => {
+        await setup({
+            routeParams: { id: '999' },
+            getTransactionByIdResult: throwError(
+                () => new HttpErrorResponse({ status: 404, statusText: 'Not Found' }),
+            ),
+        });
+
+        expect(transactionServiceMock.getTransactionById).toHaveBeenCalledWith(999);
+        expect(notificationMock.show).toHaveBeenCalledWith('transaction.not-found');
+        expect(transactionModalDialogRefs[0]?.close).toHaveBeenCalled();
+        expect(routerMock.navigate).toHaveBeenCalledWith(['/transactions'], {
+            queryParamsHandling: 'preserve',
+            replaceUrl: true,
+        });
+    });
+
+    it('should remove the id from the url, keeping the query params, when the modal opened from the route is closed', async () => {
+        await setup({ routeParams: { id: '5' }, queryParams: { name: 'kávé' } });
+        expect(routerMock.navigate).not.toHaveBeenCalled();
+
+        transactionModalDialogRefs[0]?.close();
+
+        expect(routerMock.navigate).toHaveBeenCalledWith(['/transactions'], {
+            queryParamsHandling: 'preserve',
+            replaceUrl: true,
+        });
+    });
+
+    it('should not navigate when a modal opened from the list (without id route param) is closed', async () => {
+        await setup({ isHistoryMode: false });
+
+        fixture.nativeElement.querySelector('app-transaction-card').click();
+        fixture.detectChanges();
+        transactionModalDialogRefs[0]?.close();
+
+        expect(routerMock.navigate).not.toHaveBeenCalled();
     });
 });

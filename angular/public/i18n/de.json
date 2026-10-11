@@ -67,6 +67,7 @@
     "create": "Transaktion erstellen",
     "update": "Transaktion bearbeiten",
     "delete": "Transaktion löschen",
+    "not-found": "Die gesuchte Transaktion wurde nicht gefunden!",
     "delete.confirm": "Möchtest du die Transaktion wirklich löschen?",
     "delete.error": "Beim Löschen der Transaktion ist ein Fehler aufgetreten!",
     "update.error": "Beim Bearbeiten der Transaktion ist ein Fehler aufgetreten!",

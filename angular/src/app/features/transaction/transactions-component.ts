@@ -27,7 +27,13 @@ export interface FilterData {
     selector: 'app-transactions-list-component',
     templateUrl: './transactions-component.html',
     styleUrl: './transactions-component.scss',
-    imports: [TransactionListComponent, TranslatePipe, TransactionFilter, MatCardModule, TransactionBarChartComponent],
+    imports: [
+        TransactionListComponent,
+        TranslatePipe,
+        TransactionFilter,
+        MatCardModule,
+        TransactionBarChartComponent,
+    ],
     providers: [TransactionModalStateService],
 })
 export class TransactionsListComponent implements OnChanges {
@@ -35,7 +41,6 @@ export class TransactionsListComponent implements OnChanges {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     protected readonly modal = inject(TransactionModalStateService);
-
     /**
      * Teljes listát szeretnénk-e látni, vagy csak egy részét
      */
@@ -69,6 +74,28 @@ export class TransactionsListComponent implements OnChanges {
     protected readonly filterInputDefaultValuesFromQuery = this.toFilterData(this.latestParams());
 
     constructor() {
+        this.route.params.pipe(takeUntilDestroyed()).subscribe((params) => {
+            if (params['id'] === undefined) {
+                return;
+            }
+            const transactionIdFromParam = Number(params['id']);
+            if (Number.isInteger(transactionIdFromParam) && transactionIdFromParam > 0) {
+                this.modal.open(transactionIdFromParam);
+            } else {
+                this.router.navigate(['/transactions'], { replaceUrl: true });
+            }
+        });
+
+        // Modal bezárásakor kivesszük az id-t az URL-ből, a query paramétereket (szűrőket) megtartjuk
+        this.modal.closed.pipe(takeUntilDestroyed()).subscribe(() => {
+            if (this.route.snapshot.params['id'] !== undefined) {
+                this.router.navigate(['/transactions'], {
+                    queryParamsHandling: 'preserve',
+                    replaceUrl: true,
+                });
+            }
+        });
+
         // Mentés/törlés után újratöltjük a listát, és jelezzük a szülő komponensnek is
         this.modal.changed.pipe(takeUntilDestroyed()).subscribe(() => {
             this.transactionListData.reload();

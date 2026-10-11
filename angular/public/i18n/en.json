@@ -67,6 +67,7 @@
     "create": "Create transaction",
     "update": "Update transaction",
     "delete": "Delete transaction",
+    "not-found": "The requested transaction was not found!",
     "delete.confirm": "Are you sure you want to delete this transaction?",
     "delete.error": "An error occurred while deleting the transaction!",
     "update.error": "An error occurred while updating the transaction!",
