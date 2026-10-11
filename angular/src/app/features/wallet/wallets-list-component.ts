@@ -1,4 +1,4 @@
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { WalletDataInterface } from './interfaces';
 import { WalletCardComponent } from './wallet-card-component';
 
@@ -6,7 +6,6 @@ import { WalletCardComponent } from './wallet-card-component';
     selector: 'app-wallets-list-component',
     templateUrl: './wallets-list-component.html',
     styleUrl: './wallets-list-component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [WalletCardComponent],
 })
 export class WalletsListComponent {

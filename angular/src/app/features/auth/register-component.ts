@@ -1,4 +1,4 @@
-import { Component, inject, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
     PasswordMismatchErrorStateMatcher,
@@ -20,7 +20,6 @@ import { STRICT_EMAIL_REGEX } from '@shared/constants';
     selector: 'app-register-component',
     templateUrl: './register-component.html',
     styleUrl: './register-component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         ReactiveFormsModule,
         TranslatePipe,

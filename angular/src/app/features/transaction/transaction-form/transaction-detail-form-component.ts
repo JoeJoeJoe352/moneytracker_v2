@@ -1,4 +1,4 @@
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -16,7 +16,6 @@ import { MatCardModule } from '@angular/material/card';
     selector: 'app-transaction-detail-form-component',
     templateUrl: './transaction-detail-form-component.html',
     styleUrl: './transaction-detail-form-component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         ReactiveFormsModule,
         TranslatePipe,

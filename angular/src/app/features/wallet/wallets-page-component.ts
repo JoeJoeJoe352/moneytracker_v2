@@ -1,11 +1,4 @@
-import {
-    Component,
-    computed,
-    inject,
-    resource,
-    signal,
-    ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, inject, resource, signal } from '@angular/core';
 import { outputToObservable } from '@angular/core/rxjs-interop';
 import { catchError, EMPTY, exhaustMap, finalize, firstValueFrom, Observable } from 'rxjs';
 import { WalletService } from './wallet-service';
@@ -32,7 +25,6 @@ import { WalletSyncFormComponent } from './wallet-sync-form-component';
     selector: 'app-wallets-page-component',
     templateUrl: './wallets-page-component.html',
     styleUrl: './wallets-page-component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [WalletsListComponent, TranslatePipe, MatProgressSpinner, MatCardModule, MatButton],
 })
 export class WalletsPageComponent {

@@ -1,11 +1,4 @@
-import {
-    Component,
-    computed,
-    inject,
-    Signal,
-    signal,
-    ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, inject, Signal, signal } from '@angular/core';
 import { AuthService } from '../../features/auth/auth-service';
 import { Router, RouterLink } from '@angular/router';
 import { LinkInterface } from './interfaces';
@@ -24,7 +17,6 @@ import { UserDataStore } from '@app/shared/stores/user-data-store';
     selector: 'app-sidebar',
     templateUrl: './sidebar-component.html',
     styleUrl: './sidebar-component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterLink, TranslatePipe, HeaderLinkListComponent, MatIconButton, MatIcon],
 })
 export class SidebarComponent {

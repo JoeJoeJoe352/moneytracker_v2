@@ -1,12 +1,4 @@
-import {
-    Component,
-    computed,
-    ElementRef,
-    inject,
-    input,
-    Signal,
-    ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, ElementRef, inject, input, Signal } from '@angular/core';
 import { TransactionListElementData } from '../interfaces';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { MatCard } from '@angular/material/card';
@@ -19,7 +11,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     templateUrl: './transaction-card-component.html',
     styleUrl: './transaction-card-component.scss',
     imports: [CurrencyFormatPipe, MatCard, MatIcon, TranslatePipe],
-    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         role: 'button',
         tabindex: '0',

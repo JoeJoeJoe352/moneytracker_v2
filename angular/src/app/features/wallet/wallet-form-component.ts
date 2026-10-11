@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, output, Signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, output, Signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
@@ -26,7 +26,6 @@ const WALLET_TYPE_TO_DESCRIPTION: Record<WalletTypesEnum, string> = {
     selector: 'app-wallet-form-component',
     templateUrl: './wallet-form-component.html',
     styleUrls: ['./wallet-form-component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         ReactiveFormsModule,
         TranslatePipe,

@@ -1,4 +1,4 @@
-import { Component, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, OnInit, output } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
@@ -8,7 +8,6 @@ import { LinkInterface } from './interfaces';
     selector: 'app-header-link-list',
     templateUrl: './header-link-list-component.html',
     styleUrl: './header-link-list-component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TranslatePipe, RouterLink, RouterLinkActive, MatIcon],
 })
 export class HeaderLinkListComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, OnInit, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -12,7 +12,6 @@ import type { FilterData } from './transactions-component';
     selector: 'app-transaction-filter',
     templateUrl: 'transaction-filter-component.html',
     styleUrl: './transaction-filter-component.scss',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         MatCardModule,
         TranslatePipe,

@@ -6,7 +6,6 @@ import {
     output,
     resource,
     SimpleChanges,
-    ChangeDetectionStrategy,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { TransactionService } from '../transaction/transaction-service';
@@ -35,7 +34,6 @@ export interface FilterData {
         MatCardModule,
         TransactionBarChartComponent,
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [TransactionModalStateService],
 })
 export class TransactionsListComponent implements OnChanges {

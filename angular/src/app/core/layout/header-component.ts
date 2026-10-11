@@ -1,4 +1,4 @@
-import { Component, model, ChangeDetectionStrategy } from '@angular/core';
+import { Component, model } from '@angular/core';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -9,7 +9,6 @@ import { TranslatePipe } from '@ngx-translate/core';
     selector: 'app-header',
     templateUrl: './header-component.html',
     styleUrls: ['./header-component.scss', './mobile-menu.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatToolbar, MatIconButton, MatIcon, LanguageSwitcherComponent, TranslatePipe],
 })
 export class HeaderComponent {
