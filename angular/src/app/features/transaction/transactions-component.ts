@@ -82,6 +82,7 @@ export class TransactionsListComponent implements OnChanges {
             if (Number.isInteger(transactionIdFromParam) && transactionIdFromParam > 0) {
                 this.modal.open(transactionIdFromParam);
             } else {
+                console.error('Invalid transaction id in param');
                 this.router.navigate(['/transactions'], { replaceUrl: true });
             }
         });
