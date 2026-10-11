@@ -71,6 +71,7 @@
     "update": "Tranzakció módosítása",
     "save": "Mentés",
     "delete": "Törlés",
+    "not-found": "A keresett tranzakció nem található!",
     "delete.confirm": "Biztosan törölni szeretnéd a tranzakciót?",
     "delete.error": "Hiba történt a tranzakció törlése közben!",
     "update.error": "Hiba történt a tranzakció módosítása közben!",

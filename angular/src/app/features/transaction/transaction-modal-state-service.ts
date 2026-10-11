@@ -11,6 +11,8 @@ import {
 } from './interfaces';
 import { TransactionModalComponent, TransactionModalInputInterface } from './transaction-modal';
 import { NotificationService } from '@shared/services/notification-service';
+import { _ } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 
 interface ModalParams {
     isOpen: boolean;
@@ -63,6 +65,10 @@ export class TransactionModalStateService {
      * Mentés/törlés után emittál, hogy a hívó oldal újratölthesse a saját listáját
      */
     public changed = new Subject<void>();
+    /**
+     * A modal bezárásakor emittál
+     */
+    public closed = new Subject<void>();
 
     /**
      * Tranzakciós modal függőségi adatai töltés alatt vannak-e?
@@ -81,7 +87,18 @@ export class TransactionModalStateService {
             if (params.editId === null) {
                 return null;
             }
-            return firstValueFrom(this.transactionService.getTransactionById(params.editId));
+            try {
+                return await firstValueFrom(
+                    this.transactionService.getTransactionById(params.editId),
+                );
+            } catch (err) {
+                if (err instanceof HttpErrorResponse && err.status === 404) {
+                    this.dialogRef?.close();
+                    this.notification.show(_('transaction.not-found'));
+                    return null;
+                }
+                throw err;
+            }
         },
     });
 
@@ -166,6 +183,7 @@ export class TransactionModalStateService {
             this.isOpen.set(false);
             this.editId.set(null);
             this.dialogRef = null;
+            this.closed.next();
         });
     }
 
