@@ -13,5 +13,9 @@ public record TransactionFilter(
     /**
      * Tranzakció dátuma. Pl.: 2026-06-25
      */
-    LocalDate dateString
+    LocalDate dateString,
+    /**
+     * Tranzakció id
+     */
+    Long transactionId
 ) {}

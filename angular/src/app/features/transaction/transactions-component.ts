@@ -19,6 +19,7 @@ import { firstValueFrom, map } from 'rxjs';
 import { TransactionBarChartComponent } from '../statistics/transaction-bar-chart-component';
 
 export interface FilterData {
+    transactionId?: number;
     name: string;
     date: Date | null;
 }
@@ -60,7 +61,7 @@ export class TransactionsListComponent implements OnChanges {
     public transactionsChanged = output<void>();
 
     /**
-     * A route aktuális query paraméterei. Változásukkor a lista magától újratöltődik
+     * A route aktuális query paraméterei. Változáskor a lista magától újratöltődik
      */
     private readonly latestParams = toSignal(
         this.route.queryParams.pipe(map((params) => new URLSearchParams(params as Params))),
@@ -171,6 +172,10 @@ export class TransactionsListComponent implements OnChanges {
 
         if (data.date) {
             params['date'] = data.date.toLocaleDateString('sv-SE');
+        }
+
+        if (data.transactionId) {
+            params['transactionId'] = data.transactionId.toString();
         }
 
         return params;

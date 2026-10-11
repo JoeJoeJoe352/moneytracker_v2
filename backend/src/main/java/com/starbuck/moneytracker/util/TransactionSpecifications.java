@@ -8,7 +8,8 @@ import com.starbuck.moneytracker.entity.Transaction;
 
 public class TransactionSpecifications {
 
-    private TransactionSpecifications(){}
+    private TransactionSpecifications() {
+    }
 
     /**
      * Opcionális query paraméter, ami ha van, akkor a név-re szűr
@@ -17,10 +18,8 @@ public class TransactionSpecifications {
      * @return
      */
     public static Specification<Transaction> hasName(String name) {
-        return (root, query, cb) ->
-            name == null ? 
-            null : 
-            cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+        return (root, query, cb) -> name == null ? null
+                : cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }
 
     /**
@@ -30,8 +29,17 @@ public class TransactionSpecifications {
      * @return
      */
     public static Specification<Transaction> hasDate(LocalDate date) {
-        return (root, query, cb) ->
-            date == null ? null : cb.equal(root.get("transactionDate"), date);
+        return (root, query, cb) -> date == null ? null : cb.equal(root.get("transactionDate"), date);
+    }
+
+    /**
+     * Opcionális query paraméter, ami a tranzakció id-re szűr
+     * 
+     * @param transactionId
+     * @return
+     */
+    public static Specification<Transaction> hasTransactionId(Long transactionId) {
+        return (root, query, cb) -> transactionId == null ? null : cb.equal(root.get("id"), transactionId);
     }
 
     /**
@@ -41,7 +49,6 @@ public class TransactionSpecifications {
      * @return
      */
     public static Specification<Transaction> hasUserId(Long userId) {
-        return (root, query, cb) ->
-                cb.equal(root.get("wallet").get("user").get("id"), userId);
+        return (root, query, cb) -> cb.equal(root.get("wallet").get("user").get("id"), userId);
     }
 }

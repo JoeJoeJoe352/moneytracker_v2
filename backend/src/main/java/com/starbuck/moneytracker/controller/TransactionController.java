@@ -35,7 +35,8 @@ public class TransactionController {
     private final TransactionMapper transactionMapper;
     private final WalletService walletService;
 
-    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper, WalletService walletService) {
+    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper,
+            WalletService walletService) {
         this.transactionService = transactionService;
         this.transactionMapper = transactionMapper;
         this.walletService = walletService;
@@ -119,8 +120,9 @@ public class TransactionController {
     @GetMapping(path = "/transaction/history")
     public List<TransactionResponseDto> listTransactionHistory(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) LocalDate date) {
-        final TransactionFilter filter = new TransactionFilter(name, date);
+            @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) Long transactionId) {
+        final TransactionFilter filter = new TransactionFilter(name, date, transactionId);
         List<Transaction> transactions = this.transactionService.getHistoryPageData(filter);
         return this.transactionMapper.toDtoList(transactions);
     }
