@@ -73,7 +73,7 @@
                 </mat-form-field>
             } @else {
                 <mat-form-field>
-                    <mat-label>{{ 'transaction.detail.amount' | translate }}</mat-label>
+                    <mat-label>{{ 'transaction.detail.quantity' | translate }}</mat-label>
                     <input
                         id="detail-weight-{{ index() }}"
                         matInput
@@ -86,7 +86,7 @@
                             <mat-error>{{ 'transaction.detail.field.required' | translate }}</mat-error>
                         }
                         @if (controls.detailWeight.hasError('greaterThan')) {
-                            <mat-error>{{ 'transaction.detail.amount.min' | translate }}</mat-error>
+                            <mat-error>{{ 'transaction.detail.quantity.min' | translate }}</mat-error>
                         }
                     }
                 </mat-form-field>

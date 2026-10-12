@@ -7,8 +7,26 @@
     <mat-card-content>
         <!-- szűrő form -->
         <form [formGroup]="filterForm" (ngSubmit)="submitForm()">
-            <!-- Tranzakció név -->
             <div class="filter-row">
+                <!-- Tranzakció id -->
+                <mat-form-field appearance="fill" class="filter">
+                    <mat-label>{{ 'transaction_page.filter.transactionId' | translate }}</mat-label>
+                    <input
+                        matInput
+                        id="transactionId"
+                        type="number"
+                        formControlName="transactionId"
+                        autocomplete="transactionId"
+                        [readonly]="isTransactionListLoading()"
+                    />
+                    @if (filterForm.controls.transactionId.hasError('min')) {
+                        <mat-error>
+                            {{ 'transaction_page.filter.transactionId.min' | translate }}
+                        </mat-error>
+                    }
+                </mat-form-field>
+
+                <!-- Tranzakció név -->
                 <mat-form-field appearance="fill" class="filter">
                     <mat-label>{{ 'transaction_page.filter.name' | translate }}</mat-label>
                     <input
@@ -35,27 +53,29 @@
                 </mat-form-field>
             </div>
 
-            <button
-                mat-flat-button
-                type="submit"
-                [disabled]="isTransactionListLoading()"
-                [attr.aria-disabled]="isTransactionListLoading()"
-                class="filter-submit"
-            >
-                {{ 'transaction_page.filter.submit' | translate }}
-            </button>
+            <mat-card-actions>
+                <button
+                    mat-flat-button
+                    type="submit"
+                    [disabled]="isTransactionListLoading()"
+                    [attr.aria-disabled]="isTransactionListLoading()"
+                    class="filter-submit"
+                >
+                    {{ 'transaction_page.filter.submit' | translate }}
+                </button>
 
-            <button
-                mat-stroked-button
-                id="clear-filters"
-                type="button"
-                [disabled]="isTransactionListLoading()"
-                [attr.aria-disabled]="isTransactionListLoading()"
-                class="filter-clear"
-                (click)="clearInputs()"
-            >
-                {{ 'transaction_page.filter.clear' | translate }}
-            </button>
+                <button
+                    mat-stroked-button
+                    id="clear-filters"
+                    type="button"
+                    [disabled]="isTransactionListLoading()"
+                    [attr.aria-disabled]="isTransactionListLoading()"
+                    class="filter-clear"
+                    (click)="clearInputs()"
+                >
+                    {{ 'transaction_page.filter.clear' | translate }}
+                </button>
+            </mat-card-actions>
         </form>
     </mat-card-content>
 </mat-card>

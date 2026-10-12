@@ -1,5 +1,19 @@
-import { Routes } from '@angular/router';
+import { Routes, UrlMatchResult, UrlSegment } from '@angular/router';
 import { authGuard } from './auth-guard';
+
+/**
+ * A /transactions és a /transactions/:id URL-t is ugyanarra a route-ra illeszti (opcionális id),
+ */
+export function transactionsMatcher(segments: UrlSegment[]): UrlMatchResult | null {
+    const [first, id] = segments;
+    if (first?.path !== 'transactions' || segments.length > 2) {
+        return null;
+    }
+    return {
+        consumed: segments,
+        posParams: id ? { id } : {},
+    };
+}
 
 /**
  * Routes lazy load-al van betöltve, hogy ne lépjük túl a bundle-size budget-et
@@ -17,15 +31,7 @@ export const routes: Routes = [
             import('./features/welcome/welcome-component').then((m) => m.WelcomeComponent),
     },
     {
-        path: 'transactions',
-        loadComponent: () =>
-            import('./features/transaction/transactions-page-component').then(
-                (m) => m.TransactionsPageComponent,
-            ),
-        canActivate: [authGuard],
-    },
-    {
-        path: 'transactions/:id',
+        matcher: transactionsMatcher,
         loadComponent: () =>
             import('./features/transaction/transactions-page-component').then(
                 (m) => m.TransactionsPageComponent,
@@ -35,9 +41,7 @@ export const routes: Routes = [
     {
         path: 'wallets',
         loadComponent: () =>
-            import('./features/wallet/wallets-page-component').then(
-                (m) => m.WalletsPageComponent,
-            ),
+            import('./features/wallet/wallets-page-component').then((m) => m.WalletsPageComponent),
         canActivate: [authGuard],
     },
     {

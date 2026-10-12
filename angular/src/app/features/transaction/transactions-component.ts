@@ -1,5 +1,6 @@
 import {
     Component,
+    computed,
     inject,
     input,
     OnChanges,
@@ -19,7 +20,7 @@ import { firstValueFrom, map } from 'rxjs';
 import { TransactionBarChartComponent } from '../statistics/transaction-bar-chart-component';
 
 export interface FilterData {
-    transactionId?: number;
+    transactionId: number | null;
     name: string;
     date: Date | null;
 }
@@ -80,10 +81,10 @@ export class TransactionsListComponent implements OnChanges {
                 return;
             }
             const transactionIdFromParam = Number(params['id']);
-            if (Number.isInteger(transactionIdFromParam) && transactionIdFromParam > 0) {
+            if (this.isValidTransactionId(transactionIdFromParam)) {
                 this.modal.open(transactionIdFromParam);
             } else {
-                console.error('Invalid transaction id in param');
+                console.error('Invalid transaction id in param: ' + transactionIdFromParam);
                 this.router.navigate(['/transactions'], { replaceUrl: true });
             }
         });
@@ -105,6 +106,7 @@ export class TransactionsListComponent implements OnChanges {
         });
     }
 
+
     ngOnChanges(changes: SimpleChanges): void {
         // A szülő komponens ha üzen (új tranzakció felvételéről), akkor újratöltjük a listát
         if (changes['reloadTrigger'] && !changes['reloadTrigger'].firstChange) {
@@ -112,6 +114,12 @@ export class TransactionsListComponent implements OnChanges {
         }
     }
 
+    /**
+     * Tranzakció id validálás
+     */
+    isValidTransactionId(transactionId: number) {
+        return Number.isInteger(transactionId) && transactionId > 0;
+    }
     /**
      * Tranzakciós lista adatok. A query paraméterek változtatásakor magától betöltődik
      */
@@ -148,6 +156,17 @@ export class TransactionsListComponent implements OnChanges {
         });
     }
 
+    protected isChartVisible = computed(() => {
+        return this.isHistoryMode() && this.isThereEnoughElementToShowChart();
+    });
+
+    /**
+     * Ennyi elemnél néz már ki valahogyan a diagram
+     */
+    protected isThereEnoughElementToShowChart = computed(() => {
+        return this.transactionListData.hasValue() && this.transactionListData.value().length > 1;
+    });
+
     /**
      * URLSearchParams-ból kiszedi a szűrőfeltételeket, amik be vannak állítva
      */
@@ -155,6 +174,7 @@ export class TransactionsListComponent implements OnChanges {
         const date = params.get('date');
 
         return {
+            transactionId: params.get('transactionId') ? Number(params.get('transactionId')) : null,
             name: params.get('name') ?? '',
             date: date ? new Date(date) : null,
         };
@@ -174,7 +194,7 @@ export class TransactionsListComponent implements OnChanges {
             params['date'] = data.date.toLocaleDateString('sv-SE');
         }
 
-        if (data.transactionId) {
+        if (data.transactionId && this.isValidTransactionId(data.transactionId)) {
             params['transactionId'] = data.transactionId.toString();
         }
 

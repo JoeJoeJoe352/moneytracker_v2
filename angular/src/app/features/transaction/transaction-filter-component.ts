@@ -1,5 +1,5 @@
 import { Component, inject, input, OnInit, output } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -50,6 +50,7 @@ export class TransactionFilter implements OnInit {
      * Form definiciója. A kezdőértékeket az ngOnInit tölti bele
      */
     protected readonly filterForm = this.fb.nonNullable.group({
+        transactionId: this.fb.control<number | null>(null, [Validators.min(1)]),
         name: [''],
         date: this.fb.control<Date | null>(null),
     });
@@ -70,6 +71,9 @@ export class TransactionFilter implements OnInit {
      * Form küldése
      */
     protected submitForm(): void {
+        if (!this.filterForm.valid) {
+            return;
+        }
         this.filterSubmit.emit(this.getValuesFromFilterInputs());
     }
 
@@ -77,8 +81,8 @@ export class TransactionFilter implements OnInit {
      * A filter inputok értékei alapján létrehoz egy FilterData objektumot
      */
     private getValuesFromFilterInputs(): FilterData {
-        const { name, date } = this.filterForm.getRawValue();
+        const { transactionId, name, date } = this.filterForm.getRawValue();
 
-        return { name: name.trim(), date };
+        return { transactionId, name: name.trim(), date };
     }
 }
