@@ -14,15 +14,14 @@
     "faster": "Du kannst schneller sparen — du siehst, wo du klug optimieren kannst.",
     "security": "Es gibt dir Sicherheit und Freiheit — du weißt genau, ob du dir etwas leisten kannst.",
     "goals": "Es hilft dir, langfristige Ziele zu erreichen — Wohnung, Reisen, Rücklage, was auch immer wichtig ist.",
-    "register": "Registriere dich oder melde dich an, um fortzufahren!",
-    "register.title": "Registrierung",
-    "login.title": "Anmeldung"
+    "register": "Registriere dich oder melde dich an, um fortzufahren!"
   },
   "login": {
     "title": "Anmeldung",
     "username": "Benutzername",
     "password": "Passwort",
     "submit": "Anmelden",
+    "success": "Erfolgreich angemeldet",
     "username.required-error": "Der Benutzername ist erforderlich!",
     "username.minlength-error": "Der Benutzername muss mindestens 3 Zeichen lang sein!",
     "username.maxlength-error": "Der Benutzername darf höchstens 20 Zeichen lang sein!",
@@ -47,18 +46,22 @@
     "password.maxlength-error": "Das Passwort darf höchstens 20 Zeichen lang sein!",
     "password_again": "Passwort bestätigen",
     "password_again.required-error": "Die Passwortbestätigung ist erforderlich!",
-    "password_again.minlength-error": "Die Passwortbestätigung muss mindestens 6 Zeichen lang sein!",
     "password_again.mismatch-error": "Die Passwörter stimmen nicht überein!",
-    "submit": "Registrieren"
+    "submit": "Registrieren",
+    "success": "Registrierung erfolgreich",
+    "title": "Registrierung"
   },
   "header": {
     "welcome": "Willkommen",
     "transactions": "Transaktionen",
     "logout": "Abmelden",
+    "logout.success": "Erfolgreich abgemeldet",
     "dashboard": "Startseite",
     "wallets": "Wallets",
     "menu.open": "Menü",
-    "menu.close": "Menü schließen"
+    "menu.close": "Menü schließen",
+    "register": "Registrieren",
+    "login": "Anmelden"
   },
   "footer": {
     "home": "Startseite"
@@ -66,6 +69,7 @@
   "transaction": {
     "create": "Transaktion erstellen",
     "update": "Transaktion bearbeiten",
+    "save": "Speichern",
     "delete": "Transaktion löschen",
     "not-found": "Die gesuchte Transaktion wurde nicht gefunden!",
     "delete.confirm": "Möchtest du die Transaktion wirklich löschen?",
@@ -77,7 +81,6 @@
     "name.minlength": "Der Transaktionsname muss mindestens 3 Zeichen lang sein!",
     "name.maxlength": "Der Transaktionsname darf höchstens 120 Zeichen lang sein!",
     "type": "Transaktionstyp",
-    "type.hint": "Dies bestimmt das Vorzeichen der Transaktion",
     "price": "Betrag",
     "price.required": "Der Betrag ist erforderlich!",
     "price.min": "Der Betrag muss größer als null sein!",
@@ -92,7 +95,6 @@
     "detail_state_label": "Erfassungsart",
     "hide_details": "Einzelbetrag",
     "show_details": "Posten",
-    "detail_state.hint": "Bei der Posten-Erfassung kannst du Betrag und Kategorie für jeden Posten einzeln angeben",
     "categories": "Kategorien",
     "categories.add": "Kategorien hinzufügen",
     "is_sync_transaction": "Bei einer Guthaben-Synchronisierung erstellte Transaktion",
@@ -101,6 +103,7 @@
       "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!",
       "remove": "{{name}} entfernen"
     },
+    "wallet": "Wallet",
     "wallet.hint": "Die Transaktion wird damit verknüpft",
 
     "detail": {
@@ -111,16 +114,16 @@
       "name.maxlength": "Der Transaktionsname darf höchstens 120 Zeichen lang sein!",
       "name.required": "Name ist erforderlich",
       "price": "Postenpreis",
-      "price.required": "Der Preis ist erforderlich",
       "price.min": "Muss eine Zahl größer als 0 sein",
       "add-detail": "Posten hinzufügen",
       "delete.last-one-error": "Der letzte Posten kann nicht gelöscht werden",
       "delete_row.tooltip": "Posten löschen",
       "toggle.confirm": "Möchtest du den Schalter wirklich umstellen? Bestehende Posten werden dabei gelöscht.",
-      "weight": "Gewicht",
-      "weight.min": "Das Gewicht muss größer als null sein!",
+      "quantity": "Menge",
+      "quantity.min": "Die Menge muss größer als null sein!",
       "unit_price": "Einzelpreis",
       "unit_price.min": "Der Einzelpreis muss größer als null sein!",
+      "price_mode.label": "Art der Preisangabe",
       "simple_price_mode": "Preis angeben",
       "complex_price_mode": "Menge und Einzelpreis angeben",
       "total_price": "Gesamtpreis"
@@ -140,7 +143,11 @@
     "type_label": "Wallet-Typ",
     "type": {
       "default": "Standard",
-      "savings": "Sparen"
+      "savings": "Sparen",
+      "description": {
+        "default": "Standardtyp, den du für alltägliche Ausgaben verwenden kannst.",
+        "savings": "Spartyp, den du für langfristige Ziele verwenden kannst, zum Beispiel für einen Wohnungskauf oder eine Reise."
+      }
     },
     "sync": {
       "modal_title": "Guthaben synchronisieren",
@@ -172,13 +179,16 @@
     "balance_change_this_month": "in diesem Monat",
     "total_income": "Einnahmen in diesem Monat",
     "total_expenses": "Ausgaben in diesem Monat",
-    "last_transactions": "Letzte Transaktionen"
+    "last_transactions": "Letzte Transaktionen",
+    "stat.no_data": "Für diesen Monat gibt es keine Daten zum Anzeigen"
   },
   "transaction_page": {
     "title": "Meine Transaktionen",
 
     "filter": {
       "title": "Filter",
+      "transactionId": "Transaktionsnummer",
+      "transactionId.min": "Die Transaktionsnummer muss größer als 0 sein",
       "name": "Transaktionsname",
       "date": "Transaktionsdatum",
       "date.placeholder": "Datum auswählen",
