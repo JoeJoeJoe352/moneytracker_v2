@@ -510,7 +510,29 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
                 new BigDecimal(1000), now, this.wallet);
 
         List<Transaction> result = transactionService
-                .getHistoryPageData(new TransactionFilter("groceries", now));
+                .getHistoryPageData(new TransactionFilter("groceries", now, null));
+
+        assertEquals(1, result.size());
+        assertEquals(matching.getId(), result.get(0).getId());
+
+        this.deleteData(matching);
+        this.deleteData(nonMatching);
+    }
+
+    /**
+     * History oldalon a beállított id-nek megfelelő tranzakciót adja vissza
+     */
+    @Test
+    void getHistoryPageData_filtersTransactionsById() {
+        var now = LocalDate.now();
+
+        Transaction matching = this.persistSimpleTransaction("groceries shopping", TransactionTypeEnum.OUTCOME,
+                new BigDecimal(-10), now, this.wallet);
+        Transaction nonMatching = this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME,
+                new BigDecimal(1000), now, this.wallet);
+
+        List<Transaction> result = transactionService
+                .getHistoryPageData(new TransactionFilter(null, now, matching.getId()));
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());
