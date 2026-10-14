@@ -75,7 +75,7 @@ describe('TransactionFilter (Vitest)', () => {
         typeName('  kenyér  ');
         submitButton().click();
 
-        expect(submitted).toEqual([{ name: 'kenyér', date: null }]);
+        expect(submitted).toEqual([{ name: 'kenyér', date: null, transactionId: null }]);
     });
 
     it('should empty the inputs and emit resetForm when the clear button is clicked', async () => {

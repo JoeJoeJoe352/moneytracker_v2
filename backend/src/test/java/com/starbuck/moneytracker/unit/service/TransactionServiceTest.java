@@ -519,7 +519,7 @@ class TransactionServiceTest {
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME,
                 new BigDecimal(100), 0, this.defaultWallet);
-        TransactionFilter filter = new TransactionFilter("teszt", null);
+        TransactionFilter filter = new TransactionFilter("teszt", null, null);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelperDto.class)))
