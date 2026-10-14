@@ -99,7 +99,6 @@ export class WalletsPageComponent {
         // A hibát a belső streamben kezeljük, hogy a külső stream életben maradjon és lehessen újrapróbálni
         outputToObservable(dialogRef.componentInstance.syncFormSended)
             .pipe(
-                // exhaustmap amíg dolgozik drop-ol minden új kérést, ezért nem kell az isSyncing flag-et használni
                 exhaustMap((payload) => {
                     isSyncing.set(true);
 

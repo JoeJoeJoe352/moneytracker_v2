@@ -119,8 +119,8 @@
       "delete.last-one-error": "Utolsó tétel nem törölhető",
       "delete_row.tooltip": "Tétel törlése",
       "toggle.confirm": "Biztosan átállítod a kapcsolót? A meglévő tételek így törölve lesznek.",
-      "amount": "Mennyiség",
-      "amount.min": "A mennyiségnek nagyobbnak kell lennie, mint nulla!",
+      "quantity": "Mennyiség",
+      "quantity.min": "A mennyiségnek nagyobbnak kell lennie, mint nulla!",
       "unit_price": "Egységár",
       "unit_price.min": "Az egységárnak nagyobbnak kell lennie, mint nulla!",
       "price_mode.label": "Árképzés típusa",
@@ -188,6 +188,8 @@
 
     "filter": {
       "title": "Szűrés",
+      "transactionId": "Tranzakció száma",
+      "transactionId.min": "Tranzakció száma 0-nál nagyobb legyen",
       "name": "Tranzakciónév",
       "date": "Tranzakció dátuma",
       "date.placeholder": "Válassz egy dátumot",

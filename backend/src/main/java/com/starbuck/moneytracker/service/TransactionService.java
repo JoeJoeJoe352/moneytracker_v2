@@ -171,7 +171,9 @@ public class TransactionService {
         if (filter != null) {
             filterConditions = Specification
                     .where(TransactionSpecifications.hasName(filter.name()))
-                    .and(TransactionSpecifications.hasDate(filter.dateString()));
+                    .and(TransactionSpecifications.hasDate(filter.dateString())
+                    .and(TransactionSpecifications.hasTransactionId(filter.transactionId()))
+                );
         }
 
         HistoryQueryHelperDto dto = new HistoryQueryHelperDto(limit, sort, filterConditions);
