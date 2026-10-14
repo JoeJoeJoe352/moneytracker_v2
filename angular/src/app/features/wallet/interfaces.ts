@@ -7,9 +7,10 @@ export interface WalletDataInterface {
     currencyCode: CurrencyCodesEnum;
     type: WalletTypesEnum;
     lastSyncDate: string;
-     // note: ez lehet elavult tranzakció változás esetén. 
-     // Akkor használható csak biztonsággal, ha előtte valami betölti a garantáltan frisset
+    // note: ez lehet elavult tranzakció változás esetén.
+    // Akkor használható csak biztonsággal, ha előtte valami betölti a garantáltan frisset
     sum: number;
+    deletable: boolean;
 }
 
 export interface WalletCreateRequest {

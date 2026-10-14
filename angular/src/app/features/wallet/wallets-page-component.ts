@@ -45,16 +45,7 @@ export class WalletsPageComponent {
             const wallets = await firstValueFrom(this.walletService.listWallets());
 
             // store frissítés mellékhatásként
-            this.userData.setWallets(
-                wallets.map((wallet) => ({
-                    id: wallet.id,
-                    name: wallet.name,
-                    currencyCode: wallet.currencyCode,
-                    type: wallet.type,
-                    sum: wallet.sum,
-                    lastSyncDate: wallet.lastSyncDate,
-                })),
-            );
+            this.userData.setWallets(wallets);
             return wallets;
         },
     });
