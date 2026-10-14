@@ -40,17 +40,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                 ORDER BY w.id ASC
             """)
     List<Wallet> findByUserId(long userId);
-
-    /**
-     * A user wallet darabszámának lekérdezése
-     */
-    @Query("""
-                SELECT COUNT(w)
-                FROM Wallet w
-                WHERE w.user.id = ?1 AND w.status = 0
-            """)
-    long getNumberOfActiveWalletsForUser(long userId);
-
+    
     /**
      * Walleteket lekérdezi, kiírja hozzá az összeget és az utolsó szinkronizálás
      * dátumát (ha még nem volt, akkor a wallet létrehozásának dátumát).

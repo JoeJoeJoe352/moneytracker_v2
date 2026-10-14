@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,26 +19,23 @@ import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.BalanceSyncDto;
 import com.starbuck.moneytracker.dto.WalletCreateDto;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
-import com.starbuck.moneytracker.dto.WalletResponseDto;
 import com.starbuck.moneytracker.dto.WalletUpdateDto;
-import com.starbuck.moneytracker.mapper.WalletMapper;
 import com.starbuck.moneytracker.service.BalanceSyncService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 import jakarta.validation.Valid;
 
+@RequestMapping("/wallet")
 @RestController
 public class WalletController {
 
     private final WalletService walletService;
-    private final WalletMapper walletMapper;
     private final CurrentUserUtil userUtil;
     private final BalanceSyncService syncService;
 
-    public WalletController(WalletService walletService, WalletMapper walletMapper, CurrentUserUtil userUtil, BalanceSyncService syncService) {
+    public WalletController(WalletService walletService, CurrentUserUtil userUtil, BalanceSyncService syncService) {
         this.walletService = walletService;
-        this.walletMapper = walletMapper;
         this.userUtil = userUtil;
         this.syncService = syncService;
     }
@@ -47,7 +45,7 @@ public class WalletController {
      * 
      * @return
      */
-    @GetMapping(path = "/wallet")
+    @GetMapping
     public List<WalletListResponseDto> listWallets() {
         return walletService.listWalletsForUser();
     }
@@ -57,7 +55,7 @@ public class WalletController {
      * 
      * @param dto
      */
-    @PostMapping(path = "wallet")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createWallet(@Valid @RequestBody WalletCreateDto dto) {
         var command = new CreateWalletCommand(dto.name(), dto.currencyCode(), dto.walletType(), userUtil.getUser());
@@ -71,7 +69,7 @@ public class WalletController {
      * @param dto
      * @param id
      */
-    @PostMapping(path = "wallet/{id}/sync")
+    @PostMapping(path = "/{id}/sync")
     @ResponseStatus(HttpStatus.CREATED)
     public void syncWallet(@Valid @RequestBody BalanceSyncDto dto, @PathVariable long id) {
         var command = new BalanceSyncCommand(id, dto.syncDate(), dto.currentBalance());
@@ -84,7 +82,7 @@ public class WalletController {
      * @param dto
      * @param id
      */
-    @PutMapping(path = "wallet/{id}")
+    @PutMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void updateWallet(@Valid @RequestBody WalletUpdateDto dto, @PathVariable long id) {
         var command = new UpdateWalletCommand(dto.name(), dto.walletType());
@@ -92,24 +90,11 @@ public class WalletController {
     }
 
     /**
-     * Visszaadja a user egy walletjét id alapján
-     *
-     * @param id
-     * @return
-     */
-    @GetMapping(path = "wallet/{id}")
-    public WalletResponseDto getWalletById(@PathVariable long id) {
-        var wallet = walletService.getWalletById(id);
-
-        return walletMapper.toDto(wallet);
-    }
-
-    /**
      * Soft delete-eli a walletet
      *
      * @param id
      */
-    @DeleteMapping(path = "wallet/{id}")
+    @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDeleteWallet(@PathVariable long id) {
         walletService.softDeleteWallet(id);

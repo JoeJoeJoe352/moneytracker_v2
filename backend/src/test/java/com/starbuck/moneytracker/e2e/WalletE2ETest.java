@@ -180,60 +180,6 @@ class WalletE2ETest extends MySqlContainerTest {
         }
     }
 
-    // ---- GET /wallet/{id} ----
-
-    /**
-     * Saját wallet lekérdezése id alapján a wallet adatait adja vissza
-     */
-    @Test
-    void getWalletById_returnsWalletForAuthenticatedUser() {
-        Wallet wallet = walletRepository.save(new Wallet("Savings", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
-
-        ResponseEntity<WalletResponseDto> response = restTemplate.exchange("/wallet/" + wallet.getId(),
-                HttpMethod.GET, new HttpEntity<>(headers), WalletResponseDto.class);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        WalletResponseDto body = response.getBody();
-        assertEquals(wallet.getId(), body.id());
-        assertEquals("Savings", body.name());
-        assertEquals(CurrencyEnum.USD, body.currencyCode());
-        assertEquals(WalletTypeEnum.SAVINGS, body.type());
-    }
-
-    /**
-     * Másik user walletjét nem lehet lekérdezni, a service
-     * EntityNotFoundException-t dob, amit a GlobalExceptionHandler 404-re fordít
-     */
-    @Test
-    void getWalletById_returnsNotFoundForOtherUsersWallet() {
-        User otherUser = new User("e2eOtherGetWalletUser", "irrelevantEncodedPassword", "othergetwallet@email.com");
-        otherUser.generateUuid();
-        otherUser = userRepository.save(otherUser);
-        Wallet otherUsersWallet = walletRepository
-                .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
-
-        try {
-            ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + otherUsersWallet.getId(),
-                    HttpMethod.GET, new HttpEntity<>(headers), Void.class);
-
-            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        } finally {
-            walletRepository.delete(otherUsersWallet);
-            userRepository.delete(otherUser);
-        }
-    }
-
-    /**
-     * Nem létező id-ra 404-et ad vissza
-     */
-    @Test
-    void getWalletById_returnsNotFoundForNonExistentId() {
-        ResponseEntity<Void> response = restTemplate.exchange("/wallet/999999999", HttpMethod.GET,
-                new HttpEntity<>(headers), Void.class);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
     // ---- PUT /wallet/{id} ----
 
     /**

@@ -87,7 +87,19 @@ public class WalletService {
      * Visszatér a user tárcáival
      */
     public List<WalletListResponseDto> listWalletsForUser() {
-        return walletRepo.listWalletsWithSumByUserId(userUtil.getUser().getId());
+        var wallets = walletRepo.listWalletsWithSumByUserId(userUtil.getUser().getId());
+        boolean deletable = isWalletsDeletable(wallets.size());
+        return wallets.stream().map(w -> w.withDeletable(deletable)).toList();
+    }
+
+    /**
+     * Törölhetőek-e a walletek
+     * 
+     * @param activeWalletCount
+     * @return
+     */
+    private boolean isWalletsDeletable(int activeWalletCount) {
+        return activeWalletCount > 1;
     }
 
     /**
@@ -121,7 +133,8 @@ public class WalletService {
     public void softDeleteWallet(long id) {
         Wallet walletFromDb = this.getWalletById(id);
 
-        if (walletRepo.getNumberOfActiveWalletsForUser(userUtil.getUser().getId()) == 1) {
+        List<Wallet> wallets = walletRepo.findByUserId(userUtil.getUser().getId());
+        if (!isWalletsDeletable(wallets.size())) {
             throw new IllegalStateException("Last wallet cannot be deleted");
         }
 
