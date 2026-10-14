@@ -119,9 +119,12 @@ public class WalletService {
      * @param id
      */
     public void softDeleteWallet(long id) {
-        // TODO itt miért nem a this.getWalletById van használva?
-        Wallet walletFromDb = walletRepo.getWalletById(id, userUtil.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
+        Wallet walletFromDb = this.getWalletById(id);
+
+        List<Wallet> wallets = walletRepo.findByUserId(userUtil.getUser().getId());
+        if (wallets.size() == 1) {
+            throw new IllegalStateException("Last wallet cannot be deleted");
+        }
 
         walletFromDb.setStatus(GeneralStatusEnum.DISABLED);
 

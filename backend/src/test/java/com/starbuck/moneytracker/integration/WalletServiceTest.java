@@ -22,7 +22,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
-import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -191,11 +190,6 @@ public class WalletServiceTest extends MySqlContainerTest {
         var notSyncedWallet = walletService.createWallet(
                 new CreateWalletCommand("NotSyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
 
-        var olderSync = balanceSyncRepo
-                .save(new BalanceSync(LocalDate.of(2026, 9, 1), syncedWallet, new BigDecimal("10.00")));
-        var latestSync = balanceSyncRepo
-                .save(new BalanceSync(LocalDate.of(2026, 9, 15), syncedWallet, new BigDecimal("20.00")));
-
         // When
         List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
 
@@ -303,11 +297,17 @@ public class WalletServiceTest extends MySqlContainerTest {
         walletRepo.delete(wallet);
     }
 
+    /**
+     * Wallet sikeres törlése
+     */
     @Test
     public void testSoftDeleteWallet() {
         // Given
         var command = new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
         var wallet = walletService.createWallet(command);
+        // csak akkor törölhető a wallet, ha nem az az egyetlen
+        var commandAnotherWallet = new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
+        var walletAnother = walletService.createWallet(commandAnotherWallet);
 
         // When
         walletService.softDeleteWallet(wallet.getId());
@@ -322,6 +322,7 @@ public class WalletServiceTest extends MySqlContainerTest {
         });
 
         walletRepo.delete(deletedWallet);
+        walletRepo.delete(walletAnother);
     }
 
     // HIBÁS ESETEK
@@ -394,6 +395,9 @@ public class WalletServiceTest extends MySqlContainerTest {
         userRepository.delete(savedAnotherUser);
     }
 
+    /**
+     * Más user walletját nem lehet törölni
+     */
     @Test
     public void testSoftDeleteWallet_anotherUsersWallet_throwException() {
         // Given
@@ -410,5 +414,28 @@ public class WalletServiceTest extends MySqlContainerTest {
         // Then
         walletRepo.delete(anotherUserWallet);
         userRepository.delete(savedAnotherUser);
+    }
+
+    /**
+     * A user utolsó aktív wallet-ját nem lehet törölni
+     */
+    @Test
+    public void testSoftDeleteWallet_lastWallet_throwException() {
+        // Given
+        var command = new CreateWalletCommand("lastWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
+        var wallet = walletService.createWallet(command);
+        var commandDeletedWallet = new CreateWalletCommand("lastWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
+        var walletDeleted = walletService.createWallet(commandDeletedWallet);
+
+        walletService.softDeleteWallet(walletDeleted.getId());
+        
+        // When
+        assertThrows(IllegalStateException.class, () -> {
+            walletService.softDeleteWallet(wallet.getId());
+        });
+
+        // Then
+        walletRepo.delete(wallet);
+        walletRepo.delete(walletDeleted);
     }
 }
