@@ -56,21 +56,21 @@ describe('TransactionFilter (Vitest)', () => {
     });
 
     it('should fill the name input from the default data', async () => {
-        await render({ name: 'tej', date: null });
+        await render({ name: 'tej', date: null, transactionId: null});
 
         expect(nameInput().value).toBe('tej');
     });
 
     it('should emit the default name and date when submitted without changes', async () => {
-        await render({ name: 'tej', date: defaultDate });
+        await render({ name: 'tej', date: defaultDate, transactionId: 1 });
 
         submitButton().click();
 
-        expect(submitted).toEqual([{ name: 'tej', date: defaultDate }]);
+        expect(submitted).toEqual([{ name: 'tej', date: defaultDate, transactionId: 1 }]);
     });
 
     it('should emit the trimmed name when submitted', async () => {
-        await render({ name: '', date: null });
+        await render({ name: '', date: null, transactionId: null });
 
         typeName('  kenyér  ');
         submitButton().click();
@@ -79,7 +79,7 @@ describe('TransactionFilter (Vitest)', () => {
     });
 
     it('should empty the inputs and emit resetForm when the clear button is clicked', async () => {
-        await render({ name: 'tej', date: defaultDate });
+        await render({ name: 'tej', date: defaultDate, transactionId: null });
 
         clearButton().click();
 
@@ -87,18 +87,18 @@ describe('TransactionFilter (Vitest)', () => {
         expect(resetCount).toBe(1);
         // nem a kezdőértékekre áll vissza: a szülő is szűrők nélkül tölti újra a listát
         submitButton().click();
-        expect(submitted).toEqual([{ name: '', date: null }]);
+        expect(submitted).toEqual([{ name: '', date: null, transactionId: null }]);
     });
 
-    it('should disable both buttons while the transaction list is loading', async () => {
-        await render({ name: '', date: null }, true);
+    it('should disable all buttons while the transaction list is loading', async () => {
+        await render({ name: '', date: null, transactionId: null }, true);
 
         expect(submitButton().disabled).toBe(true);
         expect(clearButton().disabled).toBe(true);
     });
 
-    it('should enable both buttons when the transaction list is not loading', async () => {
-        await render({ name: '', date: null }, false);
+    it('should enable all buttons when the transaction list is not loading', async () => {
+        await render({ name: '', date: null, transactionId: null }, false);
 
         expect(submitButton().disabled).toBe(false);
         expect(clearButton().disabled).toBe(false);
