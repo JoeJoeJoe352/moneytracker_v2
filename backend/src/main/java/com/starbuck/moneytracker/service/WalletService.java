@@ -121,8 +121,7 @@ public class WalletService {
     public void softDeleteWallet(long id) {
         Wallet walletFromDb = this.getWalletById(id);
 
-        List<Wallet> wallets = walletRepo.findByUserId(userUtil.getUser().getId());
-        if (wallets.size() == 1) {
+        if (walletRepo.getNumberOfActiveWalletsForUser(userUtil.getUser().getId()) == 1) {
             throw new IllegalStateException("Last wallet cannot be deleted");
         }
 
