@@ -33,7 +33,7 @@ import org.springframework.http.ResponseEntity;
 import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.WalletCreateDto;
-import com.starbuck.moneytracker.dto.WalletResponseDto;
+import com.starbuck.moneytracker.dto.WalletListResponseDto;
 import com.starbuck.moneytracker.dto.WalletUpdateDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -165,11 +165,11 @@ class WalletE2ETest extends MySqlContainerTest {
                 .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
         try {
-            ResponseEntity<WalletResponseDto[]> response = restTemplate.exchange("/wallet", HttpMethod.GET,
-                    new HttpEntity<>(headers), WalletResponseDto[].class);
+            ResponseEntity<WalletListResponseDto[]> response = restTemplate.exchange("/wallet", HttpMethod.GET,
+                    new HttpEntity<>(headers), WalletListResponseDto[].class);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
-            List<WalletResponseDto> wallets = List.of(response.getBody());
+            List<WalletListResponseDto> wallets = List.of(response.getBody());
 
             assertEquals(2, wallets.size());
             assertTrue(wallets.stream().anyMatch(w -> w.name().equals("Savings")));
@@ -231,11 +231,13 @@ class WalletE2ETest extends MySqlContainerTest {
 
     /**
      * Sikeres soft delete esetén a wallet DISABLED státuszú lesz, és eltűnik a
-     * listázásból és az id alapú lekérdezésből is
+     * listázásból
      */
     @Test
     void softDeleteWallet_disablesWalletAndHidesItFromQueries() {
         Wallet wallet = walletRepository.save(new Wallet("Savings", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
+        // Csak akkor lehet törölni walletet, ha legalább kettő van
+        walletRepository.save(new Wallet("SecondWallet", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
 
         ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId(), HttpMethod.DELETE,
                 new HttpEntity<>(headers), Void.class);
@@ -245,9 +247,10 @@ class WalletE2ETest extends MySqlContainerTest {
         Wallet deletedWallet = walletRepository.findById(wallet.getId()).orElseThrow();
         assertEquals(GeneralStatusEnum.DISABLED, deletedWallet.getStatus());
 
-        ResponseEntity<Void> getResponse = restTemplate.exchange("/wallet/" + wallet.getId(), HttpMethod.GET,
-                new HttpEntity<>(headers), Void.class);
-        assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode());
+        ResponseEntity<WalletListResponseDto[]> listResponse = restTemplate.exchange("/wallet", HttpMethod.GET,
+                new HttpEntity<>(headers), WalletListResponseDto[].class);
+        assertEquals(HttpStatus.OK, listResponse.getStatusCode());
+        assertFalse(Stream.of(listResponse.getBody()).anyMatch(w -> w.id().equals(wallet.getId())));
     }
 
     /**
@@ -404,7 +407,6 @@ class WalletE2ETest extends MySqlContainerTest {
         return Stream.of(
                 Arguments.of(HttpMethod.POST, "/wallet"),
                 Arguments.of(HttpMethod.GET, "/wallet"),
-                Arguments.of(HttpMethod.GET, "/wallet/1"),
                 Arguments.of(HttpMethod.PUT, "/wallet/1"),
                 Arguments.of(HttpMethod.DELETE, "/wallet/1"),
                 Arguments.of(HttpMethod.POST, "/wallet/1/sync"));
