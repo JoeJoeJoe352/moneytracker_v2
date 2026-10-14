@@ -10,8 +10,24 @@ describe('WalletsListComponent (Vitest)', () => {
     let component: WalletsListComponent;
 
     const wallets: WalletDataInterface[] = [
-        { id: 1, name: 'Napi költés', currencyCode: CurrencyCodesEnum.huf, type: WalletTypesEnum.default, sum: 0, lastSyncDate: '2026-09-15' },
-        { id: 2, name: 'Megtakarítás', currencyCode: CurrencyCodesEnum.eur, type: WalletTypesEnum.savings, sum: 0, lastSyncDate: '2026-09-15' },
+        {
+            id: 1,
+            name: 'Napi költés',
+            currencyCode: CurrencyCodesEnum.huf,
+            type: WalletTypesEnum.default,
+            sum: 0,
+            lastSyncDate: '2026-09-15',
+            deletable: false,
+        },
+        {
+            id: 2,
+            name: 'Megtakarítás',
+            currencyCode: CurrencyCodesEnum.eur,
+            type: WalletTypesEnum.savings,
+            sum: 0,
+            lastSyncDate: '2026-09-15',
+            deletable: false,
+        },
     ];
 
     beforeEach(async () => {

@@ -12,6 +12,16 @@ public record WalletListResponseDto(
         CurrencyEnum currencyCode,
         WalletTypeEnum type,
         BigDecimal sum,
-        LocalDate lastSyncDate
+        LocalDate lastSyncDate,
+        boolean deletable
 ) {
+    // constructor for the JPQL "SELECT new ..." query
+    public WalletListResponseDto(Long id, String name, CurrencyEnum currencyCode,
+        WalletTypeEnum type, BigDecimal sum, LocalDate lastSyncDate) {
+        this(id, name, currencyCode, type, sum, lastSyncDate, false);
+    }
+
+    public WalletListResponseDto withDeletable(boolean deletable) {
+        return new WalletListResponseDto(id, name, currencyCode, type, sum, lastSyncDate, deletable);
+    }
 } 

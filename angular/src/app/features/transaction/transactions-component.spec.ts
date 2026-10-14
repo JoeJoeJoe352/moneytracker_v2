@@ -48,6 +48,7 @@ const sampleTransactions: TransactionListElementData[] = [
             type: WalletTypesEnum.default,
             sum: 0,
             lastSyncDate: '2026-09-15',
+            deletable: false,
         },
     },
 ];
@@ -61,7 +62,10 @@ describe('TransactionsListComponent (Vitest)', () => {
         getTransactionById: ReturnType<typeof vi.fn>;
     };
     let routerMock: { navigate: ReturnType<typeof vi.fn> };
-    let notificationMock: { show: ReturnType<typeof vi.fn>; showGeneralError: ReturnType<typeof vi.fn> };
+    let notificationMock: {
+        show: ReturnType<typeof vi.fn>;
+        showGeneralError: ReturnType<typeof vi.fn>;
+    };
     let queryParamsSubject: BehaviorSubject<Record<string, string>>;
     let dialogOpenSpy: ReturnType<typeof vi.fn>;
     let transactionModalDialogRefs: FakeDialogRef<{
@@ -69,16 +73,20 @@ describe('TransactionsListComponent (Vitest)', () => {
         saved: EventEmitter<unknown>;
     }>[];
 
-    async function setup(options: {
-        isHistoryMode?: boolean;
-        needSearchField?: boolean;
-        queryParams?: Record<string, string>;
-        routeParams?: Record<string, string>;
-        getLastTransactionsResult?: ReturnType<typeof of> | ReturnType<typeof throwError>;
-        getTransactionByIdResult?: ReturnType<typeof of> | ReturnType<typeof throwError>;
-    } = {}) {
+    async function setup(
+        options: {
+            isHistoryMode?: boolean;
+            needSearchField?: boolean;
+            queryParams?: Record<string, string>;
+            routeParams?: Record<string, string>;
+            getLastTransactionsResult?: ReturnType<typeof of> | ReturnType<typeof throwError>;
+            getTransactionByIdResult?: ReturnType<typeof of> | ReturnType<typeof throwError>;
+        } = {},
+    ) {
         transactionServiceMock = {
-            getLastTransactions: vi.fn(() => options.getLastTransactionsResult ?? of(sampleTransactions)),
+            getLastTransactions: vi.fn(
+                () => options.getLastTransactionsResult ?? of(sampleTransactions),
+            ),
             getTransactionHistory: vi.fn(() => of(sampleTransactions)),
             getTransactionById: vi.fn(() => options.getTransactionByIdResult ?? of(null)),
         };
@@ -148,7 +156,10 @@ describe('TransactionsListComponent (Vitest)', () => {
     });
 
     it('should stop the loading state and keep the list empty if fetching the last transactions fails', async () => {
-        await setup({ isHistoryMode: false, getLastTransactionsResult: throwError(() => new Error('boom')) });
+        await setup({
+            isHistoryMode: false,
+            getLastTransactionsResult: throwError(() => new Error('boom')),
+        });
 
         expect(component['transactionListData'].isLoading()).toBe(false);
         const list = fixture.nativeElement.querySelector('app-transaction-list');
@@ -165,7 +176,9 @@ describe('TransactionsListComponent (Vitest)', () => {
         const nameInput = fixture.nativeElement.querySelector('#name');
         expect(nameInput.value).toBe('kávé');
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
-        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
+        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [
+            URLSearchParams,
+        ];
         expect(params.get('name')).toBe('kávé');
     });
 
@@ -198,7 +211,9 @@ describe('TransactionsListComponent (Vitest)', () => {
         await fixture.whenStable();
 
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
-        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
+        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [
+            URLSearchParams,
+        ];
         expect(params.get('name')).toBe('tej');
     });
 
@@ -225,7 +240,9 @@ describe('TransactionsListComponent (Vitest)', () => {
         queryParamsSubject.next({});
         await fixture.whenStable();
         expect(transactionServiceMock.getTransactionHistory).toHaveBeenCalledTimes(1);
-        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [URLSearchParams];
+        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [
+            URLSearchParams,
+        ];
         expect(params.get('name')).toBeNull();
     });
 
@@ -311,7 +328,9 @@ describe('TransactionsListComponent (Vitest)', () => {
 
             expect(dialogOpenSpy).not.toHaveBeenCalled();
             expect(transactionServiceMock.getTransactionById).not.toHaveBeenCalled();
-            expect(routerMock.navigate).toHaveBeenCalledWith(['/transactions'], { replaceUrl: true });
+            expect(routerMock.navigate).toHaveBeenCalledWith(['/transactions'], {
+                replaceUrl: true,
+            });
         },
     );
 

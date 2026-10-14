@@ -61,7 +61,7 @@
     </mat-dialog-content>
 
     <mat-dialog-actions>
-        @if (isEditMode()) {
+        @if (isEditMode() && isDeletable()) {
             <button
                 mat-flat-button
                 type="button"

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, output, Signal } from '@angular/core';
+import { Component, computed, inject, OnInit, output, Signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
@@ -79,6 +79,16 @@ export class WalletFormComponent implements OnInit {
     protected isEditMode(): this is { wallet: WalletDataInterface } {
         return this.wallet !== null;
     }
+
+    /**
+     * Törölhető-e a wallet
+     */
+    protected isDeletable = computed(() => {
+        if (!this.wallet) {
+            return false;
+        }
+        return this.wallet.deletable;
+    });
 
     /**
      * Form adatainak elküldése

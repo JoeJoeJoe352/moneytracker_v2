@@ -19,6 +19,7 @@ describe('WalletSyncFormComponent (Vitest)', () => {
         type: WalletTypesEnum.default,
         sum: 1000,
         lastSyncDate: '2026-09-15',
+        deletable: false,
     };
 
     async function setup() {

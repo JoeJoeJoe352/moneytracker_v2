@@ -58,6 +58,7 @@ const sampleWallet: WalletDataInterface = {
     type: WalletTypesEnum.default,
     sum: 0,
     lastSyncDate: '2026-09-15',
+    deletable: false,
 };
 
 describe('WalletsPageComponent (Vitest)', () => {
@@ -79,7 +80,9 @@ describe('WalletsPageComponent (Vitest)', () => {
     let syncDialogRefs: FakeDialogRef<{ syncFormSended: EventEmitter<WalletSyncData> }>[];
     let syncDialogData: WalletSyncFormInputInterface | undefined;
 
-    async function setup(listWalletsResult: Observable<WalletDataInterface[]> = of([sampleWallet])) {
+    async function setup(
+        listWalletsResult: Observable<WalletDataInterface[]> = of([sampleWallet]),
+    ) {
         walletServiceMock = {
             listWallets: vi.fn(() => listWalletsResult),
             createWallet: vi.fn(() => of(undefined)),

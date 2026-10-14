@@ -1,7 +1,11 @@
 package com.starbuck.moneytracker.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,10 +23,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
-import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -31,9 +35,11 @@ import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
+import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
+import com.starbuck.moneytracker.service.BalanceSyncService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -58,6 +64,12 @@ public class WalletServiceTest extends MySqlContainerTest {
 
     @Autowired
     BalanceSyncRepository balanceSyncRepo;
+
+    @Autowired
+    BalanceSyncService balanceSyncService;
+
+    @Autowired
+    TransactionDetailRepository transactionDetailRepo;
 
     @MockitoBean
     CurrentUserUtil currentUser;
@@ -158,16 +170,19 @@ public class WalletServiceTest extends MySqlContainerTest {
         assertEquals(CurrencyEnum.USD, wallets.get(0).currencyCode());
         assertEquals(WalletTypeEnum.SAVINGS, wallets.get(0).type());
         assertEquals(new BigDecimal("0.00"), wallets.get(0).sum());
+        assertTrue(wallets.get(0).deletable());
 
         assertEquals("HufWallet", wallets.get(1).name());
         assertEquals(CurrencyEnum.HUF, wallets.get(1).currencyCode());
         assertEquals(WalletTypeEnum.DEFAULT, wallets.get(1).type());
         assertEquals(new BigDecimal("150.00"), wallets.get(1).sum());
+        assertTrue(wallets.get(1).deletable());
 
         assertEquals("Huf2Wallet", wallets.get(2).name());
         assertEquals(CurrencyEnum.HUF, wallets.get(2).currencyCode());
         assertEquals(WalletTypeEnum.DEFAULT, wallets.get(2).type());
         assertEquals(new BigDecimal("-50.00"), wallets.get(2).sum());
+        assertTrue(wallets.get(2).deletable());
 
         transactionRepo.hardDeleteTransaction(transaction1AfterSave.getId());
         transactionRepo.hardDeleteTransaction(transaction2AfterSave.getId());
@@ -180,42 +195,89 @@ public class WalletServiceTest extends MySqlContainerTest {
     }
 
     /**
-     * A listában az utolsó szinkronizálás dátuma jelenik meg, ha még nem volt,
-     * akkor a wallet létrehozásának dátuma
+     * A listában az utolsó szinkronizálás dátumaként a wallet létrehozásának dátuma jelenik meg alapértelmezetten 
      */
     @Test
     public void testListWalletsLastSyncDate() {
         // Given
-        var syncedWallet = walletService.createWallet(
-                new CreateWalletCommand("SyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
         var notSyncedWallet = walletService.createWallet(
                 new CreateWalletCommand("NotSyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
-
-        var olderSync = balanceSyncRepo
-                .save(new BalanceSync(LocalDate.of(2026, 9, 1), syncedWallet, new BigDecimal("10.00")));
-        var latestSync = balanceSyncRepo
-                .save(new BalanceSync(LocalDate.of(2026, 9, 15), syncedWallet, new BigDecimal("20.00")));
 
         // When
         List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
 
         // Then
-        assertEquals(2, wallets.size());
-
-        assertEquals("SyncedWallet", wallets.get(0).name());
-        assertEquals(LocalDate.of(2026, 9, 15), wallets.get(0).lastSyncDate());
-        // A sync bejegyzések nem befolyásolják az összeget
-        assertEquals(new BigDecimal("0.00"), wallets.get(0).sum());
+        assertEquals(1, wallets.size());
 
         // A db-ben tárolt létrehozási dátumhoz assertál, nem a LocalDate.now()-hoz,
         // így éjfélkor és eltérő időzónáknál sem bukik el
         var notSyncedCreatedAt = walletRepo.findById(notSyncedWallet.getId()).orElseThrow().getCreatedAt();
-        assertEquals("NotSyncedWallet", wallets.get(1).name());
-        assertEquals(notSyncedCreatedAt.toLocalDate(), wallets.get(1).lastSyncDate());
+        assertEquals("NotSyncedWallet", wallets.get(0).name());
+        assertEquals(notSyncedCreatedAt.toLocalDate(), wallets.get(0).lastSyncDate());
 
-        balanceSyncRepo.hardDeleteAllForWallet(syncedWallet.getId());
-        walletRepo.delete(syncedWallet);
         walletRepo.delete(notSyncedWallet);
+    }
+
+    /**
+     * Szinkronizálás után a listában a sync dátuma jelenik meg, nem a wallet
+     * létrehozásának dátuma
+     */
+    @Test
+    public void testListWalletsLastSyncDateAfterSync() {
+        // Given
+        var syncedWallet = walletService.createWallet(
+                new CreateWalletCommand("SyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+        // Múltbeli dátum, így biztosan eltér a létrehozás napjától
+        var syncDate = LocalDate.now().minusDays(3);
+        // Üres walletnél eltérő egyenleg -> korrekciós tranzakció is létrejön
+        balanceSyncService.syncWallet(new BalanceSyncCommand(syncedWallet.getId(), syncDate, new BigDecimal("100.00")));
+
+        var balanceSync = balanceSyncRepo.findAll().stream()
+                .filter(sync -> sync.getWallet().getId().equals(syncedWallet.getId()))
+                .findFirst()
+                .orElseThrow();
+        var syncTransaction = balanceSync.getSyncTransaction();
+
+        try {
+            // When
+            List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
+
+            // Then
+            assertEquals(1, wallets.size());
+            assertNotNull(syncTransaction);
+
+            var syncedCreatedAt = walletRepo.findById(syncedWallet.getId()).orElseThrow().getCreatedAt();
+            assertEquals("SyncedWallet", wallets.get(0).name());
+            assertEquals(syncDate, wallets.get(0).lastSyncDate());
+            assertNotEquals(syncedCreatedAt.toLocalDate(), wallets.get(0).lastSyncDate());
+        } finally {
+            balanceSyncRepo.hardDeleteAllForWallet(syncedWallet.getId());
+            transactionDetailRepo.hardDeleteAllByTransactionId(syncTransaction.getId());
+            transactionRepo.hardDeleteTransaction(syncTransaction.getId());
+            walletRepo.delete(syncedWallet);
+        }
+    }
+
+    /**
+     * A listában az utolsó szinkronizálás dátuma jelenik meg, ha még nem volt,
+     * akkor a wallet létrehozásának dátuma
+     */
+    @Test
+    public void testListWalletsIsNotDeletable() {
+        // Given
+        var notDeletableWallet = walletService.createWallet(
+                new CreateWalletCommand("notDeletableWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+
+        // When
+        List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
+
+        // Then
+        assertEquals(1, wallets.size());
+
+        assertEquals("notDeletableWallet", wallets.get(0).name());
+        assertFalse(wallets.get(0).deletable());
+
+        walletRepo.delete(notDeletableWallet);
     }
 
     /**
@@ -303,11 +365,17 @@ public class WalletServiceTest extends MySqlContainerTest {
         walletRepo.delete(wallet);
     }
 
+    /**
+     * Wallet sikeres törlése
+     */
     @Test
     public void testSoftDeleteWallet() {
         // Given
         var command = new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
         var wallet = walletService.createWallet(command);
+        // csak akkor törölhető a wallet, ha nem az az egyetlen
+        var commandAnotherWallet = new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
+        var walletAnother = walletService.createWallet(commandAnotherWallet);
 
         // When
         walletService.softDeleteWallet(wallet.getId());
@@ -322,6 +390,7 @@ public class WalletServiceTest extends MySqlContainerTest {
         });
 
         walletRepo.delete(deletedWallet);
+        walletRepo.delete(walletAnother);
     }
 
     // HIBÁS ESETEK
@@ -394,6 +463,9 @@ public class WalletServiceTest extends MySqlContainerTest {
         userRepository.delete(savedAnotherUser);
     }
 
+    /**
+     * Más user walletját nem lehet törölni
+     */
     @Test
     public void testSoftDeleteWallet_anotherUsersWallet_throwException() {
         // Given
@@ -410,5 +482,28 @@ public class WalletServiceTest extends MySqlContainerTest {
         // Then
         walletRepo.delete(anotherUserWallet);
         userRepository.delete(savedAnotherUser);
+    }
+
+    /**
+     * A user utolsó aktív wallet-ját nem lehet törölni
+     */
+    @Test
+    public void testSoftDeleteWallet_lastWallet_throwException() {
+        // Given
+        var command = new CreateWalletCommand("lastWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
+        var wallet = walletService.createWallet(command);
+        var commandDeletedWallet = new CreateWalletCommand("lastWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
+        var walletDeleted = walletService.createWallet(commandDeletedWallet);
+
+        walletService.softDeleteWallet(walletDeleted.getId());
+        
+        // When
+        assertThrows(IllegalStateException.class, () -> {
+            walletService.softDeleteWallet(wallet.getId());
+        });
+
+        // Then
+        walletRepo.delete(wallet);
+        walletRepo.delete(walletDeleted);
     }
 }

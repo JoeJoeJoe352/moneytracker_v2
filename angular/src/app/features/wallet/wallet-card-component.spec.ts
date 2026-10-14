@@ -16,6 +16,7 @@ describe('WalletCardComponent (Vitest)', () => {
         type: WalletTypesEnum.default,
         sum: 550,
         lastSyncDate: '2026-09-15',
+        deletable: false,
     };
 
     beforeEach(async () => {
