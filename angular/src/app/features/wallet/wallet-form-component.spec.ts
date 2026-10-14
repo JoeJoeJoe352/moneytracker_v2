@@ -85,6 +85,7 @@ describe('WalletFormComponent (Vitest)', () => {
             type: WalletTypesEnum.default,
             sum: 0,
             lastSyncDate: '2026-09-15',
+            deletable: true,
         };
 
         beforeEach(() => setup(existingWallet));
@@ -123,6 +124,24 @@ describe('WalletFormComponent (Vitest)', () => {
             deleteButton.click();
 
             expect(deletedId).toBe(9);
+        });
+    });
+
+    describe('not deletable', () => {
+        const existingWallet: WalletDataInterface = {
+            id: 9,
+            name: 'Fő tárca',
+            currencyCode: CurrencyCodesEnum.usd,
+            type: WalletTypesEnum.default,
+            sum: 0,
+            lastSyncDate: '2026-09-15',
+            deletable: false,
+        };
+
+        beforeEach(() => setup(existingWallet));
+        it('Must not show the delete button', () => {
+            const deleteButton = fixture.nativeElement.querySelector('.mat-button-danger');
+            expect(deleteButton).toBeFalsy();
         });
     });
 });
