@@ -119,11 +119,11 @@ class UserServiceIntegrationTest extends MySqlContainerTest {
         UserCreateCommand createCommand = new UserCreateCommand("loginUser", "login@email.com", "password");
         User saved = userService.createUser(createCommand);
 
-        UserLoginCommand loginCommand = new UserLoginCommand("loginUser", "password");
+        UserLoginCommand loginCommand = new UserLoginCommand("login@email.com", "password");
         String token = userService.login(loginCommand);
 
         assertNotNull(token);
-        assertEquals("loginUser", jwtService.extractUsername(token));
+        assertEquals("login@email.com", jwtService.extractEmail(token));
         assertTrue(jwtService.isTokenValid(token, saved));
 
         deleteUserAndWallet(saved);
@@ -137,7 +137,7 @@ class UserServiceIntegrationTest extends MySqlContainerTest {
         UserCreateCommand command = new UserCreateCommand("wrongPassUser", "wrongpass@email.com", "password");
         User saved = userService.createUser(command);
 
-        UserLoginCommand loginCommand = new UserLoginCommand("wrongPassUser", "notThePassword");
+        UserLoginCommand loginCommand = new UserLoginCommand("wrongpass@email.com", "notThePassword");
         assertThrows(BadCredentialsException.class, () -> {
             userService.login(loginCommand);
         });
@@ -146,11 +146,11 @@ class UserServiceIntegrationTest extends MySqlContainerTest {
     }
 
     /**
-     * Nem létező felhasználónévvel hibát dob
+     * Nem létező email címmel hibát dob
      */
     @Test
-    void login_throwsForUnknownUsername() {
-        UserLoginCommand loginCommand = new UserLoginCommand("nonExistentUser", "password");
+    void login_throwsForUnknownEmail() {
+        UserLoginCommand loginCommand = new UserLoginCommand("nonexistent@email.com", "password");
         assertThrows(BadCredentialsException.class, () -> {
             userService.login(loginCommand);
         });

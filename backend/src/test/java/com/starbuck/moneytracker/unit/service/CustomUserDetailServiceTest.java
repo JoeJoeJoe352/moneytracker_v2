@@ -29,28 +29,28 @@ class CustomUserDetailServiceTest {
     }
 
     /**
-     * Ha létezik a userrel a felhasználónév, azt adja vissza
+     * Ha létezik user az email címmel, azt adja vissza
      */
     @Test
     void loadUserByUsername_returnsUserWhenFound() {
         User userInDB = new User("testuser", "encodedPassword", "teszt@email.com");
-        Mockito.when(userRepository.findByUsername("testuser")).thenReturn(userInDB);
+        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(userInDB);
 
-        User result = customUserDetailService.loadUserByUsername("testuser");
+        User result = customUserDetailService.loadUserByUsername("teszt@email.com");
 
         assertEquals(userInDB, result);
     }
 
     /**
-     * Ha nem található a felhasználónévvel user, UsernameNotFoundException-t
+     * Ha nem található az email címmel user, UsernameNotFoundException-t
      * dob
      */
     @Test
     void loadUserByUsername_throwsWhenUserNotFound() {
-        Mockito.when(userRepository.findByUsername("missing")).thenReturn(null);
+        Mockito.when(userRepository.findByEmail("missing@email.com")).thenReturn(null);
 
         assertThrows(UsernameNotFoundException.class, () -> {
-            customUserDetailService.loadUserByUsername("missing");
+            customUserDetailService.loadUserByUsername("missing@email.com");
         });
     }
 }

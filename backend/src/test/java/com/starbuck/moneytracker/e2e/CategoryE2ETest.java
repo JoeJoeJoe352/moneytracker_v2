@@ -71,7 +71,7 @@ class CategoryE2ETest extends MySqlContainerTest {
                 "e2ecategory@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
-        LoginRequestDto loginRequest = new LoginRequestDto("e2eCategoryUser", "password123");
+        LoginRequestDto loginRequest = new LoginRequestDto("e2ecategory@email.com", "password123");
         ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login", HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
                 });
@@ -79,7 +79,7 @@ class CategoryE2ETest extends MySqlContainerTest {
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
 
-        this.user = userRepository.findByUsername("e2eCategoryUser");
+        this.user = userRepository.findByEmail("e2ecategory@email.com");
 
         this.headers = new HttpHeaders();
         this.headers.setContentType(MediaType.APPLICATION_JSON);

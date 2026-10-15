@@ -66,13 +66,12 @@ public class AuthController {
     /**
      * Felhasználó beléptetése
      * 
-     * @param username
-     * @param password
+     * @param LoginRequestDto loginRequest
      * @return üres body + JWT token egy HttpOnly cookie-ban
      */
     @PostMapping(path = "/login")
     public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequestDto loginRequest) {
-        UserLoginCommand command = new UserLoginCommand(loginRequest.username(), loginRequest.password());
+        UserLoginCommand command = new UserLoginCommand(loginRequest.email(), loginRequest.password());
 
         String jwtToken = userService.login(command);
         ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);

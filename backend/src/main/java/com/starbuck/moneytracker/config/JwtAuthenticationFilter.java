@@ -61,18 +61,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
             return; 
         }
 
-        String username = null;
+        String email = null;
         try {
-            username = jwtService.extractUsername(jwt);
+            email = jwtService.extractEmail(jwt);
         } catch(ExpiredJwtException |SignatureException | MalformedJwtException exception) {
             // lejárt, vagy rossz a token, nem gond, majd bejelentkezik a user újból
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Nem voltunk még bejelentkezve ebben a requestben, de van username a tokenben
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User user = this.userService.loadUserByUsername(username);
+        // Nem voltunk még bejelentkezve ebben a requestben, de van email cím a tokenben
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            User user = this.userService.loadUserByUsername(email);
 
             if (jwtService.isTokenValid(jwt, user)) {
                 // Security context feltöltése a userdetails alapján

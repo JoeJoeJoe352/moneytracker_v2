@@ -47,27 +47,27 @@ class AuthE2ETest extends MySqlContainerTest {
     @Autowired
     private WalletRepository walletRepository;
 
-    // A tesztek során regisztrált usernevek, hogy minden teszt végén automatikusan
+    // A tesztek során regisztrált email címek, hogy minden teszt végén automatikusan
     // ki tudjuk törölni
-    private final List<String> createdUsernames = new ArrayList<>();
+    private final List<String> createdEmails = new ArrayList<>();
 
     @AfterEach
     void cleanupCreatedUsers() {
-        createdUsernames.forEach(username -> {
-            User user = userRepository.findByUsername(username);
+        createdEmails.forEach(email -> {
+            User user = userRepository.findByEmail(email);
             if (user != null) {
                 walletRepository.deleteAll(walletRepository.findByUserId(user.getId()));
                 userRepository.delete(user);
             }
         });
-        createdUsernames.clear();
+        createdEmails.clear();
     }
 
     /**
      * Regisztrál egy usert a valódi /auth/register végponton keresztül
      */
     private ResponseEntity<Void> register(String username, String password, String email) {
-        createdUsernames.add(username);
+        createdEmails.add(email);
         RegisterRequestDto request = new RegisterRequestDto(username, password, email);
         return restTemplate.postForEntity("/auth/register", request, Void.class);
     }
@@ -77,8 +77,8 @@ class AuthE2ETest extends MySqlContainerTest {
      * által ténylegesen kiállított Set-Cookie header-ből olvassa vissza az
      * auth cookie-t
      */
-    private String login(String username, String password) {
-        LoginRequestDto loginRequest = new LoginRequestDto(username, password);
+    private String login(String email, String password) {
+        LoginRequestDto loginRequest = new LoginRequestDto(email, password);
         ResponseEntity<Map<String, String>> response = restTemplate.exchange("/auth/login", HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
                 });
@@ -105,7 +105,7 @@ class AuthE2ETest extends MySqlContainerTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-        User savedUser = userRepository.findByUsername("e2eRegisterUser");
+        User savedUser = userRepository.findByEmail("e2eregister@email.com");
         assertNotNull(savedUser);
         assertNotEquals("password123", savedUser.getPassword());
         assertNotNull(savedUser.getUuid());
@@ -142,7 +142,7 @@ class AuthE2ETest extends MySqlContainerTest {
     void login_returnsOkWithAuthCookieForValidCredentials() {
         register("e2eLoginUser", "password123", "e2elogin@email.com");
 
-        String cookie = login("e2eLoginUser", "password123");
+        String cookie = login("e2elogin@email.com", "password123");
 
         assertTrue(cookie.startsWith("AUTH_TOKEN="));
     }
@@ -154,7 +154,7 @@ class AuthE2ETest extends MySqlContainerTest {
     void login_returnsUnauthorizedForInvalidCredentials() {
         register("e2eWrongPassUser", "password123", "e2ewrongpass@email.com");
 
-        LoginRequestDto loginRequest = new LoginRequestDto("e2eWrongPassUser", "notThePassword");
+        LoginRequestDto loginRequest = new LoginRequestDto("e2ewrongpass@email.com", "notThePassword");
         ResponseEntity<Map<String, String>> response = restTemplate.exchange("/auth/login", HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
                 });
@@ -172,7 +172,7 @@ class AuthE2ETest extends MySqlContainerTest {
     @Test
     void logout_returnsOkWithImmediatelyExpiredCookie() {
         register("e2eLogoutUser", "password123", "e2elogout@email.com");
-        String cookie = login("e2eLogoutUser", "password123");
+        String cookie = login("e2elogout@email.com", "password123");
 
         ResponseEntity<Map<String, String>> response = restTemplate.exchange("/auth/logout", HttpMethod.POST,
                 new HttpEntity<>(authHeaders(cookie)), new ParameterizedTypeReference<Map<String, String>>() {
@@ -223,7 +223,7 @@ class AuthE2ETest extends MySqlContainerTest {
     @Test
     void authenticateUser_returnsUsernameForAuthenticatedUser() {
         register("e2eAuthenticateUser", "password123", "e2eauthenticate@email.com");
-        String cookie = login("e2eAuthenticateUser", "password123");
+        String cookie = login("e2eauthenticate@email.com", "password123");
 
         ResponseEntity<UserDataResponseDto> response = restTemplate.postForEntity("/auth/authenticateUser",
                 new HttpEntity<>(authHeaders(cookie)), UserDataResponseDto.class);

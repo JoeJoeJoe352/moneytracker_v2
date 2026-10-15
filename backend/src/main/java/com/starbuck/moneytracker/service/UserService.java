@@ -64,12 +64,12 @@ public class UserService {
      * @return User
      */
     public String login(UserLoginCommand command) {
-        User user = this.userRepository.findByUsername(command.getUsername());
+        User user = this.userRepository.findByEmail(command.getEmail());
         if (user == null || !this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
             var errorMsg = messageSource.getMessage("invalidCredentials", null, LocaleContextHolder.getLocale());
             throw new BadCredentialsException(errorMsg);
         }
-        return this.jwtService.generateToken(command.getUsername());
+        return this.jwtService.generateToken(command.getEmail());
     }
 
     /**

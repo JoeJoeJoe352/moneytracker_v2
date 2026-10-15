@@ -113,11 +113,11 @@ class UserServiceTest {
     void login_returnsGeneratedTokenOnSuccess() {
         User userInDB = new User("testuser", "encodedPassword", "teszt@email.com");
 
-        Mockito.when(userRepository.findByUsername("testuser")).thenReturn(userInDB);
+        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(userInDB);
         Mockito.when(passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
-        Mockito.when(jwtService.generateToken("testuser")).thenReturn("generatedToken");
+        Mockito.when(jwtService.generateToken("teszt@email.com")).thenReturn("generatedToken");
 
-        UserLoginCommand command = new UserLoginCommand("testuser", "password");
+        UserLoginCommand command = new UserLoginCommand("teszt@email.com", "password");
 
         String token = userService.login(command);
 
@@ -125,13 +125,13 @@ class UserServiceTest {
     }
 
     /**
-     * Ha nem létezik a felhasználónév, hibát dob
+     * Ha nem létezik az email cím, hibát dob
      */
     @Test
-    void login_throwsWhenUsernameNotFound() {
-        Mockito.when(userRepository.findByUsername("missing")).thenReturn(null);
+    void login_throwsWhenEmailNotFound() {
+        Mockito.when(userRepository.findByEmail("missing@email.com")).thenReturn(null);
 
-        UserLoginCommand command = new UserLoginCommand("missing", "password");
+        UserLoginCommand command = new UserLoginCommand("missing@email.com", "password");
 
         assertThrows(BadCredentialsException.class, () -> {
             userService.login(command);
@@ -147,10 +147,10 @@ class UserServiceTest {
     void login_throwsWhenPasswordDoesNotMatch() {
         User userInDB = new User("testuser", "encodedPassword", "teszt@email.com");
 
-        Mockito.when(userRepository.findByUsername("testuser")).thenReturn(userInDB);
+        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(userInDB);
         Mockito.when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
-        UserLoginCommand command = new UserLoginCommand("testuser", "wrongPassword");
+        UserLoginCommand command = new UserLoginCommand("teszt@email.com", "wrongPassword");
         assertThrows(BadCredentialsException.class, () -> {
             userService.login(command);
         });

@@ -38,13 +38,13 @@ class JwtServiceTest {
     }
 
     /**
-     * A generált tokenből visszafejthető a beleírt username
+     * A generált tokenből visszafejthető a beleírt email cím
      */
     @Test
-    void extractUsername_returnsUsernameFromGeneratedToken() {
-        String token = jwtService.generateToken("testuser");
+    void extractEmail_returnsEmailFromGeneratedToken() {
+        String token = jwtService.generateToken("teszt@email.com");
 
-        assertEquals("testuser", jwtService.extractUsername(token));
+        assertEquals("teszt@email.com", jwtService.extractEmail(token));
     }
 
     /**
@@ -52,30 +52,30 @@ class JwtServiceTest {
      */
     @Test
     void generateToken_producesDifferentTokensForDifferentUsers() {
-        String token1 = jwtService.generateToken("user1");
-        String token2 = jwtService.generateToken("user2");
+        String token1 = jwtService.generateToken("user1@email.com");
+        String token2 = jwtService.generateToken("user2@email.com");
 
         assertNotEquals(token1, token2);
     }
 
     /**
-     * Érvényes, nem lejárt tokenre igaz, ha a usernek a nevéhez lett generálva
+     * Érvényes, nem lejárt tokenre igaz, ha a user email címéhez lett generálva
      */
     @Test
     void isTokenValid_returnsTrueForMatchingUserAndValidToken() {
         User user = new User("testuser", "password", "teszt@email.com");
-        String token = jwtService.generateToken("testuser");
+        String token = jwtService.generateToken("teszt@email.com");
 
         assertTrue(jwtService.isTokenValid(token, user));
     }
 
     /**
-     * Ha a tokenben lévő username nem egyezik a user nevével, nem érvényes
+     * Ha a tokenben lévő email cím nem egyezik a user email címével, nem érvényes
      */
     @Test
-    void isTokenValid_returnsFalseWhenUsernameDoesNotMatch() {
+    void isTokenValid_returnsFalseWhenEmailDoesNotMatch() {
         User otherUser = new User("otheruser", "password", "other@email.com");
-        String token = jwtService.generateToken("testuser");
+        String token = jwtService.generateToken("teszt@email.com");
 
         assertFalse(jwtService.isTokenValid(token, otherUser));
     }
@@ -89,7 +89,7 @@ class JwtServiceTest {
     void isTokenValid_throwsExpiredJwtExceptionForExpiredToken() {
         User user = new User("testuser", "password", "teszt@email.com");
         String expiredToken = Jwts.builder()
-                .subject("testuser")
+                .subject("teszt@email.com")
                 .issuedAt(new Date(System.currentTimeMillis() - 10_000))
                 .expiration(new Date(System.currentTimeMillis() - 5_000))
                 .signWith(signInKey)
@@ -105,13 +105,13 @@ class JwtServiceTest {
      * manipulálták), hibát dob
      */
     @Test
-    void extractUsername_throwsForTamperedSignature() {
-        String validToken = jwtService.generateToken("testuser");
+    void extractEmail_throwsForTamperedSignature() {
+        String validToken = jwtService.generateToken("teszt@email.com");
         // utolsó karaktert kicseréljük a valid tokennek, így téve invaliddá
         String tamperedToken = validToken + "-forged";
 
         assertThrows(JwtException.class, () -> {
-            jwtService.extractUsername(tamperedToken);
+            jwtService.extractEmail(tamperedToken);
         });
     }
 
@@ -119,9 +119,9 @@ class JwtServiceTest {
      * Nem valódi JWT formátumú stringre hibát dob
      */
     @Test
-    void extractUsername_throwsForMalformedToken() {
+    void extractEmail_throwsForMalformedToken() {
         assertThrows(JwtException.class, () -> {
-            jwtService.extractUsername("not.a.jwt");
+            jwtService.extractEmail("not.a.jwt");
         });
     }
 }
