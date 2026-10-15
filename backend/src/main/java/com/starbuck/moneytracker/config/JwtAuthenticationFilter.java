@@ -8,8 +8,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.starbuck.moneytracker.entity.User;
-import com.starbuck.moneytracker.service.CustomUserDetailService;
 import com.starbuck.moneytracker.service.JwtService;
+import com.starbuck.moneytracker.service.UserLookupService;
 import com.starbuck.moneytracker.util.CookieUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -29,14 +29,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
     /** Token validálása + username kiolvasás */
     private final JwtService jwtService;
-    private final CustomUserDetailService userService;
+    private final UserLookupService userLookupService;
 
     public JwtAuthenticationFilter(
-        JwtService jwtService, 
-        CustomUserDetailService userService
+        JwtService jwtService,
+        UserLookupService userLookupService
     ) {
         this.jwtService = jwtService;
-        this.userService = userService;
+        this.userLookupService = userLookupService;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
         // Nem voltunk még bejelentkezve ebben a requestben, de van email cím a tokenben
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User user = this.userService.loadUserByUsername(email);
+            User user = this.userLookupService.loadUserByEmail(email);
 
             if (jwtService.isTokenValid(jwt, user)) {
                 // Security context feltöltése a userdetails alapján
