@@ -65,10 +65,20 @@ public class UserService {
      */
     public String login(UserLoginCommand command) {
         User user = this.userRepository.findByEmail(command.getEmail());
-        if (user == null || !this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
-            var errorMsg = messageSource.getMessage("invalidCredentials", null, LocaleContextHolder.getLocale());
+        var errorMsg = messageSource.getMessage("invalidCredentials", null, LocaleContextHolder.getLocale());
+
+        if (user == null) {
+            // Egy jelszó encode azért van itt, hogy az api válasz sebességéből ne lehessen
+            // kihámozni, hogy adott email címmel van-e user (gyorsabb válasz => nincs email
+            // cím a db-ben)
+            passwordEncoder.encode("dummy_password");
             throw new BadCredentialsException(errorMsg);
         }
+
+        if (!this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException(errorMsg);
+        }
+
         return this.jwtService.generateToken(command.getEmail());
     }
 

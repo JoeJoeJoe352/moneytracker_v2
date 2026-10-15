@@ -72,11 +72,12 @@ public class AuthController {
     @PostMapping(path = "/login")
     public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequestDto loginRequest) {
         UserLoginCommand command = new UserLoginCommand(loginRequest.email(), loginRequest.password());
-
         String jwtToken = userService.login(command);
+
         ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Set-Cookie", cookie.toString());
+        
         return ResponseEntity.ok().headers(headers).build();
     }
 
