@@ -2,7 +2,7 @@ import { ValidatorFn, Validators } from '@angular/forms';
 import { STRICT_EMAIL_REGEX } from '@app/shared/constants';
 
 /**
- * Felhasználónév mező validátorai (login és regisztráció)
+ * Felhasználónév mező validátorai
  */
 export const USERNAME_VALIDATORS: ValidatorFn[] = [
     Validators.required,
@@ -11,7 +11,7 @@ export const USERNAME_VALIDATORS: ValidatorFn[] = [
 ];
 
 /**
- * Jelszó mező validátorai (login és regisztráció)
+ * Jelszó mező validátorai
  */
 export const PASSWORD_VALIDATORS: ValidatorFn[] = [
     Validators.required,

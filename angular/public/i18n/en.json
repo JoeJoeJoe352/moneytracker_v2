@@ -18,13 +18,13 @@
   },
   "login": {
     "title": "Log in",
-    "username": "Username",
+    "email": "Email",
     "password": "Password",
     "submit": "Log in",
     "success": "Logged in successfully",
-    "username.required-error": "Username is required!",
-    "username.minlength-error": "Username must be at least 3 characters long!",
-    "username.maxlength-error": "Username must be at most 20 characters long!",
+    "email.required-error": "Email is required!",
+    "email.pattern-error": "Please enter a valid email address!",
+    "email.maxlength-error": "Email must be at most 30 characters long!",
     "password.required-error": "Password is required!",
     "password.minlength-error": "Password must be at least 6 characters long!",
     "password.maxlength-error": "Password must be at most 20 characters long!"

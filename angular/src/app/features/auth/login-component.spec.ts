@@ -53,17 +53,17 @@ describe('LoginComponent (Vitest)', () => {
 
         expect(emitted).toEqual([]);
         expect(errorTexts()).toEqual([
-            'login.username.required-error',
+            'login.email.required-error',
             'login.password.required-error',
         ]);
     });
 
-    it('should emit "login" with the username and password when the form is valid', () => {
-        fill('#username', 'joe');
+    it('should emit "login" with the email and password when the form is valid', () => {
+        fill('#email', 'joe@asd.com');
         fill('#password', 'secret');
 
         submit();
 
-        expect(emitted).toEqual([{ username: 'joe', password: 'secret' }]);
+        expect(emitted).toEqual([{ email: 'joe@asd.com', password: 'secret' }]);
     });
 });
