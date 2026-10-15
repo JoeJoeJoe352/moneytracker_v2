@@ -4,8 +4,12 @@ import {
     PasswordMismatchErrorStateMatcher,
     passwordMismatchValidator,
 } from './password-match-validator';
-import { uniqueEmailValidator, uniqueUsernameValidator } from './unique-user-validators';
-import { EMAIL_VALIDATORS, PASSWORD_VALIDATORS, USERNAME_VALIDATORS } from './auth-field-validators';
+import { uniqueEmailValidator } from './unique-user-validators';
+import {
+    EMAIL_VALIDATORS,
+    PASSWORD_VALIDATORS,
+    USERNAME_VALIDATORS,
+} from './auth-field-validators';
 import { AuthService } from './auth-service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -34,7 +38,7 @@ export class RegisterComponent {
     private readonly authService = inject(AuthService);
 
     /**
-     * A jelszó egyezés hibát (ami a form szintjén van) a konfirm mezőnél is hibaként jeleníti meg
+     * A jelszó egyezés hibát (ami a form szintjén van) a confirm mezőnél is hibaként jeleníti meg
      */
     protected readonly passwordMismatchMatcher = new PasswordMismatchErrorStateMatcher();
 
@@ -52,14 +56,7 @@ export class RegisterComponent {
      */
     protected readonly registerForm = this.fb.nonNullable.group(
         {
-            username: [
-                '',
-                {
-                    validators: USERNAME_VALIDATORS,
-                    asyncValidators: [uniqueUsernameValidator(this.authService)],
-                    updateOn: 'blur',
-                },
-            ],
+            username: ['', USERNAME_VALIDATORS],
             email: [
                 '',
                 {
@@ -80,7 +77,7 @@ export class RegisterComponent {
      * Form küldéskor lefutó kódok
      */
     onSubmit(): void {
-        if (this.registerForm.invalid) {
+        if (this.registerForm.invalid || this.registerForm.pending) {
             this.registerForm.markAllAsTouched();
             return;
         }
@@ -88,22 +85,5 @@ export class RegisterComponent {
         // a passwordAgain csak az ellenőrzéshez kell, a backendnek nem küldjük el
         const { email, username, password } = this.registerForm.getRawValue();
         this.register.emit({ email, username, password });
-    }
-
-    // Getterek
-    get username() {
-        return this.registerForm.controls.username;
-    }
-
-    get email() {
-        return this.registerForm.controls.email;
-    }
-
-    get password() {
-        return this.registerForm.controls.password;
-    }
-
-    get passwordAgain() {
-        return this.registerForm.controls.passwordAgain;
     }
 }
