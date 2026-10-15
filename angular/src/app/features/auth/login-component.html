@@ -26,6 +26,11 @@
                             {{ 'login.email.required-error' | translate }}
                         </mat-error>
                     }
+                    @if (email.hasError('pattern')) {
+                        <mat-error>
+                            {{ 'login.email.pattern-error' | translate }}
+                        </mat-error>
+                    }
                 }
             </mat-form-field>
         </div>

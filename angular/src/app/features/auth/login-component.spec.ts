@@ -66,4 +66,14 @@ describe('LoginComponent (Vitest)', () => {
 
         expect(emitted).toEqual([{ email: 'joe@asd.com', password: 'secret' }]);
     });
+
+    it('should not emit "login" and should show the pattern error when the email format is invalid', () => {
+        fill('#email', 'not-an-email');
+        fill('#password', 'secret');
+
+        submit();
+
+        expect(emitted).toEqual([]);
+        expect(errorTexts()).toEqual(['login.email.pattern-error']);
+    });
 });

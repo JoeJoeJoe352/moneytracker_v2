@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthDialogData, LoginRequestData } from './interfaces';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DialogCloseButton } from '@app/shared/components/mat-modal-close';
+import { STRICT_EMAIL_REGEX } from '@app/shared/constants';
 
 @Component({
     selector: 'app-login-component',
@@ -35,7 +36,7 @@ export class LoginComponent {
      * login form adatai
      */
     protected readonly loginForm = this.fb.nonNullable.group({
-        email: ['', { validators: Validators.required }],
+        email: ['', { validators: [Validators.required, Validators.pattern(STRICT_EMAIL_REGEX)] }],
         password: ['', { validators: Validators.required }],
     });
 
