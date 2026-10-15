@@ -157,38 +157,6 @@ class UserServiceIntegrationTest extends MySqlContainerTest {
     }
 
     /**
-     * isUsernameExists a ténylegesen elmentett usernek megfelelően válaszol
-     */
-    @Test
-    void isUsernameExists_reflectsPersistedState() {
-        assertFalse(userService.isUsernameExists("notYetRegisteredUsername"));
-
-        UserCreateCommand command = new UserCreateCommand("notYetRegisteredUsername", "checkusername@email.com",
-                "password");
-        User saved = userService.createUser(command);
-
-        assertTrue(userService.isUsernameExists("notYetRegisteredUsername"));
-
-        deleteUserAndWallet(saved);
-    }
-
-    /**
-     * isEmailExists a ténylegesen elmentett usernek megfelelően válaszol
-     */
-    @Test
-    void isEmailExists_reflectsPersistedState() {
-        assertFalse(userService.isEmailExists("notyetregistered@email.com"));
-
-        UserCreateCommand command = new UserCreateCommand("checkEmailUser", "notyetregistered@email.com",
-                "password");
-        User saved = userService.createUser(command);
-
-        assertTrue(userService.isEmailExists("notyetregistered@email.com"));
-
-        deleteUserAndWallet(saved);
-    }
-
-    /**
      * Előbb a user walletjét kell törölni, különben a user törlése FK
      * constraint hibával elbukik.
      */

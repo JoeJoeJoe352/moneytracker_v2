@@ -73,16 +73,6 @@ public class UserService {
     }
 
     /**
-     * Megnézi, hogy felhasználónév foglalt-e már
-     * 
-     * @param username
-     * @return boolean
-     */
-    public boolean isUsernameExists(String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    /**
      * Megnézi, hogy az email cím foglalt-e már
      * 
      * @param email

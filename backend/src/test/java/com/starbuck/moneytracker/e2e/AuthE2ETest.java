@@ -195,24 +195,7 @@ class AuthE2ETest extends MySqlContainerTest {
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
-    // ---- /auth/isUsernameExists, /auth/isEmailExists ----
-
-    /**
-     * Publikus végpont, autentikáció nélkül is elérhető: helyesen jelzi,
-     * hogy foglalt-e már a felhasználónév
-     */
-    @Test
-    void isUsernameExists_reflectsPersistedState() {
-        register("e2eCheckUsernameUser", "password123", "e2echeckusername@email.com");
-
-        Boolean existingResult = restTemplate.postForObject("/auth/isUsernameExists",
-                Map.of("username", "e2eCheckUsernameUser"), Boolean.class);
-        Boolean missingResult = restTemplate.postForObject("/auth/isUsernameExists",
-                Map.of("username", "definitelyNotRegisteredUsername"), Boolean.class);
-
-        assertTrue(existingResult);
-        assertFalse(missingResult);
-    }
+    // ---- /auth/isEmailExists ----
 
     /**
      * Publikus végpont, autentikáció nélkül is elérhető: helyesen jelzi,

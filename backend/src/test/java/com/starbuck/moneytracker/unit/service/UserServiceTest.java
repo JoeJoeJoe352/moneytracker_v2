@@ -159,23 +159,6 @@ class UserServiceTest {
     }
 
     /**
-     * isUsernameExists visszaadja a repository válaszát
-     */
-    @Test
-    void isUsernameExists_returnsTrueWhenTaken() {
-        Mockito.when(userRepository.existsByUsername("testuser")).thenReturn(true);
-
-        assertTrue(userService.isUsernameExists("testuser"));
-    }
-
-    @Test
-    void isUsernameExists_returnsFalseWhenAvailable() {
-        Mockito.when(userRepository.existsByUsername("freeUsername")).thenReturn(false);
-
-        assertFalse(userService.isUsernameExists("freeUsername"));
-    }
-
-    /**
      * isEmailExists visszaadja a repository válaszát
      */
     @Test
