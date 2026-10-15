@@ -5,7 +5,7 @@ import {
     passwordMismatchValidator,
 } from './password-match-validator';
 import { uniqueEmailValidator, uniqueUsernameValidator } from './unique-user-validators';
-import { PASSWORD_VALIDATORS, USERNAME_VALIDATORS } from './auth-field-validators';
+import { EMAIL_VALIDATORS, PASSWORD_VALIDATORS, USERNAME_VALIDATORS } from './auth-field-validators';
 import { AuthService } from './auth-service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -14,7 +14,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
-import { STRICT_EMAIL_REGEX } from '@shared/constants';
 
 @Component({
     selector: 'app-register-component',
@@ -64,11 +63,7 @@ export class RegisterComponent {
             email: [
                 '',
                 {
-                    validators: [
-                        Validators.pattern(STRICT_EMAIL_REGEX),
-                        Validators.required,
-                        Validators.maxLength(30),
-                    ],
+                    validators: EMAIL_VALIDATORS,
                     asyncValidators: [uniqueEmailValidator(this.authService)],
                     updateOn: 'blur',
                 },
