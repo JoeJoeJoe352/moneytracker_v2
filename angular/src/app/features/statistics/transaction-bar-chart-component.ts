@@ -18,6 +18,7 @@ import { CurrencyFormatPipe } from '@app/shared/pipes/currency-format-pipe';
 import { getLocaleForLang } from '@app/shared/utils/language-util';
 import { CurrencyConversionService } from '@app/shared/services/currency-conversion-service';
 import { filterByType, indexOfMax, sum } from '@app/shared/utils/transaction-util';
+import { TimeHelper } from '@app/shared/services/time-helper';
 
 @Component({
     selector: 'app-transaction-bar-chart-component',
@@ -37,6 +38,7 @@ export class TransactionBarChartComponent {
     private readonly translateService = inject(TranslateService);
     private readonly currencyConversionService = inject(CurrencyConversionService);
     private readonly document = inject(DOCUMENT);
+    private readonly timeHelper = inject(TimeHelper);
 
     /**
      * Tranzakciós adatok a chartnak
@@ -210,11 +212,8 @@ export class TransactionBarChartComponent {
                             if (!transaction) {
                                 return '';
                             }
-                            // nem new Date(string), mert az UTC-ként értelmezné a dátumot
-                            const [year = 0, month = 1, day = 1] = transaction.transactionDate
-                                .split('-')
-                                .map(Number);
-                            return `${transaction.name} · ${dateFormat.format(new Date(year, month - 1, day))}`;
+                            const date = this.timeHelper.stringToDate(transaction.transactionDate)
+                            return `${transaction.name} · ${dateFormat.format(date)}`;
                         },
                         label: (context) => {
                             const transaction = this.transactionAt(context.dataIndex);

@@ -18,6 +18,7 @@ import { TransactionFilter } from './transaction-filter-component';
 import { MatCardModule } from '@angular/material/card';
 import { firstValueFrom, map } from 'rxjs';
 import { TransactionBarChartComponent } from '../statistics/transaction-bar-chart-component';
+import { TimeHelper } from '@app/shared/services/time-helper';
 
 export interface FilterData {
     transactionId: number | null;
@@ -42,6 +43,7 @@ export class TransactionsListComponent implements OnChanges {
     private readonly transactionService = inject(TransactionService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
+    private readonly timeHelper = inject(TimeHelper);
     protected readonly modal = inject(TransactionModalStateService);
     /**
      * Teljes listát szeretnénk-e látni, vagy csak egy részét
@@ -105,7 +107,6 @@ export class TransactionsListComponent implements OnChanges {
             this.transactionsChanged.emit();
         });
     }
-
 
     ngOnChanges(changes: SimpleChanges): void {
         // A szülő komponens ha üzen (új tranzakció felvételéről), akkor újratöltjük a listát
@@ -176,7 +177,7 @@ export class TransactionsListComponent implements OnChanges {
         return {
             transactionId: params.get('transactionId') ? Number(params.get('transactionId')) : null,
             name: params.get('name') ?? '',
-            date: date ? new Date(date) : null,
+            date: date ? this.timeHelper.stringToDate(date) : null,
         };
     }
 
@@ -191,7 +192,7 @@ export class TransactionsListComponent implements OnChanges {
         }
 
         if (data.date) {
-            params['date'] = data.date.toLocaleDateString('sv-SE');
+            params['date'] = this.timeHelper.formatDateToString(data.date);
         }
 
         if (data.transactionId && this.isValidTransactionId(data.transactionId)) {

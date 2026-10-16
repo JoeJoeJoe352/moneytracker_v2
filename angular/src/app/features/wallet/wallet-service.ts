@@ -8,12 +8,14 @@ import {
     WalletSyncData,
     WalletSyncDataToBackend,
 } from './interfaces';
+import { TimeHelper } from '@app/shared/services/time-helper';
 
 @Injectable({
     providedIn: 'root',
 })
 export class WalletService {
     private readonly http = inject(HttpClient);
+    private readonly timeHelper = inject(TimeHelper);
 
     /**
      * Visszatér a felhasználó walletjaival
