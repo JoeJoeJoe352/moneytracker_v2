@@ -22,25 +22,25 @@ public class JwtService {
     }
 
     /**
-     * A tokenben lévő Subject mezőből kinyert username-el tér vissza
-     * 
+     * A tokenben lévő Subject mezőből kinyert email címmel tér vissza
+     *
      * @param String token
-     * @return String A felhasználó neve
+     * @return String A felhasználó email címe
      */
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractAllClaims(token).getSubject();
     }
 
     /**
-     * Token generálása a username alapján. A tokenben a username lesz a subject, 1
-     * napos érvényességgel.
-     * 
-     * @param String username
+     * Token generálása az email cím alapján. A tokenben az email cím lesz a
+     * subject, 1 napos érvényességgel.
+     *
+     * @param String email
      * @return String A generált token
      */
-    public String generateToken(String username) {
+    public String generateToken(String email) {
         return Jwts.builder()
-                .subject(username) // subject mező
+                .subject(email) // subject mező
                 .issuedAt(new Date()) // mikor generálódott
                 .expiration(new Date(System.currentTimeMillis() + CookieUtil.COOKIE_MAX_LIFETIME_SECONDS * 1000))
                 .signWith(getSignInKey()) // aláírás a titkos kulccsal
@@ -48,16 +48,16 @@ public class JwtService {
     }
 
     /**
-     * Token validitás ellenőrzése: a tokenben lévő username megegyezik-e a
-     * userdetails username-jével, és a token nincs-e lejárva
-     * 
+     * Token validitás ellenőrzése: a tokenben lévő email cím megegyezik-e a
+     * user email címével, és a token nincs-e lejárva
+     *
      * @param token
      * @param userDetails
      * @return
      */
     public boolean isTokenValid(String token, User user) {
-        final String username = extractUsername(token);
-        return username.equals(user.getUsername()) && !isTokenExpired(token);
+        final String email = extractEmail(token);
+        return email.equals(user.getEmail()) && !isTokenExpired(token);
     }
 
     /**

@@ -18,13 +18,13 @@
   },
   "login": {
     "title": "Anmeldung",
-    "username": "Benutzername",
+    "email": "E-Mail",
     "password": "Passwort",
     "submit": "Anmelden",
     "success": "Erfolgreich angemeldet",
-    "username.required-error": "Der Benutzername ist erforderlich!",
-    "username.minlength-error": "Der Benutzername muss mindestens 3 Zeichen lang sein!",
-    "username.maxlength-error": "Der Benutzername darf höchstens 20 Zeichen lang sein!",
+    "email.required-error": "Die E-Mail-Adresse ist erforderlich!",
+    "email.pattern-error": "Bitte gib eine gültige E-Mail-Adresse ein!",
+    "email.maxlength-error": "Die E-Mail-Adresse darf höchstens 30 Zeichen lang sein!",
     "password.required-error": "Das Passwort ist erforderlich!",
     "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",
     "password.maxlength-error": "Das Passwort darf höchstens 20 Zeichen lang sein!"

@@ -8,13 +8,13 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.commands.UserLoginCommand;
 import com.starbuck.moneytracker.dto.IsEmailExistsDto;
-import com.starbuck.moneytracker.dto.IsUsernameExistsDto;
 import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
@@ -28,6 +28,7 @@ import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 import jakarta.validation.Valid;
 
+@RequestMapping("/auth")
 @RestController
 public class AuthController {
 
@@ -55,7 +56,7 @@ public class AuthController {
      * 
      * @param RegisterRequestDto user
      */
-    @PostMapping(path = "/auth/register")
+    @PostMapping(path = "/register")
     @ResponseStatus(HttpStatus.CREATED)
     public void authRegisterUser(@Valid @RequestBody RegisterRequestDto user) {
         UserCreateCommand command = new UserCreateCommand(user.username(), user.email(), user.password());
@@ -65,18 +66,18 @@ public class AuthController {
     /**
      * Felhasználó beléptetése
      * 
-     * @param username
-     * @param password
+     * @param LoginRequestDto loginRequest
      * @return üres body + JWT token egy HttpOnly cookie-ban
      */
-    @PostMapping(path = "/auth/login")
+    @PostMapping(path = "/login")
     public ResponseEntity<Void> loginUser(@Valid @RequestBody LoginRequestDto loginRequest) {
-        UserLoginCommand command = new UserLoginCommand(loginRequest.username(), loginRequest.password());
-
+        UserLoginCommand command = new UserLoginCommand(loginRequest.email(), loginRequest.password());
         String jwtToken = userService.login(command);
+
         ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Set-Cookie", cookie.toString());
+        
         return ResponseEntity.ok().headers(headers).build();
     }
 
@@ -86,7 +87,7 @@ public class AuthController {
      * @return ResponseEntity üres body, de tartalmaz headerben egy expiration
      *         cookie-t
      */
-    @PostMapping(path = "/auth/logout")
+    @PostMapping(path = "/logout")
     public ResponseEntity<Void> logoutUser() {
         ResponseCookie expiredCookie = cookieUtil.getJwtSessionDestroyCookie();
         HttpHeaders headers = new HttpHeaders();
@@ -95,23 +96,12 @@ public class AuthController {
     }
 
     /**
-     * Ellenőrzi, hogy a felhasználónév foglalt-e már
-     * 
-     * @param username
-     * @return Boolean
-     */
-    @PostMapping(path = "/auth/isUsernameExists")
-    public boolean isUsernameExists(@RequestBody IsUsernameExistsDto dto) {
-        return userService.isUsernameExists(dto.username());
-    }
-
-    /**
      * Ellenőrzi, hogy az email cím foglalt-e már
      * 
      * @param email
      * @return Boolean
      */
-    @PostMapping(path = "/auth/isEmailExists")
+    @PostMapping(path = "/isEmailExists")
     public boolean isEmailExists(@RequestBody IsEmailExistsDto dto) {
         return userService.isEmailExists(dto.email());
     }
@@ -125,7 +115,7 @@ public class AuthController {
      * 
      * @return
      */
-    @PostMapping(path = "auth/authenticateUser")
+    @PostMapping(path = "/authenticateUser")
     public UserDataResponseDto authenticateUser() {
         User user = this.userUtil.getUser();
         // user.getWallets() nem használható, mert itt már a security principal user

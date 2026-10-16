@@ -23,7 +23,6 @@ describe('RegisterComponent (Vitest)', () => {
                     provide: AuthService,
                     useValue: {
                         // a foglaltság-ellenőrzés itt mindig szabadot ad vissza
-                        checkNameUniqueness: () => of(false),
                         checkEmailUniqueness: () => of(false),
                     },
                 },
@@ -86,7 +85,7 @@ describe('RegisterComponent (Vitest)', () => {
         fixture.detectChanges();
 
         expect(emitted).toEqual([]);
-        expect(component.username.touched).toBe(true);
+        expect(input('#reg-username').classList).toContain('ng-touched');
         expect(errorTexts()).toContain('register.username.required-error');
     });
 

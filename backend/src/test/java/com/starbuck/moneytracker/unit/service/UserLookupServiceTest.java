@@ -13,44 +13,44 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
-import com.starbuck.moneytracker.service.CustomUserDetailService;
+import com.starbuck.moneytracker.service.UserLookupService;
 
 @ExtendWith(MockitoExtension.class)
-class CustomUserDetailServiceTest {
+class UserLookupServiceTest {
 
     @Mock
     private UserRepository userRepository;
 
-    private CustomUserDetailService customUserDetailService;
+    private UserLookupService userLookupService;
 
     @BeforeEach
     void setUp() {
-        customUserDetailService = new CustomUserDetailService(userRepository);
+        userLookupService = new UserLookupService(userRepository);
     }
 
     /**
-     * Ha létezik a userrel a felhasználónév, azt adja vissza
+     * Ha létezik user az email címmel, azt adja vissza
      */
     @Test
-    void loadUserByUsername_returnsUserWhenFound() {
+    void loadUserByEmail_returnsUserWhenFound() {
         User userInDB = new User("testuser", "encodedPassword", "teszt@email.com");
-        Mockito.when(userRepository.findByUsername("testuser")).thenReturn(userInDB);
+        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(userInDB);
 
-        User result = customUserDetailService.loadUserByUsername("testuser");
+        User result = userLookupService.loadUserByEmail("teszt@email.com");
 
         assertEquals(userInDB, result);
     }
 
     /**
-     * Ha nem található a felhasználónévvel user, UsernameNotFoundException-t
+     * Ha nem található az email címmel user, UsernameNotFoundException-t
      * dob
      */
     @Test
-    void loadUserByUsername_throwsWhenUserNotFound() {
-        Mockito.when(userRepository.findByUsername("missing")).thenReturn(null);
+    void loadUserByEmail_throwsWhenUserNotFound() {
+        Mockito.when(userRepository.findByEmail("missing@email.com")).thenReturn(null);
 
         assertThrows(UsernameNotFoundException.class, () -> {
-            customUserDetailService.loadUserByUsername("missing");
+            userLookupService.loadUserByEmail("missing@email.com");
         });
     }
 }

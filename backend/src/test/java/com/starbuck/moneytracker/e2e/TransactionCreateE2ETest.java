@@ -78,7 +78,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
                 Void.class);
         assertEquals(HttpStatus.CREATED, registerResponse.getStatusCode());
 
-        LoginRequestDto loginRequest = new LoginRequestDto("e2eCreateUser", "password123");
+        LoginRequestDto loginRequest = new LoginRequestDto("e2ecreate@email.com", "password123");
         ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login",
                 HttpMethod.POST,
                 new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
@@ -92,7 +92,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
 
-        this.user = userRepository.findByUsername("e2eCreateUser");
+        this.user = userRepository.findByEmail("e2ecreate@email.com");
         this.wallet = walletRepository.findByUserId(this.user.getId()).get(0);
     }
 

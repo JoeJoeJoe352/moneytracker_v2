@@ -38,13 +38,6 @@ export class AuthService {
     }
 
     /**
-     * Ellenőrzi, hogy a felhasználónév foglalt-e
-     */
-    checkNameUniqueness(username: string): Observable<boolean> {
-        return this.http.post<boolean>('/api/auth/isUsernameExists', { username });
-    }
-
-    /**
      * Ellenőrzi, hogy az email cím foglalt-e
      */
     checkEmailUniqueness(email: string): Observable<boolean> {

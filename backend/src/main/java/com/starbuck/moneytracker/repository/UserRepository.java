@@ -6,5 +6,5 @@ import com.starbuck.moneytracker.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByEmail(String email);
     Boolean existsByUsername(String username);
-    User findByUsername(String username);
+    User findByEmail(String email);
 }

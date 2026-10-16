@@ -64,22 +64,22 @@ public class UserService {
      * @return User
      */
     public String login(UserLoginCommand command) {
-        User user = this.userRepository.findByUsername(command.getUsername());
-        if (user == null || !this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
-            var errorMsg = messageSource.getMessage("invalidCredentials", null, LocaleContextHolder.getLocale());
+        User user = this.userRepository.findByEmail(command.getEmail());
+        var errorMsg = messageSource.getMessage("invalidCredentials", null, LocaleContextHolder.getLocale());
+
+        if (user == null) {
+            // Egy jelszó encode azért van itt, hogy az api válasz sebességéből ne lehessen
+            // kihámozni, hogy adott email címmel van-e user (gyorsabb válasz => nincs email
+            // cím a db-ben)
+            passwordEncoder.encode("dummy_password");
             throw new BadCredentialsException(errorMsg);
         }
-        return this.jwtService.generateToken(command.getUsername());
-    }
 
-    /**
-     * Megnézi, hogy felhasználónév foglalt-e már
-     * 
-     * @param username
-     * @return boolean
-     */
-    public boolean isUsernameExists(String username) {
-        return userRepository.existsByUsername(username);
+        if (!this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException(errorMsg);
+        }
+
+        return this.jwtService.generateToken(command.getEmail());
     }
 
     /**

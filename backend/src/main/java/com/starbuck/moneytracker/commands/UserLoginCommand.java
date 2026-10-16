@@ -1,22 +1,24 @@
 package com.starbuck.moneytracker.commands;
 
 public class UserLoginCommand {
-    private String username;
+    private String email;
     private String password;
 
-    public UserLoginCommand(String username, String password) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username cannot be empty");
+    public UserLoginCommand(String email, String password) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be empty");
         }
+        // TODO, check email format
+
         if (password == null || password.isBlank()) {
             throw new IllegalArgumentException("Password cannot be empty");
         }
-        this.username = username;
+        this.email = email;
         this.password = password;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
     public String getPassword() {

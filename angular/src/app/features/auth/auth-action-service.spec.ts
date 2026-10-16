@@ -20,7 +20,7 @@ describe('AuthActionService (Vitest)', () => {
     let snackBarMock: { open: ReturnType<typeof vi.fn> };
     let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
-    const loginParams: LoginRequestData = { username: 'joe', password: 'secret' };
+    const loginParams: LoginRequestData = { email: 'joe@asd.com', password: 'secret' };
     const registerParams: RegisterRequestData = {
         username: 'joe',
         email: 'joe@example.com',
