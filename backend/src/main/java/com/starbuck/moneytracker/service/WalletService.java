@@ -1,6 +1,9 @@
 package com.starbuck.moneytracker.service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.context.MessageSource;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
+import com.starbuck.moneytracker.dto.WalletListRow;
 import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -18,6 +22,7 @@ import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.UserDateUtil;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -27,11 +32,14 @@ public class WalletService {
     private final WalletRepository walletRepo;
     private final MessageSource messageSource;
     private final CurrentUserUtil userUtil;
+    private final UserDateUtil userDateUtil;
 
-    public WalletService(WalletRepository walletRepo, MessageSource messageSource, CurrentUserUtil userUtil) {
+    public WalletService(WalletRepository walletRepo, MessageSource messageSource, CurrentUserUtil userUtil,
+            UserDateUtil userDateUtil) {
         this.walletRepo = walletRepo;
         this.messageSource = messageSource;
         this.userUtil = userUtil;
+        this.userDateUtil = userDateUtil;
     }
 
     /**
@@ -89,7 +97,24 @@ public class WalletService {
     public List<WalletListResponseDto> listWalletsForUser() {
         var wallets = walletRepo.listWalletsWithSumByUserId(userUtil.getUser().getId());
         boolean deletable = isWalletsDeletable(wallets.size());
-        return wallets.stream().map(w -> w.withDeletable(deletable)).toList();
+        return wallets.stream()
+                .map(w -> new WalletListResponseDto(w.id(), w.name(), w.currencyCode(), w.type(), w.sum(),
+                        getLastSyncDate(w), deletable))
+                .toList();
+    }
+
+    /**
+     * Az utolsó szinkronizálás napja a user időzónája szerint, ha még nem volt, akkor a létrehozásé
+     *
+     * @param wallet
+     * @return LocalDate
+     */
+    private LocalDate getLastSyncDate(WalletListRow wallet) {
+        // a @CreationTimestamp a JVM időzónájában menti a LocalDateTime-ot
+        Instant lastSyncedAt = wallet.lastSyncedAt() != null
+                ? wallet.lastSyncedAt()
+                : wallet.createdAt().atZone(ZoneId.systemDefault()).toInstant();
+        return userDateUtil.toUserDate(lastSyncedAt);
     }
 
     /**

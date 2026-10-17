@@ -77,7 +77,7 @@ public class BalanceSyncServiceTest {
     void setUp() {
         var transactionFactory = new TransactionFactory(messageSource);
         balanceSyncService = new BalanceSyncService(walletService, transactionService, balanceSyncRepo,
-                transactionFactory, new UserDateUtil(CLOCK));
+                transactionFactory, new UserDateUtil(CLOCK), CLOCK);
     }
 
     @Test
@@ -117,7 +117,7 @@ public class BalanceSyncServiceTest {
 
         var savedSyncEntry = argumentCaptor.getValue();
         assertEquals(new BigDecimal("50.00"), savedSyncEntry.getActualBalance());
-        assertEquals(actualDate, savedSyncEntry.getSyncDate());
+        assertEquals(CLOCK.instant(), savedSyncEntry.getSyncedAt());
         assertEquals("wallet", savedSyncEntry.getWallet().getName());
         assertNull(savedSyncEntry.getSyncTransaction());
     }
@@ -150,7 +150,7 @@ public class BalanceSyncServiceTest {
 
         var savedSyncEntry = argumentCaptorBalanceSync.getValue();
         assertEquals(savedSyncEntry.getActualBalance(), new BigDecimal("50.00"));
-        assertEquals(savedSyncEntry.getSyncDate(), actualDate);
+        assertEquals(CLOCK.instant(), savedSyncEntry.getSyncedAt());
         assertEquals(savedSyncEntry.getWallet().getName(), "wallet");
         assertSame(createdTransaction, savedSyncEntry.getSyncTransaction());
 
@@ -191,7 +191,7 @@ public class BalanceSyncServiceTest {
 
         var savedSyncEntry = argumentCaptorBalanceSync.getValue();
         assertEquals(savedSyncEntry.getActualBalance(), new BigDecimal("100.00"));
-        assertEquals(savedSyncEntry.getSyncDate(), actualDate);
+        assertEquals(CLOCK.instant(), savedSyncEntry.getSyncedAt());
         assertEquals(savedSyncEntry.getWallet().getName(), "wallet");
         assertSame(createdTransaction, savedSyncEntry.getSyncTransaction());
 
@@ -247,7 +247,7 @@ public class BalanceSyncServiceTest {
 
         var savedSyncEntry = argumentCaptorBalanceSync.getValue();
         assertEquals(new BigDecimal(balanceFromUser), savedSyncEntry.getActualBalance());
-        assertEquals(actualDate, savedSyncEntry.getSyncDate());
+        assertEquals(CLOCK.instant(), savedSyncEntry.getSyncedAt());
         assertSame(createdTransaction, savedSyncEntry.getSyncTransaction());
 
         var transactionCreateCommand = argumentCaptorTransactionCreate.getValue();

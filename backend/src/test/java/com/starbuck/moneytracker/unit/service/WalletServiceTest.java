@@ -27,6 +27,7 @@ import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.UserDateUtil;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -42,6 +43,9 @@ public class WalletServiceTest {
     @Mock
     private CurrentUserUtil currentUser;
 
+    @Mock
+    private UserDateUtil userDateUtil;
+
     private WalletService walletService;
 
     private final User user = new User(1L, "name", "password", "email");
@@ -50,7 +54,7 @@ public class WalletServiceTest {
 
     @BeforeEach
     void setUp() {
-        walletService = new WalletService(walletRepo, messageSource, currentUser);
+        walletService = new WalletService(walletRepo, messageSource, currentUser, userDateUtil);
         when(currentUser.getUser()).thenReturn(user);
     }
 

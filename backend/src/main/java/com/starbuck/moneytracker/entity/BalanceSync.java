@@ -1,7 +1,7 @@
 package com.starbuck.moneytracker.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.Instant;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
@@ -30,8 +30,9 @@ public class BalanceSync {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** A szinkronizálás időpontja (UTC-ben tárolva), megjelenítéskor a user időzónájára váltandó */
     @Column(nullable = false)
-    private LocalDate syncDate;
+    private Instant syncedAt;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "wallet_id", nullable = false)
@@ -55,8 +56,8 @@ public class BalanceSync {
     public BalanceSync() {
     }
 
-    public BalanceSync(LocalDate syncDate, Wallet wallet, BigDecimal actualBalance) {
-        this.syncDate = syncDate;
+    public BalanceSync(Instant syncedAt, Wallet wallet, BigDecimal actualBalance) {
+        this.syncedAt = syncedAt;
         this.wallet = wallet;
         this.actualBalance = actualBalance;
     }
@@ -69,12 +70,12 @@ public class BalanceSync {
         this.id = id;
     }
 
-    public LocalDate getSyncDate() {
-        return syncDate;
+    public Instant getSyncedAt() {
+        return syncedAt;
     }
 
-    public void setSyncDate(LocalDate syncDate) {
-        this.syncDate = syncDate;
+    public void setSyncedAt(Instant syncedAt) {
+        this.syncedAt = syncedAt;
     }
 
     public Wallet getWallet() {

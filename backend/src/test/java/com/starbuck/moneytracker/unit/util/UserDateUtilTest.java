@@ -43,6 +43,14 @@ public class UserDateUtilTest {
     }
 
     @Test
+    void testToUserDateConvertsInstantToUserTimeZone() {
+        LocaleContextHolder.setTimeZone(TimeZone.getTimeZone("Europe/Budapest"));
+
+        // UTC szerint még előző nap, Budapesten (UTC+2) már 2026-10-02
+        assertEquals(LocalDate.of(2026, 10, 2), userDateUtil.toUserDate(Instant.parse("2026-10-01T23:30:00Z")));
+    }
+
+    @Test
     void testTodayWithoutLocaleContextFallsBackToUtc() {
         // pl.: ütemezett feladat / async szál, ahol nincs request
         LocaleContextHolder.resetLocaleContext();

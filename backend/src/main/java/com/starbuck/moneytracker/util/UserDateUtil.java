@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.util;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
@@ -25,7 +26,17 @@ public class UserDateUtil {
      * @return LocalDate
      */
     public LocalDate today() {
-        return LocalDate.ofInstant(clock.instant(), getUserZone());
+        return toUserDate(clock.instant());
+    }
+
+    /**
+     * Egy (UTC-ben tárolt) időpont napja a user időzónája szerint
+     *
+     * @param instant
+     * @return LocalDate
+     */
+    public LocalDate toUserDate(Instant instant) {
+        return LocalDate.ofInstant(instant, getUserZone());
     }
 
     /**

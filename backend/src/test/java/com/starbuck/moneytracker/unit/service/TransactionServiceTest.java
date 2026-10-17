@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.time.Instant;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -573,7 +574,7 @@ class TransactionServiceTest {
     void deleteTransaction_deletesBalanceSyncOfSyncTransaction() {
         Transaction transaction = createTransactionForUser1(5L);
         transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
-        BalanceSync balanceSync = new BalanceSync(LocalDate.now(), transaction.getWallet(),
+        BalanceSync balanceSync = new BalanceSync(Instant.parse("2026-10-01T10:00:00Z"), transaction.getWallet(),
                 new BigDecimal("50.00"));
         Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
         Mockito.when(balanceSyncRepo.findBySyncTransactionId(5L)).thenReturn(Optional.of(balanceSync));

@@ -1,5 +1,7 @@
 package com.starbuck.moneytracker.service;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
@@ -19,15 +21,17 @@ public class BalanceSyncService {
     private final BalanceSyncRepository balanceSyncRepo;
     private final TransactionFactory transactionFactory;
     private final UserDateUtil userDateUtil;
+    private final Clock clock;
 
     public BalanceSyncService(WalletService walletService, TransactionService transactionService,
             BalanceSyncRepository balanceSyncRepo, TransactionFactory transactionFactory,
-            UserDateUtil userDateUtil) {
+            UserDateUtil userDateUtil, Clock clock) {
         this.walletService = walletService;
         this.transactionService = transactionService;
         this.balanceSyncRepo = balanceSyncRepo;
         this.transactionFactory = transactionFactory;
         this.userDateUtil = userDateUtil;
+        this.clock = clock;
     }
 
     /**
@@ -48,11 +52,13 @@ public class BalanceSyncService {
         // és a createtransaction-ben
         var wallet = walletService.getWalletByIdForUpdate(command.getWalletId());
 
-        // User időzónája szerinti dátummal mentjük el a tranzakciót. Mivel az elavultság jelző is frontenden számolódik, ezért 
-        // A user mai napja a kliens által küldött időzóna alapján. Szándékosan nem validáljuk:
-        // a zóna csak a kliensen ismert, és legfeljebb ±1 nap eltérést okozhat a saját adataiban
-        LocalDate date = userDateUtil.today();
-        var balanceSync = new BalanceSync(date, wallet, command.getBalanceFromUser());
+        // A sync időpontja UTC-ben (időzónától független statisztikákhoz), a korrekciós tranzakció
+        // dátuma viszont üzleti dátum: ugyanennek az időpontnak a napja a user időzónája szerint.
+        // A zónát a kliens küldi, szándékosan nem validáljuk: csak a kliensen ismert, és legfeljebb
+        // ±1 nap eltérést okozhat a user saját adataiban
+        Instant syncedAt = clock.instant();
+        LocalDate date = userDateUtil.toUserDate(syncedAt);
+        var balanceSync = new BalanceSync(syncedAt, wallet, command.getBalanceFromUser());
 
         var balanceOfWalletInDb = walletService.getBalanceForWallet(command.getWalletId());
         var balancesDiffer = balanceOfWalletInDb.compareTo(command.getBalanceFromUser()) != 0;
