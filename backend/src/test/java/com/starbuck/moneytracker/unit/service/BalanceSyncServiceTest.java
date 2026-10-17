@@ -12,7 +12,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Locale;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +43,7 @@ import com.starbuck.moneytracker.service.BalanceSyncService;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.TransactionFactory;
+import com.starbuck.moneytracker.util.UserDateUtil;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -64,11 +68,16 @@ public class BalanceSyncServiceTest {
 
     private final Wallet wallet = new Wallet(1L, "wallet", user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT);
 
+    /** Fix "most", így a dátumok nem függenek a futás idejétől (éjfélkor sem bukik el) */
+    private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-10-01T10:00:00Z"), ZoneOffset.UTC);
+
+    private static final LocalDate TODAY = LocalDate.of(2026, 10, 1);
+
     @BeforeEach
     void setUp() {
         var transactionFactory = new TransactionFactory(messageSource);
         balanceSyncService = new BalanceSyncService(walletService, transactionService, balanceSyncRepo,
-                transactionFactory);
+                transactionFactory, new UserDateUtil(CLOCK), CLOCK);
     }
 
     @Test
@@ -82,7 +91,7 @@ public class BalanceSyncServiceTest {
     void testSyncWalletNotExistingWallet() {
         when(walletService.getWalletByIdForUpdate(5L)).thenThrow(new EntityNotFoundException("Wallet not found"));
 
-        BalanceSyncCommand command = new BalanceSyncCommand(5, LocalDate.now(), new BigDecimal(50));
+        BalanceSyncCommand command = new BalanceSyncCommand(5, new BigDecimal(50));
         assertThrowsExactly(EntityNotFoundException.class, () -> {
             balanceSyncService.syncWallet(command);
         });
@@ -94,8 +103,8 @@ public class BalanceSyncServiceTest {
         when(walletService.getWalletByIdForUpdate(1L)).thenReturn(wallet);
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("50.00"));
 
-        var actualDate = LocalDate.now();
-        BalanceSyncCommand command = new BalanceSyncCommand(1L, actualDate, new BigDecimal("50.00"));
+        var actualDate = TODAY;
+        BalanceSyncCommand command = new BalanceSyncCommand(1L, new BigDecimal("50.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptor = ArgumentCaptor.forClass(BalanceSync.class);
 
@@ -108,7 +117,7 @@ public class BalanceSyncServiceTest {
 
         var savedSyncEntry = argumentCaptor.getValue();
         assertEquals(new BigDecimal("50.00"), savedSyncEntry.getActualBalance());
-        assertEquals(actualDate, savedSyncEntry.getSyncDate());
+        assertEquals(CLOCK.instant(), savedSyncEntry.getSyncedAt());
         assertEquals("wallet", savedSyncEntry.getWallet().getName());
         assertNull(savedSyncEntry.getSyncTransaction());
     }
@@ -116,7 +125,7 @@ public class BalanceSyncServiceTest {
     @Test
     void testSyncWalletCreateSyncAndTransactionExpenseEntry() {
         // GIVEN
-        var actualDate = LocalDate.now();
+        var actualDate = TODAY;
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
                 .thenReturn("Szinkronizálás");
 
@@ -126,7 +135,7 @@ public class BalanceSyncServiceTest {
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("60.00"));
         var createdTransaction = new Transaction();
         when(transactionService.createTransaction(any())).thenReturn(createdTransaction);
-        BalanceSyncCommand command = new BalanceSyncCommand(1, actualDate, new BigDecimal("50.00"));
+        BalanceSyncCommand command = new BalanceSyncCommand(1, new BigDecimal("50.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
         ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor
@@ -141,7 +150,7 @@ public class BalanceSyncServiceTest {
 
         var savedSyncEntry = argumentCaptorBalanceSync.getValue();
         assertEquals(savedSyncEntry.getActualBalance(), new BigDecimal("50.00"));
-        assertEquals(savedSyncEntry.getSyncDate(), actualDate);
+        assertEquals(CLOCK.instant(), savedSyncEntry.getSyncedAt());
         assertEquals(savedSyncEntry.getWallet().getName(), "wallet");
         assertSame(createdTransaction, savedSyncEntry.getSyncTransaction());
 
@@ -157,7 +166,7 @@ public class BalanceSyncServiceTest {
     @Test
     void testSyncWalletCreateSyncAndTransactionIncomeEntry() {
         // GIVEN
-        var actualDate = LocalDate.now();
+        var actualDate = TODAY;
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
                 .thenReturn("Szinkronizálás");
 
@@ -167,7 +176,7 @@ public class BalanceSyncServiceTest {
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("60.00"));
         var createdTransaction = new Transaction();
         when(transactionService.createTransaction(any())).thenReturn(createdTransaction);
-        BalanceSyncCommand command = new BalanceSyncCommand(1, actualDate, new BigDecimal("100.00"));
+        BalanceSyncCommand command = new BalanceSyncCommand(1, new BigDecimal("100.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
         ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor
@@ -182,7 +191,7 @@ public class BalanceSyncServiceTest {
 
         var savedSyncEntry = argumentCaptorBalanceSync.getValue();
         assertEquals(savedSyncEntry.getActualBalance(), new BigDecimal("100.00"));
-        assertEquals(savedSyncEntry.getSyncDate(), actualDate);
+        assertEquals(CLOCK.instant(), savedSyncEntry.getSyncedAt());
         assertEquals(savedSyncEntry.getWallet().getName(), "wallet");
         assertSame(createdTransaction, savedSyncEntry.getSyncTransaction());
 
@@ -215,7 +224,7 @@ public class BalanceSyncServiceTest {
     void testSyncWalletCreateSyncAndTransactionEntryWithNegativeBalance(String balanceInDb, String balanceFromUser,
             TransactionTypeEnum expectedType, String expectedPrice) {
         // GIVEN
-        var actualDate = LocalDate.now();
+        var actualDate = TODAY;
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
                 .thenReturn("Szinkronizálás");
 
@@ -223,7 +232,7 @@ public class BalanceSyncServiceTest {
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal(balanceInDb));
         var createdTransaction = new Transaction();
         when(transactionService.createTransaction(any())).thenReturn(createdTransaction);
-        BalanceSyncCommand command = new BalanceSyncCommand(1, actualDate, new BigDecimal(balanceFromUser));
+        BalanceSyncCommand command = new BalanceSyncCommand(1, new BigDecimal(balanceFromUser));
 
         ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
         ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor
@@ -238,7 +247,7 @@ public class BalanceSyncServiceTest {
 
         var savedSyncEntry = argumentCaptorBalanceSync.getValue();
         assertEquals(new BigDecimal(balanceFromUser), savedSyncEntry.getActualBalance());
-        assertEquals(actualDate, savedSyncEntry.getSyncDate());
+        assertEquals(CLOCK.instant(), savedSyncEntry.getSyncedAt());
         assertSame(createdTransaction, savedSyncEntry.getSyncTransaction());
 
         var transactionCreateCommand = argumentCaptorTransactionCreate.getValue();
@@ -255,8 +264,7 @@ public class BalanceSyncServiceTest {
         when(walletService.getWalletByIdForUpdate(1L)).thenReturn(wallet);
         when(walletService.getBalanceForWallet(1L)).thenReturn(new BigDecimal("-50.00"));
 
-        var actualDate = LocalDate.now();
-        BalanceSyncCommand command = new BalanceSyncCommand(1L, actualDate, new BigDecimal("-50.00"));
+        BalanceSyncCommand command = new BalanceSyncCommand(1L, new BigDecimal("-50.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptor = ArgumentCaptor.forClass(BalanceSync.class);
 

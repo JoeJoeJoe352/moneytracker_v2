@@ -36,5 +36,4 @@ export interface WalletSyncData {
 
 export interface WalletSyncDataToBackend {
     currentBalance: number;
-    syncDate: string;
 }

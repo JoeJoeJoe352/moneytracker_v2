@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -288,7 +287,7 @@ class WalletE2ETest extends MySqlContainerTest {
     @Test
     void syncWallet_createsSyncAndCorrectsBalance() {
         Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
-        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("25.50"), "syncDate", "2026-10-01");
+        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("25.50"));
 
         ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
                 HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
@@ -299,30 +298,13 @@ class WalletE2ETest extends MySqlContainerTest {
     }
 
     /**
-     * Jövőbeli dátum is elfogadott, mert a dátum a user időzónájától függ, ami
-     * eltérhet a szerverétől
-     */
-    @Test
-    void syncWallet_acceptsFutureSyncDate() {
-        Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
-        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("25.50"),
-                "syncDate", LocalDate.now().plusDays(1).toString());
-
-        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
-                HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(1, countSyncsForWallet(wallet));
-    }
-
-    /**
      * Negatív egyenleg is elfogadott (pl. hitelkártya), a korrekció után a wallet
      * egyenlege megegyezik a user által megadottal
      */
     @Test
     void syncWallet_acceptsNegativeBalance() {
         Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
-        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("-25.50"), "syncDate", "2026-10-01");
+        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("-25.50"));
 
         ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
                 HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
@@ -349,12 +331,9 @@ class WalletE2ETest extends MySqlContainerTest {
 
     private static Stream<Arguments> invalidSyncRequests() {
         return Stream.of(
-                Arguments.of("hiányzó egyenleg", Map.of("syncDate", "2026-10-01")),
-                Arguments.of("hiányzó dátum", Map.of("currentBalance", new BigDecimal("50.00"))),
-                Arguments.of("3 tizedesjegy", Map.of("currentBalance", new BigDecimal("50.004"),
-                        "syncDate", "2026-10-01")),
-                Arguments.of("túl nagy összeg", Map.of("currentBalance", new BigDecimal("1000000000.00"),
-                        "syncDate", "2026-10-01")));
+                Arguments.of("hiányzó egyenleg", Map.of()),
+                Arguments.of("3 tizedesjegy", Map.of("currentBalance", new BigDecimal("50.004"))),
+                Arguments.of("túl nagy összeg", Map.of("currentBalance", new BigDecimal("1000000000.00"))));
     }
 
     /**
@@ -369,7 +348,7 @@ class WalletE2ETest extends MySqlContainerTest {
         otherUser = userRepository.save(otherUser);
         Wallet otherUsersWallet = walletRepository
                 .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
-        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("50.00"), "syncDate", "2026-10-01");
+        Map<String, Object> request = Map.of("currentBalance", new BigDecimal("50.00"));
 
         try {
             ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + otherUsersWallet.getId() + "/sync",

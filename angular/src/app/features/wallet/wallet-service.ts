@@ -8,12 +8,14 @@ import {
     WalletSyncData,
     WalletSyncDataToBackend,
 } from './interfaces';
+import { TimeHelper } from '@app/shared/services/time-helper';
 
 @Injectable({
     providedIn: 'root',
 })
 export class WalletService {
     private readonly http = inject(HttpClient);
+    private readonly timeHelper = inject(TimeHelper);
 
     /**
      * Visszatér a felhasználó walletjaival
@@ -47,11 +49,10 @@ export class WalletService {
      * Balance szinkronizációs kérést indít a backend felé
      */
     syncWallet(data: WalletSyncData): Observable<void> {
-        const walletDataWithDate: WalletSyncDataToBackend = {
+        const payload: WalletSyncDataToBackend = {
             currentBalance: data.currentBalance,
-            syncDate: new Date().toLocaleDateString('sv-SE'),
         };
 
-        return this.http.post<void>('/api/wallet/' + data.walletId + '/sync', walletDataWithDate);
+        return this.http.post<void>('/api/wallet/' + data.walletId + '/sync', payload);
     }
 }

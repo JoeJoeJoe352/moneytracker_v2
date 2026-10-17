@@ -46,6 +46,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: moneytracker
+      TZ: UTC
     ports:
       - "3306:3306"
     volumes:

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { inject } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -28,7 +29,10 @@ describe('TransactionFormComponent (Vitest)', () => {
             providers: [
                 provideTranslateService(),
                 provideNativeDateAdapter(),
-                { provide: TransactionService, useValue: { utils: new TransactionUtils() } },
+                {
+                    provide: TransactionService,
+                    useFactory: () => ({ utils: inject(TransactionUtils) }),
+                },
                 {
                     provide: UserDataStore,
                     useValue: {
@@ -227,7 +231,8 @@ describe('TransactionFormComponent (Vitest)', () => {
         expect(component.name.value).toBe('Fizetés');
         expect(component.isIncome.value).toBe(true);
         expect(component.price.value).toBe(5000);
-        expect(component.transactionDate.value).toEqual(new Date('2024-02-01'));
+        // helyi idő szerinti éjfél (TimeHelper.stringToDate), nem UTC - a new Date('2024-02-01') UTC-ként olvasná
+        expect(component.transactionDate.value).toEqual(new Date(2024, 1, 1));
         expect(component.details.length).toBe(1);
     });
 

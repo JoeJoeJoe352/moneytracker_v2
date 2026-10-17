@@ -26,6 +26,7 @@ import { LanguageService } from '@shared/services/translate-service';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { CredentialsInterceptor } from '@core/interceptors/credentials-interceptor';
 import { LanguageInterceptor } from '@core/interceptors/language-interceptor';
+import { TimeZoneInterceptor } from './core/interceptors/time-zone-interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -56,7 +57,7 @@ export const appConfig: ApplicationConfig = {
         },
         provideHttpClient(
             withXhr(),
-            withInterceptors([CredentialsInterceptor, LanguageInterceptor]),
+            withInterceptors([CredentialsInterceptor, LanguageInterceptor, TimeZoneInterceptor]),
         ),
         provideTranslateService({
             loader: provideTranslateHttpLoader({

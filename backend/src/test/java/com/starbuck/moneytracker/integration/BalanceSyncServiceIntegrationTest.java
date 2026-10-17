@@ -7,7 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -86,6 +90,12 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
     @MockitoBean
     CurrentUserUtil currentUser;
 
+    /** Fix "most", hogy a sync dátuma (a user mai napja) ne a futás idejétől függjön */
+    @MockitoBean
+    Clock clock;
+
+    private static final Instant SYNC_INSTANT = Instant.parse("2026-10-01T10:00:00Z");
+
     private User user;
 
     @BeforeAll
@@ -107,6 +117,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
     @BeforeEach
     public void setActualUser() {
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
+        Mockito.when(clock.instant()).thenReturn(SYNC_INSTANT);
     }
 
     /**
@@ -118,15 +129,14 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         // Given
         var wallet = createWallet("syncWallet");
         var initialTransaction = saveIncome(wallet, new BigDecimal("60.00"));
-        var syncDate = LocalDate.of(2026, 10, 1);
 
         // When
-        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), syncDate, new BigDecimal("60.00")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), new BigDecimal("60.00")));
 
         // Then
         var balanceSync = findSyncForWallet(wallet);
         assertEquals(new BigDecimal("60.00"), balanceSync.getActualBalance());
-        assertEquals(syncDate, balanceSync.getSyncDate());
+        assertEquals(SYNC_INSTANT, balanceSync.getSyncedAt());
         assertEquals(wallet.getId(), balanceSync.getWallet().getId());
         assertNull(balanceSync.getSyncTransaction());
         assertEquals(new BigDecimal("60.00"), walletService.getBalanceForWallet(wallet.getId()));
@@ -148,12 +158,12 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         var syncDate = LocalDate.of(2026, 10, 1);
 
         // When
-        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), syncDate, new BigDecimal("50.00")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), new BigDecimal("50.00")));
 
         // Then
         var balanceSync = findSyncForWallet(wallet);
         assertEquals(new BigDecimal("50.00"), balanceSync.getActualBalance());
-        assertEquals(syncDate, balanceSync.getSyncDate());
+        assertEquals(SYNC_INSTANT, balanceSync.getSyncedAt());
 
         Transaction syncTransaction = balanceSync.getSyncTransaction();
         assertNotNull(syncTransaction);
@@ -182,10 +192,9 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         // Given
         var wallet = createWallet("syncWallet");
         var initialTransaction = saveIncome(wallet, new BigDecimal("60.00"));
-        var syncDate = LocalDate.of(2026, 10, 1);
 
         // When
-        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), syncDate, new BigDecimal("100.00")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), new BigDecimal("100.00")));
 
         // Then
         var balanceSync = findSyncForWallet(wallet);
@@ -212,10 +221,9 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
     public void testSyncEmptyWalletCreatesIncome() {
         // Given
         var wallet = createWallet("emptySyncWallet");
-        var syncDate = LocalDate.of(2026, 10, 1);
 
         // When
-        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), syncDate, new BigDecimal("25.50")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), new BigDecimal("25.50")));
 
         // Then
         var balanceSync = findSyncForWallet(wallet);
@@ -240,7 +248,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         // Given
         var wallet = createWallet("concurrentSyncWallet");
         var initialTransaction = saveIncome(wallet, new BigDecimal("60.00"));
-        var command = new BalanceSyncCommand(wallet.getId(), LocalDate.of(2026, 10, 1), new BigDecimal("50.00"));
+        var command = new BalanceSyncCommand(wallet.getId(), new BigDecimal("50.00"));
 
         var executor = Executors.newFixedThreadPool(2);
         var start = new CountDownLatch(1);
@@ -289,7 +297,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         var wallet = createWallet("deleteSyncWallet");
         var initialTransaction = saveIncome(wallet, new BigDecimal("60.00"));
         balanceSyncService.syncWallet(
-                new BalanceSyncCommand(wallet.getId(), LocalDate.of(2026, 10, 1), new BigDecimal("50.00")));
+                new BalanceSyncCommand(wallet.getId(), new BigDecimal("50.00")));
         var balanceSync = findSyncForWallet(wallet);
         var syncTransaction = balanceSync.getSyncTransaction();
 
@@ -314,7 +322,9 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
                 .filter(w -> w.id().equals(wallet.getId()))
                 .findFirst()
                 .orElseThrow();
-        assertEquals(walletCreatedAt.toLocalDate(), listedWallet.lastSyncDate());
+        // a createdAt a JVM időzónájában van, a lista napja a user zónájában (itt nincs request -> UTC)
+        assertEquals(LocalDate.ofInstant(walletCreatedAt.atZone(ZoneId.systemDefault()).toInstant(), ZoneOffset.UTC),
+                listedWallet.lastSyncDate());
 
         balanceSyncRepo.hardDeleteAllForWallet(wallet.getId());
         deleteSyncTransaction(syncTransaction);
@@ -339,7 +349,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         // When
         assertThrows(EntityNotFoundException.class, () -> {
             balanceSyncService.syncWallet(
-                    new BalanceSyncCommand(anotherUserWallet.getId(), LocalDate.now(), new BigDecimal("50.00")));
+                    new BalanceSyncCommand(anotherUserWallet.getId(), new BigDecimal("50.00")));
         });
 
         // Then

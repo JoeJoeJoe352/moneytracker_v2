@@ -72,7 +72,7 @@ public class WalletController {
     @PostMapping(path = "/{id}/sync")
     @ResponseStatus(HttpStatus.CREATED)
     public void syncWallet(@Valid @RequestBody BalanceSyncDto dto, @PathVariable long id) {
-        var command = new BalanceSyncCommand(id, dto.syncDate(), dto.currentBalance());
+        var command = new BalanceSyncCommand(id, dto.currentBalance());
         syncService.syncWallet(command);
     }
 

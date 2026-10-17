@@ -6,6 +6,7 @@ import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { MatRippleModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { TimeHelper } from '@app/shared/services/time-helper';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -21,6 +22,7 @@ const SYNC_OUTDATED_AFTER_DAYS = 30;
     imports: [MatButtonModule, TranslatePipe, CurrencyFormatPipe, MatRippleModule, MatIconModule],
 })
 export class WalletCardComponent {
+    private readonly timeHelper = inject(TimeHelper);
     protected readonly walletDataUtil = inject(WalletDataUtil);
 
     /**
@@ -56,7 +58,7 @@ export class WalletCardComponent {
     protected isSyncOutdated = computed(() => {
         // a "T00:00:00" miatt helyi idő szerinti éjfélként értelmezi; a puszta "YYYY-MM-DD"-t
         // UTC-ként olvasná, ami negatív időzónában az előző napra csúszna
-        const lastSyncDate = new Date(`${this.walletData().lastSyncDate}T00:00:00`);
+        const lastSyncDate = this.timeHelper.stringToDate(this.walletData().lastSyncDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 

@@ -1,3 +1,4 @@
+import { TestBed } from '@angular/core/testing';
 import { TransactionTypeEnum } from '@shared/enums';
 import { TransactionUtils } from './transaction-utils';
 
@@ -5,7 +6,8 @@ describe('TransactionUtils', () => {
     let utils: TransactionUtils;
 
     beforeEach(() => {
-        utils = new TransactionUtils();
+        // TestBed-en keresztül, mert a TimeHelper-t inject()-tel kéri, ami csak injection contextben működik
+        utils = TestBed.inject(TransactionUtils);
     });
 
     describe('convertDataToInput', () => {

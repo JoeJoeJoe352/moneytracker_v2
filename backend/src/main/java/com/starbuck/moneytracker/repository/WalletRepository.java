@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
-import com.starbuck.moneytracker.dto.WalletListResponseDto;
+import com.starbuck.moneytracker.dto.WalletListRow;
 import com.starbuck.moneytracker.dto.WalletSummaryDto;
 import com.starbuck.moneytracker.entity.Wallet;
 
@@ -42,22 +42,20 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     List<Wallet> findByUserId(long userId);
     
     /**
-     * Walleteket lekérdezi, kiírja hozzá az összeget és az utolsó szinkronizálás
-     * dátumát (ha még nem volt, akkor a wallet létrehozásának dátumát).
-     * A sync dátum subquery-ből jön, mert egy második JOIN megsokszorozná a
+     * Walleteket lekérdezi, kiírja hozzá az összeget, az utolsó szinkronizálás
+     * időpontját és a létrehozás időpontját (a user szerinti napot a service számolja).
+     * A sync időpont subquery-ből jön, mert egy második JOIN megsokszorozná a
      * tranzakció sorokat, és elrontaná a SUM-ot.
      */
     @Query("""
-                SELECT new com.starbuck.moneytracker.dto.WalletListResponseDto(
+                SELECT new com.starbuck.moneytracker.dto.WalletListRow(
                     w.id,
                     w.name,
                     w.currencyCode,
                     w.type,
                     COALESCE(SUM(t.priceSum), 0),
-                    COALESCE(
-                        (SELECT MAX(bs.syncDate) FROM BalanceSync bs WHERE bs.wallet = w),
-                        CAST(w.createdAt AS LocalDate)
-                    )
+                    (SELECT MAX(bs.syncedAt) FROM BalanceSync bs WHERE bs.wallet = w),
+                    w.createdAt
                 )
                 FROM Wallet w
                 LEFT JOIN w.transactions t ON t.status = 0
@@ -65,7 +63,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                 GROUP BY w.id
                 ORDER BY w.id ASC
             """)
-    List<WalletListResponseDto> listWalletsWithSumByUserId(long userId);
+    List<WalletListRow> listWalletsWithSumByUserId(long userId);
 
     /**
      * Adott walletről lekérdezi, hogy mekkora a balance rajta

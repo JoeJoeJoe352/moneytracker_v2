@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
     NewTransaction,
     TransactionDataForBackend,
@@ -6,11 +6,14 @@ import {
     TransactionInputDefaultValuesWithDetails,
 } from './interfaces';
 import { TransactionTypeEnum } from '@shared/enums';
+import { TimeHelper } from '@app/shared/services/time-helper';
 
 @Injectable({
     providedIn: 'root',
 })
 export class TransactionUtils {
+    private readonly timeHelper = inject(TimeHelper);
+
     /**
      * Átalakítja a tranzakciós adat modellt arra formára, amit az inputok elvárnak
      */
@@ -18,7 +21,7 @@ export class TransactionUtils {
         transaction: TransactionDataFromBackend,
     ): TransactionInputDefaultValuesWithDetails {
         const isIncome = transaction.transactionType === TransactionTypeEnum.INCOME;
-        const transactionDate = new Date(transaction.transactionDate);
+        const transactionDate = this.timeHelper.stringToDate(transaction.transactionDate);
 
         const transactionDetailsFormatted = transaction.transactionDetails.map((detail) => ({
             ...detail,
@@ -43,8 +46,7 @@ export class TransactionUtils {
      * A Tranzakciós form inputból kapott adatokat átalakítja a backend számára megfelelő formába
      */
     convertToBackendData(input: NewTransaction): TransactionDataForBackend {
-        // sv-SE => YYYY-MM-DD formátumot fog visszaadni, amit elfogad a Java LocalDate típusa
-        const transactionDateString = input.transactionDate.toLocaleDateString('sv-SE');
+        const transactionDateString = this.timeHelper.formatDateToString(input.transactionDate);
 
         // átalakítjuk az isIncome mező értékét a backend enum-jára
         const TransactionTypeString = input.isIncome

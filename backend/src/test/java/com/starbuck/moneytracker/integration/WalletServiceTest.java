@@ -8,7 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
 
@@ -73,6 +78,10 @@ public class WalletServiceTest extends MySqlContainerTest {
 
     @MockitoBean
     CurrentUserUtil currentUser;
+
+    /** A sync dátuma (a user mai napja) ebből számolódik, így múltbeli sync is előállítható */
+    @MockitoBean
+    Clock clock;
 
     private User user;
 
@@ -213,7 +222,10 @@ public class WalletServiceTest extends MySqlContainerTest {
         // így éjfélkor és eltérő időzónáknál sem bukik el
         var notSyncedCreatedAt = walletRepo.findById(notSyncedWallet.getId()).orElseThrow().getCreatedAt();
         assertEquals("NotSyncedWallet", wallets.get(0).name());
-        assertEquals(notSyncedCreatedAt.toLocalDate(), wallets.get(0).lastSyncDate());
+        // a createdAt a JVM időzónájában van, a lista napja a user zónájában (itt nincs request -> UTC)
+        var expectedDate = LocalDate.ofInstant(notSyncedCreatedAt.atZone(ZoneId.systemDefault()).toInstant(),
+                ZoneOffset.UTC);
+        assertEquals(expectedDate, wallets.get(0).lastSyncDate());
 
         walletRepo.delete(notSyncedWallet);
     }
@@ -227,10 +239,13 @@ public class WalletServiceTest extends MySqlContainerTest {
         // Given
         var syncedWallet = walletService.createWallet(
                 new CreateWalletCommand("SyncedWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
-        // Múltbeli dátum, így biztosan eltér a létrehozás napjától
-        var syncDate = LocalDate.now().minusDays(3);
+        // Múltbeli "most" a sync idejére, így a sync napja biztosan eltér a létrehozás napjától
+        // (a createdAt a valós időt kapja, nem a mockolt Clock-ot)
+        var syncInstant = Instant.now().minus(3, ChronoUnit.DAYS);
+        Mockito.when(clock.instant()).thenReturn(syncInstant);
+        var syncDate = LocalDate.ofInstant(syncInstant, ZoneOffset.UTC);
         // Üres walletnél eltérő egyenleg -> korrekciós tranzakció is létrejön
-        balanceSyncService.syncWallet(new BalanceSyncCommand(syncedWallet.getId(), syncDate, new BigDecimal("100.00")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(syncedWallet.getId(), new BigDecimal("100.00")));
 
         var balanceSync = balanceSyncRepo.findAll().stream()
                 .filter(sync -> sync.getWallet().getId().equals(syncedWallet.getId()))
