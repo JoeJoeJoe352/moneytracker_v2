@@ -350,7 +350,6 @@ class WalletE2ETest extends MySqlContainerTest {
     private static Stream<Arguments> invalidSyncRequests() {
         return Stream.of(
                 Arguments.of("hiányzó egyenleg", Map.of("syncDate", "2026-10-01")),
-                Arguments.of("hiányzó dátum", Map.of("currentBalance", new BigDecimal("50.00"))),
                 Arguments.of("3 tizedesjegy", Map.of("currentBalance", new BigDecimal("50.004"),
                         "syncDate", "2026-10-01")),
                 Arguments.of("túl nagy összeg", Map.of("currentBalance", new BigDecimal("1000000000.00"),

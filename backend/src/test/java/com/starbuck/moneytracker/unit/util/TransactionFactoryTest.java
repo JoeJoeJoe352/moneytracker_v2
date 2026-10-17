@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 
-import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
@@ -49,10 +48,9 @@ public class TransactionFactoryTest {
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
                 .thenReturn("Szinkronizálás");
         var date = LocalDate.of(2026, 10, 1);
-        var command = new BalanceSyncCommand(1L, date, new BigDecimal("50.00"));
 
-        var result = transactionFactory.createTransactionEntryFromBalanceChange(command, wallet,
-                new BigDecimal("60.00"));
+        var result = transactionFactory.createTransactionEntryFromBalanceChange(wallet, new BigDecimal("50.00"),
+                new BigDecimal("60.00"), date);
 
         assertEquals("Szinkronizálás: wallet", result.getTransactionName());
         assertEquals(TransactionTypeEnum.OUTCOME, result.getTransactionType());
@@ -68,10 +66,8 @@ public class TransactionFactoryTest {
     void testCreateIncomeWhenUserBalanceIsHigher() {
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
                 .thenReturn("Szinkronizálás");
-        var command = new BalanceSyncCommand(1L, LocalDate.now(), new BigDecimal("100.00"));
-
-        var result = transactionFactory.createTransactionEntryFromBalanceChange(command, wallet,
-                new BigDecimal("60.00"));
+        var result = transactionFactory.createTransactionEntryFromBalanceChange(wallet, new BigDecimal("100.00"),
+                new BigDecimal("60.00"), LocalDate.of(2026, 10, 1));
 
         assertEquals(TransactionTypeEnum.INCOME, result.getTransactionType());
         assertEquals(new BigDecimal("40.00"), result.getGlobalPrice());
@@ -79,10 +75,25 @@ public class TransactionFactoryTest {
 
     @Test
     void testCreateWithEqualBalancesThrows() {
-        var command = new BalanceSyncCommand(1L, LocalDate.now(), new BigDecimal("60.00"));
-
         assertThrowsExactly(IllegalArgumentException.class, () -> {
-            transactionFactory.createTransactionEntryFromBalanceChange(command, wallet, new BigDecimal("60.00"));
+            transactionFactory.createTransactionEntryFromBalanceChange(wallet, new BigDecimal("60.00"),
+                    new BigDecimal("60.00"), LocalDate.of(2026, 10, 1));
+        });
+    }
+
+    @Test
+    void testCreateWithMissingBalanceFromUserThrows() {
+        assertThrowsExactly(IllegalArgumentException.class, () -> {
+            transactionFactory.createTransactionEntryFromBalanceChange(wallet, null, new BigDecimal("60.00"),
+                    LocalDate.of(2026, 10, 1));
+        });
+    }
+
+    @Test
+    void testCreateWithMissingDateThrows() {
+        assertThrowsExactly(IllegalArgumentException.class, () -> {
+            transactionFactory.createTransactionEntryFromBalanceChange(wallet, new BigDecimal("50.00"),
+                    new BigDecimal("60.00"), null);
         });
     }
 }
