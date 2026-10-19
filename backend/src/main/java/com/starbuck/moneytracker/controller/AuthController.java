@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.commands.UserLoginCommand;
-import com.starbuck.moneytracker.dto.IsEmailExistsDto;
+import com.starbuck.moneytracker.dto.IsEmailExistsRequestDto;
 import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.UserDataResponseDto;
@@ -102,7 +102,7 @@ public class AuthController {
      * @return Boolean
      */
     @PostMapping(path = "/isEmailExists")
-    public boolean isEmailExists(@RequestBody IsEmailExistsDto dto) {
+    public boolean isEmailExists(@RequestBody IsEmailExistsRequestDto dto) {
         return userService.isEmailExists(dto.email());
     }
 

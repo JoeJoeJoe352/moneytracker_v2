@@ -29,7 +29,7 @@ import org.springframework.http.ResponseEntity;
 import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
-import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
+import com.starbuck.moneytracker.dto.TransactionDetailCreateRequestDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
@@ -115,7 +115,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     @Test
     void createTransaction_persistsAndIsRetrievableThroughTheApi() {
         // GIVEN
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("100.00"), "teszt",
+        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("100.00"), "teszt",
                 null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("E2E groceries", null,
@@ -156,10 +156,10 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     @Test
     void createTransaction_persistsAndIsRetrievableThroughTheApi_complexTransaction() {
         // GIVEN
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("-479.00"),
+        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("-479.00"),
                 "Kakaós csiga", null,
                 null, List.of());
-        TransactionDetailCreateDto detail2 = new TransactionDetailCreateDto(null, "kenyér",
+        TransactionDetailCreateRequestDto detail2 = new TransactionDetailCreateRequestDto(null, "kenyér",
                 new BigDecimal("0.5"),
                 new BigDecimal("1500"), List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("Félegyházi bevásárlás", null,
@@ -272,7 +272,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
      */
     @Test
     void createTransaction_isRejectedWithoutAuthCookie() {
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("100.00"), null, null,
+        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("100.00"), null, null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("Should not persist", null,
                 TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), this.wallet.getId());

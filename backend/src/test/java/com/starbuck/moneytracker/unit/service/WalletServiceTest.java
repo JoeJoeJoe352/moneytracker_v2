@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 
-import com.starbuck.moneytracker.dto.WalletSummaryDto;
+import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
@@ -29,7 +29,7 @@ import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.UserDateUtil;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class WalletServiceTest {
@@ -64,7 +64,7 @@ public class WalletServiceTest {
      */
     @Test
     void testSumAllMoney() {
-        var summary = List.of(new WalletSummaryDto(CurrencyEnum.HUF, new BigDecimal("300.00")));
+        var summary = List.of(new WalletSummaryResponseDto(CurrencyEnum.HUF, new BigDecimal("300.00")));
         when(walletRepo.summarizeTotalMoneyForUser(1L)).thenReturn(summary);
 
         assertSame(summary, walletService.sumAllMoney());

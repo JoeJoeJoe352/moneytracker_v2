@@ -2,7 +2,7 @@ package com.starbuck.moneytracker.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record IsEmailExistsDto(
+public record IsEmailExistsRequestDto(
         @NotBlank
         String email) {
 

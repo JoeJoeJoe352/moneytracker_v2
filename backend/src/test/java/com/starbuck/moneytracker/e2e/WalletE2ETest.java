@@ -31,9 +31,9 @@ import org.springframework.http.ResponseEntity;
 
 import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
-import com.starbuck.moneytracker.dto.WalletCreateDto;
+import com.starbuck.moneytracker.dto.WalletCreateRequestDto;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
-import com.starbuck.moneytracker.dto.WalletUpdateDto;
+import com.starbuck.moneytracker.dto.WalletUpdateRequestDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
@@ -120,7 +120,7 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void createWallet_createsWalletForAuthenticatedUser() {
-        WalletCreateDto request = new WalletCreateDto("Savings", CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
+        WalletCreateRequestDto request = new WalletCreateRequestDto("Savings", CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
 
         ResponseEntity<Void> response = restTemplate.postForEntity("/wallet", new HttpEntity<>(request, headers),
                 Void.class);
@@ -138,7 +138,7 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void createWallet_returnsBadRequestWhenNameIsMissing() {
-        WalletCreateDto request = new WalletCreateDto(null, CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
+        WalletCreateRequestDto request = new WalletCreateRequestDto(null, CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
 
         ResponseEntity<Void> response = restTemplate.postForEntity("/wallet", new HttpEntity<>(request, headers),
                 Void.class);
@@ -154,7 +154,7 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void listWallets_returnsOnlyAuthenticatedUsersWallets() {
-        WalletCreateDto createRequest = new WalletCreateDto("Savings", CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
+        WalletCreateRequestDto createRequest = new WalletCreateRequestDto("Savings", CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
         restTemplate.postForEntity("/wallet", new HttpEntity<>(createRequest, headers), Void.class);
 
         User otherUser = new User("e2eOtherWalletUser", "irrelevantEncodedPassword", "otherwallet@email.com");
@@ -187,7 +187,7 @@ class WalletE2ETest extends MySqlContainerTest {
     @Test
     void updateWallet_updatesNameAndType() {
         Wallet wallet = walletRepository.save(new Wallet("Savings", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
-        WalletUpdateDto updateRequest = new WalletUpdateDto("UpdatedSavings", WalletTypeEnum.DEFAULT);
+        WalletUpdateRequestDto updateRequest = new WalletUpdateRequestDto("UpdatedSavings", WalletTypeEnum.DEFAULT);
 
         ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId(), HttpMethod.PUT,
                 new HttpEntity<>(updateRequest, headers), Void.class);
@@ -211,7 +211,7 @@ class WalletE2ETest extends MySqlContainerTest {
         otherUser = userRepository.save(otherUser);
         Wallet otherUsersWallet = walletRepository
                 .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
-        WalletUpdateDto updateRequest = new WalletUpdateDto("Hacked", WalletTypeEnum.DEFAULT);
+        WalletUpdateRequestDto updateRequest = new WalletUpdateRequestDto("Hacked", WalletTypeEnum.DEFAULT);
 
         try {
             ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + otherUsersWallet.getId(),

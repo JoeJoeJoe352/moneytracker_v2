@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
-import com.starbuck.moneytracker.dto.WalletListRow;
-import com.starbuck.moneytracker.dto.WalletSummaryDto;
+import com.starbuck.moneytracker.dto.WalletListRowResponseDto;
+import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
@@ -24,7 +24,7 @@ import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.UserDateUtil;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @Service
 public class WalletService {
@@ -109,7 +109,7 @@ public class WalletService {
      * @param wallet
      * @return LocalDate
      */
-    private LocalDate getLastSyncDate(WalletListRow wallet) {
+    private LocalDate getLastSyncDate(WalletListRowResponseDto wallet) {
         // a @CreationTimestamp a JVM időzónájában menti a LocalDateTime-ot
         Instant lastSyncedAt = wallet.lastSyncedAt() != null
                 ? wallet.lastSyncedAt()
@@ -183,7 +183,7 @@ public class WalletService {
     /**
      * Kiszámolja a tranzakciók alapján, hogy mennyi a jelenlegi pénze a usernek
      */
-    public List<WalletSummaryDto> sumAllMoney() {
+    public List<WalletSummaryResponseDto> sumAllMoney() {
         return this.walletRepo.summarizeTotalMoneyForUser(userUtil.getUser().getId());
     }
 

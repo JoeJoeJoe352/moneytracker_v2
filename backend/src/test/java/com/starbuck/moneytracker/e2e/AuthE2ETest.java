@@ -185,14 +185,17 @@ class AuthE2ETest extends MySqlContainerTest {
     }
 
     /**
-     * Auth cookie nélkül a logout is védett végpontnak számít, a security
-     * filter chain elutasítja
+     * A logout publikus végpont, auth cookie nélkül (pl. lejárt token esetén)
+     * is törli a cookie-t
      */
     @Test
-    void logout_isRejectedWithoutAuthCookie() {
+    void logout_succeedsWithoutAuthCookie() {
         ResponseEntity<Void> response = restTemplate.postForEntity("/auth/logout", null, Void.class);
 
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        String setCookieHeader = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        assertNotNull(setCookieHeader);
+        assertTrue(setCookieHeader.contains("Max-Age=0"));
     }
 
     // ---- /auth/isEmailExists ----

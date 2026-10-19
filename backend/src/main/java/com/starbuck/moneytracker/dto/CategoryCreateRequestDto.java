@@ -1,6 +1,6 @@
 package com.starbuck.moneytracker.dto;
 
-public record CategoryCreateDto(
+public record CategoryCreateRequestDto(
     String name
 ) {
     

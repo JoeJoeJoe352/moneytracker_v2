@@ -7,16 +7,21 @@ import org.hibernate.validator.constraints.Length;
 
 import com.starbuck.moneytracker.validation.TransactionDetailAttributeCoexist;
 
-@TransactionDetailAttributeCoexist
-public record TransactionDetailCreateDto(
+import jakarta.validation.constraints.Digits;
 
+@TransactionDetailAttributeCoexist
+public record TransactionDetailCreateRequestDto(
+
+    @Digits(integer = 8 , fraction = 2)
     BigDecimal price,
 
     @Length(min = 3, max = 20, message = "Name must be between 3 and 20 characters") 
     String name,
 
+    @Digits(integer = 8 , fraction = 2)
     BigDecimal weight,
 
+    @Digits(integer = 8 , fraction = 2)
     BigDecimal unitPrice,
 
     List<Long> categories

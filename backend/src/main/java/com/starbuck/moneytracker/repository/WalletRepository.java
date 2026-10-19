@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
-import com.starbuck.moneytracker.dto.WalletListRow;
-import com.starbuck.moneytracker.dto.WalletSummaryDto;
+import com.starbuck.moneytracker.dto.WalletListRowResponseDto;
+import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Wallet;
 
 import jakarta.persistence.LockModeType;
@@ -48,7 +48,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
      * tranzakció sorokat, és elrontaná a SUM-ot.
      */
     @Query("""
-                SELECT new com.starbuck.moneytracker.dto.WalletListRow(
+                SELECT new com.starbuck.moneytracker.dto.WalletListRowResponseDto(
                     w.id,
                     w.name,
                     w.currencyCode,
@@ -63,7 +63,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                 GROUP BY w.id
                 ORDER BY w.id ASC
             """)
-    List<WalletListRow> listWalletsWithSumByUserId(long userId);
+    List<WalletListRowResponseDto> listWalletsWithSumByUserId(long userId);
 
     /**
      * Adott walletről lekérdezi, hogy mekkora a balance rajta
@@ -81,7 +81,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
      * Lehet null, hogyha még nincs neki tranzakciója adott walleten
      */
     @Query("""
-                SELECT new com.starbuck.moneytracker.dto.WalletSummaryDto(
+                SELECT new com.starbuck.moneytracker.dto.WalletSummaryResponseDto(
                     w.currencyCode,
                     COALESCE(SUM(t.priceSum), 0)
                 )
@@ -91,5 +91,5 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                 GROUP BY w.id
                 ORDER BY w.id
             """)
-    List<WalletSummaryDto> summarizeTotalMoneyForUser(long userId);
+    List<WalletSummaryResponseDto> summarizeTotalMoneyForUser(long userId);
 }
