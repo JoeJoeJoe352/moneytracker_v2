@@ -75,7 +75,10 @@ export class TransactionFormComponent implements OnChanges {
      * Az "új tétel" gomb sora, hogy addRow()-nál az oldal aljára tudjunk görgetni
      */
     private readonly detailAddButton = viewChild<ElementRef<HTMLElement>>('detailAddButton');
-
+    /**
+     * Datepickerben utolsó kiválasztható nap
+     */
+    protected readonly lastSelectableDay = new Date();
     /**
      * Form disabled-e (pl.: töltődéskor)
      */
@@ -103,7 +106,6 @@ export class TransactionFormComponent implements OnChanges {
      * Tranzakció törlés gombra kattintott a user
      */
     public deleted = output<number>();
-
     /**
      * Tranzakciós form. A selectedWalletId előtt kell létrehozni, mert annak a valueChanges-ét figyeli
      */
