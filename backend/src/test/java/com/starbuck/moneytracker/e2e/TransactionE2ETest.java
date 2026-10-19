@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +137,7 @@ class TransactionE2ETest extends MySqlContainerTest {
     @Test
     void updateTransaction_updatesExistingTransactionForOwner() {
         Long id = createTransactionViaApi("Original", TransactionTypeEnum.INCOME, new BigDecimal("100.00"),
-                LocalDate.now());
+                LocalDate.now(ZoneOffset.UTC));
 
         // mostantól két detail lesz, amik közül az egyik komplex
         TransactionDetailCreateRequestDto updatedDetail = new TransactionDetailCreateRequestDto(null, "detail1",
@@ -187,7 +188,7 @@ class TransactionE2ETest extends MySqlContainerTest {
                 null,
                 null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Doesn't matter", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), this.wallet.getId());
+                TransactionTypeEnum.INCOME, LocalDate.now(ZoneOffset.UTC), List.of(detail), List.of(), this.wallet.getId());
 
         ResponseEntity<Void> response = restTemplate.exchange("/transaction/999999", HttpMethod.PUT,
                 new HttpEntity<>(updateRequest, headers), Void.class);
@@ -204,9 +205,9 @@ class TransactionE2ETest extends MySqlContainerTest {
     @Test
     void sumAllMoney_returnsAggregatedSumsForUser() {
         createTransactionViaApi("Salary", TransactionTypeEnum.INCOME, new BigDecimal("1000.00"),
-                LocalDate.now());
+                LocalDate.now(ZoneOffset.UTC));
         createTransactionViaApi("Rent", TransactionTypeEnum.OUTCOME, new BigDecimal("-400.00"),
-                LocalDate.now());
+                LocalDate.now(ZoneOffset.UTC));
 
         ResponseEntity<MoneySumResponseDto> response = restTemplate.exchange("/transaction/sum", HttpMethod.GET,
                 new HttpEntity<>(headers), MoneySumResponseDto.class);
@@ -228,7 +229,7 @@ class TransactionE2ETest extends MySqlContainerTest {
     void getLastTransactions_limitsResultToFiveNewest() {
         for (int i = 0; i < 6; i++) {
             createTransactionViaApi("last" + i, TransactionTypeEnum.INCOME, new BigDecimal("10.00"),
-                    LocalDate.now());
+                    LocalDate.now(ZoneOffset.UTC));
         }
 
         ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange("/transaction/last",
@@ -246,7 +247,7 @@ class TransactionE2ETest extends MySqlContainerTest {
     @Test
     void getTransactionById_returnsTransactionWithDetails() {
         Long id = createTransactionViaApi("Groceries", TransactionTypeEnum.OUTCOME, new BigDecimal("-75.00"),
-                LocalDate.now());
+                LocalDate.now(ZoneOffset.UTC));
 
         ResponseEntity<TransactionResponseDto> response = restTemplate.exchange("/transaction/" + id,
                 HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto.class);
@@ -280,7 +281,7 @@ class TransactionE2ETest extends MySqlContainerTest {
     @Test
     void deleteTransactionById_removesTransactionFromFutureQueries() {
         Long id = createTransactionViaApi("ToDelete", TransactionTypeEnum.INCOME, new BigDecimal("20.00"),
-                LocalDate.now());
+                LocalDate.now(ZoneOffset.UTC));
 
         ResponseEntity<Void> deleteResponse = restTemplate.exchange("/transaction/" + id, HttpMethod.DELETE,
                 new HttpEntity<>(headers), Void.class);
@@ -311,9 +312,9 @@ class TransactionE2ETest extends MySqlContainerTest {
     @Test
     void listTransactionHistory_filtersByName() {
         createTransactionViaApi("Groceries shopping", TransactionTypeEnum.OUTCOME, new BigDecimal("-30.00"),
-                LocalDate.now());
+                LocalDate.now(ZoneOffset.UTC));
         createTransactionViaApi("Salary payment", TransactionTypeEnum.INCOME, new BigDecimal("2000.00"),
-                LocalDate.now());
+                LocalDate.now(ZoneOffset.UTC));
 
         ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange(
                 "/transaction/history?name=groceries", HttpMethod.GET, new HttpEntity<>(headers),
@@ -329,8 +330,8 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void listTransactionHistory_returnsAllTransactionsWithoutFilter() {
-        createTransactionViaApi("first", TransactionTypeEnum.INCOME, new BigDecimal("10.00"), LocalDate.now());
-        createTransactionViaApi("second", TransactionTypeEnum.INCOME, new BigDecimal("20.00"), LocalDate.now());
+        createTransactionViaApi("first", TransactionTypeEnum.INCOME, new BigDecimal("10.00"), LocalDate.now(ZoneOffset.UTC));
+        createTransactionViaApi("second", TransactionTypeEnum.INCOME, new BigDecimal("20.00"), LocalDate.now(ZoneOffset.UTC));
 
         ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange("/transaction/history",
                 HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);

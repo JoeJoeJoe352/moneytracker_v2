@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.validator.constraints.Length;
 
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.validation.PastOrPresentInZone;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
@@ -25,7 +26,8 @@ public record TransactionCreateRequest(
     @NotNull(message = "transactionType is mandatory")
     TransactionTypeEnum transactionType,
 
-    @NotNull(message = "Date is mandatory") 
+    @NotNull(message = "Date is mandatory")
+    @PastOrPresentInZone
     LocalDate transactionDate,
     
     @Valid
