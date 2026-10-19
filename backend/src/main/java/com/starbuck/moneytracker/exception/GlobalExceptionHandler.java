@@ -26,8 +26,11 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // Ez a handler a @Valid annotációval jelölt mezők validációs hibáit kezeli, és
-    // egy map-ben adja vissza a mezőneveket és a hibaüzeneteket.
+    /**
+     * 
+     * Ez a handler a @Valid annotációval jelölt mezők validációs hibáit kezeli, és
+     * egy map-ben adja vissza a mezőneveket és a hibaüzeneteket.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
 
@@ -39,9 +42,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    // Nem olvasható request body (pl. hibás JSON, érvénytelen enum érték). A
-    // Jackson üzenete belső részleteket tartalmaz (pl. osztálynevek), ezért
-    // érvénytelen enum esetén csak az elfogadott értékek listáját adjuk vissza
+    /**
+     * Nem olvasható request body (pl. hibás JSON, érvénytelen enum érték). A
+     * Jackson üzenete belső részleteket tartalmaz (pl. osztálynevek), ezért
+     * érvénytelen enum esetén csak az elfogadott értékek listáját adjuk vissza
+     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleUnreadableMessage(HttpMessageNotReadableException ex) {
         if (ex.getCause() instanceof InvalidFormatException invalidFormat && invalidFormat.getTargetType().isEnum()) {
@@ -52,50 +57,66 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(Map.of("message", "Malformed request body"));
     }
 
-    // Path variable / request param nem konvertálható a várt típusra (pl.
-    // /transaction/abc Long id helyett)
+    /**
+     * Path variable / request param nem konvertálható a várt típusra (pl.
+     * /transaction/abc Long id helyett)
+     */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, String>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        return ResponseEntity.badRequest().body(Map.of("message", "Invalid value for parameter '" + ex.getName() + "'"));
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", "Invalid value for parameter '" + ex.getName() + "'"));
     }
 
-    // Nem létező api végpontra érkező kérés
+    /**
+     * Nem létező api végpontra érkező kérés
+     */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Map<String, String>> handleNoResourceFound(NoResourceFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("message", "Endpoint not found: /" + ex.getResourcePath()));
     }
 
-    // Service/domain rétegben eldobott validációs hibák (pl. rossz tranzakció
-    // adatok, foglalt username)
+    /**
+     * Service/domain rétegben eldobott validációs hibák (pl. rossz tranzakció
+     * adatok, foglalt username)
+     */
     @ExceptionHandler({ IllegalArgumentException.class, IllegalStateException.class })
     public ResponseEntity<Map<String, String>> handleBadRequest(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
     }
 
-    // Nem található entitásra hivatkozó kérés (pl. másik user tranzakciója, vagy
-    // nem létező id)
+    /**
+     * Nem található entitásra hivatkozó kérés (pl. másik user tranzakciója, vagy
+     * nem létező id)
+     */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(EntityNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
     }
 
-    // Sikertelen bejelentkezés (rossz username vagy jelszó)
+    /**
+     * Sikertelen bejelentkezés (rossz username vagy jelszó)
+     */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", ex.getMessage()));
     }
 
-    // Már létező, egyedinek szánt erőforrás létrehozásának kísérlete (pl.
-    // ugyanolyan nevű kategória)
+    /**
+     * Már létező, egyedinek szánt erőforrás létrehozásának kísérlete (pl.
+     * ugyanolyan nevű kategória)
+     */
     @ExceptionHandler(NonUniqueObjectException.class)
     public ResponseEntity<Map<String, String>> handleConflict(NonUniqueObjectException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));
     }
 
-    // Minden más, fentebb explicit nem kezelt kivétel. A Spring MVC saját
-    // kivételei (pl. 405, 415, hiányzó request param) ErrorResponse-t
-    // implementálnak és hordozzák a helyes státuszkódot, ezeket nem 500-ként adjuk vissza
+    /**
+     * Minden más, fentebb explicit nem kezelt kivétel. A Spring MVC saját
+     * kivételei (pl. 405, 415, hiányzó request param) ErrorResponse-t
+     * implementálnak és hordozzák a helyes státuszkódot, ezeket nem 500-ként adjuk
+     * vissza
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleUnexpectedError(Exception ex) {
         if (ex instanceof ErrorResponse errorResponse) {
