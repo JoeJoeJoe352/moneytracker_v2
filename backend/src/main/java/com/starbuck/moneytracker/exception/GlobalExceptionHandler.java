@@ -10,10 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -35,16 +37,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    // Rossz method-al hívja a user az api-t
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(HttpRequestMethodNotSupportedException ex) {
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(Map.of("message", ex.getMessage()));
+    // Nem olvasható request body (pl. hibás JSON, érvénytelen enum érték). A
+    // Jackson üzenete belső részleteket tartalmaz, ezért nem adjuk vissza
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body(Map.of("message", "Malformed request body"));
     }
 
-    // Érvénytelen enum értékkel hívja a user az api-t
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(HttpMessageNotReadableException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Map.of("message", ex.getMessage()));
+    // Path variable / request param nem konvertálható a várt típusra (pl.
+    // /transaction/abc Long id helyett)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body(Map.of("message", "Invalid value for parameter '" + ex.getName() + "'"));
+    }
+
+    // Nem létező api végpontra érkező kérés
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoResourceFound(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "Endpoint not found: /" + ex.getResourcePath()));
     }
 
     // Service/domain rétegben eldobott validációs hibák (pl. rossz tranzakció
@@ -74,9 +85,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));
     }
 
-    // Minden más, fentebb explicit nem kezelt kivétel
+    // Minden más, fentebb explicit nem kezelt kivétel. A Spring MVC saját
+    // kivételei (pl. 405, 415, hiányzó request param) ErrorResponse-t
+    // implementálnak és hordozzák a helyes státuszkódot, ezeket nem 500-ként adjuk vissza
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleUnexpectedError(Exception ex) {
+        if (ex instanceof ErrorResponse errorResponse) {
+            String detail = errorResponse.getBody().getDetail();
+            return ResponseEntity.status(errorResponse.getStatusCode())
+                    .body(Map.of("message", detail != null ? detail : ex.getClass().getSimpleName()));
+        }
         logger.error("Unhandled exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("message", "Unexpected error occurred"));
