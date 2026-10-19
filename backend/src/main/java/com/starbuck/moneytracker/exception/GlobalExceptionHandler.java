@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.exception;
 
 import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.hibernate.NonUniqueObjectException;
@@ -18,6 +19,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
+import tools.jackson.databind.exc.InvalidFormatException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,9 +40,15 @@ public class GlobalExceptionHandler {
     }
 
     // Nem olvasható request body (pl. hibás JSON, érvénytelen enum érték). A
-    // Jackson üzenete belső részleteket tartalmaz, ezért nem adjuk vissza
+    // Jackson üzenete belső részleteket tartalmaz (pl. osztálynevek), ezért
+    // érvénytelen enum esetén csak az elfogadott értékek listáját adjuk vissza
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+        if (ex.getCause() instanceof InvalidFormatException invalidFormat && invalidFormat.getTargetType().isEnum()) {
+            String acceptedValues = Arrays.toString(invalidFormat.getTargetType().getEnumConstants());
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "not one of the values accepted for Enum class: " + acceptedValues));
+        }
         return ResponseEntity.badRequest().body(Map.of("message", "Malformed request body"));
     }
 

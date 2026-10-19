@@ -123,6 +123,22 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
     }
 
     /**
+     * Érvénytelen enum érték esetén 400-at ad vissza az elfogadott értékek
+     * listájával, de a Jackson belső részletei (pl. osztálynév) nélkül
+     */
+    @Test
+    void invalidEnumValue_returnsBadRequestWithAcceptedValues() {
+        String body = "{\"name\":\"Wallet\",\"currencyCode\":\"XYZ\",\"walletType\":\"DEFAULT\"}";
+
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/wallet", HttpMethod.POST,
+                new HttpEntity<>(body, headers), MAP_TYPE);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("not one of the values accepted for Enum class: [HUF, EUR, USD]",
+                response.getBody().get("message"));
+    }
+
+    /**
      * Nem támogatott Content-Type esetén 415-öt ad vissza (ErrorResponse ágon
      * keresztül)
      */
