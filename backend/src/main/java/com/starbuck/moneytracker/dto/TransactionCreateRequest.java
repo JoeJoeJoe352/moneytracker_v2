@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.Length;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,6 +18,7 @@ public record TransactionCreateRequest(
     @Length(min = 3, max = 120, message = "Name must be between 3 and 120 characters")
     String name,
 
+    @Digits(integer = 8 , fraction = 2)
     BigDecimal globalPrice,
 
     @NotNull(message = "transactionType is mandatory")
