@@ -51,7 +51,7 @@ public interface TransactionRepository extends
      * @return
      */
     @Query("""
-                SELECT new com.starbuck.moneytracker.dto.WalletSummaryDto(
+                SELECT new com.starbuck.moneytracker.dto.WalletSummaryResponseDto(
                     w.currencyCode,
                     COALESCE(SUM(t.priceSum), 0)
                 )

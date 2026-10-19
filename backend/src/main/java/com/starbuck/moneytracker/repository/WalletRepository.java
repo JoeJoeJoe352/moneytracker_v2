@@ -48,7 +48,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
      * tranzakció sorokat, és elrontaná a SUM-ot.
      */
     @Query("""
-                SELECT new com.starbuck.moneytracker.dto.WalletListRow(
+                SELECT new com.starbuck.moneytracker.dto.WalletListRowResponseDto(
                     w.id,
                     w.name,
                     w.currencyCode,
@@ -81,7 +81,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
      * Lehet null, hogyha még nincs neki tranzakciója adott walleten
      */
     @Query("""
-                SELECT new com.starbuck.moneytracker.dto.WalletSummaryDto(
+                SELECT new com.starbuck.moneytracker.dto.WalletSummaryResponseDto(
                     w.currencyCode,
                     COALESCE(SUM(t.priceSum), 0)
                 )
