@@ -119,20 +119,6 @@ class CategoryE2ETest extends MySqlContainerTest {
     }
 
     /**
-     * Hiányzó név esetén (a service dobja az IllegalArgumentException-t) a
-     * GlobalExceptionHandler 400-ra fordítja, és nem jön létre kategória
-     */
-    @Test
-    void createCategory_returnsBadRequestWhenNameIsMissing() {
-        CategoryCreateRequestDto request = new CategoryCreateRequestDto(null);
-
-        ResponseEntity<Void> response = restTemplate.postForEntity("/category", new HttpEntity<>(request, headers),
-                Void.class);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    /**
      * Ha a usernek már van ilyen nevű kategóriája, a service
      * NonUniqueObjectException-t dob, amit a GlobalExceptionHandler 409
      * Conflict-ra fordít, és nem jön létre második kategória

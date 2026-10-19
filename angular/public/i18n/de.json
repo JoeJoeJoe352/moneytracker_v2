@@ -24,7 +24,7 @@
     "success": "Erfolgreich angemeldet",
     "email.required-error": "Die E-Mail-Adresse ist erforderlich!",
     "email.pattern-error": "Bitte gib eine gültige E-Mail-Adresse ein!",
-    "email.maxlength-error": "Die E-Mail-Adresse darf höchstens 30 Zeichen lang sein!",
+    "email.maxlength-error": "Die E-Mail-Adresse darf höchstens 255 Zeichen lang sein!",
     "password.required-error": "Das Passwort ist erforderlich!",
     "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",
     "password.maxlength-error": "Das Passwort darf höchstens 20 Zeichen lang sein!"
@@ -39,7 +39,7 @@
     "email.required-error": "Die E-Mail-Adresse ist erforderlich!",
     "email.pattern-error": "Bitte gib eine gültige E-Mail-Adresse ein!",
     "email.taken-error": "Die E-Mail-Adresse ist bereits vergeben!",
-    "email.maxlength-error": "Die E-Mail-Adresse darf höchstens 30 Zeichen lang sein!",
+    "email.maxlength-error": "Die E-Mail-Adresse darf höchstens 255 Zeichen lang sein!",
     "password": "Passwort",
     "password.required-error": "Das Passwort ist erforderlich!",
     "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",

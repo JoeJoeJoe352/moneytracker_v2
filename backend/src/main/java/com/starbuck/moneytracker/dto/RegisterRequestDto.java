@@ -26,10 +26,9 @@ public record RegisterRequestDto(
     /**
      * Felhasználó email címe
      */
-    @Length(min = 5, max = 30, message = "Email must be between 5 and 30 characters")
+    @Length(min = 5, max = 255, message = "Email must be between 5 and 255 characters")
     @NotBlank(message = "Email is mandatory")
     @Email(message = "Email should be valid")
     String email
 ) {
-    // Konstruktor, getterek, setterek automatikusan generálódnak a record miatt
 }

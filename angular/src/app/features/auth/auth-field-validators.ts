@@ -25,5 +25,5 @@ export const PASSWORD_VALIDATORS: ValidatorFn[] = [
 export const EMAIL_VALIDATORS: ValidatorFn[] = [
     Validators.pattern(STRICT_EMAIL_REGEX),
     Validators.required,
-    Validators.maxLength(30),
+    Validators.maxLength(255),
 ];

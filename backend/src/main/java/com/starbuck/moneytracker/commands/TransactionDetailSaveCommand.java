@@ -48,7 +48,6 @@ public class TransactionDetailSaveCommand {
         transactionType.validateDetailPrice(price);
 
         this.setName(name);
-        this.name = name;
         this.price = price;
         this.categories = categories;
     }

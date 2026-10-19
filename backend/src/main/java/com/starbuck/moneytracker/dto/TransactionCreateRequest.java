@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record TransactionCreateRequest(
     @NotBlank(message = "Name is mandatory")
@@ -31,8 +32,10 @@ public record TransactionCreateRequest(
     @NotNull(message = "TransactionDetails are mandatory")
     List<TransactionDetailCreateRequestDto> transactionDetails,
 
+    @NotNull 
     List<Long> globalCategories,
 
     @NotNull
+    @Positive
     Long walletId
 ) {}

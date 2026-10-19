@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 import com.starbuck.moneytracker.validation.TransactionDetailAttributeCoexist;
 
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
 
 @TransactionDetailAttributeCoexist
 public record TransactionDetailCreateRequestDto(
@@ -24,6 +25,7 @@ public record TransactionDetailCreateRequestDto(
     @Digits(integer = 8 , fraction = 2)
     BigDecimal unitPrice,
 
+    @NotNull 
     List<Long> categories
 ) {
 }

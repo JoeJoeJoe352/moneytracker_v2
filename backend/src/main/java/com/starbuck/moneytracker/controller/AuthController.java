@@ -102,7 +102,7 @@ public class AuthController {
      * @return Boolean
      */
     @PostMapping(path = "/isEmailExists")
-    public boolean isEmailExists(@RequestBody IsEmailExistsRequestDto dto) {
+    public boolean isEmailExists(@Valid @RequestBody IsEmailExistsRequestDto dto) {
         return userService.isEmailExists(dto.email());
     }
 
