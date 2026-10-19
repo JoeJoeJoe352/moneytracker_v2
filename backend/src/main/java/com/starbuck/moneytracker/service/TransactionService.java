@@ -21,7 +21,7 @@ import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainServi
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @Service
 public class TransactionService {

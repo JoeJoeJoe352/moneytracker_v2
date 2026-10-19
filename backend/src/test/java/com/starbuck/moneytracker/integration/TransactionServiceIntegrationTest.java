@@ -47,7 +47,7 @@ import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @SpringBootTest
 // csak így használható a beforeall, mert egyébként statikusan futna és nem

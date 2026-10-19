@@ -49,7 +49,7 @@ import com.starbuck.moneytracker.testutils.AssertUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionDetailFactory;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {

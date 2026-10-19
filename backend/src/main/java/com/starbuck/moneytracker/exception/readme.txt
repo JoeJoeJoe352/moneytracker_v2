@@ -3,5 +3,5 @@ Ide kerül:
 - globális exception handler
 
 Fájlok:
-- UserNotFoundException.java
+- EntityNotFoundException.java
 - GlobalExceptionHandler.java

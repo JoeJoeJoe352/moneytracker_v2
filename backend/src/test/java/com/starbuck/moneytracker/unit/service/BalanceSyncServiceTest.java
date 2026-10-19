@@ -45,7 +45,7 @@ import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.TransactionFactory;
 import com.starbuck.moneytracker.util.UserDateUtil;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class BalanceSyncServiceTest {

@@ -24,7 +24,7 @@ import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.UserDateUtil;
 
-import jakarta.persistence.EntityNotFoundException;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @Service
 public class WalletService {
