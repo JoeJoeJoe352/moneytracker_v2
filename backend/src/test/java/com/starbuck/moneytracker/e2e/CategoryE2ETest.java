@@ -29,7 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import com.starbuck.moneytracker.dto.CategoryCreateDto;
+import com.starbuck.moneytracker.dto.CategoryCreateRequestDto;
 import com.starbuck.moneytracker.dto.CategoryResponseDto;
 import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
@@ -102,7 +102,7 @@ class CategoryE2ETest extends MySqlContainerTest {
      */
     @Test
     void createCategory_createsCategoryForAuthenticatedUser() {
-        CategoryCreateDto request = new CategoryCreateDto("Groceries");
+        CategoryCreateRequestDto request = new CategoryCreateRequestDto("Groceries");
 
         ResponseEntity<CategoryResponseDto> response = restTemplate.postForEntity("/category",
                 new HttpEntity<>(request, headers), CategoryResponseDto.class);
@@ -124,7 +124,7 @@ class CategoryE2ETest extends MySqlContainerTest {
      */
     @Test
     void createCategory_returnsBadRequestWhenNameIsMissing() {
-        CategoryCreateDto request = new CategoryCreateDto(null);
+        CategoryCreateRequestDto request = new CategoryCreateRequestDto(null);
 
         ResponseEntity<Void> response = restTemplate.postForEntity("/category", new HttpEntity<>(request, headers),
                 Void.class);
@@ -139,7 +139,7 @@ class CategoryE2ETest extends MySqlContainerTest {
      */
     @Test
     void createCategory_returnsConflictForDuplicateCategoryName() {
-        CategoryCreateDto request = new CategoryCreateDto("DuplicateCategory");
+        CategoryCreateRequestDto request = new CategoryCreateRequestDto("DuplicateCategory");
         ResponseEntity<CategoryResponseDto> firstResponse = restTemplate.postForEntity("/category",
                 new HttpEntity<>(request, headers), CategoryResponseDto.class);
         assertEquals(HttpStatus.CREATED, firstResponse.getStatusCode());
@@ -159,7 +159,7 @@ class CategoryE2ETest extends MySqlContainerTest {
      */
     @Test
     void getCategories_returnsOwnAndCommonCategories() {
-        CategoryCreateDto ownRequest = new CategoryCreateDto("OwnCategory");
+        CategoryCreateRequestDto ownRequest = new CategoryCreateRequestDto("OwnCategory");
         ResponseEntity<CategoryResponseDto> ownResponse = restTemplate.postForEntity("/category",
                 new HttpEntity<>(ownRequest, headers), CategoryResponseDto.class);
         createdCategoryIds.add(ownResponse.getBody().id());

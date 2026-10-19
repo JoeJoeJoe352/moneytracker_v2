@@ -14,7 +14,7 @@ import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
  * @param lastSyncedAt az utolsó szinkronizálás időpontja, null ha még nem volt
  * @param createdAt    a wallet létrehozásának időpontja (a JVM időzónájában, @CreationTimestamp)
  */
-public record WalletListRow(
+public record WalletListRowResponseDto(
         Long id,
         String name,
         CurrencyEnum currencyCode,

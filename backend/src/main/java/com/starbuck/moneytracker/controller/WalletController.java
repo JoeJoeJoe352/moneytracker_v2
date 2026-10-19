@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
-import com.starbuck.moneytracker.dto.BalanceSyncDto;
-import com.starbuck.moneytracker.dto.WalletCreateDto;
+import com.starbuck.moneytracker.dto.BalanceSyncRequestDto;
+import com.starbuck.moneytracker.dto.WalletCreateRequestDto;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
-import com.starbuck.moneytracker.dto.WalletUpdateDto;
+import com.starbuck.moneytracker.dto.WalletUpdateRequestDto;
 import com.starbuck.moneytracker.service.BalanceSyncService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -57,7 +57,7 @@ public class WalletController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createWallet(@Valid @RequestBody WalletCreateDto dto) {
+    public void createWallet(@Valid @RequestBody WalletCreateRequestDto dto) {
         var command = new CreateWalletCommand(dto.name(), dto.currencyCode(), dto.walletType(), userUtil.getUser());
         this.walletService.createWallet(command);
     }
@@ -71,7 +71,7 @@ public class WalletController {
      */
     @PostMapping(path = "/{id}/sync")
     @ResponseStatus(HttpStatus.CREATED)
-    public void syncWallet(@Valid @RequestBody BalanceSyncDto dto, @PathVariable long id) {
+    public void syncWallet(@Valid @RequestBody BalanceSyncRequestDto dto, @PathVariable long id) {
         var command = new BalanceSyncCommand(id, dto.currentBalance());
         syncService.syncWallet(command);
     }
@@ -84,7 +84,7 @@ public class WalletController {
      */
     @PutMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void updateWallet(@Valid @RequestBody WalletUpdateDto dto, @PathVariable long id) {
+    public void updateWallet(@Valid @RequestBody WalletUpdateRequestDto dto, @PathVariable long id) {
         var command = new UpdateWalletCommand(dto.name(), dto.walletType());
         this.walletService.updateWallet(id, command);
     }

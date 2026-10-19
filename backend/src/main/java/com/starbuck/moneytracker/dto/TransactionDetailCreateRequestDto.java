@@ -10,7 +10,7 @@ import com.starbuck.moneytracker.validation.TransactionDetailAttributeCoexist;
 import jakarta.validation.constraints.Digits;
 
 @TransactionDetailAttributeCoexist
-public record TransactionDetailCreateDto(
+public record TransactionDetailCreateRequestDto(
 
     @Digits(integer = 8 , fraction = 2)
     BigDecimal price,

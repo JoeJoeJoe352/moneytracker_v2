@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
-import com.starbuck.moneytracker.dto.CategoryCreateDto;
+import com.starbuck.moneytracker.dto.CategoryCreateRequestDto;
 import com.starbuck.moneytracker.dto.CategoryResponseDto;
 import com.starbuck.moneytracker.mapper.CategoryMapper;
 import com.starbuck.moneytracker.service.CategoryService;
@@ -36,7 +36,7 @@ public class CategoryController {
      */
     @PostMapping(path = "/category")
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryResponseDto createCategory(@Valid @RequestBody CategoryCreateDto categoryData) {
+    public CategoryResponseDto createCategory(@Valid @RequestBody CategoryCreateRequestDto categoryData) {
         var commandModel = new CategoryCreateCommand(categoryData.name());
         var category = categoryService.createCategory(commandModel);
         return mapper.toDto(category);

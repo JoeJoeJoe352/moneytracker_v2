@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 
-public class WalletSummaryDto {
+public class WalletSummaryResponseDto {
     private CurrencyEnum currencyCode;
     private BigDecimal total;
 
-    public WalletSummaryDto(CurrencyEnum currencyCode, BigDecimal total) {
+    public WalletSummaryResponseDto(CurrencyEnum currencyCode, BigDecimal total) {
         this.currencyCode = currencyCode;
         this.total = total;
     }

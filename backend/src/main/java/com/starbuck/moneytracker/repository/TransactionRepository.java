@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
-import com.starbuck.moneytracker.dto.WalletSummaryDto;
+import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
@@ -64,7 +64,7 @@ public interface TransactionRepository extends
                 GROUP BY w.id
                 ORDER BY w.id
             """)
-    List<WalletSummaryDto> summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
+    List<WalletSummaryResponseDto> summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
 
     /**
      * Id alapján lekéri a tranzakciós adatokat

@@ -35,7 +35,7 @@ import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
-import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
+import com.starbuck.moneytracker.dto.TransactionDetailCreateRequestDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -111,7 +111,7 @@ class TransactionE2ETest extends MySqlContainerTest {
      * végponton keresztül, és visszaadja az adatbázisban kapott id-jét
      */
     private Long createTransactionViaApi(String name, TransactionTypeEnum type, BigDecimal price, LocalDate date) {
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(price, "teszt", null, null,
+        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(price, "teszt", null, null,
                 List.of());
         TransactionCreateRequest request = new TransactionCreateRequest(name, null, type, date, List.of(detail),
                 List.of(), this.wallet.getId());
@@ -139,9 +139,9 @@ class TransactionE2ETest extends MySqlContainerTest {
                 LocalDate.now());
 
         // mostantól két detail lesz, amik közül az egyik komplex
-        TransactionDetailCreateDto updatedDetail = new TransactionDetailCreateDto(null, "detail1",
+        TransactionDetailCreateRequestDto updatedDetail = new TransactionDetailCreateRequestDto(null, "detail1",
                 new BigDecimal("0.75"), new BigDecimal("200"), List.of());
-        TransactionDetailCreateDto updatedDetail2 = new TransactionDetailCreateDto(new BigDecimal("-200"), "detail2",
+        TransactionDetailCreateRequestDto updatedDetail2 = new TransactionDetailCreateRequestDto(new BigDecimal("-200"), "detail2",
                 null, null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Updated", null,
                 TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 1, 1), List.of(updatedDetail, updatedDetail2),
@@ -183,7 +183,7 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void updateTransaction_returnsNotFoundForNonexistentId() {
-        TransactionDetailCreateDto detail = new TransactionDetailCreateDto(new BigDecimal("10.00"), "teszt",
+        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("10.00"), "teszt",
                 null,
                 null, List.of());
         TransactionCreateRequest updateRequest = new TransactionCreateRequest("Doesn't matter", null,

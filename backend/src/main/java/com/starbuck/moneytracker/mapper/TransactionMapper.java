@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
-import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
+import com.starbuck.moneytracker.dto.TransactionDetailCreateRequestDto;
 import com.starbuck.moneytracker.dto.TransactionDetailEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
@@ -147,7 +147,7 @@ public class TransactionMapper {
      * @return
      */
     public List<TransactionDetailSaveCommand> fromDetailCreateRequest(
-            @NonNull List<TransactionDetailCreateDto> detailDtos, TransactionTypeEnum type) {
+            @NonNull List<TransactionDetailCreateRequestDto> detailDtos, TransactionTypeEnum type) {
         return detailDtos.stream().map((detail) -> {
             if (detail.unitPrice() != null || detail.weight() != null) {
                 return new TransactionDetailSaveCommand(

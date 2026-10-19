@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
-import com.starbuck.moneytracker.dto.WalletSummaryDto;
+import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -99,7 +99,7 @@ public class TransactionService {
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
      * Pozitív értékkel tér vissza (értelmetlen az, hogy negatív előjeles kiadás)
      */
-    public List<WalletSummaryDto> sumAllExpenseForMonth() {
+    public List<WalletSummaryResponseDto> sumAllExpenseForMonth() {
         var result = this.summarizeForMonth(TransactionTypeEnum.OUTCOME);
         result.forEach(walletSummary -> {
             walletSummary.setTotal(walletSummary.getTotal().abs());
@@ -111,14 +111,14 @@ public class TransactionService {
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi bevétele
      * volt
      */
-    public List<WalletSummaryDto> sumAllIncomeForMonth() {
+    public List<WalletSummaryResponseDto> sumAllIncomeForMonth() {
         return this.summarizeForMonth(TransactionTypeEnum.INCOME);
     }
 
     /**
      * Összegzi a user adott típusú tranzakcióit a hónapra
      */
-    private List<WalletSummaryDto> summarizeForMonth(TransactionTypeEnum type) {
+    private List<WalletSummaryResponseDto> summarizeForMonth(TransactionTypeEnum type) {
         Long userId = currentUser.getUser().getId();
 
         return transactionRepo.summarizeTransactionPricesForMonthAndType(userId, type);

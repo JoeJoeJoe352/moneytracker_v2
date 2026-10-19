@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
-import com.starbuck.moneytracker.dto.TransactionDetailCreateDto;
+import com.starbuck.moneytracker.dto.TransactionDetailCreateRequestDto;
 import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
@@ -272,10 +272,10 @@ class TransactionMapperTest {
      */
     @Test
     void fromDetailCreateRequest_mapsEachRequest() {
-        TransactionDetailCreateDto request1 = new TransactionDetailCreateDto(new BigDecimal("10.00"), "d1",
+        TransactionDetailCreateRequestDto request1 = new TransactionDetailCreateRequestDto(new BigDecimal("10.00"), "d1",
                 null,
                 null, List.of());
-        TransactionDetailCreateDto request2 = new TransactionDetailCreateDto(new BigDecimal("20.00"), "d2",
+        TransactionDetailCreateRequestDto request2 = new TransactionDetailCreateRequestDto(new BigDecimal("20.00"), "d2",
                 null,
                 null, List.of());
 

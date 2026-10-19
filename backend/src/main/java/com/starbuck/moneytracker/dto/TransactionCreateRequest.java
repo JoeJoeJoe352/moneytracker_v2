@@ -29,7 +29,7 @@ public record TransactionCreateRequest(
     
     @Valid
     @NotNull(message = "TransactionDetails are mandatory")
-    List<TransactionDetailCreateDto> transactionDetails,
+    List<TransactionDetailCreateRequestDto> transactionDetails,
 
     List<Long> globalCategories,
 

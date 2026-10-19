@@ -23,7 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.UserCreateCommand;
-import com.starbuck.moneytracker.dto.WalletSummaryDto;
+import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
@@ -300,7 +300,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
                 new BigDecimal(-150), LocalDate.now(), secondWallet);
 
         // When
-        List<WalletSummaryDto> result = transactionService.sumAllExpenseForMonth();
+        List<WalletSummaryResponseDto> result = transactionService.sumAllExpenseForMonth();
         assertEquals(3, result.size());
 
         // Mindig pozitív számmal tér vissza
@@ -341,7 +341,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
                 TransactionTypeEnum.INCOME,
                 new BigDecimal(150), LocalDate.now(), secondWallet);
         // When
-        List<WalletSummaryDto> result = transactionService.sumAllIncomeForMonth();
+        List<WalletSummaryResponseDto> result = transactionService.sumAllIncomeForMonth();
         assertEquals(3, result.size());
 
         // Mindig pozitív számmal tér vissza
@@ -384,8 +384,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         walletRepo.save(disabledWallet);
 
         // When
-        List<WalletSummaryDto> expenses = transactionService.sumAllExpenseForMonth();
-        List<WalletSummaryDto> incomes = transactionService.sumAllIncomeForMonth();
+        List<WalletSummaryResponseDto> expenses = transactionService.sumAllExpenseForMonth();
+        List<WalletSummaryResponseDto> incomes = transactionService.sumAllIncomeForMonth();
 
         // Then
         assertEquals(1, expenses.size());
