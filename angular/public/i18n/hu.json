@@ -209,6 +209,11 @@
     "de": "Német",
     "en": "Angol"
   },
+  "app-update": {
+    "available": "Elérhető az alkalmazás új verziója.",
+    "unrecoverable": "Az alkalmazás nem tud tovább működni, kérlek töltsd újra az oldalt!",
+    "reload": "Újratöltés"
+  },
   "etc": {
     "datepicker.format": "YYYY. MM. DD.",
     "confirm": "Megerősítés",

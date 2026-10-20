@@ -208,6 +208,11 @@
     "de": "German",
     "en": "English"
   },
+  "app-update": {
+    "available": "A new version of the app is available.",
+    "unrecoverable": "The app can no longer run properly, please reload the page!",
+    "reload": "Reload"
+  },
   "etc": {
     "datepicker.format": "MM/DD/YYYY.",
     "confirm": "Confirm",
