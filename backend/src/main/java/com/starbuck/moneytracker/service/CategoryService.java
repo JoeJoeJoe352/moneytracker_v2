@@ -2,7 +2,6 @@ package com.starbuck.moneytracker.service;
 
 import java.util.List;
 
-import org.hibernate.NonUniqueObjectException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -12,6 +11,7 @@ import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
+import com.starbuck.moneytracker.exception.CategoryNonUniqueException;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
@@ -36,7 +36,7 @@ public class CategoryService {
      * @return
      */
     @Transactional
-    public Category createCategory(CategoryCreateCommand command) {
+    public Category createCategory(CategoryCreateCommand command) throws CategoryNonUniqueException {
         if (command == null) {
             throw new IllegalArgumentException("Category is null");
         }
@@ -44,8 +44,8 @@ public class CategoryService {
         User user = currentUser.getUser();
 
         if (this.categoryRepository.isUserHaveThisCategoryName(command.getName(), user.getId(), currentLang)) {
-            throw new NonUniqueObjectException("Category with this name already exists for the user", null,
-                    command.getName());
+            throw new CategoryNonUniqueException(
+                    "Category with this name already exists for the user. " + command.getName());
         }
         Category categoryModel = new Category(
                 command.getName(),

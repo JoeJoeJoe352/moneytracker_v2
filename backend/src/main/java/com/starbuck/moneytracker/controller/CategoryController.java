@@ -3,12 +3,14 @@ package com.starbuck.moneytracker.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.starbuck.moneytracker.commands.CategoryCreateCommand;
 import com.starbuck.moneytracker.dto.CategoryCreateRequestDto;
 import com.starbuck.moneytracker.dto.CategoryResponseDto;
+import com.starbuck.moneytracker.exception.CategoryNonUniqueException;
 import com.starbuck.moneytracker.mapper.CategoryMapper;
 import com.starbuck.moneytracker.service.CategoryService;
 
@@ -18,6 +20,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
+@RequestMapping("/category")
 @RestController
 public class CategoryController {
 
@@ -33,10 +36,12 @@ public class CategoryController {
      * Létrehoz egy új kategóriát
      * 
      * @param categoryData
+     * @throws CategoryNonUniqueException
      */
-    @PostMapping(path = "/category")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryResponseDto createCategory(@Valid @RequestBody CategoryCreateRequestDto categoryData) {
+    public CategoryResponseDto createCategory(@Valid @RequestBody CategoryCreateRequestDto categoryData)
+            throws CategoryNonUniqueException {
         var commandModel = new CategoryCreateCommand(categoryData.name());
         var category = categoryService.createCategory(commandModel);
         return mapper.toDto(category);
@@ -47,7 +52,7 @@ public class CategoryController {
      * 
      * @return
      */
-    @GetMapping(path = "/category")
+    @GetMapping
     public List<CategoryResponseDto> getCategories() {
         // TODO keresést beletenni
         var categories = categoryService.listCategoriesForUser();

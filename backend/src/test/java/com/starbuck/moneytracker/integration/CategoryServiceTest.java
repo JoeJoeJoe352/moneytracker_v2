@@ -26,6 +26,7 @@ import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
+import com.starbuck.moneytracker.exception.CategoryNonUniqueException;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
@@ -95,7 +96,7 @@ public class CategoryServiceTest extends MySqlContainerTest {
 
     @Test
     @DisplayName("createCategory - Sikeres létrehozás")
-    void testCreateCategory_success() {
+    void testCreateCategory_success() throws CategoryNonUniqueException {
         var categoryCommand = new CategoryCreateCommand("tesztCategory");
         var savedCategory = categoryService.createCategory(categoryCommand);
 
@@ -107,7 +108,7 @@ public class CategoryServiceTest extends MySqlContainerTest {
 
     @Test
     @DisplayName("createCategory - Nem unique kategória a usernél")
-    void testCreateCategoryUserHasCategoryWithSameName_throws() {
+    void testCreateCategoryUserHasCategoryWithSameName_throws() throws CategoryNonUniqueException {
         // Given
         var categoryCommand = new CategoryCreateCommand("tesztCategory");
         var savedCategory = categoryService.createCategory(categoryCommand);
@@ -143,7 +144,7 @@ public class CategoryServiceTest extends MySqlContainerTest {
 
     @Test
     @DisplayName("ListCategories - Kilistázza a user összes saját és a közös kategóriákat")
-    void testListCategories() {
+    void testListCategories() throws CategoryNonUniqueException {
         // given
         UserCreateCommand user = new UserCreateCommand("testuser2", "teszt2@email.com", "password2");
         var savedUser2 = userService.createUser(user);
