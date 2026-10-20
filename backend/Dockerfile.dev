@@ -1,13 +1,14 @@
 # backend/Dockerfile.dev
 
-FROM azul/zulu-openjdk:26 AS build
-RUN apt-get update && apt-get install -y maven
+FROM azul/zulu-openjdk:25 AS build
 WORKDIR /app
 
-COPY pom.xml .
-RUN mvn dependency:go-offline
+# az apt-os maven túl régi (pl. a spotbugs plugin min. 3.8.9-et kér), ezért a projekt maven wrapperét használjuk
+COPY mvnw pom.xml ./
+COPY .mvn .mvn
+RUN chmod +x mvnw && ./mvnw dependency:go-offline
 
 COPY . .
 # nincs már wsl2, ezért a watcher ránéz a kódra x másodpercenként, hogy van-e változás és indít egy rebuildet, ha igen
-RUN chmod +x compile-watch.sh
-CMD ["sh", "-c", "./compile-watch.sh & exec mvn spring-boot:run"]
+RUN chmod +x compile-watch.sh mvnw
+CMD ["sh", "-c", "./compile-watch.sh & exec ./mvnw spring-boot:run"]

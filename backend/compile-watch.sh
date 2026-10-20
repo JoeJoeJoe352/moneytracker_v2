@@ -6,7 +6,7 @@ touch "$MARKER"
 while true; do
   if [ -n "$(find src -name '*.java' -newer "$MARKER")" ]; then
     touch "$MARKER"
-    mvn -o -q compile
+    ./mvnw -o -q compile
   fi
   sleep 1
 done
