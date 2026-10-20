@@ -17,7 +17,7 @@ public abstract class MySqlContainerTest {
     // Szándékosan nincs lezárva a resource, a Ryuk resource handler fogja lezárni, amikor a JVM lezáródik
     @SuppressWarnings("resource")
     @ServiceConnection
-    static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.0.30")
+    static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.4") // ugyanaz, mint a docker-compose.dev.yml-ben
             .withDatabaseName("testing")
             .withUsername("root")
             .withPassword("root")

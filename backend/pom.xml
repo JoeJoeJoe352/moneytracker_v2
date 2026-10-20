@@ -158,7 +158,7 @@
 						<id>validate</id>
 						<phase>validate</phase>
 						<goals>
-							<goal>verify</goal>
+							<goal>check</goal>
 						</goals>
 					</execution>
 				</executions>
