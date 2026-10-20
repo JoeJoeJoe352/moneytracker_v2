@@ -18,7 +18,8 @@ services:
       JWT_SECRET: yP/NLoOH1NhizUUekbkBz9mzr1QKumOAQ4hTZF4mD7Q= # csak lokális dev célra
       MAVEN_OPTS: "--sun-misc-unsafe-memory-access=allow" # a "terminally deprecated method" warning hibaüzenet eltüntetése
     depends_on:
-      - db
+      db:
+        condition: service_healthy # különben friss volume-nál a backend a MySQL inicializálása közben indulna el és leállna
     networks:
       - appnet
 
@@ -51,6 +52,14 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      # a -h 127.0.0.1 TCP-t kényszerít: az első indításkori inicializálás ideiglenes szervere csak socketen figyel,
+      # így a sima "mysqladmin ping" túl korán jelezne egészségesnek
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     networks:
       - appnet
 
