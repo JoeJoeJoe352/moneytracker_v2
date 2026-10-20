@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.List;
 import java.util.Locale;
 
-import org.hibernate.NonUniqueObjectException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -116,7 +115,7 @@ public class CategoryServiceTest extends MySqlContainerTest {
         assertEquals("tesztCategory", savedCategory.getName());
 
         // when
-        assertThrows(NonUniqueObjectException.class, () -> {
+        assertThrows(CategoryNonUniqueException.class, () -> {
             categoryService.createCategory(categoryCommand);
         });
 
@@ -134,7 +133,7 @@ public class CategoryServiceTest extends MySqlContainerTest {
         var categoryCommand = new CategoryCreateCommand("tesztCategory");
 
         // WHEN
-        assertThrows(NonUniqueObjectException.class, () -> {
+        assertThrows(CategoryNonUniqueException.class, () -> {
             categoryService.createCategory(categoryCommand);
         });
 

@@ -120,7 +120,7 @@ class CategoryE2ETest extends MySqlContainerTest {
 
     /**
      * Ha a usernek már van ilyen nevű kategóriája, a service
-     * NonUniqueObjectException-t dob, amit a GlobalExceptionHandler 409
+     * CategoryNonUniqueException-t dob, amit a GlobalExceptionHandler 409
      * Conflict-ra fordít, és nem jön létre második kategória
      */
     @Test
