@@ -6,7 +6,7 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
  */
 export function greaterThan(min: number): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-        const value = control.value;
+        const value = control.value as number | '' | null;
         if (value === null || value === '') {
             return null;
         }

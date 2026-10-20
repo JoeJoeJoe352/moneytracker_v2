@@ -121,8 +121,7 @@ describe('AppUpdateService (Vitest)', () => {
         swUpdateMock.checkForUpdate.mockRejectedValue(new Error('offline'));
         service.init();
 
-        vi.advanceTimersByTime(UPDATE_CHECK_INTERVAL_MS);
-        await vi.runAllTicks();
+        await vi.advanceTimersByTimeAsync(UPDATE_CHECK_INTERVAL_MS);
 
         expect(swUpdateMock.checkForUpdate).toHaveBeenCalledOnce();
     });

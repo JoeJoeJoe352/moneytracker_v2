@@ -12,8 +12,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 })
 export class ErrorPageComponent implements AfterViewInit {
     private readonly router = inject(Router);
-    private readonly backToHomepageButton = viewChild.required('mainPageButton', {
-        read: ElementRef<HTMLButtonElement>,
+    private readonly backToHomepageButton = viewChild.required<
+        string,
+        ElementRef<HTMLButtonElement>
+    >('mainPageButton', {
+        read: ElementRef,
     });
 
     ngAfterViewInit(): void {

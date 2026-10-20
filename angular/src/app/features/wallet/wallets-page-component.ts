@@ -60,7 +60,7 @@ export class WalletsPageComponent {
             data: {
                 wallet: walletData,
                 isFormDisabled: this.walletListResource.isLoading,
-            } as WalletFormInputInterface,
+            } satisfies WalletFormInputInterface,
         });
 
         dialogRef.componentInstance.saved.subscribe((payload) =>
@@ -83,7 +83,7 @@ export class WalletsPageComponent {
             data: {
                 wallet: walletData,
                 isLoading: computed(() => isSyncing() || this.walletListResource.isLoading()),
-            } as WalletSyncFormInputInterface,
+            } satisfies WalletSyncFormInputInterface,
         });
 
         // exhaustMap: amíg egy kérés fut, az újabb submitokat eldobja, így nem jöhet létre dupla szinkron.
@@ -104,7 +104,7 @@ export class WalletsPageComponent {
                 }),
             )
             .subscribe(() => {
-                this.notification.show(this.translateService.instant(_('wallet.sync.save_succes')));
+                this.notification.show(_('wallet.sync.save_succes'));
                 this.walletListResource.reload();
                 dialogRef.close();
             });
@@ -121,10 +121,7 @@ export class WalletsPageComponent {
         const isEditMode = existingWalletData !== null;
 
         const request = isEditMode
-            ? this.walletService.updateWallet(
-                  existingWalletData.id,
-                  walletDataToSave as WalletUpdateRequest,
-              )
+            ? this.walletService.updateWallet(existingWalletData.id, walletDataToSave)
             : this.walletService.createWallet(walletDataToSave as WalletCreateRequest);
 
         this.handleWalletRequest(request, _('etc.save-success'), dialogRef);
@@ -135,7 +132,7 @@ export class WalletsPageComponent {
      */
     private onWalletDeleted(walletId: number, dialogRef: MatDialogRef<WalletFormComponent>): void {
         ConfirmDialogComponent.open(this.dialog, {
-            message: this.translateService.instant(_('wallet.delete.confirm')),
+            message: this.translateService.instant(_('wallet.delete.confirm')) as string,
             danger: true,
         })
             .afterClosed()

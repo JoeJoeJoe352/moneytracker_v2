@@ -48,8 +48,8 @@ export class AppUpdateService {
     private promptReload(translationKey: string): void {
         this.snackBar
             .open(
-                this.translateService.instant(translationKey),
-                this.translateService.instant(_('app-update.reload')),
+                this.translateService.instant(translationKey) as string,
+                this.translateService.instant(_('app-update.reload')) as string,
                 { duration: 0 },
             )
             .onAction()

@@ -20,7 +20,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     },
 })
 export default class TransactionCardComponent {
-    private readonly elementRef = inject(ElementRef<HTMLElement>);
+    private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
     /**
      * Megjelenítendő tranzakció adatai
