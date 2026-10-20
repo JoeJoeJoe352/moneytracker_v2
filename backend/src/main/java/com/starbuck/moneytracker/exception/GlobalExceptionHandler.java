@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.hibernate.NonUniqueObjectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -105,8 +104,8 @@ public class GlobalExceptionHandler {
      * Már létező, egyedinek szánt erőforrás létrehozásának kísérlete (pl.
      * ugyanolyan nevű kategória)
      */
-    @ExceptionHandler(NonUniqueObjectException.class)
-    public ResponseEntity<Map<String, String>> handleConflict(NonUniqueObjectException ex) {
+    @ExceptionHandler(CategoryNonUniqueException.class)
+    public ResponseEntity<Map<String, String>> handleConflict(CategoryNonUniqueException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));
     }
 
