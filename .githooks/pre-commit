@@ -1,0 +1,29 @@
+#!/bin/sh
+# Commit előtt a stage-elt backend Java fájlokat a Spotless (palantir-java-format) formázza,
+# majd visszateszi őket a commitba.
+# Bekapcsolás (klónozás után egyszer): git config core.hooksPath .githooks
+
+files=$(git diff --cached --name-only --diff-filter=ACMR -- 'backend/*.java')
+[ -z "$files" ] && exit 0
+
+# részben stage-elt fájlnál a formázás utáni git add a nem stage-elt változásokat is commitolná
+partial=$(git diff --name-only -- $files)
+if [ -n "$partial" ]; then
+    echo "pre-commit: ezek a fájlok csak részben vannak stage-elve, a Spotless nem tudja biztonságosan formázni:"
+    echo "$partial"
+    echo "Stage-eld vagy stash-eld a maradék változásokat, vagy commitolj --no-verify-jal."
+    exit 1
+fi
+
+# a Spotless abszolút útvonalra illeszt, Windowson \ az elválasztó
+patterns=$(echo "$files" | sed -e 's#^backend/##' -e 's#\.#\\.#g' -e 's#/#[\\\\/]#g' -e 's#^#.*#' | paste -sd, -)
+
+echo "pre-commit: spotless:apply ($(echo "$files" | wc -l | tr -d ' ') fájl)"
+# a "terminally deprecated method in sun.misc.Unsafe" warning elnémítása (mint a docker-compose.dev.yml-ben)
+export MAVEN_OPTS="${MAVEN_OPTS} --sun-misc-unsafe-memory-access=allow"
+if ! (cd backend && ./mvnw -q spotless:apply -DspotlessFiles="$patterns"); then
+    echo "pre-commit: a Spotless hibára futott, a commit megszakítva"
+    exit 1
+fi
+
+git add -- $files
