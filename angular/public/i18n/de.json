@@ -25,9 +25,7 @@
     "email.required-error": "Die E-Mail-Adresse ist erforderlich!",
     "email.pattern-error": "Bitte gib eine gültige E-Mail-Adresse ein!",
     "email.maxlength-error": "Die E-Mail-Adresse darf höchstens 255 Zeichen lang sein!",
-    "password.required-error": "Das Passwort ist erforderlich!",
-    "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",
-    "password.maxlength-error": "Das Passwort darf höchstens 20 Zeichen lang sein!"
+    "password.required-error": "Das Passwort ist erforderlich!"
   },
   "register": {
     "username": "Benutzername",
@@ -43,7 +41,7 @@
     "password": "Passwort",
     "password.required-error": "Das Passwort ist erforderlich!",
     "password.minlength-error": "Das Passwort muss mindestens 6 Zeichen lang sein!",
-    "password.maxlength-error": "Das Passwort darf höchstens 20 Zeichen lang sein!",
+    "password.maxlength-error": "Das Passwort darf höchstens 72 Zeichen lang sein!",
     "password_again": "Passwort bestätigen",
     "password_again.required-error": "Die Passwortbestätigung ist erforderlich!",
     "password_again.mismatch-error": "Die Passwörter stimmen nicht überein!",

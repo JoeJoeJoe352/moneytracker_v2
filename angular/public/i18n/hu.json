@@ -24,8 +24,6 @@
     "email.maxlength-error": "Az email cím legfeljebb 255 karakter lehet!",
     "password": "Jelszó",
     "password.required-error": "A jelszó megadása kötelező!",
-    "password.minlength-error": "A jelszónak legalább 6 karakternek kell lennie!",
-    "password.maxlength-error": "A jelszó legfeljebb 20 karakter lehet!",
     "submit": "Bejelentkezés",
     "success": "Sikeres bejelentkezés"
   },
@@ -43,7 +41,7 @@
     "password": "Jelszó",
     "password.required-error": "A jelszó megadása kötelező!",
     "password.minlength-error": "A jelszónak legalább 6 karakternek kell lennie!",
-    "password.maxlength-error": "A jelszó maximum 20 karakter hosszú lehet!",
+    "password.maxlength-error": "A jelszó maximum 72 karakter hosszú lehet!",
     "password_again": "Jelszó megerősítése",
     "password_again.required-error": "A jelszó megerősítése kötelező!",
     "password_again.mismatch-error": "A jelszavak nem egyeznek!",

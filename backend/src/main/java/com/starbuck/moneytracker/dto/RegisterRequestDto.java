@@ -18,9 +18,10 @@ public record RegisterRequestDto(
 
     /**
      * Felhasználó jelszava
+     * Max 72 karakter, a Bcrypt limitje
      */
     @NotBlank(message = "Password is mandatory")
-    @Length(min = 6, max = 20, message = "Password must be between 6 and 20 characters")
+    @Length(min = 6, max = 72, message = "Password must be between 6 and 72 characters")
     String password,
 
     /**

@@ -25,9 +25,7 @@
     "email.required-error": "Email is required!",
     "email.pattern-error": "Please enter a valid email address!",
     "email.maxlength-error": "Email must be at most 255 characters long!",
-    "password.required-error": "Password is required!",
-    "password.minlength-error": "Password must be at least 6 characters long!",
-    "password.maxlength-error": "Password must be at most 20 characters long!"
+    "password.required-error": "Password is required!"
   },
   "register": {
     "username": "Username",
@@ -43,7 +41,7 @@
     "password": "Password",
     "password.required-error": "Password is required!",
     "password.minlength-error": "Password must be at least 6 characters long!",
-    "password.maxlength-error": "Password must be at most 20 characters long!",
+    "password.maxlength-error": "Password must be at most 72 characters long!",
     "password_again": "Confirm password",
     "password_again.required-error": "Password confirmation is required!",
     "password_again.mismatch-error": "Passwords do not match!",

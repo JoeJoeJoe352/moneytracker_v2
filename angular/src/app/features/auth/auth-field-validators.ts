@@ -16,7 +16,7 @@ export const USERNAME_VALIDATORS: ValidatorFn[] = [
 export const PASSWORD_VALIDATORS: ValidatorFn[] = [
     Validators.required,
     Validators.minLength(6),
-    Validators.maxLength(20),
+    Validators.maxLength(72), // Bcrypt limit
 ];
 
 /**
