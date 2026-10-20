@@ -32,7 +32,7 @@
   "register": {
     "username": "Username",
     "username.required-error": "Username is required!",
-    "username.minlength-error": "Username must be at least 5 characters long!",
+    "username.minlength-error": "Username must be at least 3 characters long!",
     "username.maxlength-error": "Username must be at most 20 characters long!",
     "username.taken-error": "Username is already taken!",
     "email": "Email",
