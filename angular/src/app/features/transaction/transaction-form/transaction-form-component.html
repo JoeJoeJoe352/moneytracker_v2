@@ -55,10 +55,11 @@
                         [matDatepicker]="transactionDatePicker"
                         formControlName="transactionDate"
                         [placeholder]="'transaction.date.placeholder' | translate"
+                         [max]="lastSelectableDay"
                     />
                     <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
                     <mat-datepicker-toggle matIconSuffix [for]="transactionDatePicker" />
-                    <mat-datepicker #transactionDatePicker />
+                    <mat-datepicker #transactionDatePicker  />
                     @if (transactionDate.invalid && transactionDate.touched) {
                         @if (transactionDate.hasError('required')) {
                             <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>

@@ -24,7 +24,10 @@ import type { FilterData } from './transactions-component';
 })
 export class TransactionFilter implements OnInit {
     private fb = inject(FormBuilder);
-
+    /**
+     * Datepickerben utolsó kiválasztható nap
+     */
+    protected readonly lastSelectableDay = new Date()
     /**
      * Form alapértelmezett adatai
      */

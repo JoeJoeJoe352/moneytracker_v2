@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +120,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
                 null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("E2E groceries", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), this.wallet.getId());
+                TransactionTypeEnum.INCOME, LocalDate.now(ZoneOffset.UTC), List.of(detail), List.of(), this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -163,7 +164,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
                 new BigDecimal("0.5"),
                 new BigDecimal("1500"), List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("Félegyházi bevásárlás", null,
-                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(detail, detail2), List.of(), this.wallet.getId());
+                TransactionTypeEnum.OUTCOME, LocalDate.now(ZoneOffset.UTC), List.of(detail, detail2), List.of(), this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -219,7 +220,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     void createTransaction_persistsAndIsRetrievableThroughTheApi_simpleTransaction() {
         // GIVEN
         TransactionCreateRequest request = new TransactionCreateRequest("Strandbelépő", new BigDecimal("-1500"),
-                TransactionTypeEnum.OUTCOME, LocalDate.now(), List.of(), List.of(), this.wallet.getId());
+                TransactionTypeEnum.OUTCOME, LocalDate.now(ZoneOffset.UTC), List.of(), List.of(), this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
@@ -275,7 +276,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
         TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("100.00"), null, null,
                 null, List.of());
         TransactionCreateRequest request = new TransactionCreateRequest("Should not persist", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(detail), List.of(), this.wallet.getId());
+                TransactionTypeEnum.INCOME, LocalDate.now(ZoneOffset.UTC), List.of(detail), List.of(), this.wallet.getId());
 
         ResponseEntity<Void> response = restTemplate.postForEntity("/transaction", request, Void.class);
 
@@ -291,7 +292,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     void createTransaction_returnsBadRequestForInvalidPayload() {
         // "ab" rövidebb, mint az elvárt minimum 3 karakter
         TransactionCreateRequest invalidRequest = new TransactionCreateRequest("ab", new BigDecimal("10.00"),
-                TransactionTypeEnum.INCOME, LocalDate.now(), List.of(), List.of(), this.wallet.getId());
+                TransactionTypeEnum.INCOME, LocalDate.now(ZoneOffset.UTC), List.of(), List.of(), this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 

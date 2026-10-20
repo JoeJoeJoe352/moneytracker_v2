@@ -42,7 +42,7 @@
                 <!-- Tranzakció dátuma -->
                 <mat-form-field appearance="fill" class="filter">
                     <mat-label>{{ 'transaction_page.filter.date' | translate }}</mat-label>
-                    <input id="date" matInput [matDatepicker]="date" formControlName="date" />
+                    <input id="date" matInput [matDatepicker]="date" formControlName="date" [max]="lastSelectableDay" />
                     <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
                     <mat-datepicker-toggle
                         matIconSuffix
