@@ -36,6 +36,7 @@ import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
@@ -46,8 +47,6 @@ import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
-
-import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @SpringBootTest
 // csak így használható a beforeall, mert egyébként statikusan futna és nem
@@ -78,7 +77,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
     @Autowired
     private WalletRepository walletRepo;
-
 
     @MockitoBean
     private CurrentUserUtil currentUser;
@@ -118,11 +116,18 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         categoryRepo.save(category);
 
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
-                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"),
+                TransactionDetail.DEFAULT_DETAIL_NAME,
+                new BigDecimal("100.00"),
                 List.of(category.getId()),
                 TransactionTypeEnum.INCOME);
-        TransactionSaveCommand command = new TransactionSaveCommand("Test", null, LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(), this.wallet.getId());
+        TransactionSaveCommand command = new TransactionSaveCommand(
+                "Test",
+                null,
+                LocalDate.of(2026, 6, 8),
+                TransactionTypeEnum.INCOME,
+                List.of(detailCommand),
+                List.of(),
+                this.wallet.getId());
 
         // WHEN
         Transaction saved = transactionService.createTransaction(command);
@@ -152,9 +157,14 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         Category category = new Category("simplekategória", this.user, LangEnum.HU);
         categoryRepo.save(category);
 
-        TransactionSaveCommand command = new TransactionSaveCommand("Test", new BigDecimal("500.00"),
+        TransactionSaveCommand command = new TransactionSaveCommand(
+                "Test",
+                new BigDecimal("500.00"),
                 LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(), List.of(category.getId()), this.wallet.getId());
+                TransactionTypeEnum.INCOME,
+                List.of(),
+                List.of(category.getId()),
+                this.wallet.getId());
 
         // WHEN
         Transaction saved = transactionService.createTransaction(command);
@@ -186,11 +196,17 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         categoryRepo.save(category1);
 
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
-                TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"),
+                TransactionDetail.DEFAULT_DETAIL_NAME,
+                new BigDecimal("100.00"),
                 List.of(category1.getId()),
                 TransactionTypeEnum.INCOME);
-        TransactionSaveCommand createCommand = new TransactionSaveCommand("Test", null,
-                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(),
+        TransactionSaveCommand createCommand = new TransactionSaveCommand(
+                "Test",
+                null,
+                LocalDate.of(2026, 6, 8),
+                TransactionTypeEnum.INCOME,
+                List.of(detailCommand),
+                List.of(),
                 this.wallet.getId());
 
         // Van DB-ben elem mostmár
@@ -201,17 +217,24 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         categoryRepo.save(category2);
 
         // Detail 1 beállításai - 1 kategóriája van
-        TransactionDetailSaveCommand updateDetailCommand1 = new TransactionDetailSaveCommand("update1",
-                new BigDecimal("-200.00"), List.of(category2.getId()), TransactionTypeEnum.OUTCOME);
+        TransactionDetailSaveCommand updateDetailCommand1 = new TransactionDetailSaveCommand(
+                "update1", new BigDecimal("-200.00"), List.of(category2.getId()), TransactionTypeEnum.OUTCOME);
 
         // Detail2 beállításai - 2 kategória beállítva
-        TransactionDetailSaveCommand updateDetailCommand2 = new TransactionDetailSaveCommand("update2",
-                new BigDecimal("0.5"), new BigDecimal("600.00"),
+        TransactionDetailSaveCommand updateDetailCommand2 = new TransactionDetailSaveCommand(
+                "update2",
+                new BigDecimal("0.5"),
+                new BigDecimal("600.00"),
                 List.of(category2.getId(), category1.getId()));
 
-        TransactionSaveCommand updateCommand = new TransactionSaveCommand("Update test", null,
-                LocalDate.of(2026, 7, 8), TransactionTypeEnum.OUTCOME,
-                List.of(updateDetailCommand1, updateDetailCommand2), List.of(), this.wallet.getId());
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand(
+                "Update test",
+                null,
+                LocalDate.of(2026, 7, 8),
+                TransactionTypeEnum.OUTCOME,
+                List.of(updateDetailCommand1, updateDetailCommand2),
+                List.of(),
+                this.wallet.getId());
 
         // WHEN
         transactionService.updateTransaction(createdTransaction.getId(), updateCommand);
@@ -259,9 +282,13 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         TransactionDetailSaveCommand detailCommand = new TransactionDetailSaveCommand(
                 "tesztnév", new BigDecimal(100), List.of(), TransactionTypeEnum.INCOME);
         TransactionSaveCommand command = new TransactionSaveCommand(
-                "hibásteszt", null,
-                LocalDate.of(2026, 6, 8), TransactionTypeEnum.INCOME, List.of(detailCommand), List.of(),
-                22L);// Nincs ilyen walletId -> entityNotFoundException
+                "hibásteszt",
+                null,
+                LocalDate.of(2026, 6, 8),
+                TransactionTypeEnum.INCOME,
+                List.of(detailCommand),
+                List.of(),
+                22L); // Nincs ilyen walletId -> entityNotFoundException
 
         assertThrows(EntityNotFoundException.class, () -> {
             transactionService.createTransaction(command);
@@ -279,25 +306,23 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void sumAllExpenseForMonth_returnsOnlyCurrentMonthExpenses() {
         // Given
-        var secondWallet = walletRepo
-                .save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
-        var emptyWallet = walletRepo
-                .save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        var secondWallet = walletRepo.save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        var emptyWallet = walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
-        Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth",
-                TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-200), LocalDate.now(), this.wallet);
-        Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth",
-                TransactionTypeEnum.INCOME,
-                new BigDecimal(150), LocalDate.now(), this.wallet);
+        Transaction expenseThisMonth = this.persistSimpleTransaction(
+                "expenseThisMonth", TransactionTypeEnum.OUTCOME, new BigDecimal(-200), LocalDate.now(), this.wallet);
+        Transaction incomeThisMonth = this.persistSimpleTransaction(
+                "incomeThisMonth", TransactionTypeEnum.INCOME, new BigDecimal(150), LocalDate.now(), this.wallet);
         // Egy tranzakció tavalyról
-        Transaction expenseLastYear = this.persistSimpleTransaction("expenseLastYear",
+        Transaction expenseLastYear = this.persistSimpleTransaction(
+                "expenseLastYear",
                 TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-999), LocalDate.now().minusYears(1), this.wallet);
+                new BigDecimal(-999),
+                LocalDate.now().minusYears(1),
+                this.wallet);
         // Egy tranzakció másik wallethoz
-        Transaction transactionForAnotherWallet = this.persistSimpleTransaction("anotherWallet",
-                TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-150), LocalDate.now(), secondWallet);
+        Transaction transactionForAnotherWallet = this.persistSimpleTransaction(
+                "anotherWallet", TransactionTypeEnum.OUTCOME, new BigDecimal(-150), LocalDate.now(), secondWallet);
 
         // When
         List<WalletSummaryResponseDto> result = transactionService.sumAllExpenseForMonth();
@@ -323,23 +348,22 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void sumAllIncomeForMonth_returnsOnlyCurrentMonthIncome() {
         // Given
-        var secondWallet = walletRepo
-                .save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
-        var emptyWallet = walletRepo
-                .save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        var secondWallet = walletRepo.save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        var emptyWallet = walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
-        Transaction incomeThisMonth = this.persistSimpleTransaction("incomeThisMonth",
+        Transaction incomeThisMonth = this.persistSimpleTransaction(
+                "incomeThisMonth", TransactionTypeEnum.INCOME, new BigDecimal(300), LocalDate.now(), this.wallet);
+        Transaction expenseThisMonth = this.persistSimpleTransaction(
+                "expenseThisMonth", TransactionTypeEnum.OUTCOME, new BigDecimal(-250), LocalDate.now(), this.wallet);
+        Transaction incomeLastYear = this.persistSimpleTransaction(
+                "incomeLastYear",
                 TransactionTypeEnum.INCOME,
-                new BigDecimal(300), LocalDate.now(), this.wallet);
-        Transaction expenseThisMonth = this.persistSimpleTransaction("expenseThisMonth",
-                TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-250), LocalDate.now(), this.wallet);
-        Transaction incomeLastYear = this.persistSimpleTransaction("incomeLastYear", TransactionTypeEnum.INCOME,
-                new BigDecimal(999), LocalDate.now().minusYears(1), this.wallet);
+                new BigDecimal(999),
+                LocalDate.now().minusYears(1),
+                this.wallet);
         // Egy tranzakció másik wallethoz
-        Transaction transactionForAnotherWallet = this.persistSimpleTransaction("anotherWallet",
-                TransactionTypeEnum.INCOME,
-                new BigDecimal(150), LocalDate.now(), secondWallet);
+        Transaction transactionForAnotherWallet = this.persistSimpleTransaction(
+                "anotherWallet", TransactionTypeEnum.INCOME, new BigDecimal(150), LocalDate.now(), secondWallet);
         // When
         List<WalletSummaryResponseDto> result = transactionService.sumAllIncomeForMonth();
         assertEquals(3, result.size());
@@ -364,20 +388,16 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void sumForMonth_ignoresDisabledWallets() {
         // Given
-        var disabledWallet = walletRepo
-                .save(new Wallet("disabled", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
-        Transaction expenseInActiveWallet = this.persistSimpleTransaction("expenseActive",
-                TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-100), LocalDate.now(), this.wallet);
-        Transaction incomeInActiveWallet = this.persistSimpleTransaction("incomeActive",
-                TransactionTypeEnum.INCOME,
-                new BigDecimal(70), LocalDate.now(), this.wallet);
-        Transaction expenseInDisabledWallet = this.persistSimpleTransaction("expenseDisabled",
-                TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-500), LocalDate.now(), disabledWallet);
-        Transaction incomeInDisabledWallet = this.persistSimpleTransaction("incomeDisabled",
-                TransactionTypeEnum.INCOME,
-                new BigDecimal(900), LocalDate.now(), disabledWallet);
+        var disabledWallet =
+                walletRepo.save(new Wallet("disabled", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
+        Transaction expenseInActiveWallet = this.persistSimpleTransaction(
+                "expenseActive", TransactionTypeEnum.OUTCOME, new BigDecimal(-100), LocalDate.now(), this.wallet);
+        Transaction incomeInActiveWallet = this.persistSimpleTransaction(
+                "incomeActive", TransactionTypeEnum.INCOME, new BigDecimal(70), LocalDate.now(), this.wallet);
+        Transaction expenseInDisabledWallet = this.persistSimpleTransaction(
+                "expenseDisabled", TransactionTypeEnum.OUTCOME, new BigDecimal(-500), LocalDate.now(), disabledWallet);
+        Transaction incomeInDisabledWallet = this.persistSimpleTransaction(
+                "incomeDisabled", TransactionTypeEnum.INCOME, new BigDecimal(900), LocalDate.now(), disabledWallet);
         // Tranzakciót csak aktív walleten lehet létrehozni, ezért csak a tranzakciók
         // után tiltjuk le
         disabledWallet.setStatus(GeneralStatusEnum.DISABLED);
@@ -405,8 +425,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
      */
     @Test
     void getTransactionByIdForActualUser_returnsTransactionWithDetails() {
-        Transaction transaction = this.persistSimpleTransaction("lookup", TransactionTypeEnum.INCOME,
-                new BigDecimal(100), LocalDate.now(), this.wallet);
+        Transaction transaction = this.persistSimpleTransaction(
+                "lookup", TransactionTypeEnum.INCOME, new BigDecimal(100), LocalDate.now(), this.wallet);
 
         Transaction result = transactionService.getTransactionByIdForActualUser(transaction.getId());
 
@@ -432,15 +452,25 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void updateTransaction_throwsWhenNotFoundWallet() {
         // GIVEN
-        TransactionSaveCommand command = new TransactionSaveCommand("Test", new BigDecimal("500.00"),
+        TransactionSaveCommand command = new TransactionSaveCommand(
+                "Test",
+                new BigDecimal("500.00"),
                 LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(), List.of(), this.wallet.getId());
+                TransactionTypeEnum.INCOME,
+                List.of(),
+                List.of(),
+                this.wallet.getId());
 
         Transaction saved = transactionService.createTransaction(command);
 
-        TransactionSaveCommand updateCommand = new TransactionSaveCommand("Test2", new BigDecimal("500.00"),
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand(
+                "Test2",
+                new BigDecimal("500.00"),
                 LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(), List.of(), 5L);
+                TransactionTypeEnum.INCOME,
+                List.of(),
+                List.of(),
+                5L);
         // WHEN
         assertThrows(EntityNotFoundException.class, () -> {
             transactionService.updateTransaction(saved.getId(), updateCommand);
@@ -462,9 +492,13 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
         var categorySaved = categoryRepo.save(new Category("cat2", anotherUserSaved, LangEnum.HU));
 
-        TransactionSaveCommand command = new TransactionSaveCommand("Test", new BigDecimal("500.00"),
+        TransactionSaveCommand command = new TransactionSaveCommand(
+                "Test",
+                new BigDecimal("500.00"),
                 LocalDate.of(2026, 6, 8),
-                TransactionTypeEnum.INCOME, List.of(), List.of(categorySaved.getId()),
+                TransactionTypeEnum.INCOME,
+                List.of(),
+                List.of(categorySaved.getId()),
                 this.wallet.getId());
 
         // WHEN
@@ -485,9 +519,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     void getLastTransactions_returnsAtMostFiveNewestTransactions() {
         List<Transaction> created = new java.util.ArrayList<>();
         for (int i = 0; i < 6; i++) {
-            created.add(this.persistSimpleTransaction("last" + i, TransactionTypeEnum.INCOME,
-                    new BigDecimal(10),
-                    LocalDate.now(), this.wallet));
+            created.add(this.persistSimpleTransaction(
+                    "last" + i, TransactionTypeEnum.INCOME, new BigDecimal(10), LocalDate.now(), this.wallet));
         }
 
         List<Transaction> result = transactionService.getLastTransactions();
@@ -504,13 +537,12 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     void getHistoryPageData_filtersTransactionsByName() {
         var now = LocalDate.now();
 
-        Transaction matching = this.persistSimpleTransaction("groceries shopping", TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-10), now, this.wallet);
-        Transaction nonMatching = this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME,
-                new BigDecimal(1000), now, this.wallet);
+        Transaction matching = this.persistSimpleTransaction(
+                "groceries shopping", TransactionTypeEnum.OUTCOME, new BigDecimal(-10), now, this.wallet);
+        Transaction nonMatching = this.persistSimpleTransaction(
+                "salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
-        List<Transaction> result = transactionService
-                .getHistoryPageData(new TransactionFilter("groceries", now, null));
+        List<Transaction> result = transactionService.getHistoryPageData(new TransactionFilter("groceries", now, null));
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());
@@ -526,13 +558,13 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     void getHistoryPageData_filtersTransactionsById() {
         var now = LocalDate.now();
 
-        Transaction matching = this.persistSimpleTransaction("groceries shopping", TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-10), now, this.wallet);
-        Transaction nonMatching = this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME,
-                new BigDecimal(1000), now, this.wallet);
+        Transaction matching = this.persistSimpleTransaction(
+                "groceries shopping", TransactionTypeEnum.OUTCOME, new BigDecimal(-10), now, this.wallet);
+        Transaction nonMatching = this.persistSimpleTransaction(
+                "salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
-        List<Transaction> result = transactionService
-                .getHistoryPageData(new TransactionFilter(null, now, matching.getId()));
+        List<Transaction> result =
+                transactionService.getHistoryPageData(new TransactionFilter(null, now, matching.getId()));
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());
@@ -547,8 +579,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
      */
     @Test
     void deleteTransaction_softDeletesTransactionForOwner() {
-        Transaction transaction = this.persistSimpleTransaction("toDelete", TransactionTypeEnum.INCOME,
-                new BigDecimal(100), LocalDate.now(), this.wallet);
+        Transaction transaction = this.persistSimpleTransaction(
+                "toDelete", TransactionTypeEnum.INCOME, new BigDecimal(100), LocalDate.now(), this.wallet);
 
         transactionService.deleteTransaction(transaction.getId());
 
@@ -564,12 +596,12 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
      * Segédfüggvény: egyszerű, egy detailos tranzakció létrehozásához és
      * elmentéséhez
      */
-    private Transaction persistSimpleTransaction(String name, TransactionTypeEnum type, BigDecimal price,
-            LocalDate date, Wallet wallet) {
-        TransactionDetailSaveCommand detail = new TransactionDetailSaveCommand(
-                TransactionDetail.DEFAULT_DETAIL_NAME, price, List.of(), type);
-        TransactionSaveCommand command = new TransactionSaveCommand(name, null, date, type, List.of(detail),
-                List.of(), wallet.getId());
+    private Transaction persistSimpleTransaction(
+            String name, TransactionTypeEnum type, BigDecimal price, LocalDate date, Wallet wallet) {
+        TransactionDetailSaveCommand detail =
+                new TransactionDetailSaveCommand(TransactionDetail.DEFAULT_DETAIL_NAME, price, List.of(), type);
+        TransactionSaveCommand command =
+                new TransactionSaveCommand(name, null, date, type, List.of(detail), List.of(), wallet.getId());
 
         return transactionService.createTransaction(command);
     }

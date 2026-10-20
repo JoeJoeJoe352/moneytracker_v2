@@ -29,14 +29,14 @@ public class TransactionFactory {
      * @param balanceOfWalletInDb a wallet db-ben nyilvántartott egyenlege
      * @param date                a tranzakció dátuma (a szinkronizálás napja)
      */
-    public TransactionSaveCommand createTransactionEntryFromBalanceChange(Wallet wallet, BigDecimal balanceFromUser,
-            BigDecimal balanceOfWalletInDb, LocalDate date) {
+    public TransactionSaveCommand createTransactionEntryFromBalanceChange(
+            Wallet wallet, BigDecimal balanceFromUser, BigDecimal balanceOfWalletInDb, LocalDate date) {
 
         if (wallet == null || balanceFromUser == null || balanceOfWalletInDb == null || date == null) {
             throw new IllegalArgumentException("wallet, balanceFromUser, balanceOfWalletInDb or date is null");
         }
-        String transactionNamePrefixLocalised = messageSource.getMessage("synchronizeTransactionNamePrefix", null,
-                LocaleContextHolder.getLocale());
+        String transactionNamePrefixLocalised =
+                messageSource.getMessage("synchronizeTransactionNamePrefix", null, LocaleContextHolder.getLocale());
         String transactionName = transactionNamePrefixLocalised + ": " + wallet.getName();
 
         var differenceFromActualBalance = balanceFromUser.subtract(balanceOfWalletInDb);
@@ -48,8 +48,8 @@ public class TransactionFactory {
 
         TransactionTypeEnum type = differenceFromZero > 0 ? TransactionTypeEnum.INCOME : TransactionTypeEnum.OUTCOME;
 
-        return new TransactionSaveCommand(transactionName, differenceFromActualBalance,
-                date, type, List.of(), List.of(), wallet.getId())
+        return new TransactionSaveCommand(
+                        transactionName, differenceFromActualBalance, date, type, List.of(), List.of(), wallet.getId())
                 .withSpecialType(TransactionSpecialTypeEnum.SYNC);
     }
 }

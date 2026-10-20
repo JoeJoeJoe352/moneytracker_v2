@@ -2,11 +2,13 @@ package com.starbuck.moneytracker.config;
 
 import java.io.IOException;
 import java.util.Arrays;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.service.JwtService;
 import com.starbuck.moneytracker.service.UserLookupService;
@@ -25,16 +27,14 @@ import jakarta.servlet.http.HttpServletResponse;
  * Requestenként egyszer lefutó filter
  */
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter{
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     /** Token validálása + username kiolvasás */
     private final JwtService jwtService;
+
     private final UserLookupService userLookupService;
 
-    public JwtAuthenticationFilter(
-        JwtService jwtService,
-        UserLookupService userLookupService
-    ) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserLookupService userLookupService) {
         this.jwtService = jwtService;
         this.userLookupService = userLookupService;
     }
@@ -49,22 +49,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         // Pl.: postmanben a cookies az üres
         if (cookies != null) {
             jwt = Arrays.stream(cookies)
-                .filter(cookie -> CookieUtil.AUTH_COOKIE_NAME.equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
+                    .filter(cookie -> CookieUtil.AUTH_COOKIE_NAME.equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
         }
         if (jwt == null) {
-            // Ha nincs authentikációs süti, akkor továbbengedi a requestet. A nem kivételes végpontoknál így nem lesz hiba
+            // Ha nincs authentikációs süti, akkor továbbengedi a requestet. A nem kivételes végpontoknál így nem lesz
+            // hiba
             // A többi végpontnál viszont ettől még az lesz
             filterChain.doFilter(request, response);
-            return; 
+            return;
         }
 
         String email = null;
         try {
             email = jwtService.extractEmail(jwt);
-        } catch(ExpiredJwtException |SignatureException | MalformedJwtException exception) {
+        } catch (ExpiredJwtException | SignatureException | MalformedJwtException exception) {
             // lejárt, vagy rossz a token, nem gond, majd bejelentkezik a user újból
             filterChain.doFilter(request, response);
             return;
@@ -76,11 +77,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
             if (jwtService.isTokenValid(jwt, user)) {
                 // Security context feltöltése a userdetails alapján
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken (
-                        user,
-                        null,
-                        user.getAuthorities()
-                    );
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 // beállítja a securitycontextbe a user adatokat
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

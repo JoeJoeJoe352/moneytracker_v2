@@ -21,5 +21,4 @@ public record WalletListRowResponseDto(
         WalletTypeEnum type,
         BigDecimal sum,
         Instant lastSyncedAt,
-        LocalDateTime createdAt) {
-}
+        LocalDateTime createdAt) {}

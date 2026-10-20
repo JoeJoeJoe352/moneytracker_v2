@@ -13,7 +13,7 @@ public class CostCalculatorDomainService {
      * Kiszámolja egy TransactionDetail költségét.
      * - Ha weight + unitPrice meg van adva → kiszámolja, majd a tranzakció típusára
      * (income/outcome) bízza az előjel eldöntését
-     * 
+     *
      * - Ha nincs akkor a price-t próbálja meg visszaadni
      * - Minden eredmény scale=2, HALF_UP
      */
@@ -28,9 +28,8 @@ public class CostCalculatorDomainService {
         }
 
         if (command.isComplexPriceMode()) {
-            BigDecimal cost = command.getWeight()
-                    .multiply(command.getUnitPrice())
-                    .setScale(2, RoundingMode.HALF_UP);
+            BigDecimal cost =
+                    command.getWeight().multiply(command.getUnitPrice()).setScale(2, RoundingMode.HALF_UP);
 
             return type.applySign(cost);
         }
@@ -38,7 +37,6 @@ public class CostCalculatorDomainService {
         // Db-ben két tizedesjegyre lesz szűkítve, de ha nem volt még mentve, akkor
         // jobb, ha forceoljuk a két tizedesjegyet
         return command.getPrice().setScale(2, RoundingMode.HALF_UP);
-
     }
 
     /**
@@ -52,6 +50,7 @@ public class CostCalculatorDomainService {
 
         return command.getDetailCommands().stream()
                 .map((detail) -> this.calculateCost(detail, command.getTransactionType()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP);
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 }

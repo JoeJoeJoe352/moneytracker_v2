@@ -14,15 +14,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -74,7 +74,7 @@ public class Transaction {
 
     /**
      * Törölt-e a tranzakció
-     * 
+     *
      * @return boolean
      */
     public boolean isDeleted() {
@@ -83,7 +83,7 @@ public class Transaction {
 
     /**
      * Szinkronizáció során létrejött tranzakció-e
-     * 
+     *
      * @return boolean
      */
     public boolean isSyncTransaction() {
@@ -93,7 +93,7 @@ public class Transaction {
     /**
      * Meghatározza, hogy a tranzakció komplex-e, azaz több tételből áll-e, vagy egy
      * tétel van, de annak a neve kézzel lett felvéve
-     * 
+     *
      * @return boolean
      */
     public boolean isComplexTransaction() {
@@ -111,7 +111,7 @@ public class Transaction {
 
     /**
      * Kiadás-e az adott tranzakció
-     * 
+     *
      * @return boolean
      */
     public boolean isOutcome() {
@@ -120,11 +120,16 @@ public class Transaction {
 
     // AUTOMATIKUSAN GENERÁLT
 
-    public Transaction() {
-    }
+    public Transaction() {}
 
-    public Transaction(Long id, String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
-            BigDecimal priceSum, int status, Wallet wallet) {
+    public Transaction(
+            Long id,
+            String name,
+            LocalDate transactionDate,
+            TransactionTypeEnum transactionType,
+            BigDecimal priceSum,
+            int status,
+            Wallet wallet) {
         this.id = id;
         this.name = name;
         this.transactionDate = transactionDate;
@@ -134,8 +139,12 @@ public class Transaction {
         this.wallet = wallet;
     }
 
-    public Transaction(String name, LocalDate transactionDate, TransactionTypeEnum transactionType,
-            BigDecimal priceSum, Wallet wallet) {
+    public Transaction(
+            String name,
+            LocalDate transactionDate,
+            TransactionTypeEnum transactionType,
+            BigDecimal priceSum,
+            Wallet wallet) {
         this.name = name;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;

@@ -12,16 +12,10 @@ import com.starbuck.moneytracker.entity.Category;
 public class CategoryMapper {
 
     public CategoryResponseDto toDto(Category category) {
-        return new CategoryResponseDto(
-                category.getId(),
-                category.getName(),
-                category.isDefaultCategory()
-            );
+        return new CategoryResponseDto(category.getId(), category.getName(), category.isDefaultCategory());
     }
 
     public List<CategoryResponseDto> toDtoList(List<Category> entities) {
-        return entities.stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+        return entities.stream().map(this::toDto).collect(Collectors.toList());
     }
 }

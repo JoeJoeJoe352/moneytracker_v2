@@ -77,15 +77,15 @@ class TransactionE2ETest extends MySqlContainerTest {
 
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eTxUser", "password123",
-                "e2etx@email.com");
+        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eTxUser", "password123", "e2etx@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
         LoginRequestDto loginRequest = new LoginRequestDto("e2etx@email.com", "password123");
-        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login",
+        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange(
+                "/auth/login",
                 HttpMethod.POST,
-                new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
-                });
+                new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<Map<String, String>>() {});
         String setCookieHeader = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
@@ -112,10 +112,10 @@ class TransactionE2ETest extends MySqlContainerTest {
      * végponton keresztül, és visszaadja az adatbázisban kapott id-jét
      */
     private Long createTransactionViaApi(String name, TransactionTypeEnum type, BigDecimal price, LocalDate date) {
-        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(price, "teszt", null, null,
-                List.of());
-        TransactionCreateRequest request = new TransactionCreateRequest(name, null, type, date, List.of(detail),
-                List.of(), this.wallet.getId());
+        TransactionDetailCreateRequestDto detail =
+                new TransactionDetailCreateRequestDto(price, "teszt", null, null, List.of());
+        TransactionCreateRequest request =
+                new TransactionCreateRequest(name, null, type, date, List.of(detail), List.of(), this.wallet.getId());
 
         restTemplate.postForEntity("/transaction", new HttpEntity<>(request, headers), Void.class);
 
@@ -136,25 +136,30 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void updateTransaction_updatesExistingTransactionForOwner() {
-        Long id = createTransactionViaApi("Original", TransactionTypeEnum.INCOME, new BigDecimal("100.00"),
-                LocalDate.now(ZoneOffset.UTC));
+        Long id = createTransactionViaApi(
+                "Original", TransactionTypeEnum.INCOME, new BigDecimal("100.00"), LocalDate.now(ZoneOffset.UTC));
 
         // mostantól két detail lesz, amik közül az egyik komplex
-        TransactionDetailCreateRequestDto updatedDetail = new TransactionDetailCreateRequestDto(null, "detail1",
-                new BigDecimal("0.75"), new BigDecimal("200"), List.of());
-        TransactionDetailCreateRequestDto updatedDetail2 = new TransactionDetailCreateRequestDto(new BigDecimal("-200"), "detail2",
-                null, null, List.of());
-        TransactionCreateRequest updateRequest = new TransactionCreateRequest("Updated", null,
-                TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 1, 1), List.of(updatedDetail, updatedDetail2),
-                List.of(), this.wallet.getId());
+        TransactionDetailCreateRequestDto updatedDetail = new TransactionDetailCreateRequestDto(
+                null, "detail1", new BigDecimal("0.75"), new BigDecimal("200"), List.of());
+        TransactionDetailCreateRequestDto updatedDetail2 =
+                new TransactionDetailCreateRequestDto(new BigDecimal("-200"), "detail2", null, null, List.of());
+        TransactionCreateRequest updateRequest = new TransactionCreateRequest(
+                "Updated",
+                null,
+                TransactionTypeEnum.OUTCOME,
+                LocalDate.of(2026, 1, 1),
+                List.of(updatedDetail, updatedDetail2),
+                List.of(),
+                this.wallet.getId());
 
-        ResponseEntity<Void> updateResponse = restTemplate.exchange("/transaction/" + id, HttpMethod.PUT,
-                new HttpEntity<>(updateRequest, headers), Void.class);
+        ResponseEntity<Void> updateResponse = restTemplate.exchange(
+                "/transaction/" + id, HttpMethod.PUT, new HttpEntity<>(updateRequest, headers), Void.class);
 
         assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
 
-        ResponseEntity<TransactionResponseDto> getResponse = restTemplate.exchange("/transaction/" + id,
-                HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto.class);
+        ResponseEntity<TransactionResponseDto> getResponse = restTemplate.exchange(
+                "/transaction/" + id, HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto.class);
 
         TransactionResponseDto transactionDto = getResponse.getBody();
         assertEquals("Updated", transactionDto.name());
@@ -176,7 +181,6 @@ class TransactionE2ETest extends MySqlContainerTest {
         assertEquals(null, detailUpdate2.weight());
         assertEquals(null, detailUpdate2.unitPrice());
         assertFalse(detailUpdate2.isComplexPriceMode());
-
     }
 
     /**
@@ -184,14 +188,19 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void updateTransaction_returnsNotFoundForNonexistentId() {
-        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("10.00"), "teszt",
+        TransactionDetailCreateRequestDto detail =
+                new TransactionDetailCreateRequestDto(new BigDecimal("10.00"), "teszt", null, null, List.of());
+        TransactionCreateRequest updateRequest = new TransactionCreateRequest(
+                "Doesn't matter",
                 null,
-                null, List.of());
-        TransactionCreateRequest updateRequest = new TransactionCreateRequest("Doesn't matter", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(ZoneOffset.UTC), List.of(detail), List.of(), this.wallet.getId());
+                TransactionTypeEnum.INCOME,
+                LocalDate.now(ZoneOffset.UTC),
+                List.of(detail),
+                List.of(),
+                this.wallet.getId());
 
-        ResponseEntity<Void> response = restTemplate.exchange("/transaction/999999", HttpMethod.PUT,
-                new HttpEntity<>(updateRequest, headers), Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/transaction/999999", HttpMethod.PUT, new HttpEntity<>(updateRequest, headers), Void.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -204,13 +213,13 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void sumAllMoney_returnsAggregatedSumsForUser() {
-        createTransactionViaApi("Salary", TransactionTypeEnum.INCOME, new BigDecimal("1000.00"),
-                LocalDate.now(ZoneOffset.UTC));
-        createTransactionViaApi("Rent", TransactionTypeEnum.OUTCOME, new BigDecimal("-400.00"),
-                LocalDate.now(ZoneOffset.UTC));
+        createTransactionViaApi(
+                "Salary", TransactionTypeEnum.INCOME, new BigDecimal("1000.00"), LocalDate.now(ZoneOffset.UTC));
+        createTransactionViaApi(
+                "Rent", TransactionTypeEnum.OUTCOME, new BigDecimal("-400.00"), LocalDate.now(ZoneOffset.UTC));
 
-        ResponseEntity<MoneySumResponseDto> response = restTemplate.exchange("/transaction/sum", HttpMethod.GET,
-                new HttpEntity<>(headers), MoneySumResponseDto.class);
+        ResponseEntity<MoneySumResponseDto> response = restTemplate.exchange(
+                "/transaction/sum", HttpMethod.GET, new HttpEntity<>(headers), MoneySumResponseDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         MoneySumResponseDto sums = response.getBody();
@@ -228,12 +237,12 @@ class TransactionE2ETest extends MySqlContainerTest {
     @Test
     void getLastTransactions_limitsResultToFiveNewest() {
         for (int i = 0; i < 6; i++) {
-            createTransactionViaApi("last" + i, TransactionTypeEnum.INCOME, new BigDecimal("10.00"),
-                    LocalDate.now(ZoneOffset.UTC));
+            createTransactionViaApi(
+                    "last" + i, TransactionTypeEnum.INCOME, new BigDecimal("10.00"), LocalDate.now(ZoneOffset.UTC));
         }
 
-        ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange("/transaction/last",
-                HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
+        ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange(
+                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(5, response.getBody().length);
@@ -246,11 +255,11 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void getTransactionById_returnsTransactionWithDetails() {
-        Long id = createTransactionViaApi("Groceries", TransactionTypeEnum.OUTCOME, new BigDecimal("-75.00"),
-                LocalDate.now(ZoneOffset.UTC));
+        Long id = createTransactionViaApi(
+                "Groceries", TransactionTypeEnum.OUTCOME, new BigDecimal("-75.00"), LocalDate.now(ZoneOffset.UTC));
 
-        ResponseEntity<TransactionResponseDto> response = restTemplate.exchange("/transaction/" + id,
-                HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto.class);
+        ResponseEntity<TransactionResponseDto> response = restTemplate.exchange(
+                "/transaction/" + id, HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         TransactionResponseDto dto = response.getBody();
@@ -266,8 +275,8 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void getTransactionById_returnsNotFoundForNonexistentId() {
-        ResponseEntity<Void> response = restTemplate.exchange("/transaction/999999", HttpMethod.GET,
-                new HttpEntity<>(headers), Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.exchange("/transaction/999999", HttpMethod.GET, new HttpEntity<>(headers), Void.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -280,15 +289,15 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void deleteTransactionById_removesTransactionFromFutureQueries() {
-        Long id = createTransactionViaApi("ToDelete", TransactionTypeEnum.INCOME, new BigDecimal("20.00"),
-                LocalDate.now(ZoneOffset.UTC));
+        Long id = createTransactionViaApi(
+                "ToDelete", TransactionTypeEnum.INCOME, new BigDecimal("20.00"), LocalDate.now(ZoneOffset.UTC));
 
-        ResponseEntity<Void> deleteResponse = restTemplate.exchange("/transaction/" + id, HttpMethod.DELETE,
-                new HttpEntity<>(headers), Void.class);
+        ResponseEntity<Void> deleteResponse =
+                restTemplate.exchange("/transaction/" + id, HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
         assertEquals(HttpStatus.OK, deleteResponse.getStatusCode());
 
-        ResponseEntity<Void> getResponse = restTemplate.exchange("/transaction/" + id, HttpMethod.GET,
-                new HttpEntity<>(headers), Void.class);
+        ResponseEntity<Void> getResponse =
+                restTemplate.exchange("/transaction/" + id, HttpMethod.GET, new HttpEntity<>(headers), Void.class);
         assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode());
     }
 
@@ -298,8 +307,8 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void deleteTransactionById_returnsNotFoundForNonexistentId() {
-        ResponseEntity<Void> response = restTemplate.exchange("/transaction/999999", HttpMethod.DELETE,
-                new HttpEntity<>(headers), Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.exchange("/transaction/999999", HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -311,13 +320,18 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void listTransactionHistory_filtersByName() {
-        createTransactionViaApi("Groceries shopping", TransactionTypeEnum.OUTCOME, new BigDecimal("-30.00"),
+        createTransactionViaApi(
+                "Groceries shopping",
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-30.00"),
                 LocalDate.now(ZoneOffset.UTC));
-        createTransactionViaApi("Salary payment", TransactionTypeEnum.INCOME, new BigDecimal("2000.00"),
-                LocalDate.now(ZoneOffset.UTC));
+        createTransactionViaApi(
+                "Salary payment", TransactionTypeEnum.INCOME, new BigDecimal("2000.00"), LocalDate.now(ZoneOffset.UTC));
 
         ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange(
-                "/transaction/history?name=groceries", HttpMethod.GET, new HttpEntity<>(headers),
+                "/transaction/history?name=groceries",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
                 TransactionResponseDto[].class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -330,11 +344,13 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void listTransactionHistory_returnsAllTransactionsWithoutFilter() {
-        createTransactionViaApi("first", TransactionTypeEnum.INCOME, new BigDecimal("10.00"), LocalDate.now(ZoneOffset.UTC));
-        createTransactionViaApi("second", TransactionTypeEnum.INCOME, new BigDecimal("20.00"), LocalDate.now(ZoneOffset.UTC));
+        createTransactionViaApi(
+                "first", TransactionTypeEnum.INCOME, new BigDecimal("10.00"), LocalDate.now(ZoneOffset.UTC));
+        createTransactionViaApi(
+                "second", TransactionTypeEnum.INCOME, new BigDecimal("20.00"), LocalDate.now(ZoneOffset.UTC));
 
-        ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange("/transaction/history",
-                HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
+        ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange(
+                "/transaction/history", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().length);

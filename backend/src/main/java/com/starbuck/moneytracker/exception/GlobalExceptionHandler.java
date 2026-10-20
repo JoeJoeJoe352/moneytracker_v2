@@ -1,7 +1,7 @@
 package com.starbuck.moneytracker.exception;
 
-import java.util.HashMap;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
- 
+
 import tools.jackson.databind.exc.InvalidFormatException;
 
 @RestControllerAdvice
@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * 
+     *
      * Ez a handler a @Valid annotációval jelölt mezők validációs hibáit kezeli, és
      * egy map-ben adja vissza a mezőneveket és a hibaüzeneteket.
      */
@@ -34,7 +34,8 @@ public class GlobalExceptionHandler {
 
         Map<String, String> errors = new HashMap<>();
 
-        ex.getBindingResult().getFieldErrors()
+        ex.getBindingResult()
+                .getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
         return ResponseEntity.badRequest().body(errors);
@@ -47,8 +48,10 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleUnreadableMessage(HttpMessageNotReadableException ex) {
-        if (ex.getCause() instanceof InvalidFormatException invalidFormat && invalidFormat.getTargetType().isEnum()) {
-            String acceptedValues = Arrays.toString(invalidFormat.getTargetType().getEnumConstants());
+        if (ex.getCause() instanceof InvalidFormatException invalidFormat
+                && invalidFormat.getTargetType().isEnum()) {
+            String acceptedValues =
+                    Arrays.toString(invalidFormat.getTargetType().getEnumConstants());
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "not one of the values accepted for Enum class: " + acceptedValues));
         }
@@ -78,7 +81,7 @@ public class GlobalExceptionHandler {
      * Service/domain rétegben eldobott validációs hibák (pl. rossz tranzakció
      * adatok, foglalt username)
      */
-    @ExceptionHandler({ IllegalArgumentException.class, IllegalStateException.class })
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     public ResponseEntity<Map<String, String>> handleBadRequest(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
     }
@@ -120,7 +123,8 @@ public class GlobalExceptionHandler {
         if (ex instanceof ErrorResponse errorResponse) {
             String detail = errorResponse.getBody().getDetail();
             return ResponseEntity.status(errorResponse.getStatusCode())
-                    .body(Map.of("message", detail != null ? detail : ex.getClass().getSimpleName()));
+                    .body(Map.of(
+                            "message", detail != null ? detail : ex.getClass().getSimpleName()));
         }
         logger.error("Unhandled exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -31,5 +31,4 @@ public class CreateWalletCommand extends AbstractWalletSaveCommand {
     public User getUser() {
         return user;
     }
-
 }

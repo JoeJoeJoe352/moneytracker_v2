@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 import jakarta.persistence.criteria.CriteriaBuilder;

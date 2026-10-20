@@ -15,13 +15,12 @@ import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
-
-import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @Service
 public class TransactionService {
@@ -34,8 +33,12 @@ public class TransactionService {
 
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
-    public TransactionService(TransactionRepository transactionRepo, TransactionDetailService transactionDetailService,
-            CurrentUserUtil currentUser, WalletService walletService, BalanceSyncRepository balanceSyncRepo) {
+    public TransactionService(
+            TransactionRepository transactionRepo,
+            TransactionDetailService transactionDetailService,
+            CurrentUserUtil currentUser,
+            WalletService walletService,
+            BalanceSyncRepository balanceSyncRepo) {
         this.transactionRepo = transactionRepo;
         this.transactionDetailService = transactionDetailService;
         this.currentUser = currentUser;
@@ -65,7 +68,7 @@ public class TransactionService {
 
     /**
      * Frissíti a user adott id-jú tranzakcióját.
-     * 
+     *
      * @param id
      * @param updateCommand
      */
@@ -126,20 +129,21 @@ public class TransactionService {
 
     /**
      * Lekéri az adott id-jú tranzakcióját a usernek
-     * 
+     *
      * @throws EntityNotFoundException, ha nincs találat
      * @param transactionId
      * @return
      */
     public Transaction getTransactionByIdForActualUser(Long transactionId) {
         return this.transactionRepo
-                .getTransactionByIdWithDetails(transactionId, currentUser.getUser().getId())
+                .getTransactionByIdWithDetails(
+                        transactionId, currentUser.getUser().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
     }
 
     /**
      * Visszatér az utolsó x darab tranzakció objektummal
-     * 
+     *
      * @return List<Transaction>
      */
     public List<Transaction> getLastTransactions() {
@@ -148,7 +152,7 @@ public class TransactionService {
 
     /**
      * Visszatér a tranzakciók oldal adataival
-     * 
+     *
      * @param filter
      * @return
      */
@@ -158,7 +162,7 @@ public class TransactionService {
 
     /**
      * Listázza a kapott feltételek alapján a tranzakciókat, adott user számára
-     * 
+     *
      * @param TransactionFilter filter
      * @return
      */
@@ -169,11 +173,9 @@ public class TransactionService {
 
         Specification<Transaction> filterConditions = null;
         if (filter != null) {
-            filterConditions = Specification
-                    .where(TransactionSpecifications.hasName(filter.name()))
+            filterConditions = Specification.where(TransactionSpecifications.hasName(filter.name()))
                     .and(TransactionSpecifications.hasDate(filter.dateString())
-                    .and(TransactionSpecifications.hasTransactionId(filter.transactionId()))
-                );
+                            .and(TransactionSpecifications.hasTransactionId(filter.transactionId())));
         }
 
         HistoryQueryHelperDto dto = new HistoryQueryHelperDto(limit, sort, filterConditions);
@@ -183,7 +185,7 @@ public class TransactionService {
 
     /**
      * Törli a tranzakciót (soft delete).
-     * 
+     *
      * @param transactionId
      */
     @Transactional
@@ -191,12 +193,14 @@ public class TransactionService {
         // getTransactionByIdForActualUser itt nem használható, mert itt feleslegesen
         // töltené be a detailokat
         Long userId = currentUser.getUser().getId();
-        Transaction transaction = this.transactionRepo.findById(transactionId)
+        Transaction transaction = this.transactionRepo
+                .findById(transactionId)
                 .filter(t -> t.getWallet().getUser().getId().equals(userId))
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
 
         if (transaction.isSyncTransaction()) {
-            var balanceSync = balanceSyncRepo.findBySyncTransactionId(transaction.getId())
+            var balanceSync = balanceSyncRepo
+                    .findBySyncTransactionId(transaction.getId())
                     .orElseThrow(() -> new IllegalStateException(
                             "Transaction " + transactionId + " is a sync transaction, but has no BalanceSync"));
 

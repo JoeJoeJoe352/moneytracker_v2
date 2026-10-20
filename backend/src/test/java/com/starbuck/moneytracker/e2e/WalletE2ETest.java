@@ -74,14 +74,16 @@ class WalletE2ETest extends MySqlContainerTest {
 
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eWalletUser", "password123",
-                "e2ewallet@email.com");
+        RegisterRequestDto registerRequest =
+                new RegisterRequestDto("e2eWalletUser", "password123", "e2ewallet@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
         LoginRequestDto loginRequest = new LoginRequestDto("e2ewallet@email.com", "password123");
-        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login", HttpMethod.POST,
-                new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
-                });
+        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange(
+                "/auth/login",
+                HttpMethod.POST,
+                new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<Map<String, String>>() {});
         String setCookieHeader = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
@@ -101,7 +103,8 @@ class WalletE2ETest extends MySqlContainerTest {
                 .filter(wallet -> wallet.getUser().getId().equals(userId))
                 .forEach(wallet -> balanceSyncRepository.hardDeleteAllForWallet(wallet.getId()));
         transactionDetailRepository.findAll().stream()
-                .filter(detail -> detail.getTransaction().getWallet().getUser().getId().equals(userId))
+                .filter(detail ->
+                        detail.getTransaction().getWallet().getUser().getId().equals(userId))
                 .forEach(transactionDetailRepository::delete);
         transactionRepository.findAll().stream()
                 .filter(transaction -> transaction.getWallet().getUser().getId().equals(userId))
@@ -120,16 +123,19 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void createWallet_createsWalletForAuthenticatedUser() {
-        WalletCreateRequestDto request = new WalletCreateRequestDto("Savings", CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
+        WalletCreateRequestDto request =
+                new WalletCreateRequestDto("Savings", CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
 
-        ResponseEntity<Void> response = restTemplate.postForEntity("/wallet", new HttpEntity<>(request, headers),
-                Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity("/wallet", new HttpEntity<>(request, headers), Void.class);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         List<Wallet> wallets = walletRepository.findByUserId(this.user.getId());
-        assertTrue(wallets.stream().anyMatch(w -> w.getName().equals("Savings")
-                && w.getType() == WalletTypeEnum.SAVINGS && w.getCurrencyCode() == CurrencyEnum.USD));
+        assertTrue(wallets.stream()
+                .anyMatch(w -> w.getName().equals("Savings")
+                        && w.getType() == WalletTypeEnum.SAVINGS
+                        && w.getCurrencyCode() == CurrencyEnum.USD));
     }
 
     /**
@@ -140,8 +146,8 @@ class WalletE2ETest extends MySqlContainerTest {
     void createWallet_returnsBadRequestWhenNameIsMissing() {
         WalletCreateRequestDto request = new WalletCreateRequestDto(null, CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
 
-        ResponseEntity<Void> response = restTemplate.postForEntity("/wallet", new HttpEntity<>(request, headers),
-                Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity("/wallet", new HttpEntity<>(request, headers), Void.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -154,18 +160,19 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void listWallets_returnsOnlyAuthenticatedUsersWallets() {
-        WalletCreateRequestDto createRequest = new WalletCreateRequestDto("Savings", CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
+        WalletCreateRequestDto createRequest =
+                new WalletCreateRequestDto("Savings", CurrencyEnum.USD, WalletTypeEnum.SAVINGS);
         restTemplate.postForEntity("/wallet", new HttpEntity<>(createRequest, headers), Void.class);
 
         User otherUser = new User("e2eOtherWalletUser", "irrelevantEncodedPassword", "otherwallet@email.com");
         otherUser.generateUuid();
         otherUser = userRepository.save(otherUser);
-        Wallet otherUsersWallet = walletRepository
-                .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        Wallet otherUsersWallet = walletRepository.save(
+                new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
         try {
-            ResponseEntity<WalletListResponseDto[]> response = restTemplate.exchange("/wallet", HttpMethod.GET,
-                    new HttpEntity<>(headers), WalletListResponseDto[].class);
+            ResponseEntity<WalletListResponseDto[]> response = restTemplate.exchange(
+                    "/wallet", HttpMethod.GET, new HttpEntity<>(headers), WalletListResponseDto[].class);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             List<WalletListResponseDto> wallets = List.of(response.getBody());
@@ -186,11 +193,12 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void updateWallet_updatesNameAndType() {
-        Wallet wallet = walletRepository.save(new Wallet("Savings", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
+        Wallet wallet =
+                walletRepository.save(new Wallet("Savings", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
         WalletUpdateRequestDto updateRequest = new WalletUpdateRequestDto("UpdatedSavings", WalletTypeEnum.DEFAULT);
 
-        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId(), HttpMethod.PUT,
-                new HttpEntity<>(updateRequest, headers), Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/wallet/" + wallet.getId(), HttpMethod.PUT, new HttpEntity<>(updateRequest, headers), Void.class);
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
 
@@ -205,20 +213,24 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void updateWallet_returnsNotFoundForOtherUsersWallet() {
-        User otherUser = new User("e2eOtherUpdateWalletUser", "irrelevantEncodedPassword",
-                "otherupdatewallet@email.com");
+        User otherUser =
+                new User("e2eOtherUpdateWalletUser", "irrelevantEncodedPassword", "otherupdatewallet@email.com");
         otherUser.generateUuid();
         otherUser = userRepository.save(otherUser);
-        Wallet otherUsersWallet = walletRepository
-                .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        Wallet otherUsersWallet = walletRepository.save(
+                new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
         WalletUpdateRequestDto updateRequest = new WalletUpdateRequestDto("Hacked", WalletTypeEnum.DEFAULT);
 
         try {
-            ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + otherUsersWallet.getId(),
-                    HttpMethod.PUT, new HttpEntity<>(updateRequest, headers), Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    "/wallet/" + otherUsersWallet.getId(),
+                    HttpMethod.PUT,
+                    new HttpEntity<>(updateRequest, headers),
+                    Void.class);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-            Wallet unchangedWallet = walletRepository.findById(otherUsersWallet.getId()).orElseThrow();
+            Wallet unchangedWallet =
+                    walletRepository.findById(otherUsersWallet.getId()).orElseThrow();
             assertEquals("OtherUsersWallet", unchangedWallet.getName());
         } finally {
             walletRepository.delete(otherUsersWallet);
@@ -234,20 +246,21 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void softDeleteWallet_disablesWalletAndHidesItFromQueries() {
-        Wallet wallet = walletRepository.save(new Wallet("Savings", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
+        Wallet wallet =
+                walletRepository.save(new Wallet("Savings", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
         // Csak akkor lehet törölni walletet, ha legalább kettő van
         walletRepository.save(new Wallet("SecondWallet", this.user, CurrencyEnum.USD, WalletTypeEnum.SAVINGS));
 
-        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId(), HttpMethod.DELETE,
-                new HttpEntity<>(headers), Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/wallet/" + wallet.getId(), HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 
         Wallet deletedWallet = walletRepository.findById(wallet.getId()).orElseThrow();
         assertEquals(GeneralStatusEnum.DISABLED, deletedWallet.getStatus());
 
-        ResponseEntity<WalletListResponseDto[]> listResponse = restTemplate.exchange("/wallet", HttpMethod.GET,
-                new HttpEntity<>(headers), WalletListResponseDto[].class);
+        ResponseEntity<WalletListResponseDto[]> listResponse = restTemplate.exchange(
+                "/wallet", HttpMethod.GET, new HttpEntity<>(headers), WalletListResponseDto[].class);
         assertEquals(HttpStatus.OK, listResponse.getStatusCode());
         assertFalse(Stream.of(listResponse.getBody()).anyMatch(w -> w.id().equals(wallet.getId())));
     }
@@ -258,19 +271,20 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void softDeleteWallet_returnsNotFoundForOtherUsersWallet() {
-        User otherUser = new User("e2eOtherDeleteWalletUser", "irrelevantEncodedPassword",
-                "otherdeletewallet@email.com");
+        User otherUser =
+                new User("e2eOtherDeleteWalletUser", "irrelevantEncodedPassword", "otherdeletewallet@email.com");
         otherUser.generateUuid();
         otherUser = userRepository.save(otherUser);
-        Wallet otherUsersWallet = walletRepository
-                .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        Wallet otherUsersWallet = walletRepository.save(
+                new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
         try {
-            ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + otherUsersWallet.getId(),
-                    HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    "/wallet/" + otherUsersWallet.getId(), HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-            Wallet unchangedWallet = walletRepository.findById(otherUsersWallet.getId()).orElseThrow();
+            Wallet unchangedWallet =
+                    walletRepository.findById(otherUsersWallet.getId()).orElseThrow();
             assertEquals(GeneralStatusEnum.ACTIVE, unchangedWallet.getStatus());
         } finally {
             walletRepository.delete(otherUsersWallet);
@@ -289,8 +303,8 @@ class WalletE2ETest extends MySqlContainerTest {
         Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
         Map<String, Object> request = Map.of("currentBalance", new BigDecimal("25.50"));
 
-        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
-                HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/wallet/" + wallet.getId() + "/sync", HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(1, countSyncsForWallet(wallet));
@@ -306,8 +320,8 @@ class WalletE2ETest extends MySqlContainerTest {
         Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
         Map<String, Object> request = Map.of("currentBalance", new BigDecimal("-25.50"));
 
-        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
-                HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/wallet/" + wallet.getId() + "/sync", HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(1, countSyncsForWallet(wallet));
@@ -322,8 +336,8 @@ class WalletE2ETest extends MySqlContainerTest {
     void syncWallet_returnsBadRequestForInvalidInput(String description, Map<String, Object> request) {
         Wallet wallet = walletRepository.findByUserId(this.user.getId()).get(0);
 
-        ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + wallet.getId() + "/sync",
-                HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(
+                "/wallet/" + wallet.getId() + "/sync", HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(0, countSyncsForWallet(wallet));
@@ -342,17 +356,19 @@ class WalletE2ETest extends MySqlContainerTest {
      */
     @Test
     void syncWallet_returnsNotFoundForOtherUsersWallet() {
-        User otherUser = new User("e2eOtherSyncWalletUser", "irrelevantEncodedPassword",
-                "othersyncwallet@email.com");
+        User otherUser = new User("e2eOtherSyncWalletUser", "irrelevantEncodedPassword", "othersyncwallet@email.com");
         otherUser.generateUuid();
         otherUser = userRepository.save(otherUser);
-        Wallet otherUsersWallet = walletRepository
-                .save(new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        Wallet otherUsersWallet = walletRepository.save(
+                new Wallet("OtherUsersWallet", otherUser, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
         Map<String, Object> request = Map.of("currentBalance", new BigDecimal("50.00"));
 
         try {
-            ResponseEntity<Void> response = restTemplate.exchange("/wallet/" + otherUsersWallet.getId() + "/sync",
-                    HttpMethod.POST, new HttpEntity<>(request, headers), Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(
+                    "/wallet/" + otherUsersWallet.getId() + "/sync",
+                    HttpMethod.POST,
+                    new HttpEntity<>(request, headers),
+                    Void.class);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
             assertEquals(0, countSyncsForWallet(otherUsersWallet));

@@ -20,8 +20,8 @@ import com.starbuck.moneytracker.util.UserDateUtil;
 public class UserDateUtilTest {
 
     /** UTC szerint 2026-10-01 22:30, ami több zónában már másnap van */
-    private final UserDateUtil userDateUtil = new UserDateUtil(
-            Clock.fixed(Instant.parse("2026-10-01T22:30:00Z"), ZoneOffset.UTC));
+    private final UserDateUtil userDateUtil =
+            new UserDateUtil(Clock.fixed(Instant.parse("2026-10-01T22:30:00Z"), ZoneOffset.UTC));
 
     @AfterEach
     void tearDown() {
@@ -30,11 +30,11 @@ public class UserDateUtilTest {
 
     @ParameterizedTest(name = "{0} -> {1}")
     @CsvSource({
-            "Pacific/Kiritimati, 2026-10-02", // UTC+14
-            "Europe/Budapest, 2026-10-02", // UTC+2 (nyári idő)
-            "UTC, 2026-10-01",
-            "America/New_York, 2026-10-01", // UTC-4
-            "Pacific/Pago_Pago, 2026-10-01" // UTC-11
+        "Pacific/Kiritimati, 2026-10-02", // UTC+14
+        "Europe/Budapest, 2026-10-02", // UTC+2 (nyári idő)
+        "UTC, 2026-10-01",
+        "America/New_York, 2026-10-01", // UTC-4
+        "Pacific/Pago_Pago, 2026-10-01" // UTC-11
     })
     void testTodayUsesUserTimeZone(String zone, LocalDate expected) {
         LocaleContextHolder.setTimeZone(TimeZone.getTimeZone(zone));

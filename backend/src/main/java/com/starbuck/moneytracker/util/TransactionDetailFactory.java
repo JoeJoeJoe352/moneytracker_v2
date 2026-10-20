@@ -22,11 +22,12 @@ public class TransactionDetailFactory {
      * @param savedTransaction
      * @return
      */
-    public List<TransactionDetailSaveCommand> resolveDetailCommands(TransactionSaveCommand createCommand,
-            Transaction savedTransaction) {
+    public List<TransactionDetailSaveCommand> resolveDetailCommands(
+            TransactionSaveCommand createCommand, Transaction savedTransaction) {
         if (createCommand.getDetailCommands().isEmpty()) {
             return List.of(createDefaultDetailSaveCommand(
-                    savedTransaction.getPriceSum(), createCommand.getCategories(),
+                    savedTransaction.getPriceSum(),
+                    createCommand.getCategories(),
                     savedTransaction.getTransactionType()));
         }
         return createCommand.getDetailCommands();
@@ -38,8 +39,8 @@ public class TransactionDetailFactory {
      * @param price
      * @return
      */
-    private TransactionDetailSaveCommand createDefaultDetailSaveCommand(BigDecimal price, List<Long> categories,
-            TransactionTypeEnum type) {
+    private TransactionDetailSaveCommand createDefaultDetailSaveCommand(
+            BigDecimal price, List<Long> categories, TransactionTypeEnum type) {
         return new TransactionDetailSaveCommand(TransactionDetail.DEFAULT_DETAIL_NAME, price, categories, type);
     }
 }

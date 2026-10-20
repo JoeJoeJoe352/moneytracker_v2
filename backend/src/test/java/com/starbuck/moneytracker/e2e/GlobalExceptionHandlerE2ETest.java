@@ -32,8 +32,8 @@ import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 @AutoConfigureTestRestTemplate
 class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
 
-    private static final ParameterizedTypeReference<Map<String, String>> MAP_TYPE = new ParameterizedTypeReference<>() {
-    };
+    private static final ParameterizedTypeReference<Map<String, String>> MAP_TYPE =
+            new ParameterizedTypeReference<>() {};
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -49,13 +49,13 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
 
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eErrorUser", "password123",
-                "e2eerror@email.com");
+        RegisterRequestDto registerRequest =
+                new RegisterRequestDto("e2eErrorUser", "password123", "e2eerror@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
         LoginRequestDto loginRequest = new LoginRequestDto("e2eerror@email.com", "password123");
-        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login", HttpMethod.POST,
-                new HttpEntity<>(loginRequest), MAP_TYPE);
+        ResponseEntity<Map<String, String>> loginResponse =
+                restTemplate.exchange("/auth/login", HttpMethod.POST, new HttpEntity<>(loginRequest), MAP_TYPE);
         String setCookieHeader = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         assertNotNull(setCookieHeader);
 
@@ -78,8 +78,8 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
      */
     @Test
     void unknownEndpoint_returnsNotFound() {
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/nonexistent", HttpMethod.GET,
-                new HttpEntity<>(headers), MAP_TYPE);
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/nonexistent", HttpMethod.GET, new HttpEntity<>(headers), MAP_TYPE);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("Endpoint not found: /nonexistent", response.getBody().get("message"));
@@ -91,8 +91,8 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
      */
     @Test
     void unsupportedMethod_returnsMethodNotAllowed() {
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/wallet", HttpMethod.DELETE,
-                new HttpEntity<>(headers), MAP_TYPE);
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/wallet", HttpMethod.DELETE, new HttpEntity<>(headers), MAP_TYPE);
 
         assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
         assertNotNull(response.getBody().get("message"));
@@ -103,8 +103,8 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
      */
     @Test
     void invalidPathVariableType_returnsBadRequest() {
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/transaction/abc", HttpMethod.GET,
-                new HttpEntity<>(headers), MAP_TYPE);
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/transaction/abc", HttpMethod.GET, new HttpEntity<>(headers), MAP_TYPE);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Invalid value for parameter 'id'", response.getBody().get("message"));
@@ -115,8 +115,8 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
      */
     @Test
     void malformedJsonBody_returnsBadRequest() {
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/category", HttpMethod.POST,
-                new HttpEntity<>("{not json", headers), MAP_TYPE);
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/category", HttpMethod.POST, new HttpEntity<>("{not json", headers), MAP_TYPE);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Malformed request body", response.getBody().get("message"));
@@ -130,11 +130,12 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
     void invalidEnumValue_returnsBadRequestWithAcceptedValues() {
         String body = "{\"name\":\"Wallet\",\"currencyCode\":\"XYZ\",\"walletType\":\"DEFAULT\"}";
 
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/wallet", HttpMethod.POST,
-                new HttpEntity<>(body, headers), MAP_TYPE);
+        ResponseEntity<Map<String, String>> response =
+                restTemplate.exchange("/wallet", HttpMethod.POST, new HttpEntity<>(body, headers), MAP_TYPE);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("not one of the values accepted for Enum class: [HUF, EUR, USD]",
+        assertEquals(
+                "not one of the values accepted for Enum class: [HUF, EUR, USD]",
                 response.getBody().get("message"));
     }
 
@@ -148,8 +149,8 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
         textHeaders.addAll(headers);
         textHeaders.setContentType(MediaType.TEXT_PLAIN);
 
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/category", HttpMethod.POST,
-                new HttpEntity<>("Groceries", textHeaders), MAP_TYPE);
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
+                "/category", HttpMethod.POST, new HttpEntity<>("Groceries", textHeaders), MAP_TYPE);
 
         assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
         assertNotNull(response.getBody().get("message"));

@@ -59,8 +59,7 @@ public class Wallet {
     @OneToMany(mappedBy = "wallet")
     private List<BalanceSync> balanceSyncs;
 
-    public Wallet() {
-    }
+    public Wallet() {}
 
     public Wallet(String name, User user, CurrencyEnum currencyCode, WalletTypeEnum type) {
         this.name = name;
@@ -156,5 +155,4 @@ public class Wallet {
     public void setBalanceSyncs(List<BalanceSync> balanceSyncs) {
         this.balanceSyncs = balanceSyncs;
     }
-
 }

@@ -38,14 +38,13 @@ import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.service.BalanceSyncService;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.TransactionFactory;
 import com.starbuck.moneytracker.util.UserDateUtil;
-
-import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class BalanceSyncServiceTest {
@@ -76,8 +75,8 @@ public class BalanceSyncServiceTest {
     @BeforeEach
     void setUp() {
         var transactionFactory = new TransactionFactory(messageSource);
-        balanceSyncService = new BalanceSyncService(walletService, transactionService, balanceSyncRepo,
-                transactionFactory, new UserDateUtil(CLOCK), CLOCK);
+        balanceSyncService = new BalanceSyncService(
+                walletService, transactionService, balanceSyncRepo, transactionFactory, new UserDateUtil(CLOCK), CLOCK);
     }
 
     @Test
@@ -138,8 +137,8 @@ public class BalanceSyncServiceTest {
         BalanceSyncCommand command = new BalanceSyncCommand(1, new BigDecimal("50.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
-        ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor
-                .forClass(TransactionSaveCommand.class);
+        ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate =
+                ArgumentCaptor.forClass(TransactionSaveCommand.class);
 
         // WHEN
         balanceSyncService.syncWallet(command);
@@ -179,8 +178,8 @@ public class BalanceSyncServiceTest {
         BalanceSyncCommand command = new BalanceSyncCommand(1, new BigDecimal("100.00"));
 
         ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
-        ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor
-                .forClass(TransactionSaveCommand.class);
+        ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate =
+                ArgumentCaptor.forClass(TransactionSaveCommand.class);
 
         // WHEN
         balanceSyncService.syncWallet(command);
@@ -210,19 +209,19 @@ public class BalanceSyncServiceTest {
      */
     @ParameterizedTest(name = "rendszer: {0}, user: {1} -> {2} {3}")
     @CsvSource({
-            // pozitívból negatívba
-            "20.00, -30.00, OUTCOME, -50.00",
-            // negatívból pozitívba
-            "-20.00, 30.00, INCOME, 50.00",
-            // negatívból kevésbé negatívba
-            "-50.00, -20.00, INCOME, 30.00",
-            // negatívból még negatívabba
-            "-50.00, -80.00, OUTCOME, -30.00",
-            // nullából negatívba
-            "0.00, -15.50, OUTCOME, -15.50",
+        // pozitívból negatívba
+        "20.00, -30.00, OUTCOME, -50.00",
+        // negatívból pozitívba
+        "-20.00, 30.00, INCOME, 50.00",
+        // negatívból kevésbé negatívba
+        "-50.00, -20.00, INCOME, 30.00",
+        // negatívból még negatívabba
+        "-50.00, -80.00, OUTCOME, -30.00",
+        // nullából negatívba
+        "0.00, -15.50, OUTCOME, -15.50",
     })
-    void testSyncWalletCreateSyncAndTransactionEntryWithNegativeBalance(String balanceInDb, String balanceFromUser,
-            TransactionTypeEnum expectedType, String expectedPrice) {
+    void testSyncWalletCreateSyncAndTransactionEntryWithNegativeBalance(
+            String balanceInDb, String balanceFromUser, TransactionTypeEnum expectedType, String expectedPrice) {
         // GIVEN
         var actualDate = TODAY;
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
@@ -235,8 +234,8 @@ public class BalanceSyncServiceTest {
         BalanceSyncCommand command = new BalanceSyncCommand(1, new BigDecimal(balanceFromUser));
 
         ArgumentCaptor<BalanceSync> argumentCaptorBalanceSync = ArgumentCaptor.forClass(BalanceSync.class);
-        ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate = ArgumentCaptor
-                .forClass(TransactionSaveCommand.class);
+        ArgumentCaptor<TransactionSaveCommand> argumentCaptorTransactionCreate =
+                ArgumentCaptor.forClass(TransactionSaveCommand.class);
 
         // WHEN
         balanceSyncService.syncWallet(command);
@@ -279,5 +278,4 @@ public class BalanceSyncServiceTest {
         assertEquals(new BigDecimal("-50.00"), savedSyncEntry.getActualBalance());
         assertNull(savedSyncEntry.getSyncTransaction());
     }
-
 }

@@ -2,6 +2,7 @@ package com.starbuck.moneytracker.service;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.repository.UserRepository;
 
@@ -32,5 +33,4 @@ public class UserLookupService {
         }
         return user;
     }
-
 }

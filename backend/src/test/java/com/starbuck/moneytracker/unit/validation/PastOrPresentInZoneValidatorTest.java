@@ -28,8 +28,8 @@ public class PastOrPresentInZoneValidatorTest {
     /** UTC szerint 2026-10-01 22:30, ami több zónában már másnap van */
     private final Clock clock = Clock.fixed(Instant.parse("2026-10-01T22:30:00Z"), ZoneOffset.UTC);
 
-    private final PastOrPresentInZoneValidator validator = new PastOrPresentInZoneValidator(clock,
-            new UserDateUtil(clock));
+    private final PastOrPresentInZoneValidator validator =
+            new PastOrPresentInZoneValidator(clock, new UserDateUtil(clock));
 
     @AfterEach
     void tearDown() {
@@ -38,12 +38,12 @@ public class PastOrPresentInZoneValidatorTest {
 
     @ParameterizedTest(name = "{0}, {1} -> {2}")
     @CsvSource({
-            "Europe/Budapest, 2026-10-02, true", // Budapesten már 10-02 van
-            "Europe/Budapest, 2026-10-03, false",
-            "UTC, 2026-10-01, true",
-            "UTC, 2026-10-02, false",
-            "America/New_York, 2026-09-30, true",
-            "America/New_York, 2026-10-02, false"
+        "Europe/Budapest, 2026-10-02, true", // Budapesten már 10-02 van
+        "Europe/Budapest, 2026-10-03, false",
+        "UTC, 2026-10-01, true",
+        "UTC, 2026-10-02, false",
+        "America/New_York, 2026-09-30, true",
+        "America/New_York, 2026-10-02, false"
     })
     void testExplicitZone(String zone, LocalDate date, boolean expected) {
         validator.initialize(annotation(zone));

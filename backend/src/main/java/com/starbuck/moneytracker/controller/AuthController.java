@@ -36,12 +36,17 @@ public class AuthController {
      * Felhasználó autentikációs szolgáltatás
      */
     private final UserService userService;
+
     private final CurrentUserUtil userUtil;
     private final CookieUtil cookieUtil;
     private final UserMapper mapper;
     private final WalletRepository walletRepository;
 
-    public AuthController(UserService userService, CurrentUserUtil userUtil, CookieUtil cookieUtil, UserMapper mapper,
+    public AuthController(
+            UserService userService,
+            CurrentUserUtil userUtil,
+            CookieUtil cookieUtil,
+            UserMapper mapper,
             WalletRepository walletRepository) {
         this.userService = userService;
         this.userUtil = userUtil;
@@ -53,7 +58,7 @@ public class AuthController {
     /**
      * Új felhasználó regisztrációja. Siker esetén 201-es választ ad vissza, hiba
      * esetén 400-as választ ad vissza a validációs hibák miatt.
-     * 
+     *
      * @param RegisterRequestDto user
      */
     @PostMapping(path = "/register")
@@ -65,7 +70,7 @@ public class AuthController {
 
     /**
      * Felhasználó beléptetése
-     * 
+     *
      * @param LoginRequestDto loginRequest
      * @return üres body + JWT token egy HttpOnly cookie-ban
      */
@@ -77,13 +82,13 @@ public class AuthController {
         ResponseCookie cookie = cookieUtil.getJwtCookie(jwtToken);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Set-Cookie", cookie.toString());
-        
+
         return ResponseEntity.ok().headers(headers).build();
     }
 
     /**
      * Felhasználó kijelentkeztetése (jwt token törlése a böngészőből)
-     * 
+     *
      * @return ResponseEntity üres body, de tartalmaz headerben egy expiration
      *         cookie-t
      */
@@ -97,7 +102,7 @@ public class AuthController {
 
     /**
      * Ellenőrzi, hogy az email cím foglalt-e már
-     * 
+     *
      * @param email
      * @return Boolean
      */
@@ -112,7 +117,7 @@ public class AuthController {
      * éri ezt a végpontot
      * Így pl.: frontend újrabetöltéskor azonnal le tudja ellenőrizni a frontend,
      * hogy be vagyunk-e jelentkezve
-     * 
+     *
      * @return
      */
     @PostMapping(path = "/authenticateUser")

@@ -11,30 +11,28 @@ class UserCreateCommandTest {
 
     @Test
     void blankUsername_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new UserCreateCommand("  ", "teszt@email.com", "jelszo123"));
+        assertThrowsExactly(
+                IllegalArgumentException.class, () -> new UserCreateCommand("  ", "teszt@email.com", "jelszo123"));
     }
 
     @Test
     void blankPassword_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new UserCreateCommand("user", "teszt@email.com", "  "));
+        assertThrowsExactly(
+                IllegalArgumentException.class, () -> new UserCreateCommand("user", "teszt@email.com", "  "));
     }
 
     @Test
     void blankEmail_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new UserCreateCommand("user", "  ", "jelszo123"));
+        assertThrowsExactly(IllegalArgumentException.class, () -> new UserCreateCommand("user", "  ", "jelszo123"));
     }
 
     @Test
     void nullFields_throw() {
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new UserCreateCommand(null, "teszt@email.com", "jelszo123"));
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new UserCreateCommand("user", "teszt@email.com", null));
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new UserCreateCommand("user", null, "jelszo123"));
+        assertThrowsExactly(
+                IllegalArgumentException.class, () -> new UserCreateCommand(null, "teszt@email.com", "jelszo123"));
+        assertThrowsExactly(
+                IllegalArgumentException.class, () -> new UserCreateCommand("user", "teszt@email.com", null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> new UserCreateCommand("user", null, "jelszo123"));
     }
 
     @Test

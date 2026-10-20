@@ -22,31 +22,29 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
  * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az
  * autógenerált lekérdezésekben status = 0 szűrést mindig bele fogja tenni
  */
-public interface TransactionRepository extends
-        JpaRepository<Transaction, Long>,
-        JpaSpecificationExecutor<Transaction> {
+public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
 
     /**
      * User számára kilistázza a tranzakcióit
-     * 
+     *
      * @param userId
      * @param specifications
      * @return
      */
     default List<Transaction> findAllForUser(Long userId, HistoryQueryHelperDto specifications) {
-        Specification<Transaction> finalSpec = Specification
-                .where(TransactionSpecifications.hasUserId(userId));
+        Specification<Transaction> finalSpec = Specification.where(TransactionSpecifications.hasUserId(userId));
 
         if (specifications.spec() != null) {
             finalSpec = finalSpec.and(specifications.spec());
         }
 
-        return findAll(finalSpec, PageRequest.of(0, specifications.limit(), specifications.sort())).getContent();
+        return findAll(finalSpec, PageRequest.of(0, specifications.limit(), specifications.sort()))
+                .getContent();
     }
 
     /**
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
-     * 
+     *
      * @param userId
      * @return
      */
@@ -68,12 +66,13 @@ public interface TransactionRepository extends
 
     /**
      * Id alapján lekéri a tranzakciós adatokat
-     * 
+     *
      * @param userId
      * @param transactionId
      * @return
      */
-    @Query("SELECT t FROM Transaction t LEFT JOIN FETCH t.transactionDetails WHERE t.id = ?1 AND t.wallet.user.id = ?2 AND t.status = 0")
+    @Query(
+            "SELECT t FROM Transaction t LEFT JOIN FETCH t.transactionDetails WHERE t.id = ?1 AND t.wallet.user.id = ?2 AND t.status = 0")
     Optional<Transaction> getTransactionByIdWithDetails(long transactionId, long userId);
 
     /**
@@ -81,7 +80,7 @@ public interface TransactionRepository extends
      * JOIN FETCH, mert alapból lazy a tranzakció részletek betöltése, így a
      * tranzakció részletek nem lennének elérhetőek
      * TODO ha sok az elem, akkor gond lehet a sok lekérésből (elfogy a mem)
-     * 
+     *
      * @return
      */
     @Query("SELECT t FROM Transaction t JOIN FETCH t.transactionDetails td WHERE t.status = 0 ")
@@ -90,7 +89,7 @@ public interface TransactionRepository extends
     /**
      * Alapból a tranzakciók softdelete-el törlődnek, ez a hard delete-et teszi
      * lehetővé
-     * 
+     *
      * @param id
      */
     @Modifying

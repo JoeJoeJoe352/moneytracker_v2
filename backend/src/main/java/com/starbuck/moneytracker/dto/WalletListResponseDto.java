@@ -17,6 +17,4 @@ public record WalletListResponseDto(
         WalletTypeEnum type,
         BigDecimal sum,
         LocalDate lastSyncDate,
-        boolean deletable
-) {
-}
+        boolean deletable) {}

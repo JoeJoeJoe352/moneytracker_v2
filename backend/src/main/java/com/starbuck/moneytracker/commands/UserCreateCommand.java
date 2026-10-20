@@ -32,5 +32,4 @@ public class UserCreateCommand {
     public String getEmail() {
         return email;
     }
-
 }

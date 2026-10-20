@@ -23,9 +23,13 @@ public class BalanceSyncService {
     private final UserDateUtil userDateUtil;
     private final Clock clock;
 
-    public BalanceSyncService(WalletService walletService, TransactionService transactionService,
-            BalanceSyncRepository balanceSyncRepo, TransactionFactory transactionFactory,
-            UserDateUtil userDateUtil, Clock clock) {
+    public BalanceSyncService(
+            WalletService walletService,
+            TransactionService transactionService,
+            BalanceSyncRepository balanceSyncRepo,
+            TransactionFactory transactionFactory,
+            UserDateUtil userDateUtil,
+            Clock clock) {
         this.walletService = walletService;
         this.transactionService = transactionService;
         this.balanceSyncRepo = balanceSyncRepo;
@@ -37,7 +41,7 @@ public class BalanceSyncService {
     /**
      * Walletben található összes pénzt összeveti a user által megadott, valós
      * pénzösszeggel, az eltérést rögzíti
-     * 
+     *
      * @param command
      */
     @Transactional
@@ -63,8 +67,8 @@ public class BalanceSyncService {
         var balanceOfWalletInDb = walletService.getBalanceForWallet(command.getWalletId());
         var balancesDiffer = balanceOfWalletInDb.compareTo(command.getBalanceFromUser()) != 0;
         if (balancesDiffer) {
-            var transactionSaveCommand = this.transactionFactory.createTransactionEntryFromBalanceChange(wallet,
-                    command.getBalanceFromUser(), balanceOfWalletInDb, date);
+            var transactionSaveCommand = this.transactionFactory.createTransactionEntryFromBalanceChange(
+                    wallet, command.getBalanceFromUser(), balanceOfWalletInDb, date);
             var transaction = transactionService.createTransaction(transactionSaveCommand);
             balanceSync.setSyncTransaction(transaction);
         }

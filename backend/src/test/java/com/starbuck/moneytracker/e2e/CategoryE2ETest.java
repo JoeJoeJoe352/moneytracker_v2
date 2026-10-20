@@ -67,14 +67,16 @@ class CategoryE2ETest extends MySqlContainerTest {
 
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eCategoryUser", "password123",
-                "e2ecategory@email.com");
+        RegisterRequestDto registerRequest =
+                new RegisterRequestDto("e2eCategoryUser", "password123", "e2ecategory@email.com");
         restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
 
         LoginRequestDto loginRequest = new LoginRequestDto("e2ecategory@email.com", "password123");
-        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login", HttpMethod.POST,
-                new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
-                });
+        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange(
+                "/auth/login",
+                HttpMethod.POST,
+                new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<Map<String, String>>() {});
         String setCookieHeader = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
@@ -104,8 +106,8 @@ class CategoryE2ETest extends MySqlContainerTest {
     void createCategory_createsCategoryForAuthenticatedUser() {
         CategoryCreateRequestDto request = new CategoryCreateRequestDto("Groceries");
 
-        ResponseEntity<CategoryResponseDto> response = restTemplate.postForEntity("/category",
-                new HttpEntity<>(request, headers), CategoryResponseDto.class);
+        ResponseEntity<CategoryResponseDto> response =
+                restTemplate.postForEntity("/category", new HttpEntity<>(request, headers), CategoryResponseDto.class);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         CategoryResponseDto body = response.getBody();
@@ -126,13 +128,13 @@ class CategoryE2ETest extends MySqlContainerTest {
     @Test
     void createCategory_returnsConflictForDuplicateCategoryName() {
         CategoryCreateRequestDto request = new CategoryCreateRequestDto("DuplicateCategory");
-        ResponseEntity<CategoryResponseDto> firstResponse = restTemplate.postForEntity("/category",
-                new HttpEntity<>(request, headers), CategoryResponseDto.class);
+        ResponseEntity<CategoryResponseDto> firstResponse =
+                restTemplate.postForEntity("/category", new HttpEntity<>(request, headers), CategoryResponseDto.class);
         assertEquals(HttpStatus.CREATED, firstResponse.getStatusCode());
         createdCategoryIds.add(firstResponse.getBody().id());
 
-        ResponseEntity<Void> secondResponse = restTemplate.postForEntity("/category",
-                new HttpEntity<>(request, headers), Void.class);
+        ResponseEntity<Void> secondResponse =
+                restTemplate.postForEntity("/category", new HttpEntity<>(request, headers), Void.class);
 
         assertEquals(HttpStatus.CONFLICT, secondResponse.getStatusCode());
     }
@@ -146,15 +148,15 @@ class CategoryE2ETest extends MySqlContainerTest {
     @Test
     void getCategories_returnsOwnAndCommonCategories() {
         CategoryCreateRequestDto ownRequest = new CategoryCreateRequestDto("OwnCategory");
-        ResponseEntity<CategoryResponseDto> ownResponse = restTemplate.postForEntity("/category",
-                new HttpEntity<>(ownRequest, headers), CategoryResponseDto.class);
+        ResponseEntity<CategoryResponseDto> ownResponse = restTemplate.postForEntity(
+                "/category", new HttpEntity<>(ownRequest, headers), CategoryResponseDto.class);
         createdCategoryIds.add(ownResponse.getBody().id());
 
         Category commonCategory = categoryRepository.save(new Category("CommonCategory", null, LangEnum.EN));
         createdCategoryIds.add(commonCategory.getId());
 
-        ResponseEntity<CategoryResponseDto[]> response = restTemplate.exchange("/category", HttpMethod.GET,
-                new HttpEntity<>(headers), CategoryResponseDto[].class);
+        ResponseEntity<CategoryResponseDto[]> response = restTemplate.exchange(
+                "/category", HttpMethod.GET, new HttpEntity<>(headers), CategoryResponseDto[].class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<CategoryResponseDto> categories = List.of(response.getBody());
@@ -172,15 +174,16 @@ class CategoryE2ETest extends MySqlContainerTest {
         otherUser.generateUuid();
         otherUser = userRepository.save(otherUser);
 
-        Category otherUsersCategory = categoryRepository.save(new Category("OtherUsersCategory", otherUser, LangEnum.HU));
+        Category otherUsersCategory =
+                categoryRepository.save(new Category("OtherUsersCategory", otherUser, LangEnum.HU));
 
         try {
-            ResponseEntity<CategoryResponseDto[]> response = restTemplate.exchange("/category", HttpMethod.GET,
-                    new HttpEntity<>(headers), CategoryResponseDto[].class);
+            ResponseEntity<CategoryResponseDto[]> response = restTemplate.exchange(
+                    "/category", HttpMethod.GET, new HttpEntity<>(headers), CategoryResponseDto[].class);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
-            boolean containsOtherUsersCategory = List.of(response.getBody()).stream()
-                    .anyMatch(c -> c.name().equals("OtherUsersCategory"));
+            boolean containsOtherUsersCategory =
+                    List.of(response.getBody()).stream().anyMatch(c -> c.name().equals("OtherUsersCategory"));
             assertFalse(containsOtherUsersCategory);
         } finally {
             categoryRepository.delete(otherUsersCategory);
@@ -203,8 +206,6 @@ class CategoryE2ETest extends MySqlContainerTest {
     }
 
     private static Stream<Arguments> categoryEndpoints() {
-        return Stream.of(
-                Arguments.of(HttpMethod.POST, "/category"),
-                Arguments.of(HttpMethod.GET, "/category"));
+        return Stream.of(Arguments.of(HttpMethod.POST, "/category"), Arguments.of(HttpMethod.GET, "/category"));
     }
 }

@@ -16,31 +16,35 @@ class CreateWalletCommandTest {
 
     @Test
     void nullName_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
+        assertThrowsExactly(
+                IllegalArgumentException.class,
                 () -> new CreateWalletCommand(null, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, user));
     }
 
     @Test
     void blankName_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
+        assertThrowsExactly(
+                IllegalArgumentException.class,
                 () -> new CreateWalletCommand("   ", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, user));
     }
 
     @Test
     void nullCurrency_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
+        assertThrowsExactly(
+                IllegalArgumentException.class,
                 () -> new CreateWalletCommand("Tárca", null, WalletTypeEnum.DEFAULT, user));
     }
 
     @Test
     void nullType_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new CreateWalletCommand("Tárca", CurrencyEnum.HUF, null, user));
+        assertThrowsExactly(
+                IllegalArgumentException.class, () -> new CreateWalletCommand("Tárca", CurrencyEnum.HUF, null, user));
     }
 
     @Test
     void nullUser_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
+        assertThrowsExactly(
+                IllegalArgumentException.class,
                 () -> new CreateWalletCommand("Tárca", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, null));
     }
 

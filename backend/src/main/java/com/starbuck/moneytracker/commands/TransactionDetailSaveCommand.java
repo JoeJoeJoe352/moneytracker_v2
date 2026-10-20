@@ -33,14 +33,14 @@ public class TransactionDetailSaveCommand {
 
     /**
      * Ha egyszerű áras a detail
-     * 
+     *
      * @param name
      * @param price
      * @param categories
      * @param transactionType
      */
-    public TransactionDetailSaveCommand(String name, BigDecimal price, List<Long> categories,
-            TransactionTypeEnum transactionType) {
+    public TransactionDetailSaveCommand(
+            String name, BigDecimal price, List<Long> categories, TransactionTypeEnum transactionType) {
 
         if (price == null) {
             throw new IllegalArgumentException("Price cannot be null");
@@ -54,7 +54,7 @@ public class TransactionDetailSaveCommand {
 
     /**
      * Ha összetett áras a detail
-     * 
+     *
      * @param name
      * @param weight
      * @param unitPrice
@@ -68,7 +68,7 @@ public class TransactionDetailSaveCommand {
 
     /**
      * Összetett-e a detail árképzése
-     * 
+     *
      * @return
      */
     public boolean isComplexPriceMode() {
@@ -77,7 +77,7 @@ public class TransactionDetailSaveCommand {
 
     /**
      * Név validálása és beállítása
-     * 
+     *
      * @param name
      */
     private void setName(String name) {
@@ -106,5 +106,4 @@ public class TransactionDetailSaveCommand {
     public List<Long> getCategories() {
         return categories;
     }
-
 }

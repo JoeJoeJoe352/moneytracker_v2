@@ -14,10 +14,7 @@ public class LanguageConfig {
     public LocaleResolver localeResolver() {
         TimeZoneAwareLocaleResolver resolver = new TimeZoneAwareLocaleResolver();
         resolver.setDefaultLocale(Locale.ENGLISH);
-        resolver.setSupportedLocales(List.of(
-                Locale.ENGLISH,
-                Locale.GERMAN,
-                Locale.of("hu")));
+        resolver.setSupportedLocales(List.of(Locale.ENGLISH, Locale.GERMAN, Locale.of("hu")));
         return resolver;
     }
 }

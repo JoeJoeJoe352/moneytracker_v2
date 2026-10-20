@@ -54,7 +54,7 @@ public class Category {
     /**
      * A mindenki számára elérhető kategóriák nyelvi kulcsként vannak az
      * adatbázisban, ezeknél nincs user beállítva
-     * 
+     *
      * @return
      */
     public boolean isDefaultCategory() {
@@ -63,8 +63,7 @@ public class Category {
 
     // Autogenerált
 
-    public Category() {
-    }
+    public Category() {}
 
     public Category(long id, String name, User user, LangEnum lang) {
         this.id = id;
@@ -134,5 +133,4 @@ public class Category {
     public void setLang(LangEnum lang) {
         this.lang = lang;
     }
-
 }

@@ -79,9 +79,11 @@ class AuthE2ETest extends MySqlContainerTest {
      */
     private String login(String email, String password) {
         LoginRequestDto loginRequest = new LoginRequestDto(email, password);
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/auth/login", HttpMethod.POST,
-                new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
-                });
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
+                "/auth/login",
+                HttpMethod.POST,
+                new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<Map<String, String>>() {});
         String setCookieHeader = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         assertNotNull(setCookieHeader);
         return setCookieHeader.split(";")[0];
@@ -124,8 +126,8 @@ class AuthE2ETest extends MySqlContainerTest {
     void register_returnsBadRequestWhenUsernameAlreadyTaken() {
         register("e2eDuplicateUser", "password123", "first@email.com");
 
-        RegisterRequestDto duplicateRequest = new RegisterRequestDto("e2eDuplicateUser", "password123",
-                "second@email.com");
+        RegisterRequestDto duplicateRequest =
+                new RegisterRequestDto("e2eDuplicateUser", "password123", "second@email.com");
         ResponseEntity<Void> response = restTemplate.postForEntity("/auth/register", duplicateRequest, Void.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -155,9 +157,11 @@ class AuthE2ETest extends MySqlContainerTest {
         register("e2eWrongPassUser", "password123", "e2ewrongpass@email.com");
 
         LoginRequestDto loginRequest = new LoginRequestDto("e2ewrongpass@email.com", "notThePassword");
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/auth/login", HttpMethod.POST,
-                new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
-                });
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
+                "/auth/login",
+                HttpMethod.POST,
+                new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<Map<String, String>>() {});
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNull(response.getHeaders().getFirst(HttpHeaders.SET_COOKIE));
@@ -174,9 +178,11 @@ class AuthE2ETest extends MySqlContainerTest {
         register("e2eLogoutUser", "password123", "e2elogout@email.com");
         String cookie = login("e2elogout@email.com", "password123");
 
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange("/auth/logout", HttpMethod.POST,
-                new HttpEntity<>(authHeaders(cookie)), new ParameterizedTypeReference<Map<String, String>>() {
-                });
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
+                "/auth/logout",
+                HttpMethod.POST,
+                new HttpEntity<>(authHeaders(cookie)),
+                new ParameterizedTypeReference<Map<String, String>>() {});
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         String setCookieHeader = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
@@ -208,10 +214,10 @@ class AuthE2ETest extends MySqlContainerTest {
     void isEmailExists_reflectsPersistedState() {
         register("e2eCheckEmailUser", "password123", "e2echeckemail@email.com");
 
-        Boolean existingResult = restTemplate.postForObject("/auth/isEmailExists",
-                Map.of("email", "e2echeckemail@email.com"), Boolean.class);
-        Boolean missingResult = restTemplate.postForObject("/auth/isEmailExists",
-                Map.of("email", "definitelynotregistered@email.com"), Boolean.class);
+        Boolean existingResult = restTemplate.postForObject(
+                "/auth/isEmailExists", Map.of("email", "e2echeckemail@email.com"), Boolean.class);
+        Boolean missingResult = restTemplate.postForObject(
+                "/auth/isEmailExists", Map.of("email", "definitelynotregistered@email.com"), Boolean.class);
 
         assertTrue(existingResult);
         assertFalse(missingResult);
@@ -228,8 +234,8 @@ class AuthE2ETest extends MySqlContainerTest {
         register("e2eAuthenticateUser", "password123", "e2eauthenticate@email.com");
         String cookie = login("e2eauthenticate@email.com", "password123");
 
-        ResponseEntity<UserDataResponseDto> response = restTemplate.postForEntity("/auth/authenticateUser",
-                new HttpEntity<>(authHeaders(cookie)), UserDataResponseDto.class);
+        ResponseEntity<UserDataResponseDto> response = restTemplate.postForEntity(
+                "/auth/authenticateUser", new HttpEntity<>(authHeaders(cookie)), UserDataResponseDto.class);
 
         var userData = response.getBody();
         assertEquals(HttpStatus.OK, response.getStatusCode());

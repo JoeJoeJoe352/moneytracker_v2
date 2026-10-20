@@ -24,5 +24,4 @@ public class UserLoginCommand {
     public String getPassword() {
         return password;
     }
-
 }

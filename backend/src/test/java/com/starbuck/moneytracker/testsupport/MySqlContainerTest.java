@@ -10,7 +10,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.mysql.MySQLContainer;
 
-//Egy eldobható MySQL konténert indít. Egyszer indul a teljes futás alatt.
+// Egy eldobható MySQL konténert indít. Egyszer indul a teljes futás alatt.
 @ActiveProfiles("test")
 public abstract class MySqlContainerTest {
 

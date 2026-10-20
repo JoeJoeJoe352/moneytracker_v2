@@ -40,7 +40,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                 ORDER BY w.id ASC
             """)
     List<Wallet> findByUserId(long userId);
-    
+
     /**
      * Walleteket lekérdezi, kiírja hozzá az összeget, az utolsó szinkronizálás
      * időpontját és a létrehozás időpontját (a user szerinti napot a service számolja).

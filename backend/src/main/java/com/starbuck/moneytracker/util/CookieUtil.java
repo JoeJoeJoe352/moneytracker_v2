@@ -18,7 +18,7 @@ public class CookieUtil {
 
     /**
      * Visszaad egy ResponseCookie objektumot, ami a JWT tokenből készül
-     * 
+     *
      * @param jwtToken
      * @return
      */
@@ -36,7 +36,7 @@ public class CookieUtil {
     /**
      * Session törlő cookie elkészítése
      * Ez egy azonnal lejáró süti, ami a böngészőből törli a meglévő sütit
-     * 
+     *
      * @return
      */
     public ResponseCookie getJwtSessionDestroyCookie() {
@@ -49,5 +49,4 @@ public class CookieUtil {
                 .build();
         return expiredCookie;
     }
-
 }

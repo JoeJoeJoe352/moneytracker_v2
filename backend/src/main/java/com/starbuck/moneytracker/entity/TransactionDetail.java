@@ -7,12 +7,12 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -65,11 +65,10 @@ public class TransactionDetail {
         return weight != null && unitPrice != null;
     }
 
-    public TransactionDetail() {
-    }
+    public TransactionDetail() {}
 
-    public TransactionDetail(Long id, String name, BigDecimal price, BigDecimal weight, BigDecimal unitPrice,
-            Transaction transaction) {
+    public TransactionDetail(
+            Long id, String name, BigDecimal price, BigDecimal weight, BigDecimal unitPrice, Transaction transaction) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -78,8 +77,8 @@ public class TransactionDetail {
         this.transaction = transaction;
     }
 
-    public TransactionDetail(String name, BigDecimal price, BigDecimal weight, BigDecimal unitPrice,
-            Transaction transaction) {
+    public TransactionDetail(
+            String name, BigDecimal price, BigDecimal weight, BigDecimal unitPrice, Transaction transaction) {
         this.name = name;
         this.price = price;
         this.weight = weight;

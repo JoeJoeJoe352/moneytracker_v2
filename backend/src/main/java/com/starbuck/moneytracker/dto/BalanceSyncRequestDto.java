@@ -9,8 +9,4 @@ import jakarta.validation.constraints.NotNull;
  * @param currentBalance A user által megszámolt, valós egyenleg.
  */
 public record BalanceSyncRequestDto(
-        @NotNull 
-        @Digits(integer = 8, fraction = 2) 
-        BigDecimal currentBalance
-) {
-}
+        @NotNull @Digits(integer = 8, fraction = 2) BigDecimal currentBalance) {}

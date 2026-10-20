@@ -1,5 +1,3 @@
 package com.starbuck.moneytracker.dto;
 
-public record LoginResponse(
-    String token 
-) {}
+public record LoginResponse(String token) {}
