@@ -69,7 +69,7 @@ export class SidebarComponent {
             next: () => {
                 this.userData.resetData();
                 this.notification.show(_('header.logout.success'));
-                this.router.navigate(['/welcome']);
+                void this.router.navigate(['/welcome']);
             },
             error: (response) => {
                 console.error(response);
@@ -93,7 +93,7 @@ export class SidebarComponent {
         dialogRef.componentInstance.login.subscribe((payload) =>
             this.actionService.login(payload, this.isLoading, () => {
                 dialogRef.close();
-                this.router.navigate(['/']);
+                void this.router.navigate(['/']);
             }),
         );
     };

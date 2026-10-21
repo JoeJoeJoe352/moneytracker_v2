@@ -1,4 +1,5 @@
 import { inject, Injectable, WritableSignal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { _ } from '@ngx-translate/core';
 import { AuthService } from './auth-service';
 import { UserDataStore } from '@app/shared/stores/user-data-store';
@@ -28,9 +29,9 @@ export class AuthActionService {
         this.authService
             .login(params)
             .pipe(
-                catchError((response) => {
+                catchError((response: HttpErrorResponse) => {
                     if (response.status === 401) {
-                        this.notification.showText(response.error.message);
+                        this.notification.showText((response.error as { message: string }).message);
                     } else {
                         console.error('Ismeretlen hiba történt a bejelentkezés során!', response);
                         this.notification.showGeneralError();
@@ -48,7 +49,7 @@ export class AuthActionService {
                     this.notification.show(_('login.success'));
                     onSuccess();
                 },
-                error: (error) => {
+                error: (error: HttpErrorResponse) => {
                     this.userDataStore.resetData();
                     if (error.status !== 401) {
                         console.error('unknown error during authcheck!', error);

@@ -60,7 +60,7 @@ describe('RegisterComponent (Vitest)', () => {
 
     function errorTexts(): string[] {
         return Array.from(fixture.nativeElement.querySelectorAll('mat-error')).map((error) =>
-            (error as HTMLElement).textContent!.trim(),
+            (error as HTMLElement).textContent.trim(),
         );
     }
 

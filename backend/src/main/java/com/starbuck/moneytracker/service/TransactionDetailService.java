@@ -32,9 +32,12 @@ public class TransactionDetailService {
 
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
-    public TransactionDetailService(TransactionDetailRepository transactionDetailRepo,
-            CategoryRepository categoryRepo, TransactionDetailCategoryRepository transactionDetailCategoryRepository,
-            CurrentUserUtil currentUser, TransactionDetailFactory detailFactory) {
+    public TransactionDetailService(
+            TransactionDetailRepository transactionDetailRepo,
+            CategoryRepository categoryRepo,
+            TransactionDetailCategoryRepository transactionDetailCategoryRepository,
+            CurrentUserUtil currentUser,
+            TransactionDetailFactory detailFactory) {
         this.transactionDetailRepo = transactionDetailRepo;
         this.categoryRepo = categoryRepo;
         this.transactionDetailCategoryRepository = transactionDetailCategoryRepository;
@@ -49,8 +52,8 @@ public class TransactionDetailService {
      * @param createCommand
      */
     public void saveDetails(Transaction savedTransaction, TransactionSaveCommand createCommand) {
-        List<TransactionDetailSaveCommand> details = detailFactory.resolveDetailCommands(createCommand,
-                savedTransaction);
+        List<TransactionDetailSaveCommand> details =
+                detailFactory.resolveDetailCommands(createCommand, savedTransaction);
 
         for (TransactionDetailSaveCommand detailCommand : details) {
             TransactionDetail detail = new TransactionDetail(
@@ -61,11 +64,11 @@ public class TransactionDetailService {
                     savedTransaction);
             var detailAfterSave = this.transactionDetailRepo.save(detail);
 
-            if (detailCommand.getCategories() != null && !detailCommand.getCategories().isEmpty()) {
+            if (detailCommand.getCategories() != null
+                    && !detailCommand.getCategories().isEmpty()) {
                 this.saveCategoryDetailEntries(detailAfterSave, detailCommand.getCategories());
             }
         }
-
     }
 
     /**
@@ -85,9 +88,9 @@ public class TransactionDetailService {
      * @param savedDetail
      * @param categoryIds
      */
-    private void saveCategoryDetailEntries(TransactionDetail savedDetail,
-            List<Long> categoryIds) {
-        var foundCategories = categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
+    private void saveCategoryDetailEntries(TransactionDetail savedDetail, List<Long> categoryIds) {
+        var foundCategories =
+                categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
         boolean isAllCategoryAvailableForUser = foundCategories.size() == categoryIds.size();
         if (!isAllCategoryAvailableForUser) {
             throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
@@ -95,8 +98,8 @@ public class TransactionDetailService {
         categoryIds.forEach((id) -> {
             Category categoryDummyObject = new Category();
             categoryDummyObject.setId(id);
-            TransactionDetailCategory detailCategoryModel = new TransactionDetailCategory(categoryDummyObject,
-                    savedDetail);
+            TransactionDetailCategory detailCategoryModel =
+                    new TransactionDetailCategory(categoryDummyObject, savedDetail);
             transactionDetailCategoryRepository.save(detailCategoryModel);
         });
     }

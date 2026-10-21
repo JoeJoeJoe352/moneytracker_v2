@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.starbuck.moneytracker.entity.BalanceSync;
 
 public interface BalanceSyncRepository extends JpaRepository<BalanceSync, Long> {
-    
+
     Optional<BalanceSync> findBySyncTransactionId(Long transactionId);
 
     /**

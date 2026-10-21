@@ -22,8 +22,8 @@ public class CategoryService {
     private final CurrentUserUtil currentUser;
     private final ConversionService conversionService;
 
-    public CategoryService(CategoryRepository categoryRepository, CurrentUserUtil currentUser,
-            ConversionService conversionService) {
+    public CategoryService(
+            CategoryRepository categoryRepository, CurrentUserUtil currentUser, ConversionService conversionService) {
         this.categoryRepository = categoryRepository;
         this.currentUser = currentUser;
         this.conversionService = conversionService;
@@ -31,7 +31,7 @@ public class CategoryService {
 
     /**
      * Létrehoz egy új kategóriát a user számára
-     * 
+     *
      * @param command
      * @return
      */
@@ -47,17 +47,14 @@ public class CategoryService {
             throw new CategoryNonUniqueException(
                     "Category with this name already exists for the user. " + command.getName());
         }
-        Category categoryModel = new Category(
-                command.getName(),
-                user,
-                currentLang);
+        Category categoryModel = new Category(command.getName(), user, currentLang);
 
         return this.categoryRepository.save(categoryModel);
     }
 
     /**
      * Kilistázza a közös és a user saját kategóriáit
-     * 
+     *
      * @return
      */
     public List<Category> listCategoriesForUser() {

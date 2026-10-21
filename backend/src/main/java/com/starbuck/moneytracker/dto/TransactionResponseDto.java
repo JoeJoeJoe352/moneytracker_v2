@@ -8,14 +8,12 @@ import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
 public record TransactionResponseDto(
-    Long id,
-    String name,
-    BigDecimal priceSum,
-    LocalDate transactionDate,
-    TransactionTypeEnum transactionType,
-    boolean isComplexTransaction,
-    List<TransactionDetailResponseDto> transactionDetails,
-    WalletResponseDto wallet,
-    TransactionSpecialTypeEnum specialType
-) {
-}
+        Long id,
+        String name,
+        BigDecimal priceSum,
+        LocalDate transactionDate,
+        TransactionTypeEnum transactionType,
+        boolean isComplexTransaction,
+        List<TransactionDetailResponseDto> transactionDetails,
+        WalletResponseDto wallet,
+        TransactionSpecialTypeEnum specialType) {}

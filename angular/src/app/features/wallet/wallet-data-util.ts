@@ -28,7 +28,7 @@ export class WalletDataUtil {
             case CurrencyCodesEnum.usd:
                 return 'currency.usd';
             default:
-                console.error('Unknown currency code const: ' + currencyCode);
+                console.error('Unknown currency code const:', currencyCode);
                 return '';
         }
     }
@@ -45,7 +45,7 @@ export class WalletDataUtil {
             case CurrencyCodesEnum.usd:
                 return '$';
             default:
-                console.error('Unknown currency code const: ' + currencyCode);
+                console.error('Unknown currency code const:', currencyCode);
                 return '';
         }
     }

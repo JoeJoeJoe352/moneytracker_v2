@@ -17,14 +17,14 @@ export class NotificationService {
      * a kulcs kerüljön _() függvénybe, hogy automatikus kulcs extractorok megtalálhassák
      */
     public show(translationKey: string): void {
-        this.showText(this.translateService.instant(translationKey));
+        this.showText(this.translateService.instant(translationKey) as string);
     }
 
     /**
      * Megjeleníti az üzenetet úgy, ahogy kapjuk (pl. a backendtől már lefordítva érkezett szöveg)
      */
     public showText(message: string): void {
-        this.snackBar.open(message, this.translateService.instant(_('etc.close')));
+        this.snackBar.open(message, this.translateService.instant(_('etc.close')) as string);
     }
 
     /**

@@ -97,7 +97,7 @@ Ezután elérhető:
   docker compose -f docker-compose.dev.yml down -v
   ```
 
-  Figyelem: ilyenkor az adatbázis is törlődik. A következő induláskor előfordulhat, hogy az adatbázis még nem jön létre, mire a Spring elindul, ami hibát okoz.
+  Figyelem: ilyenkor az adatbázis is törlődik.
 
 ## Tesztek
 

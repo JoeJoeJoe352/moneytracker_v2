@@ -1,0 +1,5 @@
+# Csak formázást tartalmazó commitok, amiket a git blame figyelmen kívül hagy.
+# Lokálisan: git config blame.ignoreRevsFile .git-blame-ignore-revs (a GitHub magától használja)
+
+# palantir-java-format formázás (spotless)
+6cbee240659ac9a5d03da4b4e5f9e80bc0720e10

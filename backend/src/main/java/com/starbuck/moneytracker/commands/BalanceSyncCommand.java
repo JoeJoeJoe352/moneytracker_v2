@@ -24,5 +24,4 @@ public class BalanceSyncCommand {
     public BigDecimal getBalanceFromUser() {
         return balanceFromUser;
     }
-
 }

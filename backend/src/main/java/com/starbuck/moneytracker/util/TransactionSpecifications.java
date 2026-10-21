@@ -8,23 +8,22 @@ import com.starbuck.moneytracker.entity.Transaction;
 
 public class TransactionSpecifications {
 
-    private TransactionSpecifications() {
-    }
+    private TransactionSpecifications() {}
 
     /**
      * Opcionális query paraméter, ami ha van, akkor a név-re szűr
-     * 
+     *
      * @param name
      * @return
      */
     public static Specification<Transaction> hasName(String name) {
-        return (root, query, cb) -> name == null ? null
-                : cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+        return (root, query, cb) ->
+                name == null ? null : cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }
 
     /**
      * Opcionális query paraméter, ami ha van, akkor a dátumra szűr
-     * 
+     *
      * @param date
      * @return
      */
@@ -34,7 +33,7 @@ public class TransactionSpecifications {
 
     /**
      * Opcionális query paraméter, ami a tranzakció id-re szűr
-     * 
+     *
      * @param transactionId
      * @return
      */
@@ -44,7 +43,7 @@ public class TransactionSpecifications {
 
     /**
      * Query paraméter, ami a user azonosítóra szűr (nem opcionális)
-     * 
+     *
      * @param userId
      * @return
      */

@@ -50,8 +50,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<Wallet> wallets = new ArrayList<>();
 
-    public User() {
-    }
+    public User() {}
 
     public User(Long id, String username, String password, String email) {
         this.id = id;
@@ -145,5 +144,4 @@ public class User implements UserDetails {
     public void setWallets(List<Wallet> wallets) {
         this.wallets = wallets;
     }
-
 }

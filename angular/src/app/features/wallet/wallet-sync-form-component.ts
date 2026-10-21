@@ -82,12 +82,14 @@ export class WalletSyncFormComponent {
             return '';
         }
         if (balanceDiff === 0) {
-            return this.translateService.instant(_('wallet.sync.modal_no_result_description'));
+            return this.translateService.instant(
+                _('wallet.sync.modal_no_result_description'),
+            ) as string;
         }
         const type =
             balanceDiff > 0
-                ? this.translateService.instant(_('transaction.income'))
-                : this.translateService.instant(_('transaction.expense'));
+                ? (this.translateService.instant(_('transaction.income')) as string)
+                : (this.translateService.instant(_('transaction.expense')) as string);
 
         return this.translateService.instant(_('wallet.sync.modal_result_description'), {
             type: type,
@@ -95,7 +97,7 @@ export class WalletSyncFormComponent {
                 Math.abs(balanceDiff),
                 this.data.wallet.currencyCode,
             ),
-        });
+        }) as string;
     });
 
     /**

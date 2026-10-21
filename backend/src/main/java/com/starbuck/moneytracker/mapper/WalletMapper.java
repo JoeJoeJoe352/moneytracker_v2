@@ -19,9 +19,6 @@ public class WalletMapper {
         if (wallets == null || wallets.size() == 0) {
             throw new IllegalArgumentException("Wallet list empty or null");
         }
-        return wallets.stream()
-                .map((wallet) -> this.toDto(wallet))
-                .collect(Collectors.toList());
+        return wallets.stream().map((wallet) -> this.toDto(wallet)).collect(Collectors.toList());
     }
-
 }

@@ -73,17 +73,18 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
      */
     @BeforeEach
     void registerAndLoginRealUser() {
-        RegisterRequestDto registerRequest = new RegisterRequestDto("e2eCreateUser", "password123",
-                "e2ecreate@email.com");
-        ResponseEntity<Void> registerResponse = restTemplate.postForEntity("/auth/register", registerRequest,
-                Void.class);
+        RegisterRequestDto registerRequest =
+                new RegisterRequestDto("e2eCreateUser", "password123", "e2ecreate@email.com");
+        ResponseEntity<Void> registerResponse =
+                restTemplate.postForEntity("/auth/register", registerRequest, Void.class);
         assertEquals(HttpStatus.CREATED, registerResponse.getStatusCode());
 
         LoginRequestDto loginRequest = new LoginRequestDto("e2ecreate@email.com", "password123");
-        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange("/auth/login",
+        ResponseEntity<Map<String, String>> loginResponse = restTemplate.exchange(
+                "/auth/login",
                 HttpMethod.POST,
-                new HttpEntity<>(loginRequest), new ParameterizedTypeReference<Map<String, String>>() {
-                });
+                new HttpEntity<>(loginRequest),
+                new ParameterizedTypeReference<Map<String, String>>() {});
         assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         // A szerver által ténylegesen kiállított Set-Cookie headert használjuk,
@@ -100,9 +101,9 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     @AfterEach
     void cleanupCreatedData() {
         transactionDetailRepository.deleteAllInBatch();
-        transactionRepository.findAll()
-                .forEach(transaction -> transactionRepository
-                        .hardDeleteTransaction(transaction.getId()));
+        transactionRepository
+                .findAll()
+                .forEach(transaction -> transactionRepository.hardDeleteTransaction(transaction.getId()));
         walletRepository.delete(this.wallet);
         userRepository.delete(this.user);
     }
@@ -116,17 +117,22 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     @Test
     void createTransaction_persistsAndIsRetrievableThroughTheApi() {
         // GIVEN
-        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("100.00"), "teszt",
+        TransactionDetailCreateRequestDto detail =
+                new TransactionDetailCreateRequestDto(new BigDecimal("100.00"), "teszt", null, null, List.of());
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                "E2E groceries",
                 null,
-                null, List.of());
-        TransactionCreateRequest request = new TransactionCreateRequest("E2E groceries", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(ZoneOffset.UTC), List.of(detail), List.of(), this.wallet.getId());
+                TransactionTypeEnum.INCOME,
+                LocalDate.now(ZoneOffset.UTC),
+                List.of(detail),
+                List.of(),
+                this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
         // WHEN
-        ResponseEntity<Void> response = restTemplate.postForEntity("/transaction",
-                new HttpEntity<>(request, headers), Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity("/transaction", new HttpEntity<>(request, headers), Void.class);
 
         // THEN
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -136,13 +142,13 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
         assertEquals(1, transactionsInDb.size());
         assertEquals("E2E groceries", transactionsInDb.get(0).getName());
         assertEquals(new BigDecimal("100.00"), transactionsInDb.get(0).getPriceSum());
-        assertEquals(this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
+        assertEquals(
+                this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció
         ResponseEntity<TransactionResponseDto[]> lastTransactionsResponse = restTemplate.exchange(
-                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers),
-                TransactionResponseDto[].class);
+                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
 
         assertEquals(HttpStatus.OK, lastTransactionsResponse.getStatusCode());
         TransactionResponseDto[] lastTransactions = lastTransactionsResponse.getBody();
@@ -157,20 +163,24 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     @Test
     void createTransaction_persistsAndIsRetrievableThroughTheApi_complexTransaction() {
         // GIVEN
-        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("-479.00"),
-                "Kakaós csiga", null,
-                null, List.of());
-        TransactionDetailCreateRequestDto detail2 = new TransactionDetailCreateRequestDto(null, "kenyér",
-                new BigDecimal("0.5"),
-                new BigDecimal("1500"), List.of());
-        TransactionCreateRequest request = new TransactionCreateRequest("Félegyházi bevásárlás", null,
-                TransactionTypeEnum.OUTCOME, LocalDate.now(ZoneOffset.UTC), List.of(detail, detail2), List.of(), this.wallet.getId());
+        TransactionDetailCreateRequestDto detail =
+                new TransactionDetailCreateRequestDto(new BigDecimal("-479.00"), "Kakaós csiga", null, null, List.of());
+        TransactionDetailCreateRequestDto detail2 = new TransactionDetailCreateRequestDto(
+                null, "kenyér", new BigDecimal("0.5"), new BigDecimal("1500"), List.of());
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                "Félegyházi bevásárlás",
+                null,
+                TransactionTypeEnum.OUTCOME,
+                LocalDate.now(ZoneOffset.UTC),
+                List.of(detail, detail2),
+                List.of(),
+                this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
         // WHEN
-        ResponseEntity<Void> response = restTemplate.postForEntity("/transaction",
-                new HttpEntity<>(request, headers), Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity("/transaction", new HttpEntity<>(request, headers), Void.class);
 
         // THEN
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -180,13 +190,13 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
         assertEquals(1, transactionsInDb.size());
         assertEquals("Félegyházi bevásárlás", transactionsInDb.get(0).getName());
         assertEquals(new BigDecimal("-1229.00"), transactionsInDb.get(0).getPriceSum());
-        assertEquals(this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
+        assertEquals(
+                this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció
         ResponseEntity<TransactionResponseDto[]> lastTransactionsResponse = restTemplate.exchange(
-                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers),
-                TransactionResponseDto[].class);
+                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
 
         assertEquals(HttpStatus.OK, lastTransactionsResponse.getStatusCode());
         TransactionResponseDto[] lastTransactions = lastTransactionsResponse.getBody();
@@ -219,14 +229,20 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     @Test
     void createTransaction_persistsAndIsRetrievableThroughTheApi_simpleTransaction() {
         // GIVEN
-        TransactionCreateRequest request = new TransactionCreateRequest("Strandbelépő", new BigDecimal("-1500"),
-                TransactionTypeEnum.OUTCOME, LocalDate.now(ZoneOffset.UTC), List.of(), List.of(), this.wallet.getId());
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                "Strandbelépő",
+                new BigDecimal("-1500"),
+                TransactionTypeEnum.OUTCOME,
+                LocalDate.now(ZoneOffset.UTC),
+                List.of(),
+                List.of(),
+                this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
         // WHEN
-        ResponseEntity<Void> response = restTemplate.postForEntity("/transaction",
-                new HttpEntity<>(request, headers), Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity("/transaction", new HttpEntity<>(request, headers), Void.class);
 
         // THEN
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -236,13 +252,13 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
         assertEquals(1, transactionsInDb.size());
         assertEquals("Strandbelépő", transactionsInDb.get(0).getName());
         assertEquals(new BigDecimal("-1500.00"), transactionsInDb.get(0).getPriceSum());
-        assertEquals(this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
+        assertEquals(
+                this.user.getId(), transactionsInDb.get(0).getWallet().getUser().getId());
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció
         ResponseEntity<TransactionResponseDto[]> lastTransactionsResponse = restTemplate.exchange(
-                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers),
-                TransactionResponseDto[].class);
+                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
 
         assertEquals(HttpStatus.OK, lastTransactionsResponse.getStatusCode());
         TransactionResponseDto[] lastTransactions = lastTransactionsResponse.getBody();
@@ -273,10 +289,16 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
      */
     @Test
     void createTransaction_isRejectedWithoutAuthCookie() {
-        TransactionDetailCreateRequestDto detail = new TransactionDetailCreateRequestDto(new BigDecimal("100.00"), null, null,
-                null, List.of());
-        TransactionCreateRequest request = new TransactionCreateRequest("Should not persist", null,
-                TransactionTypeEnum.INCOME, LocalDate.now(ZoneOffset.UTC), List.of(detail), List.of(), this.wallet.getId());
+        TransactionDetailCreateRequestDto detail =
+                new TransactionDetailCreateRequestDto(new BigDecimal("100.00"), null, null, null, List.of());
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                "Should not persist",
+                null,
+                TransactionTypeEnum.INCOME,
+                LocalDate.now(ZoneOffset.UTC),
+                List.of(detail),
+                List.of(),
+                this.wallet.getId());
 
         ResponseEntity<Void> response = restTemplate.postForEntity("/transaction", request, Void.class);
 
@@ -291,13 +313,19 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
     @Test
     void createTransaction_returnsBadRequestForInvalidPayload() {
         // "ab" rövidebb, mint az elvárt minimum 3 karakter
-        TransactionCreateRequest invalidRequest = new TransactionCreateRequest("ab", new BigDecimal("10.00"),
-                TransactionTypeEnum.INCOME, LocalDate.now(ZoneOffset.UTC), List.of(), List.of(), this.wallet.getId());
+        TransactionCreateRequest invalidRequest = new TransactionCreateRequest(
+                "ab",
+                new BigDecimal("10.00"),
+                TransactionTypeEnum.INCOME,
+                LocalDate.now(ZoneOffset.UTC),
+                List.of(),
+                List.of(),
+                this.wallet.getId());
 
         var headers = this.getHeaderWithCookie();
 
-        ResponseEntity<Void> response = restTemplate.postForEntity("/transaction",
-                new HttpEntity<>(invalidRequest, headers), Void.class);
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity("/transaction", new HttpEntity<>(invalidRequest, headers), Void.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(0, transactionRepository.count());

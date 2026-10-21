@@ -21,8 +21,7 @@ public class TransactionDetailCategory {
     @JoinColumn(name = "transaction_detail_id")
     private TransactionDetail transactionDetail;
 
-    public TransactionDetailCategory() {
-    }
+    public TransactionDetailCategory() {}
 
     public TransactionDetailCategory(Category category, TransactionDetail transactionDetail) {
         this.category = category;
@@ -52,5 +51,4 @@ public class TransactionDetailCategory {
     public void setTransactionDetail(TransactionDetail transactionDetail) {
         this.transactionDetail = transactionDetail;
     }
-
 }

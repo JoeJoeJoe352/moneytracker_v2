@@ -13,7 +13,7 @@ import jakarta.validation.Payload;
  * Ha a zone üres, a requesthez tartozó user időzónáját használja (x-time-zone header, UserDateUtil).
  * A null értéket érvényesnek tekinti, ahhoz @NotNull kell.
  */
-@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT })
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = PastOrPresentInZoneValidator.class)
 public @interface PastOrPresentInZone {

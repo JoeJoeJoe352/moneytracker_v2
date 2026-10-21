@@ -21,8 +21,12 @@ public class UserService {
     private final WalletService walletService;
     private final MessageSource messageSource;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
-            WalletService walletService, MessageSource messageSource) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            WalletService walletService,
+            MessageSource messageSource) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -33,7 +37,7 @@ public class UserService {
     /**
      * Felhasználó létrehozása a megadott adatokkal. Username és email cím egyediség
      * ellenőrzés
-     * 
+     *
      * @param User user
      * @return User
      */
@@ -84,7 +88,7 @@ public class UserService {
 
     /**
      * Megnézi, hogy az email cím foglalt-e már
-     * 
+     *
      * @param email
      * @return boolean
      */

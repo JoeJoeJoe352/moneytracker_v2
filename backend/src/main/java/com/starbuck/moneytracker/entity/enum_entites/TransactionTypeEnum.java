@@ -20,8 +20,7 @@ public enum TransactionTypeEnum {
         @Override
         public void validateDetailPrice(BigDecimal price) {
             if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException(
-                        "Income transaction, with a negative or zero detail!");
+                throw new IllegalArgumentException("Income transaction, with a negative or zero detail!");
             }
         }
     },
@@ -34,8 +33,7 @@ public enum TransactionTypeEnum {
         @Override
         public void validateDetailPrice(BigDecimal price) {
             if (price.compareTo(BigDecimal.ZERO) >= 0) {
-                throw new IllegalArgumentException(
-                        "Expense transaction, with a positive or zero detail!");
+                throw new IllegalArgumentException("Expense transaction, with a positive or zero detail!");
             }
         }
     };

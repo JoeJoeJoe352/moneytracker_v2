@@ -26,6 +26,7 @@ import { LanguageService } from '@shared/services/translate-service';
 import { CredentialsInterceptor } from '@core/interceptors/credentials-interceptor';
 import { LanguageInterceptor } from '@core/interceptors/language-interceptor';
 import { TimeZoneInterceptor } from './core/interceptors/time-zone-interceptor';
+import { AppUpdateService } from '@core/services/app-update-service';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -71,5 +72,6 @@ export const appConfig: ApplicationConfig = {
             enabled: !isDevMode(),
             registrationStrategy: 'registerWhenStable:30000',
         }),
+        provideAppInitializer(() => inject(AppUpdateService).init()),
     ],
 };

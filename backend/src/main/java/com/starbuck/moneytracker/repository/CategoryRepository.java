@@ -12,26 +12,28 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     /**
      * Megnézi, hogy a usernek van-e már ilyen néven kategóriája (saját, vagy közös)
-     * 
+     *
      * @param name
      * @param userId
      * @return
      */
-    @Query("SELECT COUNT(c) > 0 FROM Category c WHERE c.name = ?1 AND (c.user.id = ?2 OR (c.user.id IS NULL AND c.lang = ?3)) AND c.status = 0")
+    @Query(
+            "SELECT COUNT(c) > 0 FROM Category c WHERE c.name = ?1 AND (c.user.id = ?2 OR (c.user.id IS NULL AND c.lang = ?3)) AND c.status = 0")
     boolean isUserHaveThisCategoryName(String name, long userId, LangEnum lang);
 
     /**
      * Kilistázza a user saját kategóriáit és a közös kategóriákat, de csak adott nyelvre (null user_id)
-     * 
+     *
      * @param userId
      * @return
      */
-    @Query("SELECT c FROM Category c WHERE (c.user.id = ?1 OR (c.user.id IS NULL AND c.lang = ?2)) AND c.status = 0 ORDER BY c.id ASC")
+    @Query(
+            "SELECT c FROM Category c WHERE (c.user.id = ?1 OR (c.user.id IS NULL AND c.lang = ?2)) AND c.status = 0 ORDER BY c.id ASC")
     List<Category> findAllForUser(long userId, LangEnum lang);
 
     /**
      * Kilistázza a user saját kategóriáit és a közös kategóriákat (null used_id)
-     * 
+     *
      * @param userId
      * @return
      */

@@ -9,7 +9,7 @@ import { AuthService } from './auth-service';
  */
 export function uniqueEmailValidator(authService: AuthService): AsyncValidatorFn {
     return (control) =>
-        authService.checkEmailUniqueness(control.value).pipe(
+        authService.checkEmailUniqueness(control.value as string).pipe(
             map((isTaken) => (isTaken ? { emailTaken: true } : null)),
             catchError(() => of(null)),
         );

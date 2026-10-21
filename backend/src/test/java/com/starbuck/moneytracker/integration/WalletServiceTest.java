@@ -39,6 +39,7 @@ import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -48,8 +49,6 @@ import com.starbuck.moneytracker.service.BalanceSyncService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
-
-import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -160,15 +159,12 @@ public class WalletServiceTest extends MySqlContainerTest {
         var savedAnotherUser = userRepository.save(anotherUser);
         var wallet4 = walletService.createDefaultWallet(savedAnotherUser);
 
-        var transaction1AfterSave = transactionRepo
-                .save(new Transaction("transaction1", LocalDate.now(), TransactionTypeEnum.INCOME,
-                        new BigDecimal(200), wallet2));
-        var transaction2AfterSave = transactionRepo
-                .save(new Transaction("transaction2", LocalDate.now(), TransactionTypeEnum.OUTCOME,
-                        new BigDecimal(-50), wallet2));
-        var transaction3AfterSave = transactionRepo
-                .save(new Transaction("transaction3", LocalDate.now(), TransactionTypeEnum.OUTCOME,
-                        new BigDecimal(-50), wallet3));
+        var transaction1AfterSave = transactionRepo.save(new Transaction(
+                "transaction1", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal(200), wallet2));
+        var transaction2AfterSave = transactionRepo.save(new Transaction(
+                "transaction2", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal(-50), wallet2));
+        var transaction3AfterSave = transactionRepo.save(new Transaction(
+                "transaction3", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal(-50), wallet3));
         // When
         List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
 
@@ -204,7 +200,7 @@ public class WalletServiceTest extends MySqlContainerTest {
     }
 
     /**
-     * A listában az utolsó szinkronizálás dátumaként a wallet létrehozásának dátuma jelenik meg alapértelmezetten 
+     * A listában az utolsó szinkronizálás dátumaként a wallet létrehozásának dátuma jelenik meg alapértelmezetten
      */
     @Test
     public void testListWalletsLastSyncDate() {
@@ -220,11 +216,12 @@ public class WalletServiceTest extends MySqlContainerTest {
 
         // A db-ben tárolt létrehozási dátumhoz assertál, nem a LocalDate.now()-hoz,
         // így éjfélkor és eltérő időzónáknál sem bukik el
-        var notSyncedCreatedAt = walletRepo.findById(notSyncedWallet.getId()).orElseThrow().getCreatedAt();
+        var notSyncedCreatedAt =
+                walletRepo.findById(notSyncedWallet.getId()).orElseThrow().getCreatedAt();
         assertEquals("NotSyncedWallet", wallets.get(0).name());
         // a createdAt a JVM időzónájában van, a lista napja a user zónájában (itt nincs request -> UTC)
-        var expectedDate = LocalDate.ofInstant(notSyncedCreatedAt.atZone(ZoneId.systemDefault()).toInstant(),
-                ZoneOffset.UTC);
+        var expectedDate = LocalDate.ofInstant(
+                notSyncedCreatedAt.atZone(ZoneId.systemDefault()).toInstant(), ZoneOffset.UTC);
         assertEquals(expectedDate, wallets.get(0).lastSyncDate());
 
         walletRepo.delete(notSyncedWallet);
@@ -261,7 +258,8 @@ public class WalletServiceTest extends MySqlContainerTest {
             assertEquals(1, wallets.size());
             assertNotNull(syncTransaction);
 
-            var syncedCreatedAt = walletRepo.findById(syncedWallet.getId()).orElseThrow().getCreatedAt();
+            var syncedCreatedAt =
+                    walletRepo.findById(syncedWallet.getId()).orElseThrow().getCreatedAt();
             assertEquals("SyncedWallet", wallets.get(0).name());
             assertEquals(syncDate, wallets.get(0).lastSyncDate());
             assertNotEquals(syncedCreatedAt.toLocalDate(), wallets.get(0).lastSyncDate());
@@ -309,12 +307,12 @@ public class WalletServiceTest extends MySqlContainerTest {
         var emptyWallet = walletService.createWallet(
                 new CreateWalletCommand("EmptyWallet", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
 
-        var income = transactionRepo.save(new Transaction("income", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal(500), hufWallet));
-        var expense = transactionRepo.save(new Transaction("expense", LocalDate.now(), TransactionTypeEnum.OUTCOME,
-                new BigDecimal(-200), hufWallet));
-        var incomeEur = transactionRepo.save(new Transaction("income", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal(1000), eurWallet));
+        var income = transactionRepo.save(
+                new Transaction("income", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal(500), hufWallet));
+        var expense = transactionRepo.save(new Transaction(
+                "expense", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal(-200), hufWallet));
+        var incomeEur = transactionRepo.save(new Transaction(
+                "income", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal(1000), eurWallet));
 
         try {
             // When
@@ -341,8 +339,8 @@ public class WalletServiceTest extends MySqlContainerTest {
     @Test
     public void updateWallet() {
         // Given
-        var createCommand = new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS,
-                this.user);
+        var createCommand =
+                new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
         var wallet = walletService.createWallet(createCommand);
 
         var updateCommand = new UpdateWalletCommand("UpdatedCustomWallet", WalletTypeEnum.DEFAULT);
@@ -351,8 +349,8 @@ public class WalletServiceTest extends MySqlContainerTest {
         walletService.updateWallet(wallet.getId(), updateCommand);
 
         // Then
-        Wallet updatedWallet = walletRepo.findById(wallet.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
+        Wallet updatedWallet =
+                walletRepo.findById(wallet.getId()).orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
 
         assertEquals("UpdatedCustomWallet", updatedWallet.getName());
         assertEquals(WalletTypeEnum.DEFAULT, updatedWallet.getType());
@@ -389,15 +387,16 @@ public class WalletServiceTest extends MySqlContainerTest {
         var command = new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
         var wallet = walletService.createWallet(command);
         // csak akkor törölhető a wallet, ha nem az az egyetlen
-        var commandAnotherWallet = new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
+        var commandAnotherWallet =
+                new CreateWalletCommand("customWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
         var walletAnother = walletService.createWallet(commandAnotherWallet);
 
         // When
         walletService.softDeleteWallet(wallet.getId());
 
         // Then
-        var deletedWallet = walletRepo.findById(wallet.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
+        var deletedWallet =
+                walletRepo.findById(wallet.getId()).orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
         assertEquals(GeneralStatusEnum.DISABLED, deletedWallet.getStatus());
 
         assertThrows(EntityNotFoundException.class, () -> {
@@ -507,11 +506,12 @@ public class WalletServiceTest extends MySqlContainerTest {
         // Given
         var command = new CreateWalletCommand("lastWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
         var wallet = walletService.createWallet(command);
-        var commandDeletedWallet = new CreateWalletCommand("lastWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
+        var commandDeletedWallet =
+                new CreateWalletCommand("lastWallet", CurrencyEnum.USD, WalletTypeEnum.SAVINGS, this.user);
         var walletDeleted = walletService.createWallet(commandDeletedWallet);
 
         walletService.softDeleteWallet(walletDeleted.getId());
-        
+
         // When
         assertThrows(IllegalStateException.class, () -> {
             walletService.softDeleteWallet(wallet.getId());

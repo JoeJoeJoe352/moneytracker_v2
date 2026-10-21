@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.BalanceSyncCommand;
+import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
 import com.starbuck.moneytracker.dto.BalanceSyncRequestDto;
 import com.starbuck.moneytracker.dto.WalletCreateRequestDto;
@@ -42,7 +42,7 @@ public class WalletController {
 
     /**
      * Visszatér a felhasználó walletjaival
-     * 
+     *
      * @return
      */
     @GetMapping
@@ -52,7 +52,7 @@ public class WalletController {
 
     /**
      * Elment egy walletet
-     * 
+     *
      * @param dto
      */
     @PostMapping
@@ -99,5 +99,4 @@ public class WalletController {
     public void softDeleteWallet(@PathVariable long id) {
         walletService.softDeleteWallet(id);
     }
-
 }

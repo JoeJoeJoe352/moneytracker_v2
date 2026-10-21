@@ -31,8 +31,8 @@ class CostCalculatorDomainServiceTest {
 
     @Test
     void nullType_throws() {
-        var detail = new TransactionDetailSaveCommand("teszt", new BigDecimal("1000"), List.of(),
-                TransactionTypeEnum.INCOME);
+        var detail = new TransactionDetailSaveCommand(
+                "teszt", new BigDecimal("1000"), List.of(), TransactionTypeEnum.INCOME);
         assertThrowsExactly(IllegalArgumentException.class, () -> service.calculateCost(detail, null));
     }
 
@@ -41,9 +41,10 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void pricePositiveWhenOutcome_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionDetailSaveCommand("tej", new BigDecimal("300"), List.of(),
-                        TransactionTypeEnum.OUTCOME));
+        assertThrowsExactly(
+                IllegalArgumentException.class,
+                () -> new TransactionDetailSaveCommand(
+                        "tej", new BigDecimal("300"), List.of(), TransactionTypeEnum.OUTCOME));
     }
 
     /**
@@ -51,26 +52,30 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void priceNegativeWhenIncome_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
-                () -> new TransactionDetailSaveCommand("Fizetés", new BigDecimal("-300"), List.of(),
-                        TransactionTypeEnum.INCOME));
+        assertThrowsExactly(
+                IllegalArgumentException.class,
+                () -> new TransactionDetailSaveCommand(
+                        "Fizetés", new BigDecimal("-300"), List.of(), TransactionTypeEnum.INCOME));
     }
 
     @Test
     void simpleModeWithNullPrice_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
+        assertThrowsExactly(
+                IllegalArgumentException.class,
                 () -> new TransactionDetailSaveCommand("teszt", null, List.of(), TransactionTypeEnum.INCOME));
     }
 
     @Test
     void complexModeWithNullUnitPrice_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
+        assertThrowsExactly(
+                IllegalArgumentException.class,
                 () -> new TransactionDetailSaveCommand("teszt", new BigDecimal("5"), null, List.of()));
     }
 
     @Test
     void complexModeWithNullWeight_throws() {
-        assertThrowsExactly(IllegalArgumentException.class,
+        assertThrowsExactly(
+                IllegalArgumentException.class,
                 () -> new TransactionDetailSaveCommand("teszt", null, new BigDecimal("5"), List.of()));
     }
 
@@ -79,8 +84,14 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void emptyDetailArray_returnsZero() {
-        var transaction = new TransactionSaveCommand("bevásárlás", new BigDecimal("300.00"), LocalDate.now(),
-                TransactionTypeEnum.INCOME, List.of(), List.of(), 1L);
+        var transaction = new TransactionSaveCommand(
+                "bevásárlás",
+                new BigDecimal("300.00"),
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                List.of(),
+                List.of(),
+                1L);
 
         assertEquals(new BigDecimal("300.00"), service.calculateTransactionCost(transaction));
     }
@@ -90,8 +101,7 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void priceHasSmallerPriorityThanWeightAndUnitPrice() {
-        var detail = new TransactionDetailSaveCommand("teszt", new BigDecimal("5"), new BigDecimal("1000"),
-                List.of());
+        var detail = new TransactionDetailSaveCommand("teszt", new BigDecimal("5"), new BigDecimal("1000"), List.of());
 
         assertEquals(new BigDecimal("5000.00"), service.calculateCost(detail, TransactionTypeEnum.INCOME));
         assertEquals(new BigDecimal("-5000.00"), service.calculateCost(detail, TransactionTypeEnum.OUTCOME));
@@ -102,12 +112,12 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void roundsHalfUpToTwoDecimals() {
-        var roundsUp = new TransactionDetailSaveCommand("roundsUp", new BigDecimal("3"), new BigDecimal("0.005"),
-                List.of());
+        var roundsUp =
+                new TransactionDetailSaveCommand("roundsUp", new BigDecimal("3"), new BigDecimal("0.005"), List.of());
         assertEquals(new BigDecimal("0.02"), service.calculateCost(roundsUp, TransactionTypeEnum.INCOME));
 
-        var roundsDown = new TransactionDetailSaveCommand("roundsDown", new BigDecimal("1"),
-                new BigDecimal("0.004"), List.of());
+        var roundsDown =
+                new TransactionDetailSaveCommand("roundsDown", new BigDecimal("1"), new BigDecimal("0.004"), List.of());
         assertEquals(new BigDecimal("0.00"), service.calculateCost(roundsDown, TransactionTypeEnum.INCOME));
     }
 
@@ -116,13 +126,13 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void priceIsUsedAsIs_regardlessOfTransactionType() {
-        var detail = new TransactionDetailSaveCommand("price", new BigDecimal("1000"), List.of(),
-                TransactionTypeEnum.INCOME);
+        var detail = new TransactionDetailSaveCommand(
+                "price", new BigDecimal("1000"), List.of(), TransactionTypeEnum.INCOME);
 
         assertEquals(new BigDecimal("1000.00"), service.calculateCost(detail, TransactionTypeEnum.INCOME));
 
-        var negativeDetail = new TransactionDetailSaveCommand("negativePrice", new BigDecimal("-500"),
-                List.of(), TransactionTypeEnum.OUTCOME);
+        var negativeDetail = new TransactionDetailSaveCommand(
+                "negativePrice", new BigDecimal("-500"), List.of(), TransactionTypeEnum.OUTCOME);
         assertEquals(new BigDecimal("-500.00"), service.calculateCost(negativeDetail, TransactionTypeEnum.OUTCOME));
     }
 
@@ -131,8 +141,8 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void roundsPriceToTwoDecimals() {
-        var detail = new TransactionDetailSaveCommand("price", new BigDecimal("1000.005"), List.of(),
-                TransactionTypeEnum.INCOME);
+        var detail = new TransactionDetailSaveCommand(
+                "price", new BigDecimal("1000.005"), List.of(), TransactionTypeEnum.INCOME);
         assertEquals(new BigDecimal("1000.01"), service.calculateCost(detail, TransactionTypeEnum.INCOME));
     }
 
@@ -141,12 +151,17 @@ class CostCalculatorDomainServiceTest {
      */
     @Test
     void sumsAllDetailCosts() {
-        var detail1 = new TransactionDetailSaveCommand("kenyér", new BigDecimal("2"), new BigDecimal("500"),
-                List.of());
-        var detail2 = new TransactionDetailSaveCommand("tej", new BigDecimal("-300"), List.of(),
-                TransactionTypeEnum.OUTCOME);
-        var transaction = new TransactionSaveCommand("bevásárlás", null, LocalDate.now(),
-                TransactionTypeEnum.OUTCOME, List.of(detail1, detail2), List.of(), 1L);
+        var detail1 = new TransactionDetailSaveCommand("kenyér", new BigDecimal("2"), new BigDecimal("500"), List.of());
+        var detail2 =
+                new TransactionDetailSaveCommand("tej", new BigDecimal("-300"), List.of(), TransactionTypeEnum.OUTCOME);
+        var transaction = new TransactionSaveCommand(
+                "bevásárlás",
+                null,
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                List.of(detail1, detail2),
+                List.of(),
+                1L);
 
         var result = service.calculateTransactionCost(transaction);
 

@@ -28,5 +28,4 @@ public class WalletSummaryResponseDto {
     public void setTotal(BigDecimal total) {
         this.total = total;
     }
-
 }

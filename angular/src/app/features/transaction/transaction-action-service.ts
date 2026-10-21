@@ -18,7 +18,7 @@ export class TransactionActionService {
      */
     public confirmDeletion(): Observable<boolean> {
         return ConfirmDialogComponent.open(this.dialog, {
-            message: this.translateService.instant(_('transaction.delete.confirm')),
+            message: this.translateService.instant(_('transaction.delete.confirm')) as string,
             danger: true,
         })
             .afterClosed()

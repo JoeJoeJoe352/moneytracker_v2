@@ -67,7 +67,7 @@ export class TransactionsListComponent implements OnChanges {
      * A route aktuális query paraméterei. Változáskor a lista magától újratöltődik
      */
     private readonly latestParams = toSignal(
-        this.route.queryParams.pipe(map((params) => new URLSearchParams(params as Params))),
+        this.route.queryParams.pipe(map((params) => new URLSearchParams(params))),
         { initialValue: new URLSearchParams() },
     );
 
@@ -87,14 +87,14 @@ export class TransactionsListComponent implements OnChanges {
                 this.modal.open(transactionIdFromParam);
             } else {
                 console.error('Invalid transaction id in param: ' + transactionIdFromParam);
-                this.router.navigate(['/transactions'], { replaceUrl: true });
+                void this.router.navigate(['/transactions'], { replaceUrl: true });
             }
         });
 
         // Modal bezárásakor kivesszük az id-t az URL-ből, a query paramétereket (szűrőket) megtartjuk
         this.modal.closed.pipe(takeUntilDestroyed()).subscribe(() => {
             if (this.route.snapshot.params['id'] !== undefined) {
-                this.router.navigate(['/transactions'], {
+                void this.router.navigate(['/transactions'], {
                     queryParamsHandling: 'preserve',
                     replaceUrl: true,
                 });
@@ -141,7 +141,7 @@ export class TransactionsListComponent implements OnChanges {
      * A queryParams változásra reagálva újratölti a listát
      */
     protected onFilterSubmit(data: FilterData): void {
-        this.router.navigate([], {
+        void this.router.navigate([], {
             relativeTo: this.route,
             queryParams: this.toQueryParams(data),
         });
@@ -151,7 +151,7 @@ export class TransactionsListComponent implements OnChanges {
      * keresési adatok resetelése
      */
     protected clearInputs(): void {
-        this.router.navigate([], {
+        void this.router.navigate([], {
             relativeTo: this.route,
             queryParams: {},
         });

@@ -53,8 +53,7 @@ public class BalanceSync {
     @ColumnDefault("0")
     private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
 
-    public BalanceSync() {
-    }
+    public BalanceSync() {}
 
     public BalanceSync(Instant syncedAt, Wallet wallet, BigDecimal actualBalance) {
         this.syncedAt = syncedAt;
@@ -109,5 +108,4 @@ public class BalanceSync {
     public void setStatus(GeneralStatusEnum status) {
         this.status = status;
     }
-
 }

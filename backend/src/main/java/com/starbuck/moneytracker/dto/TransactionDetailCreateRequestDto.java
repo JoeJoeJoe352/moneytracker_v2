@@ -12,20 +12,13 @@ import jakarta.validation.constraints.NotNull;
 
 @TransactionDetailAttributeCoexist
 public record TransactionDetailCreateRequestDto(
+        @Digits(integer = 8, fraction = 2) BigDecimal price,
 
-    @Digits(integer = 8 , fraction = 2)
-    BigDecimal price,
+        @Length(min = 3, max = 20, message = "Name must be between 3 and 20 characters")
+        String name,
 
-    @Length(min = 3, max = 20, message = "Name must be between 3 and 20 characters") 
-    String name,
+        @Digits(integer = 8, fraction = 2) BigDecimal weight,
 
-    @Digits(integer = 8 , fraction = 2)
-    BigDecimal weight,
+        @Digits(integer = 8, fraction = 2) BigDecimal unitPrice,
 
-    @Digits(integer = 8 , fraction = 2)
-    BigDecimal unitPrice,
-
-    @NotNull 
-    List<Long> categories
-) {
-}
+        @NotNull List<Long> categories) {}

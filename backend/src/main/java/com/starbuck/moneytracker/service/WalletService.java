@@ -20,11 +20,10 @@ import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.UserDateUtil;
-
-import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @Service
 public class WalletService {
@@ -34,7 +33,10 @@ public class WalletService {
     private final CurrentUserUtil userUtil;
     private final UserDateUtil userDateUtil;
 
-    public WalletService(WalletRepository walletRepo, MessageSource messageSource, CurrentUserUtil userUtil,
+    public WalletService(
+            WalletRepository walletRepo,
+            MessageSource messageSource,
+            CurrentUserUtil userUtil,
             UserDateUtil userDateUtil) {
         this.walletRepo = walletRepo;
         this.messageSource = messageSource;
@@ -64,17 +66,17 @@ public class WalletService {
      * @return a létrehozott wallet
      */
     public Wallet createDefaultWallet(User registeredUser) {
-        String defaultNameLocalised = messageSource.getMessage("defaultWalletName", null,
-                LocaleContextHolder.getLocale());
+        String defaultNameLocalised =
+                messageSource.getMessage("defaultWalletName", null, LocaleContextHolder.getLocale());
 
-        CreateWalletCommand command = new CreateWalletCommand(defaultNameLocalised, CurrencyEnum.HUF,
-                WalletTypeEnum.DEFAULT, registeredUser);
+        CreateWalletCommand command =
+                new CreateWalletCommand(defaultNameLocalised, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, registeredUser);
         return createWallet(command);
     }
 
     /**
      * Wallet frissítése
-     * 
+     *
      * @param id
      * @param command
      */
@@ -82,7 +84,8 @@ public class WalletService {
         if (command == null) {
             throw new IllegalArgumentException("updateCommand is null");
         }
-        Wallet walletFromDb = walletRepo.getWalletById(id, userUtil.getUser().getId())
+        Wallet walletFromDb = walletRepo
+                .getWalletById(id, userUtil.getUser().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
 
         walletFromDb.setName(command.getName());
@@ -98,8 +101,8 @@ public class WalletService {
         var wallets = walletRepo.listWalletsWithSumByUserId(userUtil.getUser().getId());
         boolean deletable = isWalletsDeletable(wallets.size());
         return wallets.stream()
-                .map(w -> new WalletListResponseDto(w.id(), w.name(), w.currencyCode(), w.type(), w.sum(),
-                        getLastSyncDate(w), deletable))
+                .map(w -> new WalletListResponseDto(
+                        w.id(), w.name(), w.currencyCode(), w.type(), w.sum(), getLastSyncDate(w), deletable))
                 .toList();
     }
 
@@ -119,7 +122,7 @@ public class WalletService {
 
     /**
      * Törölhetőek-e a walletek
-     * 
+     *
      * @param activeWalletCount
      * @return
      */
@@ -134,7 +137,8 @@ public class WalletService {
      * @return
      */
     public Wallet getWalletById(long id) {
-        return walletRepo.getWalletById(id, userUtil.getUser().getId())
+        return walletRepo
+                .getWalletById(id, userUtil.getUser().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
     }
 
@@ -146,7 +150,8 @@ public class WalletService {
      * @return
      */
     public Wallet getWalletByIdForUpdate(long id) {
-        return walletRepo.getWalletByIdForUpdate(id, userUtil.getUser().getId())
+        return walletRepo
+                .getWalletByIdForUpdate(id, userUtil.getUser().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
     }
 
@@ -170,7 +175,7 @@ public class WalletService {
 
     /**
      * Adott wallethez lekérdezi a rajta lévő balance-ot
-     * 
+     *
      * @param walletId
      * @return
      */
@@ -186,5 +191,4 @@ public class WalletService {
     public List<WalletSummaryResponseDto> sumAllMoney() {
         return this.walletRepo.summarizeTotalMoneyForUser(userUtil.getUser().getId());
     }
-
 }

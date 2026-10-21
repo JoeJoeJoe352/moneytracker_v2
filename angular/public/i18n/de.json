@@ -13,8 +13,7 @@
     "financial-stress": "Finanzieller Stress nimmt ab — weniger Überraschungen, mehr Kontrolle.",
     "faster": "Du kannst schneller sparen — du siehst, wo du klug optimieren kannst.",
     "security": "Es gibt dir Sicherheit und Freiheit — du weißt genau, ob du dir etwas leisten kannst.",
-    "goals": "Es hilft dir, langfristige Ziele zu erreichen — Wohnung, Reisen, Rücklage, was auch immer wichtig ist.",
-    "register": "Registriere dich oder melde dich an, um fortzufahren!"
+    "goals": "Es hilft dir, langfristige Ziele zu erreichen — Wohnung, Reisen, Rücklage, was auch immer wichtig ist."
   },
   "login": {
     "title": "Anmeldung",
@@ -61,9 +60,6 @@
     "register": "Registrieren",
     "login": "Anmelden"
   },
-  "footer": {
-    "home": "Startseite"
-  },
   "transaction": {
     "create": "Transaktion erstellen",
     "update": "Transaktion bearbeiten",
@@ -71,9 +67,6 @@
     "delete": "Transaktion löschen",
     "not-found": "Die gesuchte Transaktion wurde nicht gefunden!",
     "delete.confirm": "Möchtest du die Transaktion wirklich löschen?",
-    "delete.error": "Beim Löschen der Transaktion ist ein Fehler aufgetreten!",
-    "update.error": "Beim Bearbeiten der Transaktion ist ein Fehler aufgetreten!",
-    "create.error": "Beim Erstellen der Transaktion ist ein Fehler aufgetreten!",
     "name": "Transaktionsname",
     "name.required": "Der Transaktionsname ist erforderlich!",
     "name.minlength": "Der Transaktionsname muss mindestens 3 Zeichen lang sein!",
@@ -102,21 +95,15 @@
       "remove": "{{name}} entfernen"
     },
     "wallet": "Wallet",
-    "wallet.hint": "Die Transaktion wird damit verknüpft",
-
     "detail": {
       "field.required": "Dieses Feld ist erforderlich",
-      "title": "Transaktionsdetails",
       "name": "Postenname",
       "name.minlength": "Der Transaktionsname muss mindestens 3 Zeichen lang sein!",
       "name.maxlength": "Der Transaktionsname darf höchstens 120 Zeichen lang sein!",
-      "name.required": "Name ist erforderlich",
       "price": "Postenpreis",
       "price.min": "Muss eine Zahl größer als 0 sein",
       "add-detail": "Posten hinzufügen",
-      "delete.last-one-error": "Der letzte Posten kann nicht gelöscht werden",
       "delete_row.tooltip": "Posten löschen",
-      "toggle.confirm": "Möchtest du den Schalter wirklich umstellen? Bestehende Posten werden dabei gelöscht.",
       "quantity": "Menge",
       "quantity.min": "Die Menge muss größer als null sein!",
       "unit_price": "Einzelpreis",
@@ -131,7 +118,6 @@
     "create": "Wallet erstellen",
     "update": "Wallet bearbeiten",
     "delete": "Wallet löschen",
-    "cancel": "Abbrechen",
     "delete.confirm": "Möchtest du dieses Wallet wirklich löschen?",
     "name": "Wallet-Name",
     "name.required": "Der Wallet-Name ist erforderlich!",
@@ -154,7 +140,6 @@
       "modal_no_result_description": "Glückwunsch! Das Guthaben im System stimmt mit dem eingegebenen überein, nach dem Speichern ändert sich nur das Datum der letzten Synchronisierung.",
       "current_balance": "Aktuelles Guthaben",
       "current_balance.required": "Aktuelles Guthaben ist erforderlich!",
-      "current_balance.min": "Aktuelles Guthaben muss bei diesem Wallet-Typ mindestens 0 sein!",
       "save_succes": "Guthaben erfolgreich synchronisiert",
       "sync_button": "Synchronisieren",
       "last_sync": "Letzte Synchronisierung",
@@ -168,7 +153,6 @@
     "usd": "Dollar"
   },
   "mainpage": {
-    "page_title": "Meine letzten Transaktionen",
     "total_balance": "Gesamtguthaben",
     "increase": "Anstieg",
     "decrease": "Rückgang",
@@ -182,19 +166,16 @@
   },
   "transaction_page": {
     "title": "Meine Transaktionen",
-
     "filter": {
       "title": "Filter",
       "transactionId": "Transaktionsnummer",
       "transactionId.min": "Die Transaktionsnummer muss größer als 0 sein",
       "name": "Transaktionsname",
       "date": "Transaktionsdatum",
-      "date.placeholder": "Datum auswählen",
       "date.open-calendar": "Kalender öffnen",
       "submit": "Suchen",
       "clear": "Filter zurücksetzen"
     },
-
     "chart": {
       "type": "Diagramminhalt",
       "summary": "{{type}}: {{count}} Transaktionen, insgesamt {{total}}. Größte: {{name}}, {{amount}}.",
@@ -207,6 +188,11 @@
     "hu": "Ungarn",
     "de": "Deutsch",
     "en": "Englisch"
+  },
+  "app-update": {
+    "available": "Eine neue Version der App ist verfügbar.",
+    "unrecoverable": "Die App kann nicht mehr richtig ausgeführt werden, bitte lade die Seite neu!",
+    "reload": "Neu laden"
   },
   "etc": {
     "datepicker.format": "DD.MM.YYYY.",

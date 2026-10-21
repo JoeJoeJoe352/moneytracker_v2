@@ -80,8 +80,8 @@ class UserServiceIntegrationTest extends MySqlContainerTest {
 
         User existing = userService.createUser(command);
 
-        UserCreateCommand anotherUserCommand = new UserCreateCommand("brandNewUsername", "duplicate@email.com",
-                "teszt");
+        UserCreateCommand anotherUserCommand =
+                new UserCreateCommand("brandNewUsername", "duplicate@email.com", "teszt");
         assertThrows(IllegalArgumentException.class, () -> {
             userService.createUser(anotherUserCommand);
         });

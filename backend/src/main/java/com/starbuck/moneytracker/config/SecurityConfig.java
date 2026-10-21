@@ -32,26 +32,30 @@ public class SecurityConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Security filter chain beállítása. Csak a regisztráció és bejelentkezés végpont publikus, minden más védett. 
+     * Security filter chain beállítása. Csak a regisztráció és bejelentkezés végpont publikus, minden más védett.
      * Stateless session management, JWT filter hozzáadása.
-     * 
+     *
      * @param HttpSecurity http
      * @return
      * @throws Exception
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/register").permitAll()        // Regisztráció végpont publikus
-                .requestMatchers("/auth/login").permitAll()           // Bejelentkezés végpont publikus
-                .requestMatchers("/auth/logout").permitAll()          // Kijelentkezés végpont publikus
-                .requestMatchers("/auth/isEmailExists").permitAll()   // Email ellenőrzése végpont publikus
-                .anyRequest().authenticated()                         // minden más védett
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(
+                        auth -> auth.requestMatchers("/auth/register")
+                                .permitAll() // Regisztráció végpont publikus
+                                .requestMatchers("/auth/login")
+                                .permitAll() // Bejelentkezés végpont publikus
+                                .requestMatchers("/auth/logout")
+                                .permitAll() // Kijelentkezés végpont publikus
+                                .requestMatchers("/auth/isEmailExists")
+                                .permitAll() // Email ellenőrzése végpont publikus
+                                .anyRequest()
+                                .authenticated() // minden más védett
+                        )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -29,13 +29,12 @@ public class TransactionMapper {
 
     /**
      * Átalakít egy tranzakciót DTO-ra
-     * 
+     *
      * @param entity
      * @return
      */
     public TransactionResponseDto toDto(Transaction entity) {
-        if (entity == null)
-            return null;
+        if (entity == null) return null;
 
         List<TransactionDetailResponseDto> detailDto = entity.getTransactionDetails().stream()
                 .map(detail -> {
@@ -70,13 +69,12 @@ public class TransactionMapper {
 
     /**
      * Tranzakció adatok szekresztő felületekhez
-     * 
+     *
      * @param entity
      * @return
      */
     public TransactionEditResponseDto toEditDto(Transaction entity) {
-        if (entity == null)
-            return null;
+        if (entity == null) return null;
 
         List<TransactionDetailEditResponseDto> detailDto = entity.getTransactionDetails().stream()
                 .map(detail -> {
@@ -106,26 +104,23 @@ public class TransactionMapper {
 
     /**
      * Átalakít több tranzakciót DTO-ra
-     * 
+     *
      * @param entities
      * @return
      */
     public List<TransactionResponseDto> toDtoList(List<Transaction> entities) {
-        return entities.stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+        return entities.stream().map(this::toDto).collect(Collectors.toList());
     }
 
     /**
      * Átalakít egy tranzakció DTO-t egy tranzakció frissítő commandra
-     * 
+     *
      * @param request
      * @return
      */
     public TransactionSaveCommand fromTransactionSaveRequest(@NonNull TransactionCreateRequest request) {
-        List<TransactionDetailSaveCommand> detailCommands = this.fromDetailCreateRequest(
-                request.transactionDetails(),
-                request.transactionType());
+        List<TransactionDetailSaveCommand> detailCommands =
+                this.fromDetailCreateRequest(request.transactionDetails(), request.transactionType());
 
         TransactionSaveCommand command = new TransactionSaveCommand(
                 request.name(),
@@ -141,35 +136,30 @@ public class TransactionMapper {
 
     /**
      * Detail Dto-ból Detail létrehozó commandot állít elő
-     * 
+     *
      * @param detailDtos
      * @param type
      * @return
      */
     public List<TransactionDetailSaveCommand> fromDetailCreateRequest(
             @NonNull List<TransactionDetailCreateRequestDto> detailDtos, TransactionTypeEnum type) {
-        return detailDtos.stream().map((detail) -> {
-            if (detail.unitPrice() != null || detail.weight() != null) {
-                return new TransactionDetailSaveCommand(
-                        detail.name(),
-                        detail.weight(),
-                        detail.unitPrice(),
-                        detail.categories());
-            } else {
-                return new TransactionDetailSaveCommand(
-                        detail.name(),
-                        detail.price(),
-                        detail.categories(),
-                        type);
-            }
-
-        }).collect(Collectors.toList());
+        return detailDtos.stream()
+                .map((detail) -> {
+                    if (detail.unitPrice() != null || detail.weight() != null) {
+                        return new TransactionDetailSaveCommand(
+                                detail.name(), detail.weight(), detail.unitPrice(), detail.categories());
+                    } else {
+                        return new TransactionDetailSaveCommand(
+                                detail.name(), detail.price(), detail.categories(), type);
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     /**
      * Db-ből származó entitást átalakít egy update command-á (az szigorúbb
      * szabályozású, kötelező a detail lista)
-     * 
+     *
      * @param transaction
      * @return
      */
@@ -178,17 +168,15 @@ public class TransactionMapper {
                 .map((detail) -> {
                     if (detail.isComplexPriceMode()) {
                         return new TransactionDetailSaveCommand(
-                                detail.getName(),
-                                detail.getWeight(),
-                                detail.getUnitPrice(),
-                                categoryIdsOf(detail));
+                                detail.getName(), detail.getWeight(), detail.getUnitPrice(), categoryIdsOf(detail));
                     }
                     return new TransactionDetailSaveCommand(
                             detail.getName(),
                             detail.getPrice(),
                             categoryIdsOf(detail),
                             transaction.getTransactionType());
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
 
         return new TransactionSaveCommand(
                 transaction.getName(),

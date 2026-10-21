@@ -27,8 +27,14 @@ public class TransactionSaveCommand {
      * @param categories        Tranzakcióhoz kategóriái (lehet üres)
      * @param walletId          Tranzakcióhoz tartozó wallet
      */
-    public TransactionSaveCommand(String name, BigDecimal globalPrice, LocalDate date, TransactionTypeEnum type,
-            List<TransactionDetailSaveCommand> detailCommands, List<Long> categories, Long walletId) {
+    public TransactionSaveCommand(
+            String name,
+            BigDecimal globalPrice,
+            LocalDate date,
+            TransactionTypeEnum type,
+            List<TransactionDetailSaveCommand> detailCommands,
+            List<Long> categories,
+            Long walletId) {
 
         if (detailCommands == null) {
             throw new IllegalArgumentException("Detailcommands cannot be null (use empty List instead)");
@@ -111,5 +117,4 @@ public class TransactionSaveCommand {
     public TransactionSpecialTypeEnum getSpecialType() {
         return specialType;
     }
-
 }

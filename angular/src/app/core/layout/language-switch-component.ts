@@ -29,15 +29,15 @@ export class LanguageSwitcherComponent {
         return [
             {
                 id: SupportedLangEnum.hu,
-                name: this.translateService.instant(_('language.hu')),
+                name: this.translateService.instant(_('language.hu')) as string,
             },
             {
                 id: SupportedLangEnum.en,
-                name: this.translateService.instant(_('language.en')),
+                name: this.translateService.instant(_('language.en')) as string,
             },
             {
                 id: SupportedLangEnum.de,
-                name: this.translateService.instant(_('language.de')),
+                name: this.translateService.instant(_('language.de')) as string,
             },
         ];
     });

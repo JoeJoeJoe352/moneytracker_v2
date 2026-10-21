@@ -79,8 +79,8 @@ describe('TransactionsListComponent (Vitest)', () => {
             needSearchField?: boolean;
             queryParams?: Record<string, string>;
             routeParams?: Record<string, string>;
-            getLastTransactionsResult?: ReturnType<typeof of> | ReturnType<typeof throwError>;
-            getTransactionByIdResult?: ReturnType<typeof of> | ReturnType<typeof throwError>;
+            getLastTransactionsResult?: Observable<unknown>;
+            getTransactionByIdResult?: Observable<unknown>;
         } = {},
     ) {
         transactionServiceMock = {

@@ -21,7 +21,7 @@ public class UserMapper {
     /**
      * Átalakítja a usert dto-vá. Walletek azért jönnek paraméterből, hogy a hívó
      * felelőssége legyen olyan query-t lekérni, ahol biztos létezik
-     * 
+     *
      * @param user
      * @param wallets
      * @return

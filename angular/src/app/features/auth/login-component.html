@@ -31,6 +31,11 @@
                             {{ 'login.email.pattern-error' | translate }}
                         </mat-error>
                     }
+                    @if (email.hasError('maxlength')) {
+                        <mat-error>
+                            {{ 'login.email.maxlength-error' | translate }}
+                        </mat-error>
+                    }
                 }
             </mat-form-field>
         </div>

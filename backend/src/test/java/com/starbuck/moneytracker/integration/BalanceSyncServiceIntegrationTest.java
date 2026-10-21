@@ -33,8 +33,8 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.BalanceSyncCommand;
+import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
@@ -43,6 +43,7 @@ import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -53,8 +54,6 @@ import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
-
-import com.starbuck.moneytracker.exception.EntityNotFoundException;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -296,8 +295,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         // Given
         var wallet = createWallet("deleteSyncWallet");
         var initialTransaction = saveIncome(wallet, new BigDecimal("60.00"));
-        balanceSyncService.syncWallet(
-                new BalanceSyncCommand(wallet.getId(), new BigDecimal("50.00")));
+        balanceSyncService.syncWallet(new BalanceSyncCommand(wallet.getId(), new BigDecimal("50.00")));
         var balanceSync = findSyncForWallet(wallet);
         var syncTransaction = balanceSync.getSyncTransaction();
 
@@ -307,10 +305,11 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         // Then
         // A sync bejegyzés nem látszik a lekérdezésekben...
         assertTrue(balanceSyncRepo.findById(balanceSync.getId()).isEmpty());
-        assertTrue(balanceSyncRepo.findBySyncTransactionId(syncTransaction.getId()).isEmpty());
+        assertTrue(
+                balanceSyncRepo.findBySyncTransactionId(syncTransaction.getId()).isEmpty());
         // ...de a sor soft delete-tel megmaradt
-        Integer status = jdbcTemplate.queryForObject("SELECT status FROM balance_sync WHERE id = ?",
-                Integer.class, balanceSync.getId());
+        Integer status = jdbcTemplate.queryForObject(
+                "SELECT status FROM balance_sync WHERE id = ?", Integer.class, balanceSync.getId());
         assertEquals(1, status);
 
         // A korrekció törlése után az eredeti egyenleg látszik
@@ -323,7 +322,9 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
                 .findFirst()
                 .orElseThrow();
         // a createdAt a JVM időzónájában van, a lista napja a user zónájában (itt nincs request -> UTC)
-        assertEquals(LocalDate.ofInstant(walletCreatedAt.atZone(ZoneId.systemDefault()).toInstant(), ZoneOffset.UTC),
+        assertEquals(
+                LocalDate.ofInstant(
+                        walletCreatedAt.atZone(ZoneId.systemDefault()).toInstant(), ZoneOffset.UTC),
                 listedWallet.lastSyncDate());
 
         balanceSyncRepo.hardDeleteAllForWallet(wallet.getId());
@@ -348,8 +349,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
 
         // When
         assertThrows(EntityNotFoundException.class, () -> {
-            balanceSyncService.syncWallet(
-                    new BalanceSyncCommand(anotherUserWallet.getId(), new BigDecimal("50.00")));
+            balanceSyncService.syncWallet(new BalanceSyncCommand(anotherUserWallet.getId(), new BigDecimal("50.00")));
         });
 
         // Then
@@ -372,8 +372,8 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
     }
 
     private Transaction saveIncome(Wallet wallet, BigDecimal amount) {
-        return transactionRepo.save(new Transaction("income", LocalDate.of(2026, 9, 1), TransactionTypeEnum.INCOME,
-                amount, wallet));
+        return transactionRepo.save(
+                new Transaction("income", LocalDate.of(2026, 9, 1), TransactionTypeEnum.INCOME, amount, wallet));
     }
 
     /**

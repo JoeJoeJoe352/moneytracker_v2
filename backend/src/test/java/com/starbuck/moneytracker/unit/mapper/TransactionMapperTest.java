@@ -69,11 +69,17 @@ class TransactionMapperTest {
      */
     @Test
     void toDto_mapsSimpleTransactionWithSingleDetail() {
-        Transaction transaction = new Transaction(1L, "simple", LocalDate.of(2026, 1, 15),
-                TransactionTypeEnum.INCOME, new BigDecimal("100.00"), 0, defaultWallet);
+        Transaction transaction = new Transaction(
+                1L,
+                "simple",
+                LocalDate.of(2026, 1, 15),
+                TransactionTypeEnum.INCOME,
+                new BigDecimal("100.00"),
+                0,
+                defaultWallet);
 
-        TransactionDetail detail = new TransactionDetail(1L, TransactionDetail.DEFAULT_DETAIL_NAME,
-                new BigDecimal("100.00"), null, null, transaction);
+        TransactionDetail detail = new TransactionDetail(
+                1L, TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("100.00"), null, null, transaction);
         detail.setCategoryLinks(List.of());
         transaction.setTransactionDetails(List.of(detail));
 
@@ -89,7 +95,8 @@ class TransactionMapperTest {
         assertEquals(1, dto.transactionDetails().size());
         assertNull(dto.specialType());
 
-        TransactionDetailResponseDto detailDto = dto.transactionDetails().iterator().next();
+        TransactionDetailResponseDto detailDto =
+                dto.transactionDetails().iterator().next();
         assertEquals(TransactionDetail.DEFAULT_DETAIL_NAME, detailDto.name());
         assertEquals(new BigDecimal("100.00"), detailDto.price());
         assertFalse(detailDto.isComplexPriceMode());
@@ -107,17 +114,24 @@ class TransactionMapperTest {
      */
     @Test
     void toDto_mapsComplexPriceModeDetail() {
-        Transaction transaction = new Transaction(1L, "weighted", LocalDate.now(), TransactionTypeEnum.OUTCOME,
-                new BigDecimal("-150.00"), 0, defaultWallet);
+        Transaction transaction = new Transaction(
+                1L,
+                "weighted",
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-150.00"),
+                0,
+                defaultWallet);
 
-        TransactionDetail detail = new TransactionDetail(1L, "meat", new BigDecimal("-150.00"),
-                new BigDecimal("0.5"), new BigDecimal("300"), transaction);
+        TransactionDetail detail = new TransactionDetail(
+                1L, "meat", new BigDecimal("-150.00"), new BigDecimal("0.5"), new BigDecimal("300"), transaction);
         detail.setCategoryLinks(List.of());
         transaction.setTransactionDetails(List.of(detail));
 
         TransactionResponseDto dto = mapper.toDto(transaction);
 
-        TransactionDetailResponseDto detailDto = dto.transactionDetails().iterator().next();
+        TransactionDetailResponseDto detailDto =
+                dto.transactionDetails().iterator().next();
         assertTrue(detailDto.isComplexPriceMode());
         assertEquals(new BigDecimal("0.5"), detailDto.weight());
         assertEquals(new BigDecimal("300"), detailDto.unitPrice());
@@ -144,12 +158,12 @@ class TransactionMapperTest {
     }
 
     private Transaction createSyncTransaction() {
-        Transaction transaction = new Transaction(1L, "sync", LocalDate.now(), TransactionTypeEnum.OUTCOME,
-                new BigDecimal("-10.00"), 0, defaultWallet);
+        Transaction transaction = new Transaction(
+                1L, "sync", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal("-10.00"), 0, defaultWallet);
         transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
 
-        TransactionDetail detail = new TransactionDetail(1L, TransactionDetail.DEFAULT_DETAIL_NAME,
-                new BigDecimal("-10.00"), null, null, transaction);
+        TransactionDetail detail = new TransactionDetail(
+                1L, TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("-10.00"), null, null, transaction);
         detail.setCategoryLinks(List.of());
         transaction.setTransactionDetails(List.of(detail));
 
@@ -162,13 +176,13 @@ class TransactionMapperTest {
      */
     @Test
     void toDto_mapsMultipleDetailsAsComplexTransactionWithCategoryIds() {
-        Transaction transaction = new Transaction(1L, "multi", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal("300.00"), 0, defaultWallet);
+        Transaction transaction = new Transaction(
+                1L, "multi", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal("300.00"), 0, defaultWallet);
 
-        TransactionDetail detail1 = new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null,
-                transaction);
-        TransactionDetail detail2 = new TransactionDetail(2L, "detail2", new BigDecimal("200.00"), null, null,
-                transaction);
+        TransactionDetail detail1 =
+                new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null, transaction);
+        TransactionDetail detail2 =
+                new TransactionDetail(2L, "detail2", new BigDecimal("200.00"), null, null, transaction);
 
         var category = new com.starbuck.moneytracker.entity.Category();
         category.setId(7L);
@@ -185,20 +199,22 @@ class TransactionMapperTest {
         assertNull(dto.specialType());
 
         var detail1Dto = dto.transactionDetails().stream()
-                .filter(d -> d.name().equals("detail1")).findFirst().orElseThrow();
+                .filter(d -> d.name().equals("detail1"))
+                .findFirst()
+                .orElseThrow();
         assertEquals(List.of(7L), detail1Dto.categories());
     }
 
     @Test
     void toDto_mapsMultipleDetailsAsComplexTransactionWithCategoryIds_list() {
         Category category = new Category(7L, "teszt!", null, null);
-        Transaction transaction = new Transaction(1L, "multi", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal("300.00"), 0, defaultWallet);
+        Transaction transaction = new Transaction(
+                1L, "multi", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal("300.00"), 0, defaultWallet);
 
-        TransactionDetail detail1 = new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null,
-                transaction);
-        TransactionDetail detail2 = new TransactionDetail(2L, "detail2", new BigDecimal("200.00"), null, null,
-                transaction);
+        TransactionDetail detail1 =
+                new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null, transaction);
+        TransactionDetail detail2 =
+                new TransactionDetail(2L, "detail2", new BigDecimal("200.00"), null, null, transaction);
 
         TransactionDetailCategory categoryLink = new TransactionDetailCategory(category, detail1);
         detail1.setCategoryLinks(List.of(categoryLink));
@@ -212,7 +228,9 @@ class TransactionMapperTest {
         assertEquals(2, dto.transactionDetails().size());
 
         var detail1Dto = dto.transactionDetails().stream()
-                .filter(d -> d.name().equals("detail1")).findFirst().orElseThrow();
+                .filter(d -> d.name().equals("detail1"))
+                .findFirst()
+                .orElseThrow();
         assertEquals(List.of("teszt!"), detail1Dto.categories());
     }
 
@@ -229,17 +247,17 @@ class TransactionMapperTest {
      */
     @Test
     void toDtoList_mapsEachTransaction() {
-        Transaction transaction1 = new Transaction(1L, "first", LocalDate.now(), TransactionTypeEnum.INCOME,
-                new BigDecimal("10.00"), 0, defaultWallet);
-        TransactionDetail detail1 = new TransactionDetail(1L, TransactionDetail.DEFAULT_DETAIL_NAME,
-                new BigDecimal("10.00"), null, null, transaction1);
+        Transaction transaction1 = new Transaction(
+                1L, "first", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal("10.00"), 0, defaultWallet);
+        TransactionDetail detail1 = new TransactionDetail(
+                1L, TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("10.00"), null, null, transaction1);
         detail1.setCategoryLinks(List.of());
         transaction1.setTransactionDetails(List.of(detail1));
 
-        Transaction transaction2 = new Transaction(2L, "second", LocalDate.now(), TransactionTypeEnum.OUTCOME,
-                new BigDecimal("-20.00"), 0, defaultWallet);
-        TransactionDetail detail2 = new TransactionDetail(2L, TransactionDetail.DEFAULT_DETAIL_NAME,
-                new BigDecimal("-20.00"), null, null, transaction2);
+        Transaction transaction2 = new Transaction(
+                2L, "second", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal("-20.00"), 0, defaultWallet);
+        TransactionDetail detail2 = new TransactionDetail(
+                2L, TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("-20.00"), null, null, transaction2);
         detail2.setCategoryLinks(List.of());
         transaction2.setTransactionDetails(List.of(detail2));
 
@@ -256,8 +274,14 @@ class TransactionMapperTest {
      */
     @Test
     void fromTransactionCreateRequest_mapsBasicFields() {
-        TransactionCreateRequest request = new TransactionCreateRequest("groceries", new BigDecimal("-50.00"),
-                TransactionTypeEnum.OUTCOME, LocalDate.of(2026, 3, 1), List.of(), List.of(), 1L);
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                "groceries",
+                new BigDecimal("-50.00"),
+                TransactionTypeEnum.OUTCOME,
+                LocalDate.of(2026, 3, 1),
+                List.of(),
+                List.of(),
+                1L);
 
         TransactionSaveCommand result = mapper.fromTransactionSaveRequest(request);
 
@@ -272,15 +296,13 @@ class TransactionMapperTest {
      */
     @Test
     void fromDetailCreateRequest_mapsEachRequest() {
-        TransactionDetailCreateRequestDto request1 = new TransactionDetailCreateRequestDto(new BigDecimal("10.00"), "d1",
-                null,
-                null, List.of());
-        TransactionDetailCreateRequestDto request2 = new TransactionDetailCreateRequestDto(new BigDecimal("20.00"), "d2",
-                null,
-                null, List.of());
+        TransactionDetailCreateRequestDto request1 =
+                new TransactionDetailCreateRequestDto(new BigDecimal("10.00"), "d1", null, null, List.of());
+        TransactionDetailCreateRequestDto request2 =
+                new TransactionDetailCreateRequestDto(new BigDecimal("20.00"), "d2", null, null, List.of());
 
-        List<TransactionDetailSaveCommand> result = mapper.fromDetailCreateRequest(
-                List.of(request1, request2), TransactionTypeEnum.INCOME);
+        List<TransactionDetailSaveCommand> result =
+                mapper.fromDetailCreateRequest(List.of(request1, request2), TransactionTypeEnum.INCOME);
 
         assertEquals(2, result.size());
         assertEquals("d1", result.get(0).getName());
@@ -292,19 +314,25 @@ class TransactionMapperTest {
      */
     @Test
     void fromDetailCreateRequest_returnsEmptyListForEmptyInput() {
-        assertTrue(mapper.fromDetailCreateRequest(List.of(), TransactionTypeEnum.INCOME).isEmpty());
+        assertTrue(mapper.fromDetailCreateRequest(List.of(), TransactionTypeEnum.INCOME)
+                .isEmpty());
     }
 
     @Test
     void fromEntityRequest() {
         var date = LocalDate.now();
-        Transaction transaction = new Transaction(1L, "test", date, TransactionTypeEnum.INCOME,
-                new BigDecimal("100.00"), 0, defaultWallet);
+        Transaction transaction = new Transaction(
+                1L, "test", date, TransactionTypeEnum.INCOME, new BigDecimal("100.00"), 0, defaultWallet);
 
-        TransactionDetail detail1 = new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null,
+        TransactionDetail detail1 =
+                new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null, transaction);
+        TransactionDetail detail2 = new TransactionDetail(
+                1L,
+                "detail2",
+                new BigDecimal("100.00"),
+                new BigDecimal("50.00"),
+                new BigDecimal("200.00"),
                 transaction);
-        TransactionDetail detail2 = new TransactionDetail(1L, "detail2", new BigDecimal("100.00"),
-                new BigDecimal("50.00"), new BigDecimal("200.00"), transaction);
         transaction.setTransactionDetails(List.of(detail1, detail2));
 
         var command = mapper.entityToCommand(transaction);
@@ -317,9 +345,11 @@ class TransactionMapperTest {
 
         assertEquals("detail1", command.getDetailCommands().get(0).getName());
         assertEquals("detail2", command.getDetailCommands().get(1).getName());
-        assertEquals(new BigDecimal("100.00"), command.getDetailCommands().get(0).getPrice());
+        assertEquals(
+                new BigDecimal("100.00"), command.getDetailCommands().get(0).getPrice());
         assertNull(command.getDetailCommands().get(1).getPrice());
-        assertEquals(new BigDecimal("200.00"), command.getDetailCommands().get(1).getUnitPrice());
+        assertEquals(
+                new BigDecimal("200.00"), command.getDetailCommands().get(1).getUnitPrice());
         assertEquals(new BigDecimal("50.00"), command.getDetailCommands().get(1).getWeight());
     }
 }

@@ -148,7 +148,8 @@ class UserServiceTest {
         User userInDB = new User("testuser", "encodedPassword", "teszt@email.com");
 
         Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(userInDB);
-        Mockito.when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
+        Mockito.when(passwordEncoder.matches("wrongPassword", "encodedPassword"))
+                .thenReturn(false);
 
         UserLoginCommand command = new UserLoginCommand("teszt@email.com", "wrongPassword");
         assertThrows(BadCredentialsException.class, () -> {

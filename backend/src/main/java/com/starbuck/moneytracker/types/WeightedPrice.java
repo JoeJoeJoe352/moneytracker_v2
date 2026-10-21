@@ -27,5 +27,4 @@ public class WeightedPrice {
     public BigDecimal getUnitPrice() {
         return unitPrice;
     }
-
 }

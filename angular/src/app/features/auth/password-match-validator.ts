@@ -13,8 +13,8 @@ import { ErrorStateMatcher } from '@angular/material/core';
 export const passwordMismatchValidator: ValidatorFn = (
     control: AbstractControl,
 ): ValidationErrors | null => {
-    const password = control.get('password')?.value;
-    const passwordAgain = control.get('passwordAgain')?.value;
+    const password: unknown = control.get('password')?.value;
+    const passwordAgain: unknown = control.get('passwordAgain')?.value;
 
     if (!password || !passwordAgain) {
         return null;
@@ -29,7 +29,10 @@ export const passwordMismatchValidator: ValidatorFn = (
  * mezőnek a szülő csoport hibáját is figyelembe kell vennie
  */
 export class PasswordMismatchErrorStateMatcher implements ErrorStateMatcher {
-    isErrorState(control: AbstractControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    isErrorState(
+        control: AbstractControl | null,
+        form: FormGroupDirective | NgForm | null,
+    ): boolean {
         const hasError = control?.invalid || control?.parent?.hasError('passwordMismatch');
         return !!(hasError && (control?.touched || form?.submitted));
     }

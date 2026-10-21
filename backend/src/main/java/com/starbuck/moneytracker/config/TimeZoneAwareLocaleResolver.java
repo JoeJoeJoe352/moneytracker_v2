@@ -29,8 +29,8 @@ public class TimeZoneAwareLocaleResolver extends AcceptHeaderLocaleResolver impl
     }
 
     @Override
-    public void setLocaleContext(HttpServletRequest request, HttpServletResponse response,
-            LocaleContext localeContext) {
+    public void setLocaleContext(
+            HttpServletRequest request, HttpServletResponse response, LocaleContext localeContext) {
         throw new UnsupportedOperationException(
                 "Cannot change locale context - use the Accept-Language and " + TIME_ZONE_HEADER + " headers");
     }

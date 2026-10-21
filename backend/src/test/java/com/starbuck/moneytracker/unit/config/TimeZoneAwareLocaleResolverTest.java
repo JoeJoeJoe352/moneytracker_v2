@@ -70,7 +70,8 @@ public class TimeZoneAwareLocaleResolverTest {
 
     @Test
     void testSetLocaleContextIsNotSupported() {
-        assertThrowsExactly(UnsupportedOperationException.class,
+        assertThrowsExactly(
+                UnsupportedOperationException.class,
                 () -> resolver.setLocaleContext(request, new MockHttpServletResponse(), null));
     }
 }

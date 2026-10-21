@@ -1,5 +1,8 @@
 package com.starbuck.moneytracker.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,10 +19,6 @@ import com.starbuck.moneytracker.service.CategoryService;
 
 import jakarta.validation.Valid;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-
 @RequestMapping("/category")
 @RestController
 public class CategoryController {
@@ -34,7 +33,7 @@ public class CategoryController {
 
     /**
      * Létrehoz egy új kategóriát
-     * 
+     *
      * @param categoryData
      * @throws CategoryNonUniqueException
      */
@@ -49,7 +48,7 @@ public class CategoryController {
 
     /**
      * Kilistázza a user kategóriáit
-     * 
+     *
      * @return
      */
     @GetMapping

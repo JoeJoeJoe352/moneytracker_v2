@@ -152,8 +152,8 @@ public class CategoryServiceTest extends MySqlContainerTest {
 
         var savedCategoryOwn = categoryService.createCategory(categoryCommand);
 
-        var savedCategoryNotOwned = categoryRepository
-                .save(new Category("AnotherUserCategory", savedUser2, LangEnum.HU));
+        var savedCategoryNotOwned =
+                categoryRepository.save(new Category("AnotherUserCategory", savedUser2, LangEnum.HU));
 
         var savedCategoryCommon = categoryRepository.save(new Category("commonCategory", null, LangEnum.HU));
 

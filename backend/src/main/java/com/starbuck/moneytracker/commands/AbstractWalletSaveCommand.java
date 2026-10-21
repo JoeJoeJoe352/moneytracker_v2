@@ -3,7 +3,7 @@ package com.starbuck.moneytracker.commands;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
 
 public abstract class AbstractWalletSaveCommand {
-    
+
     protected String name;
     protected WalletTypeEnum type;
 
