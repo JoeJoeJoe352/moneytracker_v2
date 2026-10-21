@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
@@ -78,11 +81,16 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Autowired
     private WalletRepository walletRepo;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @MockitoBean
     private CurrentUserUtil currentUser;
 
     private User user;
     private Wallet wallet;
+    // Teszten belül létrehozott másik user, a cleanUp törli
+    private User anotherUser;
 
     @BeforeAll
     void beforeAll() {
@@ -98,6 +106,30 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @BeforeEach
     void mockUserUtil() {
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
+    }
+
+    /**
+     * Minden teszt után töröl mindent, amit a teszt létrehozott (a közös user és
+     * wallet kivételével), így egy elbukó assertion sem hagy maga után adatot,
+     * ami a többi tesztet is elrontaná
+     */
+    @AfterEach
+    void cleanUp() {
+        detailCategoryRepo.deleteAllInBatch();
+        transactionDetailRepo.deleteAllInBatch();
+        // Natív sql, mert a soft delete miatt a repository a törölt tranzakciókat nem látja
+        jdbcTemplate.update(
+                "DELETE FROM transactions WHERE wallet_id IN (SELECT id FROM wallet WHERE user_id = ?)",
+                this.user.getId());
+        // Az előre definiált (user nélküli) kategóriák megmaradnak
+        jdbcTemplate.update("DELETE FROM category WHERE user_id IS NOT NULL");
+        // Natív sql, mert a letiltott walleteket a repository nem adja vissza
+        jdbcTemplate.update("DELETE FROM wallet WHERE user_id = ? AND id <> ?", this.user.getId(), this.wallet.getId());
+        if (this.anotherUser != null) {
+            userRepo.delete(this.anotherUser);
+            this.anotherUser = null;
+        }
+        LocaleContextHolder.resetLocaleContext();
     }
 
     @AfterAll
@@ -147,8 +179,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(1, transactionDetailRepo.count());
         assertEquals(1, detailCategoryRepo.count());
         assertEquals(new BigDecimal("100.00"), saved.getPriceSum());
-
-        this.deleteData(saved);
     }
 
     @Test
@@ -185,8 +215,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(1, transactionDetailRepo.count());
         assertEquals(1, detailCategoryRepo.count());
         assertEquals(new BigDecimal("500.00"), saved.getPriceSum());
-
-        this.deleteData(saved);
     }
 
     @Test
@@ -244,7 +272,11 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(1, transactionRepo.count());
         assertEquals(2, transactionDetailRepo.count());
         assertEquals(3, detailCategoryRepo.count());
-        assertEquals(2, categoryRepo.count());
+        // Csak a user saját kategóriái, az előre definiáltak nélkül
+        assertEquals(
+                2,
+                jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM category WHERE user_id = ?", Long.class, this.user.getId()));
 
         // Tranzakció validálása
         Transaction transactionFromDb = transactionRepo.findAll().get(0);
@@ -254,7 +286,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(new BigDecimal("-500.00"), transactionFromDb.getPriceSum());
 
         // Detailok validálása
-        List<TransactionDetail> detailsFromDb = transactionDetailRepo.findAll();
+        // id szerint rendezve, mert ORDER BY nélkül a db tetszőleges sorrendben adhatja vissza
+        List<TransactionDetail> detailsFromDb = transactionDetailRepo.findAll(Sort.by("id"));
         var detailFromDb1 = detailsFromDb.get(0);
         var detailFromDb2 = detailsFromDb.get(1);
         assertEquals("update1", detailFromDb1.getName());
@@ -265,15 +298,13 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(transactionFromDb.getId(), detailFromDb2.getTransaction().getId());
 
         // Kapcsolótábla bejegyzések validálása
-        List<TransactionDetailCategory> detailCategories = detailCategoryRepo.findAll();
+        List<TransactionDetailCategory> detailCategories = detailCategoryRepo.findAll(Sort.by("id"));
         assertEquals("update1", detailCategories.get(0).getTransactionDetail().getName());
         assertEquals("updateKategória", detailCategories.get(0).getCategory().getName());
         assertEquals("update2", detailCategories.get(1).getTransactionDetail().getName());
         assertEquals("updateKategória", detailCategories.get(1).getCategory().getName());
         assertEquals("update2", detailCategories.get(2).getTransactionDetail().getName());
         assertEquals("tesztKategória", detailCategories.get(2).getCategory().getName());
-
-        this.deleteData(transactionFromDb);
     }
 
     @Test
@@ -307,21 +338,22 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     void sumAllExpenseForMonth_returnsOnlyCurrentMonthExpenses() {
         // Given
         var secondWallet = walletRepo.save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
-        var emptyWallet = walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        // Tranzakció nélküli wallet, 0 összeggel kell megjelennie
+        walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
-        Transaction expenseThisMonth = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "expenseThisMonth", TransactionTypeEnum.OUTCOME, new BigDecimal(-200), LocalDate.now(), this.wallet);
-        Transaction incomeThisMonth = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "incomeThisMonth", TransactionTypeEnum.INCOME, new BigDecimal(150), LocalDate.now(), this.wallet);
         // Egy tranzakció tavalyról
-        Transaction expenseLastYear = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "expenseLastYear",
                 TransactionTypeEnum.OUTCOME,
                 new BigDecimal(-999),
                 LocalDate.now().minusYears(1),
                 this.wallet);
         // Egy tranzakció másik wallethoz
-        Transaction transactionForAnotherWallet = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "anotherWallet", TransactionTypeEnum.OUTCOME, new BigDecimal(-150), LocalDate.now(), secondWallet);
 
         // When
@@ -332,13 +364,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(new BigDecimal("200.00"), result.get(0).getTotal());
         assertEquals(new BigDecimal("150.00"), result.get(1).getTotal());
         assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
-
-        this.deleteData(expenseThisMonth);
-        this.deleteData(incomeThisMonth);
-        this.deleteData(expenseLastYear);
-        this.deleteData(transactionForAnotherWallet);
-        this.walletRepo.delete(secondWallet);
-        this.walletRepo.delete(emptyWallet);
     }
 
     /**
@@ -349,20 +374,21 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     void sumAllIncomeForMonth_returnsOnlyCurrentMonthIncome() {
         // Given
         var secondWallet = walletRepo.save(new Wallet("eur", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
-        var emptyWallet = walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        // Tranzakció nélküli wallet, 0 összeggel kell megjelennie
+        walletRepo.save(new Wallet("empty", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
 
-        Transaction incomeThisMonth = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "incomeThisMonth", TransactionTypeEnum.INCOME, new BigDecimal(300), LocalDate.now(), this.wallet);
-        Transaction expenseThisMonth = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "expenseThisMonth", TransactionTypeEnum.OUTCOME, new BigDecimal(-250), LocalDate.now(), this.wallet);
-        Transaction incomeLastYear = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "incomeLastYear",
                 TransactionTypeEnum.INCOME,
                 new BigDecimal(999),
                 LocalDate.now().minusYears(1),
                 this.wallet);
         // Egy tranzakció másik wallethoz
-        Transaction transactionForAnotherWallet = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "anotherWallet", TransactionTypeEnum.INCOME, new BigDecimal(150), LocalDate.now(), secondWallet);
         // When
         List<WalletSummaryResponseDto> result = transactionService.sumAllIncomeForMonth();
@@ -372,13 +398,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(new BigDecimal("300.00"), result.get(0).getTotal());
         assertEquals(new BigDecimal("150.00"), result.get(1).getTotal());
         assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
-
-        this.deleteData(transactionForAnotherWallet);
-        this.deleteData(incomeThisMonth);
-        this.deleteData(expenseThisMonth);
-        this.deleteData(incomeLastYear);
-        this.walletRepo.delete(secondWallet);
-        this.walletRepo.delete(emptyWallet);
     }
 
     /**
@@ -390,13 +409,13 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         // Given
         var disabledWallet =
                 walletRepo.save(new Wallet("disabled", this.user, CurrencyEnum.USD, WalletTypeEnum.DEFAULT));
-        Transaction expenseInActiveWallet = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "expenseActive", TransactionTypeEnum.OUTCOME, new BigDecimal(-100), LocalDate.now(), this.wallet);
-        Transaction incomeInActiveWallet = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "incomeActive", TransactionTypeEnum.INCOME, new BigDecimal(70), LocalDate.now(), this.wallet);
-        Transaction expenseInDisabledWallet = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "expenseDisabled", TransactionTypeEnum.OUTCOME, new BigDecimal(-500), LocalDate.now(), disabledWallet);
-        Transaction incomeInDisabledWallet = this.persistSimpleTransaction(
+        this.persistSimpleTransaction(
                 "incomeDisabled", TransactionTypeEnum.INCOME, new BigDecimal(900), LocalDate.now(), disabledWallet);
         // Tranzakciót csak aktív walleten lehet létrehozni, ezért csak a tranzakciók
         // után tiltjuk le
@@ -412,12 +431,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(new BigDecimal("100.00"), expenses.get(0).getTotal());
         assertEquals(1, incomes.size());
         assertEquals(new BigDecimal("70.00"), incomes.get(0).getTotal());
-
-        this.deleteData(expenseInActiveWallet);
-        this.deleteData(incomeInActiveWallet);
-        this.deleteData(expenseInDisabledWallet);
-        this.deleteData(incomeInDisabledWallet);
-        this.walletRepo.delete(disabledWallet);
     }
 
     /**
@@ -432,8 +445,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
         assertEquals(transaction.getId(), result.getId());
         assertEquals(1, result.getTransactionDetails().size());
-
-        this.deleteData(transaction);
     }
 
     /**
@@ -475,8 +486,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertThrows(EntityNotFoundException.class, () -> {
             transactionService.updateTransaction(saved.getId(), updateCommand);
         });
-
-        this.deleteData(saved);
     }
 
     /**
@@ -486,11 +495,11 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     void updateTransaction_throwsWhenNotFoundCategory() {
         // GIVEN
         LocaleContextHolder.setLocale(Locale.forLanguageTag("hu"));
-        User anotherUser = new User("anotheruser", "password", "another@user.com");
-        anotherUser.generateUuid();
-        var anotherUserSaved = userRepo.save(anotherUser);
+        User newUser = new User("anotheruser", "password", "another@user.com");
+        newUser.generateUuid();
+        this.anotherUser = userRepo.save(newUser);
 
-        var categorySaved = categoryRepo.save(new Category("cat2", anotherUserSaved, LangEnum.HU));
+        var categorySaved = categoryRepo.save(new Category("cat2", this.anotherUser, LangEnum.HU));
 
         TransactionSaveCommand command = new TransactionSaveCommand(
                 "Test",
@@ -505,10 +514,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertThrows(IllegalArgumentException.class, () -> {
             transactionService.createTransaction(command);
         });
-
-        categoryRepo.delete(categorySaved);
-        userRepo.delete(anotherUserSaved);
-        LocaleContextHolder.resetLocaleContext();
     }
 
     /**
@@ -517,17 +522,14 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
      */
     @Test
     void getLastTransactions_returnsAtMostFiveNewestTransactions() {
-        List<Transaction> created = new java.util.ArrayList<>();
         for (int i = 0; i < 6; i++) {
-            created.add(this.persistSimpleTransaction(
-                    "last" + i, TransactionTypeEnum.INCOME, new BigDecimal(10), LocalDate.now(), this.wallet));
+            this.persistSimpleTransaction(
+                    "last" + i, TransactionTypeEnum.INCOME, new BigDecimal(10), LocalDate.now(), this.wallet);
         }
 
         List<Transaction> result = transactionService.getLastTransactions();
 
         assertEquals(5, result.size());
-
-        created.forEach(this::deleteData);
     }
 
     /**
@@ -539,16 +541,13 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
         Transaction matching = this.persistSimpleTransaction(
                 "groceries shopping", TransactionTypeEnum.OUTCOME, new BigDecimal(-10), now, this.wallet);
-        Transaction nonMatching = this.persistSimpleTransaction(
-                "salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
+        // Nem egyező tranzakció
+        this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
         List<Transaction> result = transactionService.getHistoryPageData(new TransactionFilter("groceries", now, null));
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());
-
-        this.deleteData(matching);
-        this.deleteData(nonMatching);
     }
 
     /**
@@ -560,17 +559,14 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
 
         Transaction matching = this.persistSimpleTransaction(
                 "groceries shopping", TransactionTypeEnum.OUTCOME, new BigDecimal(-10), now, this.wallet);
-        Transaction nonMatching = this.persistSimpleTransaction(
-                "salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
+        // Nem egyező tranzakció
+        this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
         List<Transaction> result =
                 transactionService.getHistoryPageData(new TransactionFilter(null, now, matching.getId()));
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());
-
-        this.deleteData(matching);
-        this.deleteData(nonMatching);
     }
 
     /**
@@ -588,8 +584,6 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
             transactionService.getTransactionByIdForActualUser(transaction.getId());
         });
         assertEquals(0, transactionRepo.count());
-
-        this.deleteData(transaction);
     }
 
     /**
@@ -604,13 +598,5 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
                 new TransactionSaveCommand(name, null, date, type, List.of(detail), List.of(), wallet.getId());
 
         return transactionService.createTransaction(command);
-    }
-
-    private void deleteData(Transaction transaction) {
-        detailCategoryRepo.deleteAllInBatch();
-        categoryRepo.deleteAllInBatch();
-        transactionDetailRepo.deleteAllInBatch();
-        // Tranzakciót csak így lehet törölni, mert softDelete van rajta
-        transactionRepo.hardDeleteTransaction(transaction.getId());
     }
 }
