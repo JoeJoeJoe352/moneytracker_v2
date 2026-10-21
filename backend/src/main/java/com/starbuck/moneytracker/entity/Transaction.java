@@ -11,6 +11,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 
@@ -27,9 +28,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 // soft delete (logikai törlés)
-@SQLDelete(sql = "UPDATE transactions SET status = 1 WHERE id = ?")
+@SQLDelete(sql = "UPDATE transactions SET status = 'DISABLED' WHERE id = ?")
 // autogenerált sql-ekben csak a nem töröltek jelennek meg
-@SQLRestriction("status = 0")
+@SQLRestriction("status = 'ACTIVE'")
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -55,9 +56,10 @@ public class Transaction {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal priceSum;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @ColumnDefault("0") // TODO legyen GeneralStatusEnum
-    private int status;
+    @ColumnDefault("'ACTIVE'")
+    private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -78,7 +80,7 @@ public class Transaction {
      * @return boolean
      */
     public boolean isDeleted() {
-        return this.status == 1;
+        return this.status == GeneralStatusEnum.DISABLED;
     }
 
     /**
@@ -128,7 +130,7 @@ public class Transaction {
             LocalDate transactionDate,
             TransactionTypeEnum transactionType,
             BigDecimal priceSum,
-            int status,
+            GeneralStatusEnum status,
             Wallet wallet) {
         this.id = id;
         this.name = name;
@@ -216,11 +218,11 @@ public class Transaction {
         this.priceSum = priceSum;
     }
 
-    public int getStatus() {
+    public GeneralStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(GeneralStatusEnum status) {
         this.status = status;
     }
 

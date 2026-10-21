@@ -35,8 +35,9 @@ public class Wallet {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("'ACTIVE'")
     private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
 
     @Enumerated(EnumType.STRING)

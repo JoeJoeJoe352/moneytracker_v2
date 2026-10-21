@@ -29,6 +29,7 @@ import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
@@ -75,7 +76,7 @@ class TransactionMapperTest {
                 LocalDate.of(2026, 1, 15),
                 TransactionTypeEnum.INCOME,
                 new BigDecimal("100.00"),
-                0,
+                GeneralStatusEnum.ACTIVE,
                 defaultWallet);
 
         TransactionDetail detail = new TransactionDetail(
@@ -120,7 +121,7 @@ class TransactionMapperTest {
                 LocalDate.now(),
                 TransactionTypeEnum.OUTCOME,
                 new BigDecimal("-150.00"),
-                0,
+                GeneralStatusEnum.ACTIVE,
                 defaultWallet);
 
         TransactionDetail detail = new TransactionDetail(
@@ -159,7 +160,13 @@ class TransactionMapperTest {
 
     private Transaction createSyncTransaction() {
         Transaction transaction = new Transaction(
-                1L, "sync", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal("-10.00"), 0, defaultWallet);
+                1L,
+                "sync",
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-10.00"),
+                GeneralStatusEnum.ACTIVE,
+                defaultWallet);
         transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
 
         TransactionDetail detail = new TransactionDetail(
@@ -177,7 +184,13 @@ class TransactionMapperTest {
     @Test
     void toDto_mapsMultipleDetailsAsComplexTransactionWithCategoryIds() {
         Transaction transaction = new Transaction(
-                1L, "multi", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal("300.00"), 0, defaultWallet);
+                1L,
+                "multi",
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                new BigDecimal("300.00"),
+                GeneralStatusEnum.ACTIVE,
+                defaultWallet);
 
         TransactionDetail detail1 =
                 new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null, transaction);
@@ -209,7 +222,13 @@ class TransactionMapperTest {
     void toDto_mapsMultipleDetailsAsComplexTransactionWithCategoryIds_list() {
         Category category = new Category(7L, "teszt!", null, null);
         Transaction transaction = new Transaction(
-                1L, "multi", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal("300.00"), 0, defaultWallet);
+                1L,
+                "multi",
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                new BigDecimal("300.00"),
+                GeneralStatusEnum.ACTIVE,
+                defaultWallet);
 
         TransactionDetail detail1 =
                 new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null, transaction);
@@ -248,14 +267,26 @@ class TransactionMapperTest {
     @Test
     void toDtoList_mapsEachTransaction() {
         Transaction transaction1 = new Transaction(
-                1L, "first", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal("10.00"), 0, defaultWallet);
+                1L,
+                "first",
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                new BigDecimal("10.00"),
+                GeneralStatusEnum.ACTIVE,
+                defaultWallet);
         TransactionDetail detail1 = new TransactionDetail(
                 1L, TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("10.00"), null, null, transaction1);
         detail1.setCategoryLinks(List.of());
         transaction1.setTransactionDetails(List.of(detail1));
 
         Transaction transaction2 = new Transaction(
-                2L, "second", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal("-20.00"), 0, defaultWallet);
+                2L,
+                "second",
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-20.00"),
+                GeneralStatusEnum.ACTIVE,
+                defaultWallet);
         TransactionDetail detail2 = new TransactionDetail(
                 2L, TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("-20.00"), null, null, transaction2);
         detail2.setCategoryLinks(List.of());
@@ -322,7 +353,13 @@ class TransactionMapperTest {
     void fromEntityRequest() {
         var date = LocalDate.now();
         Transaction transaction = new Transaction(
-                1L, "test", date, TransactionTypeEnum.INCOME, new BigDecimal("100.00"), 0, defaultWallet);
+                1L,
+                "test",
+                date,
+                TransactionTypeEnum.INCOME,
+                new BigDecimal("100.00"),
+                GeneralStatusEnum.ACTIVE,
+                defaultWallet);
 
         TransactionDetail detail1 =
                 new TransactionDetail(1L, "detail1", new BigDecimal("100.00"), null, null, transaction);

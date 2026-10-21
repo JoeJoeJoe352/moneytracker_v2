@@ -287,7 +287,7 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
 
     /**
      * Sync tranzakció törlésekor a hozzá tartozó BalanceSync is soft delete-elődik:
-     * a sor megmarad a db-ben (status = 1), de a lekérdezésekből eltűnik, a wallet
+     * a sor megmarad a db-ben (status = 'DISABLED'), de a lekérdezésekből eltűnik, a wallet
      * egyenlege visszaáll, és a lastSyncDate a létrehozás dátumára esik vissza
      */
     @Test
@@ -308,9 +308,9 @@ public class BalanceSyncServiceIntegrationTest extends MySqlContainerTest {
         assertTrue(
                 balanceSyncRepo.findBySyncTransactionId(syncTransaction.getId()).isEmpty());
         // ...de a sor soft delete-tel megmaradt
-        Integer status = jdbcTemplate.queryForObject(
-                "SELECT status FROM balance_sync WHERE id = ?", Integer.class, balanceSync.getId());
-        assertEquals(1, status);
+        String status = jdbcTemplate.queryForObject(
+                "SELECT status FROM balance_sync WHERE id = ?", String.class, balanceSync.getId());
+        assertEquals("DISABLED", status);
 
         // A korrekció törlése után az eredeti egyenleg látszik
         assertEquals(new BigDecimal("60.00"), walletService.getBalanceForWallet(wallet.getId()));

@@ -38,8 +38,9 @@ public class Category {
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("'ACTIVE'")
     private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
 
     @CreationTimestamp

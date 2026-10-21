@@ -33,6 +33,7 @@ import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
@@ -238,7 +239,13 @@ class TransactionServiceTest {
         // Ezeket úgy kezeljük, mintha már a db-ben lennének
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(
-                1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal(100), 0, this.defaultWallet);
+                1l,
+                "teszt",
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                new BigDecimal(100),
+                GeneralStatusEnum.ACTIVE,
+                this.defaultWallet);
         TransactionDetail detailInDB =
                 new TransactionDetail(1l, "detail1", new BigDecimal(100), null, null, transactionInDB);
         transactionInDB.setTransactionDetails(List.of(detailInDB));
@@ -503,7 +510,13 @@ class TransactionServiceTest {
     void getTransactionByIdForActualUser_returnsTransactionWhenFound() {
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(
-                1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal(100), 0, this.defaultWallet);
+                1l,
+                "teszt",
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                new BigDecimal(100),
+                GeneralStatusEnum.ACTIVE,
+                this.defaultWallet);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(1l, 1l)).thenReturn(Optional.of(transactionInDB));
@@ -535,7 +548,13 @@ class TransactionServiceTest {
     void getLastTransactions_queriesWithLimitOfFiveAndNoFilter() {
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(
-                1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal(100), 0, this.defaultWallet);
+                1l,
+                "teszt",
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                new BigDecimal(100),
+                GeneralStatusEnum.ACTIVE,
+                this.defaultWallet);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelperDto.class)))
@@ -558,7 +577,13 @@ class TransactionServiceTest {
     void getHistoryPageData_queriesWithLimitOfThirtyAndGivenFilter() {
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(
-                1l, "teszt", LocalDate.now(), TransactionTypeEnum.INCOME, new BigDecimal(100), 0, this.defaultWallet);
+                1l,
+                "teszt",
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                new BigDecimal(100),
+                GeneralStatusEnum.ACTIVE,
+                this.defaultWallet);
         TransactionFilter filter = new TransactionFilter("teszt", null, null);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
@@ -706,6 +731,12 @@ class TransactionServiceTest {
         Wallet wallet = new Wallet(
                 "wallet", new User(1L, "name", "password", "email"), CurrencyEnum.HUF, WalletTypeEnum.DEFAULT);
         return new Transaction(
-                id, "teszt", LocalDate.now(), TransactionTypeEnum.OUTCOME, new BigDecimal("-10.00"), 0, wallet);
+                id,
+                "teszt",
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-10.00"),
+                GeneralStatusEnum.ACTIVE,
+                wallet);
     }
 }

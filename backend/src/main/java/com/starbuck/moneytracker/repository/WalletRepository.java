@@ -19,7 +19,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     /**
      * Walletet lekérdez a megadott id alapján
      */
-    @Query("SELECT w FROM Wallet w WHERE w.id=?1 AND w.user.id = ?2 AND w.status = 0")
+    @Query("SELECT w FROM Wallet w WHERE w.id=?1 AND w.user.id = ?2 AND w.status = ACTIVE")
     Optional<Wallet> getWalletById(long walletId, long userId);
 
     /**
@@ -27,7 +27,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
      * így két párhuzamos művelet nem futhat egyszerre ugyanazon a walleten
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT w FROM Wallet w WHERE w.id=?1 AND w.user.id = ?2 AND w.status = 0")
+    @Query("SELECT w FROM Wallet w WHERE w.id=?1 AND w.user.id = ?2 AND w.status = ACTIVE")
     Optional<Wallet> getWalletByIdForUpdate(long walletId, long userId);
 
     /**
@@ -36,7 +36,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     @Query("""
                 SELECT w
                 FROM Wallet w
-                WHERE w.user.id = ?1 AND w.status = 0
+                WHERE w.user.id = ?1 AND w.status = ACTIVE
                 ORDER BY w.id ASC
             """)
     List<Wallet> findByUserId(long userId);
@@ -58,8 +58,8 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                     w.createdAt
                 )
                 FROM Wallet w
-                LEFT JOIN w.transactions t ON t.status = 0
-                WHERE w.user.id = ?1 AND w.status = 0
+                LEFT JOIN w.transactions t ON t.status = ACTIVE
+                WHERE w.user.id = ?1 AND w.status = ACTIVE
                 GROUP BY w.id
                 ORDER BY w.id ASC
             """)
@@ -71,8 +71,8 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
     @Query("""
                 SELECT COALESCE(SUM(t.priceSum), 0)
                 FROM Wallet w
-                LEFT JOIN w.transactions t ON t.status = 0
-                WHERE w.user.id = ?2 AND w.status = 0 AND w.id = ?1
+                LEFT JOIN w.transactions t ON t.status = ACTIVE
+                WHERE w.user.id = ?2 AND w.status = ACTIVE AND w.id = ?1
             """)
     BigDecimal getBalanceOfWallet(long walletId, long userId);
 
@@ -86,8 +86,8 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
                     COALESCE(SUM(t.priceSum), 0)
                 )
                 FROM Wallet w
-                LEFT JOIN w.transactions t ON t.status = 0
-                WHERE w.user.id = ?1 AND w.status = 0
+                LEFT JOIN w.transactions t ON t.status = ACTIVE
+                WHERE w.user.id = ?1 AND w.status = ACTIVE
                 GROUP BY w.id
                 ORDER BY w.id
             """)
