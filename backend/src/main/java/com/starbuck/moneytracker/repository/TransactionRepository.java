@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -76,15 +77,28 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     Optional<Transaction> getTransactionByIdWithDetails(long transactionId, long userId);
 
     /**
-     * Lekéri az összes tranzakciót a tranzakció részletekkel együtt
-     * JOIN FETCH, mert alapból lazy a tranzakció részletek betöltése, így a
-     * tranzakció részletek nem lennének elérhetőek
-     * TODO ha sok az elem, akkor gond lehet a sok lekérésből (elfogy a mem)
+     * Az aktív tranzakciók azonosítói id szerint növekvő sorrendben, a megadott
+     * id utántól (keyset lapozás: a következő lapot az előző lap utolsó id-ja
+     * után kéri le, így nem kell az egész táblát memóriába tölteni)
      *
+     * @param lastId az előző lap utolsó id-ja (első lapnál 0)
+     * @param limit lapméret
      * @return
      */
-    @Query("SELECT t FROM Transaction t JOIN FETCH t.transactionDetails td WHERE t.status = ACTIVE ")
-    List<Transaction> getAllTransaction();
+    @Query("SELECT t.id FROM Transaction t WHERE t.status = ACTIVE AND t.id > ?1 ORDER BY t.id")
+    List<Long> getActiveTransactionIdsAfter(long lastId, Limit limit);
+
+    /**
+     * Lekéri a megadott tranzakciókat a tranzakció részletekkel együtt.
+     * JOIN FETCH, mert alapból lazy a tranzakció részletek betöltése. LEFT,
+     * hogy a részlet nélküli tranzakciók is benne legyenek. DISTINCT, hogy
+     * a több részletes tranzakciók ne szerepeljenek többször.
+     *
+     * @param ids
+     * @return
+     */
+    @Query("SELECT DISTINCT t FROM Transaction t LEFT JOIN FETCH t.transactionDetails WHERE t.id IN ?1")
+    List<Transaction> getTransactionsWithDetailsByIds(List<Long> ids);
 
     /**
      * Alapból a tranzakciók softdelete-el törlődnek, ez a hard delete-et teszi
