@@ -1,5 +1,5 @@
 import { inject, Pipe, PipeTransform } from '@angular/core';
-import { CurrencyPipe, registerLocaleData } from '@angular/common';
+import { formatCurrency, registerLocaleData } from '@angular/common';
 import localeEn from '@angular/common/locales/en';
 import localeDe from '@angular/common/locales/de';
 import localeHu from '@angular/common/locales/hu';
@@ -13,7 +13,7 @@ registerLocaleData(localeDe);
 registerLocaleData(localeHu);
 
 /**
- * Wrapper a CurrencyPipe köré
+ * Wrapper a formatCurrency köré
  */
 @Pipe({
     name: 'currencyFormat',
@@ -24,13 +24,18 @@ export class CurrencyFormatPipe implements PipeTransform {
     private walletUtils = inject(WalletDataUtil);
 
     public transform(amount: number, currencyCode: CurrencyCodesEnum): string {
+        if (amount == null) {
+            return '';
+        }
+
         const lang = this.translateService.currentLang() ?? this.translateService.getFallbackLang();
         const locale = getLocaleForLang(lang);
         // Az Angular locale-adatai csak a locale "saját" pénznemének szimbólumát ismerik, a többihez az ISO kódot adnak vissza
         // (pl. hu locale-ban EUR -> "EUR", nem "€") - ezért a szimbólumot a WalletDataUtil-ból vesszük
         const symbol = this.walletUtils.getCurrencySymbolForCurrencyCode(currencyCode);
 
-        // A CurrencyPipe a pénznem szimbólum pozícióját (szám elé/mögé) és az ezres elválasztókat a UI nyelvéhez igazítja
-        return new CurrencyPipe(locale).transform(amount, currencyCode, symbol, '1.0-2') ?? '';
+        // A formatCurrency a pénznem szimbólum pozícióját (szám elé/mögé) és az ezres elválasztókat a UI nyelvéhez igazítja.
+        // Nem hozunk létre CurrencyPipe példányt, mert az impure pipe miatt minden change detection ciklusban újra kéne
+        return formatCurrency(amount, locale, symbol, currencyCode, '1.0-2');
     }
 }
