@@ -88,7 +88,7 @@ class WalletE2ETest extends MySqlContainerTest {
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
 
-        this.user = userRepository.findByEmail("e2ewallet@email.com");
+        this.user = userRepository.findByEmail("e2ewallet@email.com").orElseThrow();
 
         this.headers = new HttpHeaders();
         this.headers.setContentType(MediaType.APPLICATION_JSON);

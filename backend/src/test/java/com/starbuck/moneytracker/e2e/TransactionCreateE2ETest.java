@@ -94,7 +94,7 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
 
-        this.user = userRepository.findByEmail("e2ecreate@email.com");
+        this.user = userRepository.findByEmail("e2ecreate@email.com").orElseThrow();
         this.wallet = walletRepository.findByUserId(this.user.getId()).get(0);
     }
 

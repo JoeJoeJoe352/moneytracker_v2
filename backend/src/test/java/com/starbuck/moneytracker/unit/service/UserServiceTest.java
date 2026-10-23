@@ -9,6 +9,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -113,7 +115,7 @@ class UserServiceTest {
     void login_returnsGeneratedTokenOnSuccess() {
         User userInDB = new User("testuser", "encodedPassword", "teszt@email.com");
 
-        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(userInDB);
+        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(Optional.of(userInDB));
         Mockito.when(passwordEncoder.matches("password", "encodedPassword")).thenReturn(true);
         Mockito.when(jwtService.generateToken("teszt@email.com")).thenReturn("generatedToken");
 
@@ -129,7 +131,7 @@ class UserServiceTest {
      */
     @Test
     void login_throwsWhenEmailNotFound() {
-        Mockito.when(userRepository.findByEmail("missing@email.com")).thenReturn(null);
+        Mockito.when(userRepository.findByEmail("missing@email.com")).thenReturn(Optional.empty());
 
         UserLoginCommand command = new UserLoginCommand("missing@email.com", "password");
 
@@ -147,7 +149,7 @@ class UserServiceTest {
     void login_throwsWhenPasswordDoesNotMatch() {
         User userInDB = new User("testuser", "encodedPassword", "teszt@email.com");
 
-        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(userInDB);
+        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(Optional.of(userInDB));
         Mockito.when(passwordEncoder.matches("wrongPassword", "encodedPassword"))
                 .thenReturn(false);
 

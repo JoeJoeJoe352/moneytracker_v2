@@ -81,7 +81,7 @@ public class TransactionSaveCommand {
     /**
      * Hozzáadja az opcionális specialType paramétert. Builder pattern
      */
-    public TransactionSaveCommand withSpecialType(TransactionSpecialTypeEnum specialType) {
+    public TransactionSaveCommand setSpecialType(TransactionSpecialTypeEnum specialType) {
         this.specialType = specialType;
         return this;
     }

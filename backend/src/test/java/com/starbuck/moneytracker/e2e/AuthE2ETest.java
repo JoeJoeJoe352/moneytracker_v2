@@ -54,11 +54,10 @@ class AuthE2ETest extends MySqlContainerTest {
     @AfterEach
     void cleanupCreatedUsers() {
         createdEmails.forEach(email -> {
-            User user = userRepository.findByEmail(email);
-            if (user != null) {
+            userRepository.findByEmail(email).ifPresent(user -> {
                 walletRepository.deleteAll(walletRepository.findByUserId(user.getId()));
                 userRepository.delete(user);
-            }
+            });
         });
         createdEmails.clear();
     }
@@ -107,8 +106,7 @@ class AuthE2ETest extends MySqlContainerTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-        User savedUser = userRepository.findByEmail("e2eregister@email.com");
-        assertNotNull(savedUser);
+        User savedUser = userRepository.findByEmail("e2eregister@email.com").orElseThrow();
         assertNotEquals("password123", savedUser.getPassword());
         assertNotNull(savedUser.getUuid());
 

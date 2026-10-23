@@ -50,6 +50,6 @@ public class TransactionFactory {
 
         return new TransactionSaveCommand(
                         transactionName, differenceFromActualBalance, date, type, List.of(), List.of(), wallet.getId())
-                .withSpecialType(TransactionSpecialTypeEnum.SYNC);
+                .setSpecialType(TransactionSpecialTypeEnum.SYNC);
     }
 }

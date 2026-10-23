@@ -59,7 +59,7 @@ class GlobalExceptionHandlerE2ETest extends MySqlContainerTest {
         String setCookieHeader = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         assertNotNull(setCookieHeader);
 
-        this.user = userRepository.findByEmail("e2eerror@email.com");
+        this.user = userRepository.findByEmail("e2eerror@email.com").orElseThrow();
 
         this.headers = new HttpHeaders();
         this.headers.setContentType(MediaType.APPLICATION_JSON);

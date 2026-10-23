@@ -81,7 +81,7 @@ class CategoryE2ETest extends MySqlContainerTest {
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
 
-        this.user = userRepository.findByEmail("e2ecategory@email.com");
+        this.user = userRepository.findByEmail("e2ecategory@email.com").orElseThrow();
 
         this.headers = new HttpHeaders();
         this.headers.setContentType(MediaType.APPLICATION_JSON);
