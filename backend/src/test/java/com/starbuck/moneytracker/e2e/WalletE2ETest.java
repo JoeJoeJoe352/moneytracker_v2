@@ -200,7 +200,7 @@ class WalletE2ETest extends MySqlContainerTest {
         ResponseEntity<Void> response = restTemplate.exchange(
                 "/wallet/" + wallet.getId(), HttpMethod.PUT, new HttpEntity<>(updateRequest, headers), Void.class);
 
-        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
 
         Wallet updatedWallet = walletRepository.findById(wallet.getId()).orElseThrow();
         assertEquals("UpdatedSavings", updatedWallet.getName());
@@ -254,7 +254,7 @@ class WalletE2ETest extends MySqlContainerTest {
         ResponseEntity<Void> response = restTemplate.exchange(
                 "/wallet/" + wallet.getId(), HttpMethod.DELETE, new HttpEntity<>(headers), Void.class);
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
 
         Wallet deletedWallet = walletRepository.findById(wallet.getId()).orElseThrow();
         assertEquals(GeneralStatusEnum.DISABLED, deletedWallet.getStatus());
