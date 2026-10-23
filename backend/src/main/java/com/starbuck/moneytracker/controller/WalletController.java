@@ -83,7 +83,7 @@ public class WalletController {
      * @param id
      */
     @PutMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     public void updateWallet(@Valid @RequestBody WalletUpdateRequestDto dto, @PathVariable long id) {
         var command = new UpdateWalletCommand(dto.name(), dto.walletType());
         this.walletService.updateWallet(id, command);
@@ -95,7 +95,7 @@ public class WalletController {
      * @param id
      */
     @DeleteMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public void softDeleteWallet(@PathVariable long id) {
         walletService.softDeleteWallet(id);
     }
