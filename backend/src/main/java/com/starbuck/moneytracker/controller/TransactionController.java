@@ -18,9 +18,9 @@ import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
+import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
@@ -121,7 +121,7 @@ public class TransactionController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) Long transactionId) {
-        final TransactionFilter filter = new TransactionFilter(name, date, transactionId);
+        final TransactionFilterDto filter = new TransactionFilterDto(name, date, transactionId);
         List<Transaction> transactions = this.transactionService.getHistoryPageData(filter);
         return this.transactionMapper.toDtoList(transactions);
     }

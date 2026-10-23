@@ -23,13 +23,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
-import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
-import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
@@ -49,6 +48,7 @@ import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.testutils.AssertUtil;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.HistoryQueryHelper;
 import com.starbuck.moneytracker.util.TransactionDetailFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -557,12 +557,12 @@ class TransactionServiceTest {
                 this.defaultWallet);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelperDto.class)))
+        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
                 .thenReturn(List.of(transactionInDB));
 
         List<Transaction> result = transactionService.getLastTransactions();
 
-        ArgumentCaptor<HistoryQueryHelperDto> captor = ArgumentCaptor.forClass(HistoryQueryHelperDto.class);
+        ArgumentCaptor<HistoryQueryHelper> captor = ArgumentCaptor.forClass(HistoryQueryHelper.class);
         Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
 
         assertEquals(List.of(transactionInDB), result);
@@ -584,15 +584,15 @@ class TransactionServiceTest {
                 new BigDecimal(100),
                 GeneralStatusEnum.ACTIVE,
                 this.defaultWallet);
-        TransactionFilter filter = new TransactionFilter("teszt", null, null);
+        TransactionFilterDto filter = new TransactionFilterDto("teszt", null, null);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelperDto.class)))
+        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
                 .thenReturn(List.of(transactionInDB));
 
         List<Transaction> result = transactionService.getHistoryPageData(filter);
 
-        ArgumentCaptor<HistoryQueryHelperDto> captor = ArgumentCaptor.forClass(HistoryQueryHelperDto.class);
+        ArgumentCaptor<HistoryQueryHelper> captor = ArgumentCaptor.forClass(HistoryQueryHelper.class);
         Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
 
         assertEquals(List.of(transactionInDB), result);

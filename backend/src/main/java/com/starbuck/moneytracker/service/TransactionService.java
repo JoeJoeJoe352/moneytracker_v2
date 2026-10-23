@@ -9,10 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
-import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
+import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
-import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
@@ -20,6 +19,7 @@ import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.HistoryQueryHelper;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 @Service
@@ -156,17 +156,17 @@ public class TransactionService {
      * @param filter
      * @return
      */
-    public List<Transaction> getHistoryPageData(TransactionFilter filter) {
+    public List<Transaction> getHistoryPageData(TransactionFilterDto filter) {
         return this.getHistory(filter, 30);
     }
 
     /**
      * Listázza a kapott feltételek alapján a tranzakciókat, adott user számára
      *
-     * @param TransactionFilter filter
+     * @param TransactionFilterDto filter
      * @return
      */
-    private List<Transaction> getHistory(TransactionFilter filter, int limit) {
+    private List<Transaction> getHistory(TransactionFilterDto filter, int limit) {
         Long userId = currentUser.getUser().getId();
 
         Sort sort = Sort.by("createdAt").descending();
@@ -174,11 +174,11 @@ public class TransactionService {
         Specification<Transaction> filterConditions = null;
         if (filter != null) {
             filterConditions = Specification.where(TransactionSpecifications.hasName(filter.name()))
-                    .and(TransactionSpecifications.hasDate(filter.dateString())
+                    .and(TransactionSpecifications.hasDate(filter.date())
                             .and(TransactionSpecifications.hasTransactionId(filter.transactionId())));
         }
 
-        HistoryQueryHelperDto dto = new HistoryQueryHelperDto(limit, sort, filterConditions);
+        HistoryQueryHelper dto = new HistoryQueryHelper(limit, sort, filterConditions);
 
         return this.transactionRepo.findAllForUser(userId, dto);
     }

@@ -12,10 +12,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.starbuck.moneytracker.dto.HistoryQueryHelperDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
+import com.starbuck.moneytracker.util.HistoryQueryHelper;
 import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 /**
@@ -31,7 +31,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      * @param specifications
      * @return
      */
-    default List<Transaction> findAllForUser(Long userId, HistoryQueryHelperDto specifications) {
+    default List<Transaction> findAllForUser(Long userId, HistoryQueryHelper specifications) {
         Specification<Transaction> finalSpec = Specification.where(TransactionSpecifications.hasUserId(userId));
 
         if (specifications.spec() != null) {
