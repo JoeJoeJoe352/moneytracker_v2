@@ -123,12 +123,6 @@
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!-- Lokális adatbázis, teszteknek -->
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>test</scope>
-		</dependency>
 		<!-- Testcontainers: eldobható MySQL a tesztekhez, migrációnként friss DB-vel -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
