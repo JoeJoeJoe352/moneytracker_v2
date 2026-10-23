@@ -105,6 +105,7 @@ public class TransactionController {
      * @return TransactionDto
      */
     @DeleteMapping(path = "/transaction/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public void deleteTransactionById(@PathVariable Long id) {
         transactionService.deleteTransaction(id);
     }
