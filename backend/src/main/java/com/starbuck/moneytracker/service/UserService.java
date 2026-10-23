@@ -68,16 +68,15 @@ public class UserService {
      * @return User
      */
     public String login(UserLoginCommand command) {
-        User user = this.userRepository.findByEmail(command.getEmail());
         var errorMsg = messageSource.getMessage("invalidCredentials", null, LocaleContextHolder.getLocale());
 
-        if (user == null) {
+        User user = this.userRepository.findByEmail(command.getEmail()).orElseThrow(() -> {
             // Egy jelszó encode azért van itt, hogy az api válasz sebességéből ne lehessen
             // kihámozni, hogy adott email címmel van-e user (gyorsabb válasz => nincs email
             // cím a db-ben)
             passwordEncoder.encode("dummy_password");
-            throw new BadCredentialsException(errorMsg);
-        }
+            return new BadCredentialsException(errorMsg);
+        });
 
         if (!this.passwordEncoder.matches(command.getPassword(), user.getPassword())) {
             throw new BadCredentialsException(errorMsg);

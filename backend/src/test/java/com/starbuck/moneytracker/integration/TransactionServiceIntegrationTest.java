@@ -26,19 +26,19 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.UserCreateCommand;
+import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
-import com.starbuck.moneytracker.entity.TransactionFilter;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
-import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
-import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
-import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enums.LangEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
@@ -544,7 +544,8 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         // Nem egyező tranzakció
         this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
-        List<Transaction> result = transactionService.getHistoryPageData(new TransactionFilter("groceries", now, null));
+        List<Transaction> result =
+                transactionService.getHistoryPageData(new TransactionFilterDto("groceries", now, null));
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());
@@ -563,7 +564,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
         List<Transaction> result =
-                transactionService.getHistoryPageData(new TransactionFilter(null, now, matching.getId()));
+                transactionService.getHistoryPageData(new TransactionFilterDto(null, now, matching.getId()));
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());

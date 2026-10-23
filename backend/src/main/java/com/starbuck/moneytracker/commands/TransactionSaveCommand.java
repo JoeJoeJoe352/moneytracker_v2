@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
-import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
 public class TransactionSaveCommand {
     private BigDecimal globalPrice;
@@ -81,7 +81,7 @@ public class TransactionSaveCommand {
     /**
      * Hozzáadja az opcionális specialType paramétert. Builder pattern
      */
-    public TransactionSaveCommand withSpecialType(TransactionSpecialTypeEnum specialType) {
+    public TransactionSaveCommand setSpecialType(TransactionSpecialTypeEnum specialType) {
         this.specialType = specialType;
         return this;
     }

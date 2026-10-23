@@ -28,11 +28,11 @@ import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
-import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
-import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.mapper.WalletMapper;
 

@@ -3,6 +3,8 @@ package com.starbuck.moneytracker.unit.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +36,7 @@ class UserLookupServiceTest {
     @Test
     void loadUserByEmail_returnsUserWhenFound() {
         User userInDB = new User("testuser", "encodedPassword", "teszt@email.com");
-        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(userInDB);
+        Mockito.when(userRepository.findByEmail("teszt@email.com")).thenReturn(Optional.of(userInDB));
 
         User result = userLookupService.loadUserByEmail("teszt@email.com");
 
@@ -47,7 +49,7 @@ class UserLookupServiceTest {
      */
     @Test
     void loadUserByEmail_throwsWhenUserNotFound() {
-        Mockito.when(userRepository.findByEmail("missing@email.com")).thenReturn(null);
+        Mockito.when(userRepository.findByEmail("missing@email.com")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () -> {
             userLookupService.loadUserByEmail("missing@email.com");

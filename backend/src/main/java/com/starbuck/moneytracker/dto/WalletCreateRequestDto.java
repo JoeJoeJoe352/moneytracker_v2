@@ -2,8 +2,8 @@ package com.starbuck.moneytracker.dto;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
-import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 
 import jakarta.validation.constraints.NotBlank;
 

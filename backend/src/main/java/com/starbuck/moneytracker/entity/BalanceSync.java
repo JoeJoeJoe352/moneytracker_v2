@@ -7,7 +7,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

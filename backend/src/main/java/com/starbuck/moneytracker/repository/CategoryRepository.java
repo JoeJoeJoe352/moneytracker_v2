@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.starbuck.moneytracker.entity.Category;
-import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
+import com.starbuck.moneytracker.entity.enums.LangEnum;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 

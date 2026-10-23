@@ -36,9 +36,9 @@ import com.starbuck.moneytracker.dto.WalletListResponseDto;
 import com.starbuck.moneytracker.dto.WalletUpdateRequestDto;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
-import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
-import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -88,7 +88,7 @@ class WalletE2ETest extends MySqlContainerTest {
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
 
-        this.user = userRepository.findByEmail("e2ewallet@email.com");
+        this.user = userRepository.findByEmail("e2ewallet@email.com").orElseThrow();
 
         this.headers = new HttpHeaders();
         this.headers.setContentType(MediaType.APPLICATION_JSON);

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
 @Component
 public class TransactionFactory {
@@ -50,6 +50,6 @@ public class TransactionFactory {
 
         return new TransactionSaveCommand(
                         transactionName, differenceFromActualBalance, date, type, List.of(), List.of(), wallet.getId())
-                .withSpecialType(TransactionSpecialTypeEnum.SYNC);
+                .setSpecialType(TransactionSpecialTypeEnum.SYNC);
     }
 }

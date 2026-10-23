@@ -1,11 +1,11 @@
-package com.starbuck.moneytracker.entity;
+package com.starbuck.moneytracker.dto;
 
 import java.time.LocalDate;
 
 /**
  * Keresési feltételek struktúrája
  */
-public record TransactionFilter(
+public record TransactionFilterDto(
         /**
          * Tranzakció név
          */
@@ -13,7 +13,7 @@ public record TransactionFilter(
         /**
          * Tranzakció dátuma. Pl.: 2026-06-25
          */
-        LocalDate dateString,
+        LocalDate date,
         /**
          * Tranzakció id
          */

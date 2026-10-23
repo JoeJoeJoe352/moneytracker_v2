@@ -27,10 +27,8 @@ public class UserLookupService {
      * @throws UsernameNotFoundException ha nincs ilyen email címmel user
      */
     public User loadUserByEmail(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with email: " + email);
-        }
-        return user;
+        return userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }

@@ -11,9 +11,9 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionSpecialTypeEnum;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

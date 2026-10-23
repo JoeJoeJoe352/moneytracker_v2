@@ -1,8 +1,8 @@
-package com.starbuck.moneytracker.dto;
+package com.starbuck.moneytracker.util;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.starbuck.moneytracker.entity.Transaction;
 
-public record HistoryQueryHelperDto(int limit, Sort sort, Specification<Transaction> spec) {}
+public record HistoryQueryHelper(int limit, Sort sort, Specification<Transaction> spec) {}

@@ -16,7 +16,7 @@ import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
 @Component
 public class TransactionMapper {

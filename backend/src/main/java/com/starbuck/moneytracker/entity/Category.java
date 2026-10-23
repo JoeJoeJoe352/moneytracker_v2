@@ -7,8 +7,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
-import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
+import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enums.LangEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

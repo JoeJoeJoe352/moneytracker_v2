@@ -5,9 +5,13 @@ import java.math.RoundingMode;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
-public class CostCalculatorDomainService {
+/**
+ * Egyszerű kalkulátor osztály a tranzakció árak számolására
+ * Nincs függősége, sem állapota, ezért nem @Service
+ */
+public final class CostCalculatorDomainService {
 
     /**
      * Kiszámolja egy TransactionDetail költségét.

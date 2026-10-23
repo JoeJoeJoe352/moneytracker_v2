@@ -3,7 +3,7 @@ package com.starbuck.moneytracker.commands;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.types.WeightedPrice;
 
 /**

@@ -37,7 +37,7 @@ import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
@@ -101,7 +101,7 @@ class TransactionDateTimeZoneE2ETest extends MySqlContainerTest {
         assertNotNull(setCookieHeader);
         this.authCookie = setCookieHeader.split(";")[0];
 
-        this.user = userRepository.findByEmail("e2etimezone@email.com");
+        this.user = userRepository.findByEmail("e2etimezone@email.com").orElseThrow();
         this.wallet = walletRepository.findByUserId(this.user.getId()).get(0);
     }
 
