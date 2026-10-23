@@ -5,7 +5,7 @@ import localeDe from '@angular/common/locales/de';
 import localeHu from '@angular/common/locales/hu';
 import { TranslateService } from '@ngx-translate/core';
 import { CurrencyCodesEnum } from '../enums';
-import { WalletDataUtil } from '../../features/wallet/wallet-data-util';
+import { WalletDataUtil } from '../utils/wallet-data-util';
 import { getLocaleForLang } from '../utils/language-util';
 
 registerLocaleData(localeEn);

@@ -39,7 +39,7 @@ import {
     TransactionInputDefaultValuesWithDetails,
 } from '../interfaces';
 import { UserDataStore } from '@app/shared/stores/user-data-store';
-import { WalletDataUtil } from '../../wallet/wallet-data-util';
+import { WalletDataUtil } from '@shared/utils/wallet-data-util';
 import { TransactionSpecialTypeEnum } from '@shared/enums';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';

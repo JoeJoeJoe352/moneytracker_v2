@@ -6,7 +6,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionsListComponent } from '../transaction/transactions-component';
-import { WalletDataUtil } from '../wallet/wallet-data-util';
+import { WalletDataUtil } from '@shared/utils/wallet-data-util';
 import { WalletSummaryInterface } from '../transaction/interfaces';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { StatCardComponent } from './stat-card-component';
