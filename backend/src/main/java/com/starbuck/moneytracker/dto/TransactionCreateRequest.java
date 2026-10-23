@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.starbuck.moneytracker.entity.enum_entites.TransactionTypeEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.validation.PastOrPresentInZone;
 
 import jakarta.validation.Valid;

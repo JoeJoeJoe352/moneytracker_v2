@@ -5,7 +5,7 @@ import java.util.Locale;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import com.starbuck.moneytracker.entity.enum_entites.LangEnum;
+import com.starbuck.moneytracker.entity.enums.LangEnum;
 
 @Component
 public class LocaleToLangEnumConverter implements Converter<Locale, LangEnum> {

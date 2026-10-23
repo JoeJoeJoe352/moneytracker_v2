@@ -1,4 +1,4 @@
-package com.starbuck.moneytracker.entity.enum_entites;
+package com.starbuck.moneytracker.entity.enums;
 
 public enum WalletTypeEnum {
     DEFAULT,

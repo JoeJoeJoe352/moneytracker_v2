@@ -1,8 +1,8 @@
 package com.starbuck.moneytracker.commands;
 
 import com.starbuck.moneytracker.entity.User;
-import com.starbuck.moneytracker.entity.enum_entites.CurrencyEnum;
-import com.starbuck.moneytracker.entity.enum_entites.WalletTypeEnum;
+import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 
 public class CreateWalletCommand extends AbstractWalletSaveCommand {
 
