@@ -18,7 +18,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @return
      */
     @Query(
-            "SELECT COUNT(c) > 0 FROM Category c WHERE c.name = ?1 AND (c.user.id = ?2 OR (c.user.id IS NULL AND c.lang = ?3)) AND c.status = 0")
+            "SELECT COUNT(c) > 0 FROM Category c WHERE c.name = ?1 AND (c.user.id = ?2 OR (c.user.id IS NULL AND c.lang = ?3)) AND c.status = ACTIVE")
     boolean isUserHaveThisCategoryName(String name, long userId, LangEnum lang);
 
     /**
@@ -28,7 +28,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @return
      */
     @Query(
-            "SELECT c FROM Category c WHERE (c.user.id = ?1 OR (c.user.id IS NULL AND c.lang = ?2)) AND c.status = 0 ORDER BY c.id ASC")
+            "SELECT c FROM Category c WHERE (c.user.id = ?1 OR (c.user.id IS NULL AND c.lang = ?2)) AND c.status = ACTIVE ORDER BY c.id ASC")
     List<Category> findAllForUser(long userId, LangEnum lang);
 
     /**
@@ -37,6 +37,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @param userId
      * @return
      */
-    @Query("SELECT c FROM Category c WHERE (c.user.id = ?2 OR c.user.id IS NULL) AND c.status = 0 AND c.id in (?1)")
+    @Query(
+            "SELECT c FROM Category c WHERE (c.user.id = ?2 OR c.user.id IS NULL) AND c.status = ACTIVE AND c.id in (?1)")
     List<Category> findAllById(List<Long> ids, long userId);
 }

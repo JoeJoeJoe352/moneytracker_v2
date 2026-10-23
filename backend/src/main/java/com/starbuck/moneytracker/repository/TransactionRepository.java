@@ -20,7 +20,7 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 /**
  * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az
- * autógenerált lekérdezésekben status = 0 szűrést mindig bele fogja tenni
+ * autógenerált lekérdezésekben status = 'ACTIVE' szűrést mindig bele fogja tenni
  */
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
 
@@ -58,7 +58,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                     YEAR(t.transactionDate) = YEAR(CURDATE()) AND
                     MONTH(t.transactionDate) = MONTH(CURDATE()) AND
                     t.transactionType = ?2
-                WHERE w.user.id = ?1 AND w.status = 0
+                WHERE w.user.id = ?1 AND w.status = ACTIVE
                 GROUP BY w.id
                 ORDER BY w.id
             """)
@@ -72,7 +72,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      * @return
      */
     @Query(
-            "SELECT t FROM Transaction t LEFT JOIN FETCH t.transactionDetails WHERE t.id = ?1 AND t.wallet.user.id = ?2 AND t.status = 0")
+            "SELECT t FROM Transaction t LEFT JOIN FETCH t.transactionDetails WHERE t.id = ?1 AND t.wallet.user.id = ?2 AND t.status = ACTIVE")
     Optional<Transaction> getTransactionByIdWithDetails(long transactionId, long userId);
 
     /**
@@ -83,7 +83,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      *
      * @return
      */
-    @Query("SELECT t FROM Transaction t JOIN FETCH t.transactionDetails td WHERE t.status = 0 ")
+    @Query("SELECT t FROM Transaction t JOIN FETCH t.transactionDetails td WHERE t.status = ACTIVE ")
     List<Transaction> getAllTransaction();
 
     /**

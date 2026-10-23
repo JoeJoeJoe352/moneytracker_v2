@@ -6,19 +6,26 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
+@Table(
+        uniqueConstraints =
+                @UniqueConstraint(
+                        name = "UC_category_detail",
+                        columnNames = {"category_id", "transaction_detail_id"}))
 public class TransactionDetailCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "transaction_detail_id")
+    @JoinColumn(name = "transaction_detail_id", nullable = false)
     private TransactionDetail transactionDetail;
 
     public TransactionDetailCategory() {}

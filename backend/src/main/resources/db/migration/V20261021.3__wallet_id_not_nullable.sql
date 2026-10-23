@@ -1,0 +1,1 @@
+ALTER TABLE transactions MODIFY wallet_id BIGINT NOT NULL;

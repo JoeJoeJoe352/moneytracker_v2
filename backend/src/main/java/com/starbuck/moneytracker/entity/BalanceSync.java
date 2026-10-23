@@ -11,6 +11,8 @@ import com.starbuck.moneytracker.entity.enum_entites.GeneralStatusEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,9 +22,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 // soft delete (logikai törlés)
-@SQLDelete(sql = "UPDATE balance_sync SET status = 1 WHERE id = ?")
+@SQLDelete(sql = "UPDATE balance_sync SET status = 'DISABLED' WHERE id = ?")
 // autogenerált sql-ekben csak a nem töröltek jelennek meg
-@SQLRestriction("status = 0")
+@SQLRestriction("status = 'ACTIVE'")
 @Entity
 @Table(name = "balance_sync")
 public class BalanceSync {
@@ -49,8 +51,9 @@ public class BalanceSync {
     @JoinColumn(name = "sync_transaction_id", referencedColumnName = "id", nullable = true)
     private Transaction syncTransaction;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("'ACTIVE'")
     private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
 
     public BalanceSync() {}
