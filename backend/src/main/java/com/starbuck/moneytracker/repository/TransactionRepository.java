@@ -21,12 +21,13 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 /**
  * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az
- * autógenerált lekérdezésekben status = 'ACTIVE' szűrést mindig bele fogja tenni
+ * autógenerált lekérdezésekben status = 'ACTIVE' szűrést mindig bele fogja
+ * tenni
  */
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
 
     /**
-     * User számára kilistázza a tranzakcióit
+     * Kilistázza a user, az adott feltételeknek megfelelő tranzakcióit
      *
      * @param userId
      * @param specifications
@@ -39,8 +40,27 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             finalSpec = finalSpec.and(specifications.spec());
         }
 
-        return findAll(finalSpec, PageRequest.of(0, specifications.limit(), specifications.sort()))
+        return findAll(
+                        finalSpec,
+                        PageRequest.of(specifications.pageNumber(), specifications.limit(), specifications.sort()))
                 .getContent();
+    }
+
+    /**
+     * Visszatér a user, az adott feltételeknek megfelelő tranzakcióinak a számával
+     *
+     * @param userId
+     * @param specifications
+     * @return
+     */
+    default long countAllForUser(Long userId, Specification<Transaction> specifications) {
+        Specification<Transaction> finalSpec = Specification.where(TransactionSpecifications.hasUserId(userId));
+
+        if (specifications != null) {
+            finalSpec = finalSpec.and(specifications);
+        }
+
+        return count(finalSpec);
     }
 
     /**
@@ -82,7 +102,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      * után kéri le, így nem kell az egész táblát memóriába tölteni)
      *
      * @param lastId az előző lap utolsó id-ja (első lapnál 0)
-     * @param limit lapméret
+     * @param limit  lapméret
      * @return
      */
     @Query("SELECT t.id FROM Transaction t WHERE t.status = ACTIVE AND t.id > ?1 ORDER BY t.id")

@@ -19,6 +19,7 @@ import { MatCardModule } from '@angular/material/card';
 import { firstValueFrom, map } from 'rxjs';
 import { TransactionBarChartComponent } from '../statistics/transaction-bar-chart-component';
 import { TimeHelper } from '@app/shared/services/time-helper';
+import { TransactionHistoryInterface } from './interfaces';
 
 export interface FilterData {
     transactionId: number | null;
@@ -125,7 +126,7 @@ export class TransactionsListComponent implements OnChanges {
      * Tranzakciós lista adatok. A query paraméterek változtatásakor magától betöltődik
      */
     protected transactionListData = resource({
-        defaultValue: [],
+        defaultValue: { maxPageNumber: 0, transactions: [] } satisfies TransactionHistoryInterface,
         params: this.latestParams,
         loader: async ({ params }) => {
             const apiObserver = this.isHistoryMode()
@@ -165,7 +166,7 @@ export class TransactionsListComponent implements OnChanges {
      * Ennyi elemnél néz már ki valahogyan a diagram
      */
     protected isThereEnoughElementToShowChart = computed(() => {
-        return this.transactionListData.hasValue() && this.transactionListData.value().length > 1;
+        return this.transactionListData.hasValue() && this.transactionListData.value().transactions.length > 1;
     });
 
     /**

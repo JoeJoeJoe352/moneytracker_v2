@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TransactionsListComponent } from './transactions-component';
 import { TransactionService } from './transaction-service';
 import { CategoryService } from './category-service';
-import { TransactionListElementData } from './interfaces';
+import { TransactionHistoryInterface, TransactionListElementData } from './interfaces';
 import { TransactionModalStateService } from './transaction-modal-state-service';
 import { TransactionModalComponent } from './transaction-modal';
 import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
@@ -53,6 +53,18 @@ const sampleTransactions: TransactionListElementData[] = [
     },
 ];
 
+/** A /transaction/last válasza: itt nincs lapozás, ezért nincs oldalszám */
+const sampleLastTransactions: TransactionHistoryInterface = {
+    transactions: sampleTransactions,
+    maxPageNumber: null,
+};
+
+/** A /transaction/history válasza */
+const sampleHistory: TransactionHistoryInterface = {
+    transactions: sampleTransactions,
+    maxPageNumber: 1,
+};
+
 describe('TransactionsListComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionsListComponent>;
     let component: TransactionsListComponent;
@@ -85,9 +97,9 @@ describe('TransactionsListComponent (Vitest)', () => {
     ) {
         transactionServiceMock = {
             getLastTransactions: vi.fn(
-                () => options.getLastTransactionsResult ?? of(sampleTransactions),
+                () => options.getLastTransactionsResult ?? of(sampleLastTransactions),
             ),
-            getTransactionHistory: vi.fn(() => of(sampleTransactions)),
+            getTransactionHistory: vi.fn(() => of(sampleHistory)),
             getTransactionById: vi.fn(() => options.getTransactionByIdResult ?? of(null)),
         };
         routerMock = { navigate: vi.fn() };

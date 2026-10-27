@@ -24,6 +24,7 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 @Service
 public class TransactionService {
+    private final int HISTORY_PAGESIZE = 15;
 
     private final TransactionRepository transactionRepo;
     private final TransactionDetailService transactionDetailService;
@@ -149,7 +150,7 @@ public class TransactionService {
     public List<Transaction> getLastTransactions() {
         Sort sort = Sort.by(Transaction::getUpdatedAt).descending();
 
-        return this.getHistory(null, 5, sort);
+        return this.getHistory(null, sort, 5, 0);
     }
 
     /**
@@ -158,10 +159,10 @@ public class TransactionService {
      * @param filter
      * @return
      */
-    public List<Transaction> getHistoryPageData(TransactionFilterDto filter) {
+    public List<Transaction> getHistoryPageData(TransactionFilterDto filter, int pageNumber) {
         Sort sort = Sort.by(Transaction::getTransactionDate).descending();
 
-        return this.getHistory(filter, 30, sort);
+        return this.getHistory(filter, sort, HISTORY_PAGESIZE, pageNumber);
     }
 
     /**
@@ -170,19 +171,64 @@ public class TransactionService {
      * @param TransactionFilterDto filter
      * @return
      */
-    private List<Transaction> getHistory(TransactionFilterDto filter, int limit, Sort sort) {
-        Long userId = currentUser.getUser().getId();
+    private List<Transaction> getHistory(TransactionFilterDto filter, Sort sort, int limit, int pageNumber) {
+        if (limit < 1) {
+            throw new IllegalArgumentException("limit must be at lest 1");
+        }
 
+        if (pageNumber < 0) {
+            throw new IllegalArgumentException("pageNumber must be at least 0");
+        }
+
+        Long userId = currentUser.getUser().getId();
+        Specification<Transaction> filterConditions = this.createSpecification(filter);
+
+        HistoryQueryHelper dto = new HistoryQueryHelper(limit, pageNumber, sort, filterConditions);
+
+        return this.transactionRepo.findAllForUser(userId, dto);
+    }
+
+    /**
+     * Megszámolja a kapott feltételek alapján a tranzakciók darabszámát, adott user
+     * számára
+     *
+     * @param filter
+     * @return
+     */
+    private long countAllForUser(TransactionFilterDto filter) {
+        Long userId = currentUser.getUser().getId();
+        Specification<Transaction> filterConditions = this.createSpecification(filter);
+
+        return this.transactionRepo.countAllForUser(userId, filterConditions);
+    }
+
+    /**
+     * Oldalszámot visszaadja a kapott feltételek alapján megjelenő tranzakció
+     * darabszám alapján
+     *
+     * @param filter
+     * @return
+     */
+    public long getTransactionHistoryMaxPageNumber(TransactionFilterDto filter) {
+        Long maxCount = this.countAllForUser(filter);
+
+        return (long) Math.ceil((double) maxCount / (double) HISTORY_PAGESIZE);
+    }
+
+    /**
+     * Visszaadja a specification objectet
+     *
+     * @param filter
+     * @return
+     */
+    private Specification<Transaction> createSpecification(TransactionFilterDto filter) {
         Specification<Transaction> filterConditions = null;
         if (filter != null) {
             filterConditions = Specification.where(TransactionSpecifications.hasName(filter.name()))
                     .and(TransactionSpecifications.hasDate(filter.date())
                             .and(TransactionSpecifications.hasTransactionId(filter.transactionId())));
         }
-
-        HistoryQueryHelper dto = new HistoryQueryHelper(limit, sort, filterConditions);
-
-        return this.transactionRepo.findAllForUser(userId, dto);
+        return filterConditions;
     }
 
     /**

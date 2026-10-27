@@ -1,6 +1,8 @@
 package com.starbuck.moneytracker.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -15,11 +17,14 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
@@ -570,11 +575,11 @@ class TransactionServiceTest {
     }
 
     /**
-     * A tranzakciók oldalhoz 30-as limittel és a kapott szűréssel kéri le az
-     * adatokat
+     * A tranzakciók oldalhoz 15-ös limittel, a kapott oldalszámmal és szűréssel
+     * kéri le az adatokat
      */
     @Test
-    void getHistoryPageData_queriesWithLimitOfThirtyAndGivenFilter() {
+    void getHistoryPageData_queriesWithLimitOfFifteenAndGivenFilter() {
         User userInDB = new User(1l, "alma", "pass", "email");
         Transaction transactionInDB = new Transaction(
                 1l,
@@ -590,13 +595,81 @@ class TransactionServiceTest {
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
                 .thenReturn(List.of(transactionInDB));
 
-        List<Transaction> result = transactionService.getHistoryPageData(filter);
+        List<Transaction> result = transactionService.getHistoryPageData(filter, 2);
 
         ArgumentCaptor<HistoryQueryHelper> captor = ArgumentCaptor.forClass(HistoryQueryHelper.class);
         Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
 
         assertEquals(List.of(transactionInDB), result);
-        assertEquals(30, captor.getValue().limit());
+        assertEquals(15, captor.getValue().limit());
+        assertEquals(2, captor.getValue().pageNumber());
+        assertNotNull(captor.getValue().spec());
+    }
+
+    /**
+     * Az utolsó tranzakciók lekérése mindig az első oldalt kéri le
+     */
+    @Test
+    void getLastTransactions_queriesFirstPage() {
+        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
+                .thenReturn(List.of());
+
+        transactionService.getLastTransactions();
+
+        ArgumentCaptor<HistoryQueryHelper> captor = ArgumentCaptor.forClass(HistoryQueryHelper.class);
+        Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
+
+        assertEquals(0, captor.getValue().pageNumber());
+        assertNull(captor.getValue().spec());
+    }
+
+    /**
+     * Negatív oldalszámnál hibát dob, és nem kérdez le az adatbázisból
+     */
+    @Test
+    void getHistoryPageData_throwsWhenPageNumberIsNegative() {
+        TransactionFilterDto filter = new TransactionFilterDto(null, null, null);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.getHistoryPageData(filter, -1);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).findAllForUser(anyLong(), any(HistoryQueryHelper.class));
+    }
+
+    /**
+     * Az oldalszámot felfelé kerekítve számolja ki a tranzakciók darabszámából
+     * (15-ös lapmérettel)
+     */
+    @ParameterizedTest
+    @CsvSource({"0, 0", "1, 1", "14, 1", "15, 1", "16, 2", "30, 2", "31, 3"})
+    void getTransactionHistoryMaxPageNumber_roundsUpByPageSize(long transactionCount, long expectedPageNumber) {
+        Mockito.when(transactionRepo.countAllForUser(Mockito.eq(1l), any())).thenReturn(transactionCount);
+
+        long result = transactionService.getTransactionHistoryMaxPageNumber(new TransactionFilterDto(null, null, null));
+
+        assertEquals(expectedPageNumber, result);
+    }
+
+    /**
+     * Az oldalszám számolásánál a bejelentkezett user és a kapott szűrés alapján
+     * számol
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    void getTransactionHistoryMaxPageNumber_countsWithCurrentUserAndFilter() {
+        User userInDB = new User(7l, "alma", "pass", "email");
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.countAllForUser(Mockito.eq(7l), any())).thenReturn(20l);
+
+        long result =
+                transactionService.getTransactionHistoryMaxPageNumber(new TransactionFilterDto("teszt", null, null));
+
+        ArgumentCaptor<Specification<Transaction>> captor = ArgumentCaptor.forClass(Specification.class);
+        Mockito.verify(transactionRepo).countAllForUser(Mockito.eq(7l), captor.capture());
+
+        assertEquals(2, result);
+        assertNotNull(captor.getValue());
     }
 
     /**

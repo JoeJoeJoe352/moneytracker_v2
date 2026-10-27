@@ -258,7 +258,7 @@ class TransactionMapperTest {
      */
     @Test
     void toDtoList_returnsEmptyListForEmptyInput() {
-        assertTrue(mapper.toDtoList(List.of()).isEmpty());
+        assertTrue(mapper.toDtoList(List.of(), null).transactions().isEmpty());
     }
 
     /**
@@ -292,7 +292,8 @@ class TransactionMapperTest {
         detail2.setCategoryLinks(List.of());
         transaction2.setTransactionDetails(List.of(detail2));
 
-        List<TransactionResponseDto> dtos = mapper.toDtoList(List.of(transaction1, transaction2));
+        List<TransactionResponseDto> dtos =
+                mapper.toDtoList(List.of(transaction1, transaction2), null).transactions();
 
         assertEquals(2, dtos.size());
         assertTrue(dtos.stream().anyMatch(d -> d.name().equals("first")));

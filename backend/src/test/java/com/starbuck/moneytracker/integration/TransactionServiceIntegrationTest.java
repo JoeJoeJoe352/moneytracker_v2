@@ -545,7 +545,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
         List<Transaction> result =
-                transactionService.getHistoryPageData(new TransactionFilterDto("groceries", now, null));
+                transactionService.getHistoryPageData(new TransactionFilterDto("groceries", now, null), 0);
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());
@@ -564,7 +564,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
         List<Transaction> result =
-                transactionService.getHistoryPageData(new TransactionFilterDto(null, now, matching.getId()));
+                transactionService.getHistoryPageData(new TransactionFilterDto(null, now, matching.getId()), 0);
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());

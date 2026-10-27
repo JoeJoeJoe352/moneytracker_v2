@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.dto.HistoryResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateRequestDto;
 import com.starbuck.moneytracker.dto.TransactionDetailEditResponseDto;
@@ -108,8 +109,10 @@ public class TransactionMapper {
      * @param entities
      * @return
      */
-    public List<TransactionResponseDto> toDtoList(List<Transaction> entities) {
-        return entities.stream().map(this::toDto).collect(Collectors.toList());
+    public HistoryResponseDto toDtoList(List<Transaction> entities, Long maxPagenumber) {
+        var transactions = entities.stream().map((entity) -> this.toDto(entity)).collect(Collectors.toList());
+
+        return new HistoryResponseDto(transactions, maxPagenumber);
     }
 
     /**
