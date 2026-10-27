@@ -147,7 +147,9 @@ public class TransactionService {
      * @return List<Transaction>
      */
     public List<Transaction> getLastTransactions() {
-        return this.getHistory(null, 5);
+        Sort sort = Sort.by(Transaction::getUpdatedAt).descending();
+
+        return this.getHistory(null, 5, sort);
     }
 
     /**
@@ -157,7 +159,9 @@ public class TransactionService {
      * @return
      */
     public List<Transaction> getHistoryPageData(TransactionFilterDto filter) {
-        return this.getHistory(filter, 30);
+        Sort sort = Sort.by(Transaction::getTransactionDate).descending();
+
+        return this.getHistory(filter, 30, sort);
     }
 
     /**
@@ -166,10 +170,8 @@ public class TransactionService {
      * @param TransactionFilterDto filter
      * @return
      */
-    private List<Transaction> getHistory(TransactionFilterDto filter, int limit) {
+    private List<Transaction> getHistory(TransactionFilterDto filter, int limit, Sort sort) {
         Long userId = currentUser.getUser().getId();
-
-        Sort sort = Sort.by("createdAt").descending();
 
         Specification<Transaction> filterConditions = null;
         if (filter != null) {
