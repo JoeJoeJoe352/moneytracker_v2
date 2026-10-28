@@ -5,4 +5,4 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.starbuck.moneytracker.entity.Transaction;
 
-public record HistoryQueryHelper(int limit, Sort sort, Specification<Transaction> spec) {}
+public record HistoryQueryHelper(int limit, int pageNumber, Sort sort, Specification<Transaction> spec) {}

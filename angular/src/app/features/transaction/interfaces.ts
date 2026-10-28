@@ -123,6 +123,14 @@ export interface CategoryResponseInterface {
     isDefaultCategory: boolean;
 }
 
+export interface TransactionHistoryInterface {
+    transactions: TransactionListElementData[];
+    pageData?: {
+        elementCount: number;
+        elementPerPage: number;
+    };
+}
+
 /**
  * Egy, a listában szereplő elem adatai
  */

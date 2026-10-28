@@ -1,8 +1,10 @@
 import {
     Component,
     computed,
+    effect,
     inject,
     input,
+    linkedSignal,
     OnChanges,
     output,
     resource,
@@ -19,6 +21,8 @@ import { MatCardModule } from '@angular/material/card';
 import { firstValueFrom, map } from 'rxjs';
 import { TransactionBarChartComponent } from '../statistics/transaction-bar-chart-component';
 import { TimeHelper } from '@app/shared/services/time-helper';
+import { TransactionHistoryInterface } from './interfaces';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 export interface FilterData {
     transactionId: number | null;
@@ -36,6 +40,7 @@ export interface FilterData {
         TransactionFilter,
         MatCardModule,
         TransactionBarChartComponent,
+        MatPaginatorModule,
     ],
     providers: [TransactionModalStateService],
 })
@@ -106,6 +111,22 @@ export class TransactionsListComponent implements OnChanges {
             this.transactionListData.reload();
             this.transactionsChanged.emit();
         });
+
+        // Ha az oldalszám túlmutat az utolsó oldalon (pl. kézzel írt URL, vagy törölték az utolsó
+        // oldal utolsó elemét), az utolsó létező oldalra navigálunk
+        effect(() => {
+            if (this.transactionListData.status() !== 'resolved') {
+                return;
+            }
+            const pageData = this.transactionListData.value().pageData;
+            if (!pageData) {
+                return;
+            }
+            const lastPageNumber = Math.max(0, Math.ceil(pageData.elementCount / pageData.elementPerPage) - 1);
+            if (this.actualPageNumber() > lastPageNumber) {
+                this.navigateToPage(lastPageNumber, true);
+            }
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -118,15 +139,41 @@ export class TransactionsListComponent implements OnChanges {
     /**
      * Tranzakció id validálás
      */
-    isValidTransactionId(transactionId: number) {
+    private isValidTransactionId(transactionId: number) {
         return Number.isInteger(transactionId) && transactionId > 0;
     }
+
+    /**
+     * Aktuális oldalszám. Érvénytelen (nem egész, negatív) érték esetén az első oldal
+     */
+    protected actualPageNumber = computed(() => {
+        const pageNumber = Number(this.latestParams().get('pageNumber'));
+        return Number.isInteger(pageNumber) && pageNumber > 0 ? pageNumber : 0;
+    });
+
+    /**
+     * A backend felé küldött paraméterek: a query paraméterek, validált oldalszámmal
+     */
+    private readonly requestParams = computed(() => {
+        const params = new URLSearchParams(this.latestParams());
+        params.delete('pageNumber');
+
+        const pageNumber = this.actualPageNumber();
+        if (pageNumber > 0) {
+            params.set('pageNumber', pageNumber.toString());
+        }
+
+        return params;
+    });
+
     /**
      * Tranzakciós lista adatok. A query paraméterek változtatásakor magától betöltődik
      */
     protected transactionListData = resource({
-        defaultValue: [],
-        params: this.latestParams,
+        defaultValue: {
+            transactions: [],
+        } satisfies TransactionHistoryInterface,
+        params: this.requestParams,
         loader: async ({ params }) => {
             const apiObserver = this.isHistoryMode()
                 ? this.transactionService.getTransactionHistory(params)
@@ -134,6 +181,19 @@ export class TransactionsListComponent implements OnChanges {
 
             return firstValueFrom(apiObserver);
         },
+    });
+
+    /**
+     * Lapozási adatok. Betöltés/hiba alatt az utolsó ismert értéket tartja meg, hogy a lapozó
+     * ne tűnjön el (és ne vesszen el rajta a fókusz) minden lapváltáskor
+     */
+    protected readonly pageData = linkedSignal<
+        TransactionHistoryInterface['pageData'] | undefined,
+        TransactionHistoryInterface['pageData'] | undefined
+    >({
+        source: () =>
+            this.transactionListData.hasValue() ? this.transactionListData.value().pageData : undefined,
+        computation: (pageData, previous) => pageData ?? previous?.value,
     });
 
     /**
@@ -148,15 +208,38 @@ export class TransactionsListComponent implements OnChanges {
     }
 
     /**
-     * keresési adatok resetelése
+     * Lapváltás lekezelése. Többi keresési feltételt megtartja
      */
-    protected clearInputs(): void {
+    protected handlePageChange(event: PageEvent) {
+        this.navigateToPage(event.pageIndex);
+    }
+
+    /**
+     * Adott oldalra navigál, a többi query paramétert megtartva. Az első oldalnál kiveszi a
+     * pageNumber-t az URL-ből
+     */
+    private navigateToPage(pageNumber: number, replaceUrl = false): void {
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { pageNumber: pageNumber > 0 ? pageNumber : null },
+            queryParamsHandling: 'merge',
+            replaceUrl,
+        });
+    }
+
+    /**
+     * Url paraméterek resetelése (filterform elemei is törlődnek + lapozó is visszaáll az első oldalra)
+     */
+    protected clearUrlParams(): void {
         void this.router.navigate([], {
             relativeTo: this.route,
             queryParams: {},
         });
     }
 
+    /**
+     * Diagramm megjelenik-e
+     */
     protected isChartVisible = computed(() => {
         return this.isHistoryMode() && this.isThereEnoughElementToShowChart();
     });
@@ -165,7 +248,10 @@ export class TransactionsListComponent implements OnChanges {
      * Ennyi elemnél néz már ki valahogyan a diagram
      */
     protected isThereEnoughElementToShowChart = computed(() => {
-        return this.transactionListData.hasValue() && this.transactionListData.value().length > 1;
+        return (
+            this.transactionListData.hasValue() &&
+            this.transactionListData.value().transactions.length > 1
+        );
     });
 
     /**

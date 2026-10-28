@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,26 +22,29 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 /**
  * Note: Transaction entitásban be van kapcsolva a SQLRestriction, így az
- * autógenerált lekérdezésekben status = 'ACTIVE' szűrést mindig bele fogja tenni
+ * autógenerált lekérdezésekben status = 'ACTIVE' szűrést mindig bele fogja
+ * tenni
  */
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
 
     /**
-     * User számára kilistázza a tranzakcióit
+     * Kilistázza a user, az adott feltételeknek megfelelő tranzakcióinak egy
+     * oldalát. A Page a feltételeknek megfelelő összes tranzakció darabszámát is
+     * tartalmazza
      *
      * @param userId
      * @param specifications
      * @return
      */
-    default List<Transaction> findAllForUser(Long userId, HistoryQueryHelper specifications) {
+    default Page<Transaction> findAllForUser(Long userId, HistoryQueryHelper specifications) {
         Specification<Transaction> finalSpec = Specification.where(TransactionSpecifications.hasUserId(userId));
 
         if (specifications.spec() != null) {
             finalSpec = finalSpec.and(specifications.spec());
         }
 
-        return findAll(finalSpec, PageRequest.of(0, specifications.limit(), specifications.sort()))
-                .getContent();
+        return findAll(
+                finalSpec, PageRequest.of(specifications.pageNumber(), specifications.limit(), specifications.sort()));
     }
 
     /**
@@ -82,7 +86,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      * után kéri le, így nem kell az egész táblát memóriába tölteni)
      *
      * @param lastId az előző lap utolsó id-ja (első lapnál 0)
-     * @param limit lapméret
+     * @param limit  lapméret
      * @return
      */
     @Query("SELECT t.id FROM Transaction t WHERE t.status = ACTIVE AND t.id > ?1 ORDER BY t.id")

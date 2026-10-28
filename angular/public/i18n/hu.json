@@ -181,7 +181,8 @@
       "summary": "{{type}}: {{count}} tranzakció, összesen {{total}}. Legnagyobb: {{name}}, {{amount}}.",
       "summary.empty": "{{type}}: ebben az időszakban nincs tranzakció.",
       "total": "Összesen: {{total}}"
-    }
+    },
+    "select_page": "Válassz oldalt"
   },
   "language": {
     "title": "Nyelv",

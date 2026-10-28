@@ -11,18 +11,36 @@
         [defaultData]="filterInputDefaultValuesFromQuery"
         [isTransactionListLoading]="transactionListData.isLoading()"
         (filterSubmit)="onFilterSubmit($event)"
-        (resetForm)="clearInputs()"
+        (resetForm)="clearUrlParams()"
     />
 }
+
 @if (isHistoryMode() && isThereEnoughElementToShowChart()) {
     <app-transaction-bar-chart-component
-        [transactionList]="transactionListData.value()"
+        [transactionList]="transactionListData.value().transactions"
         (editTransaction)="modal.open($event.transactionId)"
     />
 }
+
 <app-transaction-list
     [title]="isHistoryMode() ? null : ('mainpage.last_transactions' | translate)"
     [listStatus]="transactionListData.status()"
-    [transactions]="transactionListData.hasValue() ? transactionListData.value() : []"
+    [transactions]="transactionListData.hasValue() ? transactionListData.value().transactions : []"
     (editTransaction)="modal.open($event.transactionId)"
 />
+
+@let pageData = this.pageData();
+@if (pageData) {
+    <mat-paginator
+        #paginator
+        [aria-label]="'transaction_page.select_page' | translate"
+        class="paginator"
+        [length]="pageData.elementCount"
+        [pageSize]="pageData.elementPerPage"
+        [showFirstLastButtons]="true"
+        [hidePageSize]="true"
+        [pageIndex]="actualPageNumber()"
+        (page)="handlePageChange($event)"
+    >
+    </mat-paginator>
+}

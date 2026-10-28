@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,17 +16,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.dto.HistoryResponseDto;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
-import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 
 @RestController
 public class TransactionController {
@@ -82,9 +84,10 @@ public class TransactionController {
      * @return List<TransactionDto>
      */
     @GetMapping(path = "/transaction/last")
-    public List<TransactionResponseDto> getLastTransactions() {
+    public HistoryResponseDto getLastTransactions() {
         List<Transaction> transactions = this.transactionService.getLastTransactions();
-        return this.transactionMapper.toDtoList(transactions);
+        // Itt nincs lapozás, ezért lapméret nincs beállítva
+        return this.transactionMapper.toDtoList(transactions, null);
     }
 
     /**
@@ -114,16 +117,21 @@ public class TransactionController {
      * Tranzakció history listázása
      *
      * @param name
-     * @param dateString
+     * @param date
+     * @param transactionId
+     * @param pageNumber
      * @return
      */
     @GetMapping(path = "/transaction/history")
-    public List<TransactionResponseDto> listTransactionHistory(
+    public HistoryResponseDto listTransactionHistory(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) LocalDate date,
-            @RequestParam(required = false) Long transactionId) {
+            @RequestParam(required = false) Long transactionId,
+            @RequestParam(defaultValue = "0") @Min(0) int pageNumber) {
         final TransactionFilterDto filter = new TransactionFilterDto(name, date, transactionId);
-        List<Transaction> transactions = this.transactionService.getHistoryPageData(filter);
+
+        Page<Transaction> transactions = this.transactionService.getHistoryPageData(filter, pageNumber);
+
         return this.transactionMapper.toDtoList(transactions);
     }
 }

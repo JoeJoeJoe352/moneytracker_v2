@@ -181,7 +181,8 @@
       "summary": "{{type}}: {{count}} Transaktionen, insgesamt {{total}}. Größte: {{name}}, {{amount}}.",
       "summary.empty": "{{type}}: keine Transaktionen in diesem Zeitraum.",
       "total": "Gesamt: {{total}}"
-    }
+    },
+    "select_page": "Seite auswählen"
   },
   "language": {
     "title": "Sprache",

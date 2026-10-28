@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.dto.HistoryResponseDto;
+import com.starbuck.moneytracker.dto.PageDataResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateRequestDto;
 import com.starbuck.moneytracker.dto.TransactionDetailEditResponseDto;
@@ -108,8 +111,22 @@ public class TransactionMapper {
      * @param entities
      * @return
      */
-    public List<TransactionResponseDto> toDtoList(List<Transaction> entities) {
-        return entities.stream().map(this::toDto).collect(Collectors.toList());
+    public HistoryResponseDto toDtoList(List<Transaction> entities, PageDataResponseDto pageData) {
+        var transactions = entities.stream().map((entity) -> this.toDto(entity)).collect(Collectors.toList());
+
+        return new HistoryResponseDto(transactions, pageData);
+    }
+
+    /**
+     * Átalakít egy tranzakció oldalt DTO-ra, a lapozási adatokkal együtt
+     *
+     * @param page
+     * @return
+     */
+    public HistoryResponseDto toDtoList(Page<Transaction> page) {
+        PageDataResponseDto pageData = new PageDataResponseDto(page.getTotalElements(), page.getSize());
+
+        return this.toDtoList(page.getContent(), pageData);
     }
 
     /**

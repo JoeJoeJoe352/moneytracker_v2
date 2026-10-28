@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.service;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 @Service
 public class TransactionService {
+    private static final int HISTORY_PAGESIZE = 15;
 
     private final TransactionRepository transactionRepo;
     private final TransactionDetailService transactionDetailService;
@@ -147,17 +149,23 @@ public class TransactionService {
      * @return List<Transaction>
      */
     public List<Transaction> getLastTransactions() {
-        return this.getHistory(null, 5);
+        Sort sort = Sort.by(Transaction::getUpdatedAt).descending();
+
+        return this.getHistory(null, sort, 5, 0).getContent();
     }
 
     /**
-     * Visszatér a tranzakciók oldal adataival
+     * Visszatér a tranzakciók oldal adataival. Egy tranzakción belül kéri le az
+     * oldalt és a darabszámot, így a kettő egymással konzisztens
      *
      * @param filter
      * @return
      */
-    public List<Transaction> getHistoryPageData(TransactionFilterDto filter) {
-        return this.getHistory(filter, 30);
+    @Transactional(readOnly = true)
+    public Page<Transaction> getHistoryPageData(TransactionFilterDto filter, int pageNumber) {
+        Sort sort = Sort.by(Transaction::getTransactionDate, Transaction::getId).descending();
+
+        return this.getHistory(filter, sort, HISTORY_PAGESIZE, pageNumber);
     }
 
     /**
@@ -166,21 +174,37 @@ public class TransactionService {
      * @param TransactionFilterDto filter
      * @return
      */
-    private List<Transaction> getHistory(TransactionFilterDto filter, int limit) {
+    private Page<Transaction> getHistory(TransactionFilterDto filter, Sort sort, int limit, int pageNumber) {
+        if (limit < 1) {
+            throw new IllegalArgumentException("limit must be at lest 1");
+        }
+
+        if (pageNumber < 0) {
+            throw new IllegalArgumentException("pageNumber must be at least 0");
+        }
+
         Long userId = currentUser.getUser().getId();
+        Specification<Transaction> filterConditions = this.createSpecification(filter);
 
-        Sort sort = Sort.by("createdAt").descending();
+        HistoryQueryHelper dto = new HistoryQueryHelper(limit, pageNumber, sort, filterConditions);
 
+        return this.transactionRepo.findAllForUser(userId, dto);
+    }
+
+    /**
+     * Visszaadja a specification objectet
+     *
+     * @param filter
+     * @return
+     */
+    private Specification<Transaction> createSpecification(TransactionFilterDto filter) {
         Specification<Transaction> filterConditions = null;
         if (filter != null) {
             filterConditions = Specification.where(TransactionSpecifications.hasName(filter.name()))
                     .and(TransactionSpecifications.hasDate(filter.date())
                             .and(TransactionSpecifications.hasTransactionId(filter.transactionId())));
         }
-
-        HistoryQueryHelper dto = new HistoryQueryHelper(limit, sort, filterConditions);
-
-        return this.transactionRepo.findAllForUser(userId, dto);
+        return filterConditions;
     }
 
     /**
