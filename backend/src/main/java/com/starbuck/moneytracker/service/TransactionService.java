@@ -25,7 +25,7 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 @Service
 public class TransactionService {
-    private final int HISTORY_PAGESIZE = 15;
+    private static final int HISTORY_PAGESIZE = 15;
 
     private final TransactionRepository transactionRepo;
     private final TransactionDetailService transactionDetailService;
