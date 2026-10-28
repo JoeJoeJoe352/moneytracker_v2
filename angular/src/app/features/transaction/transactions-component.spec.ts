@@ -218,6 +218,35 @@ describe('TransactionsListComponent (Vitest)', () => {
         );
     });
 
+    it('should drop the page number when a new filter is submitted, so the new search starts on the first page', async () => {
+        await setup({
+            isHistoryMode: true,
+            needSearchField: true,
+            queryParams: { name: 'kávé', pageNumber: '1' },
+            getTransactionHistoryResult: of({
+                transactions: sampleTransactions,
+                pageData: { elementCount: 30, elementPerPage: 15 },
+            } satisfies TransactionHistoryInterface),
+        });
+        routerMock.navigate.mockClear();
+
+        const nameInput = fixture.nativeElement.querySelector('#name');
+        nameInput.value = 'tej';
+        nameInput.dispatchEvent(new Event('input'));
+        fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+
+        expect(routerMock.navigate).toHaveBeenCalledWith(
+            [],
+            expect.objectContaining({ queryParams: { name: 'tej' } }),
+        );
+    });
+
+    it('should not show the paginator for the last transactions, which are not paged', async () => {
+        await setup({ isHistoryMode: false });
+
+        expect(fixture.nativeElement.querySelector('mat-paginator')).toBeNull();
+    });
+
     it('should reload the history whenever the route query params change (e.g. after the filter navigates)', async () => {
         await setup({ isHistoryMode: true, needSearchField: true });
         transactionServiceMock.getTransactionHistory.mockClear();

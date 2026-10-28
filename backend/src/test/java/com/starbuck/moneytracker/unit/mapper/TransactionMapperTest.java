@@ -14,9 +14,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.dto.HistoryResponseDto;
+import com.starbuck.moneytracker.dto.PageDataResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateRequestDto;
 import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
@@ -259,6 +264,20 @@ class TransactionMapperTest {
     @Test
     void toDtoList_returnsEmptyListForEmptyInput() {
         assertTrue(mapper.toDtoList(List.of(), null).transactions().isEmpty());
+    }
+
+    /**
+     * Oldalból a lapozási adatokat az összes darabszámból és a lapméretből tölti
+     * ki
+     */
+    @Test
+    void toDtoList_fillsPageDataFromPage() {
+        Page<Transaction> page = new PageImpl<>(List.of(), PageRequest.of(1, 15), 16);
+
+        HistoryResponseDto dto = mapper.toDtoList(page);
+
+        assertTrue(dto.transactions().isEmpty());
+        assertEquals(new PageDataResponseDto(16, 15), dto.pageData());
     }
 
     /**

@@ -22,6 +22,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
@@ -560,7 +563,7 @@ class TransactionServiceTest {
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
-                .thenReturn(List.of(transactionInDB));
+                .thenReturn(new PageImpl<>(List.of(transactionInDB)));
 
         List<Transaction> result = transactionService.getLastTransactions();
 
@@ -590,17 +593,53 @@ class TransactionServiceTest {
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
-                .thenReturn(List.of(transactionInDB));
+                .thenReturn(new PageImpl<>(List.of(transactionInDB)));
 
-        List<Transaction> result = transactionService.getHistoryPageData(filter, 2);
+        Page<Transaction> result = transactionService.getHistoryPageData(filter, 2);
 
         ArgumentCaptor<HistoryQueryHelper> captor = ArgumentCaptor.forClass(HistoryQueryHelper.class);
         Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
 
-        assertEquals(List.of(transactionInDB), result);
+        assertEquals(List.of(transactionInDB), result.getContent());
         assertEquals(15, captor.getValue().limit());
         assertEquals(2, captor.getValue().pageNumber());
         assertNotNull(captor.getValue().spec());
+    }
+
+    /**
+     * Oldalszám nélkül az első oldalt kéri le
+     */
+    @Test
+    void getHistoryPageData_queriesFirstPageWhenPageNumberIsNull() {
+        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
+                .thenReturn(Page.empty());
+
+        transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null), null);
+
+        ArgumentCaptor<HistoryQueryHelper> captor = ArgumentCaptor.forClass(HistoryQueryHelper.class);
+        Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
+
+        assertEquals(0, captor.getValue().pageNumber());
+    }
+
+    /**
+     * A bejelentkezett user tranzakcióit kéri le, és a repository által adott
+     * oldalt (az összes darabszámmal együtt) változtatás nélkül adja vissza
+     */
+    @Test
+    void getHistoryPageData_returnsPageOfCurrentUserWithTotalCount() {
+        User userInDB = new User(7l, "alma", "pass", "email");
+        Page<Transaction> pageInDB = new PageImpl<>(List.of(), PageRequest.of(1, 15), 20);
+
+        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
+        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(7l), any(HistoryQueryHelper.class)))
+                .thenReturn(pageInDB);
+
+        Page<Transaction> result = transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null), 1);
+
+        Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(7l), any(HistoryQueryHelper.class));
+        assertEquals(20, result.getTotalElements());
+        assertEquals(15, result.getSize());
     }
 
     /**
@@ -609,7 +648,7 @@ class TransactionServiceTest {
     @Test
     void getLastTransactions_queriesFirstPage() {
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
-                .thenReturn(List.of());
+                .thenReturn(Page.empty());
 
         transactionService.getLastTransactions();
 

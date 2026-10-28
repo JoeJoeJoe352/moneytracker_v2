@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,13 +28,15 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
 
     /**
-     * Kilistázza a user, az adott feltételeknek megfelelő tranzakcióit
+     * Kilistázza a user, az adott feltételeknek megfelelő tranzakcióinak egy
+     * oldalát. A Page a feltételeknek megfelelő összes tranzakció darabszámát is
+     * tartalmazza
      *
      * @param userId
      * @param specifications
      * @return
      */
-    default List<Transaction> findAllForUser(Long userId, HistoryQueryHelper specifications) {
+    default Page<Transaction> findAllForUser(Long userId, HistoryQueryHelper specifications) {
         Specification<Transaction> finalSpec = Specification.where(TransactionSpecifications.hasUserId(userId));
 
         if (specifications.spec() != null) {
@@ -41,26 +44,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
         }
 
         return findAll(
-                        finalSpec,
-                        PageRequest.of(specifications.pageNumber(), specifications.limit(), specifications.sort()))
-                .getContent();
-    }
-
-    /**
-     * Visszatér a user, az adott feltételeknek megfelelő tranzakcióinak a számával
-     *
-     * @param userId
-     * @param specifications
-     * @return
-     */
-    default long countAllForUser(Long userId, Specification<Transaction> specifications) {
-        Specification<Transaction> finalSpec = Specification.where(TransactionSpecifications.hasUserId(userId));
-
-        if (specifications != null) {
-            finalSpec = finalSpec.and(specifications);
-        }
-
-        return count(finalSpec);
+                finalSpec, PageRequest.of(specifications.pageNumber(), specifications.limit(), specifications.sort()));
     }
 
     /**

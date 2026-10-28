@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -126,6 +127,10 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         // Natív sql, mert a letiltott walleteket a repository nem adja vissza
         jdbcTemplate.update("DELETE FROM wallet WHERE user_id = ? AND id <> ?", this.user.getId(), this.wallet.getId());
         if (this.anotherUser != null) {
+            jdbcTemplate.update(
+                    "DELETE FROM transactions WHERE wallet_id IN (SELECT id FROM wallet WHERE user_id = ?)",
+                    this.anotherUser.getId());
+            jdbcTemplate.update("DELETE FROM wallet WHERE user_id = ?", this.anotherUser.getId());
             userRepo.delete(this.anotherUser);
             this.anotherUser = null;
         }
@@ -544,11 +549,38 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         // Nem egyező tranzakció
         this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
-        List<Transaction> result =
+        Page<Transaction> result =
                 transactionService.getHistoryPageData(new TransactionFilterDto("groceries", now, null), 0);
 
-        assertEquals(1, result.size());
-        assertEquals(matching.getId(), result.get(0).getId());
+        assertEquals(1, result.getTotalElements());
+        assertEquals(matching.getId(), result.getContent().get(0).getId());
+    }
+
+    /**
+     * Lapozásnál az összes darabszámba csak a bejelentkezett user tranzakciói
+     * számítanak bele, és a kért oldalt adja vissza
+     */
+    @Test
+    void getHistoryPageData_pagesAndCountsOnlyCurrentUsersTransactions() {
+        var now = LocalDate.now();
+        for (int i = 0; i < 16; i++) {
+            this.persistSimpleTransaction(
+                    "own" + i, TransactionTypeEnum.INCOME, new BigDecimal(10), now.minusDays(i), this.wallet);
+        }
+
+        // Másik user tranzakciója, ami nem számíthat bele
+        this.anotherUser = userService.createUser(new UserCreateCommand("anotheruser", "another@user.com", "password"));
+        Wallet anotherWallet = walletRepo.findByUserId(this.anotherUser.getId()).get(0);
+        Mockito.when(currentUser.getUser()).thenReturn(this.anotherUser);
+        this.persistSimpleTransaction("foreign", TransactionTypeEnum.INCOME, new BigDecimal(10), now, anotherWallet);
+        Mockito.when(currentUser.getUser()).thenReturn(this.user);
+
+        Page<Transaction> result = transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null), 1);
+
+        assertEquals(16, result.getTotalElements());
+        assertEquals(2, result.getTotalPages());
+        assertEquals(1, result.getContent().size());
+        assertEquals("own15", result.getContent().get(0).getName());
     }
 
     /**
@@ -563,11 +595,11 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         // Nem egyező tranzakció
         this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
-        List<Transaction> result =
+        Page<Transaction> result =
                 transactionService.getHistoryPageData(new TransactionFilterDto(null, now, matching.getId()), 0);
 
-        assertEquals(1, result.size());
-        assertEquals(matching.getId(), result.get(0).getId());
+        assertEquals(1, result.getTotalElements());
+        assertEquals(matching.getId(), result.getContent().get(0).getId());
     }
 
     /**

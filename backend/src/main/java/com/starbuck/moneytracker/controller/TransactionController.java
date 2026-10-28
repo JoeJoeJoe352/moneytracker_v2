@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.HistoryResponseDto;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
-import com.starbuck.moneytracker.dto.PageDataResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
@@ -127,12 +127,11 @@ public class TransactionController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) Long transactionId,
-            @RequestParam(required = false) @Min(0) Integer pageNumber) {
+            @RequestParam(defaultValue = "0") @Min(0) int pageNumber) {
         final TransactionFilterDto filter = new TransactionFilterDto(name, date, transactionId);
 
-        List<Transaction> transactions = this.transactionService.getHistoryPageData(filter, pageNumber);
+        Page<Transaction> transactions = this.transactionService.getHistoryPageData(filter, pageNumber);
 
-        PageDataResponseDto pageData = this.transactionService.getPageData(filter);
-        return this.transactionMapper.toDtoList(transactions, pageData);
+        return this.transactionMapper.toDtoList(transactions);
     }
 }

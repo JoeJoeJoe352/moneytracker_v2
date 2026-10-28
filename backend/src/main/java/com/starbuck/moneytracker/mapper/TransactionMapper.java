@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
@@ -114,6 +115,18 @@ public class TransactionMapper {
         var transactions = entities.stream().map((entity) -> this.toDto(entity)).collect(Collectors.toList());
 
         return new HistoryResponseDto(transactions, pageData);
+    }
+
+    /**
+     * Átalakít egy tranzakció oldalt DTO-ra, a lapozási adatokkal együtt
+     *
+     * @param page
+     * @return
+     */
+    public HistoryResponseDto toDtoList(Page<Transaction> page) {
+        PageDataResponseDto pageData = new PageDataResponseDto(page.getTotalElements(), page.getSize());
+
+        return this.toDtoList(page.getContent(), pageData);
     }
 
     /**
