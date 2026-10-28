@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import com.starbuck.moneytracker.dto.HistoryResponseDto;
 import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
@@ -147,14 +148,15 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció
-        ResponseEntity<TransactionResponseDto[]> lastTransactionsResponse = restTemplate.exchange(
-                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
+        ResponseEntity<HistoryResponseDto> lastTransactionsResponse = restTemplate.exchange(
+                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), HistoryResponseDto.class);
 
         assertEquals(HttpStatus.OK, lastTransactionsResponse.getStatusCode());
-        TransactionResponseDto[] lastTransactions = lastTransactionsResponse.getBody();
-        assertEquals(1, lastTransactions.length);
-        assertEquals("E2E groceries", lastTransactions[0].name());
-        assertEquals(new BigDecimal("100.00"), lastTransactions[0].priceSum());
+        List<TransactionResponseDto> lastTransactions =
+                lastTransactionsResponse.getBody().transactions();
+        assertEquals(1, lastTransactions.size());
+        assertEquals("E2E groceries", lastTransactions.get(0).name());
+        assertEquals(new BigDecimal("100.00"), lastTransactions.get(0).priceSum());
     }
 
     /**
@@ -195,27 +197,28 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció
-        ResponseEntity<TransactionResponseDto[]> lastTransactionsResponse = restTemplate.exchange(
-                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
+        ResponseEntity<HistoryResponseDto> lastTransactionsResponse = restTemplate.exchange(
+                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), HistoryResponseDto.class);
 
         assertEquals(HttpStatus.OK, lastTransactionsResponse.getStatusCode());
-        TransactionResponseDto[] lastTransactions = lastTransactionsResponse.getBody();
-        assertEquals(1, lastTransactions.length);
-        assertEquals("Félegyházi bevásárlás", lastTransactions[0].name());
-        assertEquals(new BigDecimal("-1229.00"), lastTransactions[0].priceSum());
-        assertTrue(lastTransactions[0].isComplexTransaction());
+        List<TransactionResponseDto> lastTransactions =
+                lastTransactionsResponse.getBody().transactions();
+        assertEquals(1, lastTransactions.size());
+        assertEquals("Félegyházi bevásárlás", lastTransactions.get(0).name());
+        assertEquals(new BigDecimal("-1229.00"), lastTransactions.get(0).priceSum());
+        assertTrue(lastTransactions.get(0).isComplexTransaction());
 
         // Detailok ellenőrzése
-        assertEquals(2, lastTransactions[0].transactionDetails().size());
+        assertEquals(2, lastTransactions.get(0).transactionDetails().size());
 
-        var detailCocoaRoll = lastTransactions[0].transactionDetails().get(0);
+        var detailCocoaRoll = lastTransactions.get(0).transactionDetails().get(0);
         assertEquals("Kakaós csiga", detailCocoaRoll.name());
         assertEquals(new BigDecimal("-479.00"), detailCocoaRoll.price());
         assertEquals(null, detailCocoaRoll.weight());
         assertEquals(null, detailCocoaRoll.weight());
         assertFalse(detailCocoaRoll.isComplexPriceMode());
 
-        var detailBread = lastTransactions[0].transactionDetails().get(1);
+        var detailBread = lastTransactions.get(0).transactionDetails().get(1);
         assertEquals("kenyér", detailBread.name());
         assertEquals(new BigDecimal("-750.00"), detailBread.price());
         assertEquals(new BigDecimal("0.50"), detailBread.weight());
@@ -257,20 +260,21 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
 
         // API szintű ellenőrzés: egy másik, szintén autentikált végponton keresztül
         // is visszaolvasható-e a frissen létrehozott tranzakció
-        ResponseEntity<TransactionResponseDto[]> lastTransactionsResponse = restTemplate.exchange(
-                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
+        ResponseEntity<HistoryResponseDto> lastTransactionsResponse = restTemplate.exchange(
+                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), HistoryResponseDto.class);
 
         assertEquals(HttpStatus.OK, lastTransactionsResponse.getStatusCode());
-        TransactionResponseDto[] lastTransactions = lastTransactionsResponse.getBody();
-        assertEquals(1, lastTransactions.length);
-        assertEquals("Strandbelépő", lastTransactions[0].name());
-        assertEquals(new BigDecimal("-1500.00"), lastTransactions[0].priceSum());
-        assertFalse(lastTransactions[0].isComplexTransaction());
+        List<TransactionResponseDto> lastTransactions =
+                lastTransactionsResponse.getBody().transactions();
+        assertEquals(1, lastTransactions.size());
+        assertEquals("Strandbelépő", lastTransactions.get(0).name());
+        assertEquals(new BigDecimal("-1500.00"), lastTransactions.get(0).priceSum());
+        assertFalse(lastTransactions.get(0).isComplexTransaction());
 
         // Detailok ellenőrzése
-        assertEquals(1, lastTransactions[0].transactionDetails().size());
+        assertEquals(1, lastTransactions.get(0).transactionDetails().size());
 
-        var detailSum = lastTransactions[0].transactionDetails().get(0);
+        var detailSum = lastTransactions.get(0).transactionDetails().get(0);
         assertEquals(TransactionDetail.DEFAULT_DETAIL_NAME, detailSum.name());
         assertEquals(new BigDecimal("-1500.00"), detailSum.price());
         assertEquals(null, detailSum.weight());

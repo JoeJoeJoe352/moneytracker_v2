@@ -17,14 +17,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.jpa.domain.Specification;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
@@ -635,41 +632,6 @@ class TransactionServiceTest {
         });
 
         Mockito.verify(transactionRepo, Mockito.never()).findAllForUser(anyLong(), any(HistoryQueryHelper.class));
-    }
-
-    /**
-     * Az oldalszámot felfelé kerekítve számolja ki a tranzakciók darabszámából
-     * (15-ös lapmérettel)
-     */
-    @ParameterizedTest
-    @CsvSource({"0, 0", "1, 1", "14, 1", "15, 1", "16, 2", "30, 2", "31, 3"})
-    void getTransactionHistoryMaxPageNumber_roundsUpByPageSize(long transactionCount, long expectedPageNumber) {
-        Mockito.when(transactionRepo.countAllForUser(Mockito.eq(1l), any())).thenReturn(transactionCount);
-
-        long result = transactionService.getTransactionHistoryMaxPageNumber(new TransactionFilterDto(null, null, null));
-
-        assertEquals(expectedPageNumber, result);
-    }
-
-    /**
-     * Az oldalszám számolásánál a bejelentkezett user és a kapott szűrés alapján
-     * számol
-     */
-    @Test
-    @SuppressWarnings("unchecked")
-    void getTransactionHistoryMaxPageNumber_countsWithCurrentUserAndFilter() {
-        User userInDB = new User(7l, "alma", "pass", "email");
-        Mockito.when(currentUser.getUser()).thenReturn(userInDB);
-        Mockito.when(transactionRepo.countAllForUser(Mockito.eq(7l), any())).thenReturn(20l);
-
-        long result =
-                transactionService.getTransactionHistoryMaxPageNumber(new TransactionFilterDto("teszt", null, null));
-
-        ArgumentCaptor<Specification<Transaction>> captor = ArgumentCaptor.forClass(Specification.class);
-        Mockito.verify(transactionRepo).countAllForUser(Mockito.eq(7l), captor.capture());
-
-        assertEquals(2, result);
-        assertNotNull(captor.getValue());
     }
 
     /**

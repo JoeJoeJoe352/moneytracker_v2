@@ -80,8 +80,8 @@ describe('MainPageComponent (Vitest)', () => {
                     provide: TransactionService,
                     useValue: {
                         getMoneySum: getMoneySumSpy,
-                        getLastTransactions: () => of({ transactions: [], maxPageNumber: null }),
-                        getTransactionHistory: () => of({ transactions: [], maxPageNumber: 0 }),
+                        getLastTransactions: () => of({ transactions: [], pageData: null }),
+                        getTransactionHistory: () => of({ transactions: [], pageData: {} }),
                         getTransactionById: () => of(null),
                     },
                 },

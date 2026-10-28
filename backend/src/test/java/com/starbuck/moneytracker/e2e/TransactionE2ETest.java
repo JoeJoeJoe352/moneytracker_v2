@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.e2e;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -32,8 +33,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import com.starbuck.moneytracker.dto.HistoryResponseDto;
 import com.starbuck.moneytracker.dto.LoginRequestDto;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
+import com.starbuck.moneytracker.dto.PageDataResponseDto;
 import com.starbuck.moneytracker.dto.RegisterRequestDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionDetailCreateRequestDto;
@@ -241,11 +244,13 @@ class TransactionE2ETest extends MySqlContainerTest {
                     "last" + i, TransactionTypeEnum.INCOME, new BigDecimal("10.00"), LocalDate.now(ZoneOffset.UTC));
         }
 
-        ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange(
-                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
+        ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
+                "/transaction/last", HttpMethod.GET, new HttpEntity<>(headers), HistoryResponseDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(5, response.getBody().length);
+        assertEquals(5, response.getBody().transactions().size());
+        // itt nincs lapozás, ezért lapozási adat sincs
+        assertNull(response.getBody().pageData());
     }
 
     // ---- GET /transaction/{id} ----
@@ -328,15 +333,16 @@ class TransactionE2ETest extends MySqlContainerTest {
         createTransactionViaApi(
                 "Salary payment", TransactionTypeEnum.INCOME, new BigDecimal("2000.00"), LocalDate.now(ZoneOffset.UTC));
 
-        ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange(
+        ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
                 "/transaction/history?name=groceries",
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
-                TransactionResponseDto[].class);
+                HistoryResponseDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, response.getBody().length);
-        assertEquals("Groceries shopping", response.getBody()[0].name());
+        assertEquals(1, response.getBody().transactions().size());
+        assertEquals(
+                "Groceries shopping", response.getBody().transactions().get(0).name());
     }
 
     /**
@@ -349,11 +355,97 @@ class TransactionE2ETest extends MySqlContainerTest {
         createTransactionViaApi(
                 "second", TransactionTypeEnum.INCOME, new BigDecimal("20.00"), LocalDate.now(ZoneOffset.UTC));
 
-        ResponseEntity<TransactionResponseDto[]> response = restTemplate.exchange(
-                "/transaction/history", HttpMethod.GET, new HttpEntity<>(headers), TransactionResponseDto[].class);
+        ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
+                "/transaction/history", HttpMethod.GET, new HttpEntity<>(headers), HistoryResponseDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, response.getBody().length);
+        assertEquals(2, response.getBody().transactions().size());
+    }
+
+    /**
+     * Oldalszám nélkül az első (nulladik) oldalt adja vissza, a lapozási
+     * adatokkal együtt
+     */
+    @Test
+    void listTransactionHistory_returnsFirstPageWithPageData() {
+        createTransactionsWithDecreasingDates(16);
+
+        ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
+                "/transaction/history", HttpMethod.GET, new HttpEntity<>(headers), HistoryResponseDto.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(15, response.getBody().transactions().size());
+        assertEquals("history0", response.getBody().transactions().get(0).name());
+        assertEquals(new PageDataResponseDto(16, 15), response.getBody().pageData());
+    }
+
+    /**
+     * A pageNumber paraméterrel a következő oldal kérhető le
+     */
+    @Test
+    void listTransactionHistory_returnsRequestedPage() {
+        createTransactionsWithDecreasingDates(16);
+
+        ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
+                "/transaction/history?pageNumber=1",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                HistoryResponseDto.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().transactions().size());
+        assertEquals("history15", response.getBody().transactions().get(0).name());
+        assertEquals(new PageDataResponseDto(16, 15), response.getBody().pageData());
+    }
+
+    /**
+     * A szűrés a lapozási adatokat is befolyásolja
+     */
+    @Test
+    void listTransactionHistory_countsPageDataWithFilter() {
+        createTransactionsWithDecreasingDates(16);
+        createTransactionViaApi(
+                "Groceries shopping",
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-30.00"),
+                LocalDate.now(ZoneOffset.UTC));
+
+        ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
+                "/transaction/history?name=groceries",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                HistoryResponseDto.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(new PageDataResponseDto(1, 15), response.getBody().pageData());
+    }
+
+    /**
+     * Negatív oldalszámra 400-at ad vissza
+     */
+    @Test
+    void listTransactionHistory_returnsBadRequestForNegativePageNumber() {
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
+                "/transaction/history?pageNumber=-1",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<Map<String, String>>() {});
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    /**
+     * Létrehoz count darab tranzakciót "history0", "history1", ... névvel, egyre
+     * régebbi dátummal, így a history-ban ebben a sorrendben jelennek meg
+     */
+    private void createTransactionsWithDecreasingDates(int count) {
+        for (int i = 0; i < count; i++) {
+            createTransactionViaApi(
+                    "history" + i,
+                    TransactionTypeEnum.INCOME,
+                    new BigDecimal("10.00"),
+                    LocalDate.now(ZoneOffset.UTC).minusDays(i));
+        }
     }
 
     // ---- Security határ - minden végpont auth cookie nélkül ----

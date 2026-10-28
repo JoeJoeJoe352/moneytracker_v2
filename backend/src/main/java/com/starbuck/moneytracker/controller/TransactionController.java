@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.HistoryResponseDto;
 import com.starbuck.moneytracker.dto.MoneySumResponseDto;
+import com.starbuck.moneytracker.dto.PageDataResponseDto;
 import com.starbuck.moneytracker.dto.TransactionCreateRequest;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
@@ -26,6 +27,7 @@ import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 
 @RestController
 public class TransactionController {
@@ -115,7 +117,9 @@ public class TransactionController {
      * Tranzakció history listázása
      *
      * @param name
-     * @param dateString
+     * @param date
+     * @param transactionId
+     * @param pageNumber
      * @return
      */
     @GetMapping(path = "/transaction/history")
@@ -123,13 +127,12 @@ public class TransactionController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) Long transactionId,
-            @RequestParam(required = false) Integer pageNumber) {
+            @RequestParam(required = false) @Min(0) Integer pageNumber) {
         final TransactionFilterDto filter = new TransactionFilterDto(name, date, transactionId);
 
-        List<Transaction> transactions =
-                this.transactionService.getHistoryPageData(filter, pageNumber == null ? 0 : pageNumber);
+        List<Transaction> transactions = this.transactionService.getHistoryPageData(filter, pageNumber);
 
-        long maxPageNumber = this.transactionService.getTransactionHistoryMaxPageNumber(filter);
-        return this.transactionMapper.toDtoList(transactions, maxPageNumber);
+        PageDataResponseDto pageData = this.transactionService.getPageData(filter);
+        return this.transactionMapper.toDtoList(transactions, pageData);
     }
 }

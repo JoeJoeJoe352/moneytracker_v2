@@ -56,13 +56,15 @@ const sampleTransactions: TransactionListElementData[] = [
 /** A /transaction/last válasza: itt nincs lapozás, ezért nincs oldalszám */
 const sampleLastTransactions: TransactionHistoryInterface = {
     transactions: sampleTransactions,
-    maxPageNumber: null,
 };
 
 /** A /transaction/history válasza */
 const sampleHistory: TransactionHistoryInterface = {
     transactions: sampleTransactions,
-    maxPageNumber: 1,
+    pageData: {
+        elementCount: 1,
+        elementPerPage: 15,
+    },
 };
 
 describe('TransactionsListComponent (Vitest)', () => {
@@ -92,6 +94,7 @@ describe('TransactionsListComponent (Vitest)', () => {
             queryParams?: Record<string, string>;
             routeParams?: Record<string, string>;
             getLastTransactionsResult?: Observable<unknown>;
+            getTransactionHistoryResult?: Observable<unknown>;
             getTransactionByIdResult?: Observable<unknown>;
         } = {},
     ) {
@@ -99,7 +102,7 @@ describe('TransactionsListComponent (Vitest)', () => {
             getLastTransactions: vi.fn(
                 () => options.getLastTransactionsResult ?? of(sampleLastTransactions),
             ),
-            getTransactionHistory: vi.fn(() => of(sampleHistory)),
+            getTransactionHistory: vi.fn(() => options.getTransactionHistoryResult ?? of(sampleHistory)),
             getTransactionById: vi.fn(() => options.getTransactionByIdResult ?? of(null)),
         };
         routerMock = { navigate: vi.fn() };
@@ -383,5 +386,62 @@ describe('TransactionsListComponent (Vitest)', () => {
         transactionModalDialogRefs[0]?.close();
 
         expect(routerMock.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should merge the selected page into the query params, keeping the filters', async () => {
+        await setup({ isHistoryMode: true, queryParams: { name: 'kávé' } });
+        routerMock.navigate.mockClear();
+
+        component['handlePageChange']({ pageIndex: 1, previousPageIndex: 0, pageSize: 15, length: 16 });
+
+        expect(routerMock.navigate).toHaveBeenCalledWith(
+            [],
+            expect.objectContaining({ queryParams: { pageNumber: 1 }, queryParamsHandling: 'merge' }),
+        );
+    });
+
+    it.each(['abc', '-1', '1.5'])(
+        'should request the first page when the pageNumber query param is invalid (%s)',
+        async (invalidPageNumber) => {
+            await setup({ isHistoryMode: true, queryParams: { pageNumber: invalidPageNumber } });
+
+            const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [
+                URLSearchParams,
+            ];
+            expect(params.get('pageNumber')).toBeNull();
+            expect(component['actualPageNumber']()).toBe(0);
+        },
+    );
+
+    it('should navigate to the last existing page when the pageNumber is past the last page', async () => {
+        await setup({
+            isHistoryMode: true,
+            queryParams: { name: 'kávé', pageNumber: '5' },
+            getTransactionHistoryResult: of({
+                transactions: [],
+                pageData: { elementCount: 16, elementPerPage: 15 },
+            } satisfies TransactionHistoryInterface),
+        });
+
+        expect(routerMock.navigate).toHaveBeenCalledWith([], {
+            relativeTo: expect.anything(),
+            queryParams: { pageNumber: 1 },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    });
+
+    it('should keep the paginator visible while the next page is loading', async () => {
+        await setup({ isHistoryMode: true });
+        expect(fixture.nativeElement.querySelector('mat-paginator')).not.toBeNull();
+
+        // a következő oldal betöltése soha nem fejeződik be, így a resource loading állapotban marad
+        transactionServiceMock.getTransactionHistory.mockReturnValue(new Subject());
+        queryParamsSubject.next({ pageNumber: '1' });
+        // whenStable() itt nem használható, mert a függőben lévő betöltés miatt sosem lesz stabil
+        fixture.detectChanges();
+
+        expect(component['transactionListData'].isLoading()).toBe(true);
+        expect(fixture.nativeElement.querySelector('mat-paginator')).not.toBeNull();
     });
 });

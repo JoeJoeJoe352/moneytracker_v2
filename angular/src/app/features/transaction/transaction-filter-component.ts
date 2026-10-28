@@ -27,7 +27,7 @@ export class TransactionFilter implements OnInit {
     /**
      * Datepickerben utolsó kiválasztható nap
      */
-    protected readonly lastSelectableDay = new Date()
+    protected readonly lastSelectableDay = new Date();
     /**
      * Form alapértelmezett adatai
      */
@@ -86,6 +86,6 @@ export class TransactionFilter implements OnInit {
     private getValuesFromFilterInputs(): FilterData {
         const { transactionId, name, date } = this.filterForm.getRawValue();
 
-        return { transactionId, name: name.trim(), date };
+        return { transactionId: transactionId, name: name.trim(), date: date };
     }
 }

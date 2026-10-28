@@ -181,7 +181,8 @@
       "summary": "{{type}}: {{count}} transactions, {{total}} in total. Largest: {{name}}, {{amount}}.",
       "summary.empty": "{{type}}: no transactions in this period.",
       "total": "Total: {{total}}"
-    }
+    },
+    "select_page": "Select page"
   },
   "language": {
     "title": "Language",

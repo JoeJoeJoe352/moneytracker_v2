@@ -125,7 +125,10 @@ export interface CategoryResponseInterface {
 
 export interface TransactionHistoryInterface {
     transactions: TransactionListElementData[];
-    maxPageNumber: number | null;
+    pageData?: {
+        elementCount: number;
+        elementPerPage: number;
+    };
 }
 
 /**

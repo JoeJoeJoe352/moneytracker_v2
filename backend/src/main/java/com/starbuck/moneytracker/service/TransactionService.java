@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.dto.PageDataResponseDto;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
@@ -159,10 +160,12 @@ public class TransactionService {
      * @param filter
      * @return
      */
-    public List<Transaction> getHistoryPageData(TransactionFilterDto filter, int pageNumber) {
-        Sort sort = Sort.by(Transaction::getTransactionDate).descending();
+    public List<Transaction> getHistoryPageData(TransactionFilterDto filter, Integer pageNumber) {
+        int calculatedPageNumber = pageNumber == null ? 0 : pageNumber;
 
-        return this.getHistory(filter, sort, HISTORY_PAGESIZE, pageNumber);
+        Sort sort = Sort.by(Transaction::getTransactionDate, Transaction::getId).descending();
+
+        return this.getHistory(filter, sort, HISTORY_PAGESIZE, calculatedPageNumber);
     }
 
     /**
@@ -209,10 +212,10 @@ public class TransactionService {
      * @param filter
      * @return
      */
-    public long getTransactionHistoryMaxPageNumber(TransactionFilterDto filter) {
+    public PageDataResponseDto getPageData(TransactionFilterDto filter) {
         Long maxCount = this.countAllForUser(filter);
 
-        return (long) Math.ceil((double) maxCount / (double) HISTORY_PAGESIZE);
+        return new PageDataResponseDto(maxCount, HISTORY_PAGESIZE);
     }
 
     /**
