@@ -173,6 +173,8 @@
       "name": "Transaktionsname",
       "date": "Transaktionsdatum",
       "date.open-calendar": "Kalender öffnen",
+      "type": "Transaktionstyp",
+      "default_type": "Alle Typen",
       "submit": "Suchen",
       "clear": "Filter zurücksetzen"
     },

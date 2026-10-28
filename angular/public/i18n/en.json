@@ -173,6 +173,8 @@
       "name": "Transaction name",
       "date": "Transaction date",
       "date.open-calendar": "Open calendar",
+      "type": "Transaction type",
+      "default_type": "All types",
       "submit": "Search",
       "clear": "Clear filters"
     },

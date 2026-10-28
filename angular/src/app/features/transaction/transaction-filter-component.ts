@@ -5,8 +5,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { TranslatePipe } from '@ngx-translate/core';
+import { _, TranslatePipe } from '@ngx-translate/core';
 import type { FilterData } from './transactions-component';
+import { TransactionTypeEnum } from '@app/shared/enums';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
     selector: 'app-transaction-filter',
@@ -20,6 +22,7 @@ import type { FilterData } from './transactions-component';
         MatDatepickerModule,
         MatButtonModule,
         ReactiveFormsModule,
+        MatSelectModule,
     ],
 })
 export class TransactionFilter implements OnInit {
@@ -50,12 +53,27 @@ export class TransactionFilter implements OnInit {
     public resetForm = output<void>();
 
     /**
+     * Típusok a dropdownhoz
+     */
+    protected types = [
+        {
+            type: TransactionTypeEnum.INCOME,
+            nameKey: _('transaction.income'),
+        },
+        {
+            type: TransactionTypeEnum.OUTCOME,
+            nameKey: _('transaction.expense'),
+        },
+    ];
+
+    /**
      * Form definiciója. A kezdőértékeket az ngOnInit tölti bele
      */
     protected readonly filterForm = this.fb.nonNullable.group({
         transactionId: this.fb.control<number | null>(null, [Validators.min(1)]),
         name: [''],
         date: this.fb.control<Date | null>(null),
+        type: this.fb.control<TransactionTypeEnum | null>(null),
     });
 
     ngOnInit(): void {
@@ -84,8 +102,8 @@ export class TransactionFilter implements OnInit {
      * A filter inputok értékei alapján létrehoz egy FilterData objektumot
      */
     private getValuesFromFilterInputs(): FilterData {
-        const { transactionId, name, date } = this.filterForm.getRawValue();
+        const { transactionId, name, date, type } = this.filterForm.getRawValue();
 
-        return { transactionId: transactionId, name: name.trim(), date: date };
+        return { transactionId: transactionId, name: name.trim(), date: date, type: type };
     }
 }

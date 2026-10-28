@@ -23,11 +23,13 @@ import { TransactionBarChartComponent } from '../statistics/transaction-bar-char
 import { TimeHelper } from '@app/shared/services/time-helper';
 import { TransactionHistoryInterface } from './interfaces';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { TransactionTypeEnum } from '@app/shared/enums';
 
 export interface FilterData {
     transactionId: number | null;
     name: string;
     date: Date | null;
+    type: TransactionTypeEnum | null;
 }
 
 @Component({
@@ -122,7 +124,10 @@ export class TransactionsListComponent implements OnChanges {
             if (!pageData) {
                 return;
             }
-            const lastPageNumber = Math.max(0, Math.ceil(pageData.elementCount / pageData.elementPerPage) - 1);
+            const lastPageNumber = Math.max(
+                0,
+                Math.ceil(pageData.elementCount / pageData.elementPerPage) - 1,
+            );
             if (this.actualPageNumber() > lastPageNumber) {
                 this.navigateToPage(lastPageNumber, true);
             }
@@ -192,7 +197,9 @@ export class TransactionsListComponent implements OnChanges {
         TransactionHistoryInterface['pageData'] | undefined
     >({
         source: () =>
-            this.transactionListData.hasValue() ? this.transactionListData.value().pageData : undefined,
+            this.transactionListData.hasValue()
+                ? this.transactionListData.value().pageData
+                : undefined,
         computation: (pageData, previous) => pageData ?? previous?.value,
     });
 
@@ -259,11 +266,13 @@ export class TransactionsListComponent implements OnChanges {
      */
     private toFilterData(params: URLSearchParams): FilterData {
         const date = params.get('date');
+        const typeEnum = (params.get('type') ?? null) as TransactionTypeEnum;
 
         return {
             transactionId: params.get('transactionId') ? Number(params.get('transactionId')) : null,
             name: params.get('name') ?? '',
             date: date ? this.timeHelper.stringToDate(date) : null,
+            type: typeEnum,
         };
     }
 
@@ -279,6 +288,10 @@ export class TransactionsListComponent implements OnChanges {
 
         if (data.date) {
             params['date'] = this.timeHelper.formatDateToString(data.date);
+        }
+
+        if (data.type) {
+            params['type'] = data.type;
         }
 
         if (data.transactionId && this.isValidTransactionId(data.transactionId)) {

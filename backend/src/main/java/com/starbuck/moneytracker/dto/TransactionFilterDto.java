@@ -2,6 +2,8 @@ package com.starbuck.moneytracker.dto;
 
 import java.time.LocalDate;
 
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
+
 /**
  * Keresési feltételek struktúrája
  */
@@ -17,4 +19,8 @@ public record TransactionFilterDto(
         /**
          * Tranzakció id
          */
-        Long transactionId) {}
+        Long transactionId,
+        /**
+         * Tranzakció típus
+         */
+        TransactionTypeEnum type) {}

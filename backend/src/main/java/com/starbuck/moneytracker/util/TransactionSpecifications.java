@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.starbuck.moneytracker.entity.Transaction;
+import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
 public class TransactionSpecifications {
 
@@ -39,6 +40,16 @@ public class TransactionSpecifications {
      */
     public static Specification<Transaction> hasTransactionId(Long transactionId) {
         return (root, query, cb) -> transactionId == null ? null : cb.equal(root.get("id"), transactionId);
+    }
+
+    /**
+     * Opcionális query paraméter, ami a tranzakció type-ra szűr
+     *
+     * @param transactionId
+     * @return
+     */
+    public static Specification<Transaction> hasTransactionType(TransactionTypeEnum type) {
+        return (root, query, cb) -> type == null ? null : cb.equal(root.get("transactionType"), type);
     }
 
     /**

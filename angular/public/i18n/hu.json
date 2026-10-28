@@ -170,9 +170,11 @@
       "title": "Szűrés",
       "transactionId": "Tranzakció száma",
       "transactionId.min": "Tranzakció száma 0-nál nagyobb legyen",
-      "name": "Tranzakciónév",
+      "name": "Tranzakció neve",
       "date": "Tranzakció dátuma",
       "date.open-calendar": "Naptár megnyitása",
+      "type": "Tranzakció típusa",
+      "default_type": "Minden típus",
       "submit": "Keresés",
       "clear": "Filterek törlése"
     },

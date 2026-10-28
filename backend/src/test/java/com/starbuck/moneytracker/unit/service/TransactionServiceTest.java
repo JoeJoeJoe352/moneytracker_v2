@@ -589,7 +589,7 @@ class TransactionServiceTest {
                 new BigDecimal(100),
                 GeneralStatusEnum.ACTIVE,
                 this.defaultWallet);
-        TransactionFilterDto filter = new TransactionFilterDto("teszt", null, null);
+        TransactionFilterDto filter = new TransactionFilterDto("teszt", null, null, null);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
@@ -619,7 +619,8 @@ class TransactionServiceTest {
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(7l), any(HistoryQueryHelper.class)))
                 .thenReturn(pageInDB);
 
-        Page<Transaction> result = transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null), 1);
+        Page<Transaction> result =
+                transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null, null), 1);
 
         Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(7l), any(HistoryQueryHelper.class));
         assertEquals(20, result.getTotalElements());
@@ -648,7 +649,7 @@ class TransactionServiceTest {
      */
     @Test
     void getHistoryPageData_throwsWhenPageNumberIsNegative() {
-        TransactionFilterDto filter = new TransactionFilterDto(null, null, null);
+        TransactionFilterDto filter = new TransactionFilterDto(null, null, null, null);
 
         assertThrows(IllegalArgumentException.class, () -> {
             transactionService.getHistoryPageData(filter, -1);

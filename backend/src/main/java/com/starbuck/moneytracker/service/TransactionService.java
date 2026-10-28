@@ -202,7 +202,8 @@ public class TransactionService {
         if (filter != null) {
             filterConditions = Specification.where(TransactionSpecifications.hasName(filter.name()))
                     .and(TransactionSpecifications.hasDate(filter.date())
-                            .and(TransactionSpecifications.hasTransactionId(filter.transactionId())));
+                            .and(TransactionSpecifications.hasTransactionId(filter.transactionId()))
+                            .and(TransactionSpecifications.hasTransactionType(filter.type())));
         }
         return filterConditions;
     }
