@@ -30,10 +30,6 @@ export interface FilterData {
     date: Date | null;
 }
 
-export interface SearchDataInterface extends FilterData {
-    pageNumber: number | null;
-}
-
 @Component({
     selector: 'app-transactions-list-component',
     templateUrl: './transactions-component.html',

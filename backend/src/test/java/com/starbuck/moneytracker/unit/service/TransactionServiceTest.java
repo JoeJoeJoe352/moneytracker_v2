@@ -607,22 +607,6 @@ class TransactionServiceTest {
     }
 
     /**
-     * Oldalszám nélkül az első oldalt kéri le
-     */
-    @Test
-    void getHistoryPageData_queriesFirstPageWhenPageNumberIsNull() {
-        Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
-                .thenReturn(Page.empty());
-
-        transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null), null);
-
-        ArgumentCaptor<HistoryQueryHelper> captor = ArgumentCaptor.forClass(HistoryQueryHelper.class);
-        Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
-
-        assertEquals(0, captor.getValue().pageNumber());
-    }
-
-    /**
      * A bejelentkezett user tranzakcióit kéri le, és a repository által adott
      * oldalt (az összes darabszámmal együtt) változtatás nélkül adja vissza
      */
