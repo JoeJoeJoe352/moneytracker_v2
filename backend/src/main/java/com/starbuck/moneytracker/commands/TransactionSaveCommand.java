@@ -58,8 +58,6 @@ public class TransactionSaveCommand {
         if (date == null) {
             throw new IllegalArgumentException("Transaction date cannot be null");
         }
-        // TODO validálni, hogy user a saját időzónájához képest ne tudjon jövőbeni időt
-        // beállítani
         if (walletId == null) {
             throw new IllegalArgumentException("WalletId cannot be null");
         }
