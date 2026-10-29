@@ -58,15 +58,10 @@
                     <mat-datepicker #date />
                 </mat-form-field>
 
-                <!-- Tranzakció típusa-->
-                <mat-form-field>
+                <!-- Tranzakció típusa -->
+                <mat-form-field appearance="fill" class="filter">
                     <mat-label>{{ 'transaction_page.filter.type' | translate }}</mat-label>
-                    <mat-select
-                        formControlName="type"
-                        appearance="fill"
-                        class="filter"
-                        [disabled]="isTransactionListLoading()"
-                    >
+                    <mat-select id="type" formControlName="type">
                         <!-- Default, üres érték -->
                         <mat-option [value]="null">{{
                             'transaction_page.filter.default_type' | translate

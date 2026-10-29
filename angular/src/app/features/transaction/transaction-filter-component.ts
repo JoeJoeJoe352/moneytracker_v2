@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, output } from '@angular/core';
+import { Component, effect, inject, input, OnInit, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -75,6 +75,19 @@ export class TransactionFilter implements OnInit {
         date: this.fb.control<Date | null>(null),
         type: this.fb.control<TransactionTypeEnum | null>(null),
     });
+
+    constructor() {
+        // Reactive formnál a [disabled] binding nem működik, ezért a controlt tiltjuk le.
+        // A getRawValue a letiltott control értékét is visszaadja
+        effect(() => {
+            const typeControl = this.filterForm.controls.type;
+            if (this.isTransactionListLoading()) {
+                typeControl.disable({ emitEvent: false });
+            } else {
+                typeControl.enable({ emitEvent: false });
+            }
+        });
+    }
 
     ngOnInit(): void {
         this.filterForm.patchValue(this.defaultData());

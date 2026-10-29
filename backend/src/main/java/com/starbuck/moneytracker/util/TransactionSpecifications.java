@@ -45,7 +45,7 @@ public class TransactionSpecifications {
     /**
      * Opcionális query paraméter, ami a tranzakció type-ra szűr
      *
-     * @param transactionId
+     * @param type
      * @return
      */
     public static Specification<Transaction> hasTransactionType(TransactionTypeEnum type) {

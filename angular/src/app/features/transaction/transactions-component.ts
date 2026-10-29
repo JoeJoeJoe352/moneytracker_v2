@@ -149,6 +149,13 @@ export class TransactionsListComponent implements OnChanges {
     }
 
     /**
+     * Tranzakció típus validálás (pl. kézzel írt URL esetén)
+     */
+    private isValidTransactionType(type: string | null): type is TransactionTypeEnum {
+        return Object.values<string | null>(TransactionTypeEnum).includes(type);
+    }
+
+    /**
      * Aktuális oldalszám. Érvénytelen (nem egész, negatív) érték esetén az első oldal
      */
     protected actualPageNumber = computed(() => {
@@ -157,11 +164,15 @@ export class TransactionsListComponent implements OnChanges {
     });
 
     /**
-     * A backend felé küldött paraméterek: a query paraméterek, validált oldalszámmal
+     * A backend felé küldött paraméterek: a query paraméterek, validált oldalszámmal és típussal
      */
     private readonly requestParams = computed(() => {
         const params = new URLSearchParams(this.latestParams());
         params.delete('pageNumber');
+
+        if (!this.isValidTransactionType(params.get('type'))) {
+            params.delete('type');
+        }
 
         const pageNumber = this.actualPageNumber();
         if (pageNumber > 0) {
@@ -266,13 +277,13 @@ export class TransactionsListComponent implements OnChanges {
      */
     private toFilterData(params: URLSearchParams): FilterData {
         const date = params.get('date');
-        const typeEnum = (params.get('type') ?? null) as TransactionTypeEnum;
+        const type = params.get('type');
 
         return {
             transactionId: params.get('transactionId') ? Number(params.get('transactionId')) : null,
             name: params.get('name') ?? '',
             date: date ? this.timeHelper.stringToDate(date) : null,
-            type: typeEnum,
+            type: this.isValidTransactionType(type) ? type : null,
         };
     }
 

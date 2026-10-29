@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
@@ -343,6 +344,45 @@ class TransactionE2ETest extends MySqlContainerTest {
         assertEquals(1, response.getBody().transactions().size());
         assertEquals(
                 "Groceries shopping", response.getBody().transactions().get(0).name());
+    }
+
+    /**
+     * A history végpont a type query paraméter alapján szűri a listát
+     */
+    @Test
+    void listTransactionHistory_filtersByType() {
+        createTransactionViaApi(
+                "Groceries shopping",
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-30.00"),
+                LocalDate.now(ZoneOffset.UTC));
+        createTransactionViaApi(
+                "Salary payment", TransactionTypeEnum.INCOME, new BigDecimal("2000.00"), LocalDate.now(ZoneOffset.UTC));
+
+        ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
+                "/transaction/history?type=INCOME",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                HistoryResponseDto.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().transactions().size());
+        assertEquals("Salary payment", response.getBody().transactions().get(0).name());
+    }
+
+    /**
+     * Érvénytelen szűrőértékre (nem konvertálható típus, id) 400-at ad vissza
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"type=foo", "transactionId=abc"})
+    void listTransactionHistory_returnsBadRequestForInvalidFilterValue(String query) {
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(
+                "/transaction/history?" + query,
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<Map<String, String>>() {});
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     /**

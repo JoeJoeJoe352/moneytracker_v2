@@ -604,6 +604,26 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     }
 
     /**
+     * History oldalon a beállított típusnak megfelelő tranzakciókat adja vissza
+     */
+    @Test
+    void getHistoryPageData_filtersTransactionsByType() {
+        var now = LocalDate.now();
+
+        Transaction matching = this.persistSimpleTransaction(
+                "salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
+        // Nem egyező tranzakció
+        this.persistSimpleTransaction(
+                "groceries shopping", TransactionTypeEnum.OUTCOME, new BigDecimal(-10), now, this.wallet);
+
+        Page<Transaction> result = transactionService.getHistoryPageData(
+                new TransactionFilterDto(null, null, null, TransactionTypeEnum.INCOME), 0);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(matching.getId(), result.getContent().get(0).getId());
+    }
+
+    /**
      * Törléskor a tranzakció soft delete-tel törlődik, így a normál
      * lekérdezésekben már nem jelenik meg
      */
