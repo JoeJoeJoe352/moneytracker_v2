@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.unit.service;
 
+import static com.starbuck.moneytracker.service.TransactionService.HISTORY_PAGESIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -601,7 +602,7 @@ class TransactionServiceTest {
         Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
 
         assertEquals(List.of(transactionInDB), result.getContent());
-        assertEquals(15, captor.getValue().limit());
+        assertEquals(HISTORY_PAGESIZE, captor.getValue().limit());
         assertEquals(2, captor.getValue().pageNumber());
         assertNotNull(captor.getValue().spec());
     }

@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.e2e;
 
+import static com.starbuck.moneytracker.service.TransactionService.HISTORY_PAGESIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -408,15 +409,17 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void listTransactionHistory_returnsFirstPageWithPageData() {
-        createTransactionsWithDecreasingDates(16);
+        createTransactionsWithDecreasingDates(HISTORY_PAGESIZE + 1);
 
         ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
                 "/transaction/history", HttpMethod.GET, new HttpEntity<>(headers), HistoryResponseDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(15, response.getBody().transactions().size());
+        assertEquals(HISTORY_PAGESIZE, response.getBody().transactions().size());
         assertEquals("history0", response.getBody().transactions().get(0).name());
-        assertEquals(new PageDataResponseDto(16, 15), response.getBody().pageData());
+        assertEquals(
+                new PageDataResponseDto(HISTORY_PAGESIZE + 1, HISTORY_PAGESIZE),
+                response.getBody().pageData());
     }
 
     /**
@@ -424,7 +427,7 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void listTransactionHistory_returnsRequestedPage() {
-        createTransactionsWithDecreasingDates(16);
+        createTransactionsWithDecreasingDates(HISTORY_PAGESIZE + 1);
 
         ResponseEntity<HistoryResponseDto> response = restTemplate.exchange(
                 "/transaction/history?pageNumber=1",
@@ -434,8 +437,12 @@ class TransactionE2ETest extends MySqlContainerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().transactions().size());
-        assertEquals("history15", response.getBody().transactions().get(0).name());
-        assertEquals(new PageDataResponseDto(16, 15), response.getBody().pageData());
+        assertEquals(
+                "history" + HISTORY_PAGESIZE,
+                response.getBody().transactions().get(0).name());
+        assertEquals(
+                new PageDataResponseDto(HISTORY_PAGESIZE + 1, HISTORY_PAGESIZE),
+                response.getBody().pageData());
     }
 
     /**
@@ -443,7 +450,7 @@ class TransactionE2ETest extends MySqlContainerTest {
      */
     @Test
     void listTransactionHistory_countsPageDataWithFilter() {
-        createTransactionsWithDecreasingDates(16);
+        createTransactionsWithDecreasingDates(HISTORY_PAGESIZE + 1);
         createTransactionViaApi(
                 "Groceries shopping",
                 TransactionTypeEnum.OUTCOME,
@@ -457,7 +464,8 @@ class TransactionE2ETest extends MySqlContainerTest {
                 HistoryResponseDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(new PageDataResponseDto(1, 15), response.getBody().pageData());
+        assertEquals(
+                new PageDataResponseDto(1, HISTORY_PAGESIZE), response.getBody().pageData());
     }
 
     /**

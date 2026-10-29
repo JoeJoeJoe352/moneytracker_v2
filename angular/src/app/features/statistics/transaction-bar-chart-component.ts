@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { TransactionListElementData } from '../transaction/interfaces';
 import { CurrencyCodesEnum, TransactionTypeEnum } from '@app/shared/enums';
@@ -12,19 +12,18 @@ import {
     LinearScale,
     Tooltip,
 } from 'chart.js';
-import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@app/shared/pipes/currency-format-pipe';
 import { getLocaleForLang } from '@app/shared/utils/language-util';
 import { CurrencyConversionService } from '@app/shared/services/currency-conversion-service';
-import { filterByType, indexOfMax, sum } from '@app/shared/utils/transaction-util';
+import { indexOfMax } from '@app/shared/utils/transaction-util';
 import { TimeHelper } from '@app/shared/services/time-helper';
 
 @Component({
     selector: 'app-transaction-bar-chart-component',
     templateUrl: './transaction-bar-chart-component.html',
     styleUrl: './transaction-bar-chart-component.scss',
-    imports: [BaseChartDirective, MatButtonToggleGroup, MatButtonToggle, TranslatePipe],
+    imports: [BaseChartDirective, TranslatePipe],
     providers: [
         CurrencyFormatPipe,
         // Így a bundle size türhető mértéken marad, mert akkor tölti csak be, ahol használva van a diagram
@@ -50,33 +49,16 @@ export class TransactionBarChartComponent {
      */
     public editTransaction = output<{ transactionId: number }>();
 
-    /**
-     * A kiadás oldali diagrammot mutatjuk-e a usernek
-     */
-    protected isExpenseMode = signal(true);
-
     // a canvas nem érti a CSS változókat, ezért itt kiolvassuk a tényleges színeket
     private readonly rootStyle = getComputedStyle(this.document.documentElement);
     private readonly expenseColor = this.rootStyle.getPropertyValue('--moneytracker-red').trim();
     private readonly incomeColor = this.rootStyle.getPropertyValue('--moneytracker-green').trim();
 
     /**
-     * Tranzakciós adatok, a tranzakció típus által szűrve
-     */
-    private transactionDataFilteredByType = computed(() => {
-        const type = this.isExpenseMode()
-            ? TransactionTypeEnum.OUTCOME
-            : TransactionTypeEnum.INCOME;
-
-        // A diagramon a legrégebbi elem legyen bal oldalt
-        return filterByType(this.transactionList(), type).reverse();
-    });
-
-    /**
      * Az oszlopok értékei forintban. Minden érték pozitív
      */
     private hufPrices = computed(() =>
-        this.transactionDataFilteredByType().map((transaction) =>
+        this.transactionList().map((transaction) =>
             Math.abs(
                 this.currencyConversionService.toHuf(
                     transaction.priceSum,
@@ -87,29 +69,17 @@ export class TransactionBarChartComponent {
     );
 
     /**
-     * Nincs megjeleníthető tranzakció a kiválasztott típusból
+     * Kiadás-e a tranzakció
      */
-    protected isEmpty = computed(() => this.transactionDataFilteredByType().length === 0);
-
-    /**
-     * A megjelenített tranzakciók forintos összege, formázva
-     */
-    protected formattedTotal = computed(() => {
-        return this.currencyFormatPipe.transform(sum(this.hufPrices()), CurrencyCodesEnum.huf);
-    });
-
-    /**
-     * A megjelenített tranzakció típus fordítási kulcsa
-     */
-    protected typeLabelKey = computed(() =>
-        this.isExpenseMode() ? 'transaction.expenses' : 'transaction.incomes',
-    );
+    private isExpense(transaction: TransactionListElementData): boolean {
+        return transaction.transactionType === TransactionTypeEnum.OUTCOME;
+    }
 
     /**
      * A diagram szöveges összefoglalója a felolvasóknak (a canvas tartalmát nem tudják felolvasni)
      */
     protected summary = computed(() => {
-        const data = this.transactionDataFilteredByType();
+        const data = this.transactionList();
         if (data.length === 0) {
             return { key: 'transaction_page.chart.summary.empty', params: {} };
         }
@@ -122,11 +92,14 @@ export class TransactionBarChartComponent {
             return { key: 'transaction_page.chart.summary.empty', params: {} };
         }
 
+        const expenseCount = data.filter((transaction) => this.isExpense(transaction)).length;
+
         return {
             key: 'transaction_page.chart.summary',
             params: {
                 count: data.length,
-                total: this.formattedTotal(),
+                incomeCount: data.length - expenseCount,
+                expenseCount: expenseCount,
                 name: largest.name,
                 amount: this.currencyFormatPipe.transform(largestPrice, CurrencyCodesEnum.huf),
             },
@@ -137,24 +110,32 @@ export class TransactionBarChartComponent {
      * A chart adott indexű oszlopához tartozó tranzakció
      */
     private transactionAt(index: number | undefined): TransactionListElementData | undefined {
-        return index === undefined ? undefined : this.transactionDataFilteredByType()[index];
+        return index === undefined ? undefined : this.transactionList()[index];
     }
 
     /**
      * Adatok átalakítása a chartjs számára
      */
     protected chartData = computed<ChartData<'bar'>>(() => {
-        const color = this.isExpenseMode() ? this.expenseColor : this.incomeColor;
+        // oszloponként a tranzakció típusának megfelelő szín
+        const colors = this.transactionList().map((transaction) =>
+            this.isExpense(transaction) ? this.expenseColor : this.incomeColor,
+        );
+        // a kiadások a tengely alá kerülnek, így nem csak a szín különbözteti meg a típusokat
+        const signedHufPrices = this.hufPrices().map((price, index) => {
+            const transaction = this.transactionAt(index);
+            return transaction && this.isExpense(transaction) ? -price : price;
+        });
 
         return {
-            labels: this.transactionDataFilteredByType().map(
+            labels: this.transactionList().map(
                 (transactionData) => transactionData.name,
             ),
             datasets: [
                 {
-                    data: this.hufPrices(),
-                    backgroundColor: color,
-                    hoverBackgroundColor: color,
+                    data: signedHufPrices,
+                    backgroundColor: colors,
+                    hoverBackgroundColor: colors,
                     borderRadius: 4,
                 },
             ],
@@ -218,22 +199,27 @@ export class TransactionBarChartComponent {
                         label: (context) => {
                             const transaction = this.transactionAt(context.dataIndex);
                             const hufPrice = this.currencyFormatPipe.transform(
-                                context.parsed.y ?? 0,
+                                Math.abs(context.parsed.y ?? 0),
                                 CurrencyCodesEnum.huf,
                             );
                             if (!transaction) {
                                 return `${hufPrice}`;
                             }
+                            const type = this.translateService.instant(
+                                this.isExpense(transaction)
+                                    ? 'transaction.expense'
+                                    : 'transaction.income',
+                            ) as string;
                             const currencyCode = transaction.wallet.currencyCode;
 
                             if (currencyCode === CurrencyCodesEnum.huf) {
-                                return `${hufPrice}`;
+                                return `${type}: ${hufPrice}`;
                             }
                             const price = this.currencyFormatPipe.transform(
                                 Math.abs(transaction.priceSum),
                                 currencyCode,
                             );
-                            return `${price} (≈${hufPrice})`;
+                            return `${type}: ${price} (≈${hufPrice})`;
                         },
                     },
                 },

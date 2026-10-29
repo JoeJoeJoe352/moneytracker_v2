@@ -263,6 +263,19 @@ export class TransactionsListComponent implements OnChanges {
     });
 
     /**
+     * Diagrammban fordított sorrendben kell megjeleníteni az adatokat
+     * (bal szélső a legrégebbi)
+     */
+    protected reversedTransactionData = computed(() => {
+        if (!this.transactionListData.hasValue()) {
+            return [];
+        }
+        // [...] klónozza a tömböt, így a reverse az eredeti tömböt nem fogja módosítani
+        const tempTransactionData = [...this.transactionListData.value().transactions];
+        return tempTransactionData.reverse();
+    });
+
+    /**
      * Ennyi elemnél néz már ki valahogyan a diagram
      */
     protected isThereEnoughElementToShowChart = computed(() => {

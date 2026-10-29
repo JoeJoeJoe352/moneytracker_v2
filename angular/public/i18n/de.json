@@ -179,10 +179,8 @@
       "clear": "Filter zurücksetzen"
     },
     "chart": {
-      "type": "Diagramminhalt",
-      "summary": "{{type}}: {{count}} Transaktionen, insgesamt {{total}}. Größte: {{name}}, {{amount}}.",
-      "summary.empty": "{{type}}: keine Transaktionen in diesem Zeitraum.",
-      "total": "Gesamt: {{total}}"
+      "summary": "{{count}} Transaktionen ({{incomeCount}} Einnahmen, {{expenseCount}} Ausgaben). Größte: {{name}}, {{amount}}.",
+      "summary.empty": "Keine Transaktionen in diesem Zeitraum."
     },
     "select_page": "Seite auswählen"
   },

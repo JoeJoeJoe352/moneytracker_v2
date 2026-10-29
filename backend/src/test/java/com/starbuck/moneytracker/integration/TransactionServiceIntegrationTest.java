@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.integration;
 
+import static com.starbuck.moneytracker.service.TransactionService.HISTORY_PAGESIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -563,7 +564,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void getHistoryPageData_pagesAndCountsOnlyCurrentUsersTransactions() {
         var now = LocalDate.now();
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < HISTORY_PAGESIZE + 1; i++) {
             this.persistSimpleTransaction(
                     "own" + i, TransactionTypeEnum.INCOME, new BigDecimal(10), now.minusDays(i), this.wallet);
         }
@@ -578,10 +579,10 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         Page<Transaction> result =
                 transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null, null), 1);
 
-        assertEquals(16, result.getTotalElements());
+        assertEquals(HISTORY_PAGESIZE + 1, result.getTotalElements());
         assertEquals(2, result.getTotalPages());
         assertEquals(1, result.getContent().size());
-        assertEquals("own15", result.getContent().get(0).getName());
+        assertEquals("own" + HISTORY_PAGESIZE, result.getContent().get(0).getName());
     }
 
     /**
