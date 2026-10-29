@@ -1,6 +1,5 @@
 package com.starbuck.moneytracker.controller;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -119,19 +118,14 @@ public class TransactionController {
      * @param name
      * @param date
      * @param transactionId
+     * @param type
      * @param pageNumber
      * @return
      */
     @GetMapping(path = "/transaction/history")
     public HistoryResponseDto listTransactionHistory(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) LocalDate date,
-            @RequestParam(required = false) Long transactionId,
-            @RequestParam(defaultValue = "0") @Min(0) int pageNumber) {
-        final TransactionFilterDto filter = new TransactionFilterDto(name, date, transactionId);
-
+            TransactionFilterDto filter, @RequestParam(defaultValue = "0") @Min(0) int pageNumber) {
         Page<Transaction> transactions = this.transactionService.getHistoryPageData(filter, pageNumber);
-
         return this.transactionMapper.toDtoList(transactions);
     }
 }

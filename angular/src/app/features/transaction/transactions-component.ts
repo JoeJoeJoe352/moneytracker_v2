@@ -23,11 +23,13 @@ import { TransactionBarChartComponent } from '../statistics/transaction-bar-char
 import { TimeHelper } from '@app/shared/services/time-helper';
 import { TransactionHistoryInterface } from './interfaces';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { TransactionTypeEnum } from '@app/shared/enums';
 
 export interface FilterData {
     transactionId: number | null;
     name: string;
     date: Date | null;
+    type: TransactionTypeEnum | null;
 }
 
 @Component({
@@ -122,7 +124,10 @@ export class TransactionsListComponent implements OnChanges {
             if (!pageData) {
                 return;
             }
-            const lastPageNumber = Math.max(0, Math.ceil(pageData.elementCount / pageData.elementPerPage) - 1);
+            const lastPageNumber = Math.max(
+                0,
+                Math.ceil(pageData.elementCount / pageData.elementPerPage) - 1,
+            );
             if (this.actualPageNumber() > lastPageNumber) {
                 this.navigateToPage(lastPageNumber, true);
             }
@@ -144,6 +149,13 @@ export class TransactionsListComponent implements OnChanges {
     }
 
     /**
+     * Tranzakció típus validálás (pl. kézzel írt URL esetén)
+     */
+    private isValidTransactionType(type: string | null): type is TransactionTypeEnum {
+        return Object.values<string | null>(TransactionTypeEnum).includes(type);
+    }
+
+    /**
      * Aktuális oldalszám. Érvénytelen (nem egész, negatív) érték esetén az első oldal
      */
     protected actualPageNumber = computed(() => {
@@ -152,11 +164,15 @@ export class TransactionsListComponent implements OnChanges {
     });
 
     /**
-     * A backend felé küldött paraméterek: a query paraméterek, validált oldalszámmal
+     * A backend felé küldött paraméterek: a query paraméterek, validált oldalszámmal és típussal
      */
     private readonly requestParams = computed(() => {
         const params = new URLSearchParams(this.latestParams());
         params.delete('pageNumber');
+
+        if (!this.isValidTransactionType(params.get('type'))) {
+            params.delete('type');
+        }
 
         const pageNumber = this.actualPageNumber();
         if (pageNumber > 0) {
@@ -192,7 +208,9 @@ export class TransactionsListComponent implements OnChanges {
         TransactionHistoryInterface['pageData'] | undefined
     >({
         source: () =>
-            this.transactionListData.hasValue() ? this.transactionListData.value().pageData : undefined,
+            this.transactionListData.hasValue()
+                ? this.transactionListData.value().pageData
+                : undefined,
         computation: (pageData, previous) => pageData ?? previous?.value,
     });
 
@@ -245,6 +263,19 @@ export class TransactionsListComponent implements OnChanges {
     });
 
     /**
+     * Diagrammban fordított sorrendben kell megjeleníteni az adatokat
+     * (bal szélső a legrégebbi)
+     */
+    protected reversedTransactionData = computed(() => {
+        if (!this.transactionListData.hasValue()) {
+            return [];
+        }
+        // [...] klónozza a tömböt, így a reverse az eredeti tömböt nem fogja módosítani
+        const tempTransactionData = [...this.transactionListData.value().transactions];
+        return tempTransactionData.reverse();
+    });
+
+    /**
      * Ennyi elemnél néz már ki valahogyan a diagram
      */
     protected isThereEnoughElementToShowChart = computed(() => {
@@ -259,11 +290,13 @@ export class TransactionsListComponent implements OnChanges {
      */
     private toFilterData(params: URLSearchParams): FilterData {
         const date = params.get('date');
+        const type = params.get('type');
 
         return {
             transactionId: params.get('transactionId') ? Number(params.get('transactionId')) : null,
             name: params.get('name') ?? '',
             date: date ? this.timeHelper.stringToDate(date) : null,
+            type: this.isValidTransactionType(type) ? type : null,
         };
     }
 
@@ -279,6 +312,10 @@ export class TransactionsListComponent implements OnChanges {
 
         if (data.date) {
             params['date'] = this.timeHelper.formatDateToString(data.date);
+        }
+
+        if (data.type) {
+            params['type'] = data.type;
         }
 
         if (data.transactionId && this.isValidTransactionId(data.transactionId)) {

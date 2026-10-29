@@ -81,8 +81,6 @@
     "date.invalid": "A dátum érvénytelen!",
     "expense": "Kiadás",
     "income": "Bevétel",
-    "expenses": "Kiadások",
-    "incomes": "Bevételek",
     "detail_state_label": "Rögzítés módja",
     "hide_details": "Egyszeri",
     "show_details": "Tételenként",
@@ -170,17 +168,17 @@
       "title": "Szűrés",
       "transactionId": "Tranzakció száma",
       "transactionId.min": "Tranzakció száma 0-nál nagyobb legyen",
-      "name": "Tranzakciónév",
+      "name": "Tranzakció neve",
       "date": "Tranzakció dátuma",
       "date.open-calendar": "Naptár megnyitása",
+      "type": "Tranzakció típusa",
+      "default_type": "Minden típus",
       "submit": "Keresés",
       "clear": "Filterek törlése"
     },
     "chart": {
-      "type": "Diagram tartalma",
-      "summary": "{{type}}: {{count}} tranzakció, összesen {{total}}. Legnagyobb: {{name}}, {{amount}}.",
-      "summary.empty": "{{type}}: ebben az időszakban nincs tranzakció.",
-      "total": "Összesen: {{total}}"
+      "summary": "{{count}} tranzakció ({{incomeCount}} bevétel, {{expenseCount}} kiadás). Legnagyobb: {{name}}, {{amount}}.",
+      "summary.empty": "Ebben az időszakban nincs tranzakció."
     },
     "select_page": "Válassz oldalt"
   },

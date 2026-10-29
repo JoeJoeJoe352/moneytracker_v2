@@ -25,7 +25,7 @@ import com.starbuck.moneytracker.util.TransactionSpecifications;
 
 @Service
 public class TransactionService {
-    private static final int HISTORY_PAGESIZE = 15;
+    public static final int HISTORY_PAGESIZE = 25;
 
     private final TransactionRepository transactionRepo;
     private final TransactionDetailService transactionDetailService;
@@ -200,9 +200,11 @@ public class TransactionService {
     private Specification<Transaction> createSpecification(TransactionFilterDto filter) {
         Specification<Transaction> filterConditions = null;
         if (filter != null) {
-            filterConditions = Specification.where(TransactionSpecifications.hasName(filter.name()))
-                    .and(TransactionSpecifications.hasDate(filter.date())
-                            .and(TransactionSpecifications.hasTransactionId(filter.transactionId())));
+            filterConditions = Specification.allOf(
+                    TransactionSpecifications.hasName(filter.name()),
+                    TransactionSpecifications.hasDate(filter.date()),
+                    TransactionSpecifications.hasTransactionId(filter.transactionId()),
+                    TransactionSpecifications.hasTransactionType(filter.type()));
         }
         return filterConditions;
     }

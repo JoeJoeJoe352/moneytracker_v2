@@ -197,6 +197,20 @@ describe('TransactionsListComponent (Vitest)', () => {
         expect(params.get('name')).toBe('kávé');
     });
 
+    it('should not send an invalid type query param to the backend', async () => {
+        await setup({
+            isHistoryMode: true,
+            needSearchField: true,
+            queryParams: { name: 'kávé', type: 'foo' },
+        });
+
+        const [params] = transactionServiceMock.getTransactionHistory.mock.calls[0] as [
+            URLSearchParams,
+        ];
+        expect(params.get('type')).toBeNull();
+        expect(params.get('name')).toBe('kávé');
+    });
+
     it('should navigate with the entered filter values, replacing (not merging) the query params, when the filter form is submitted', async () => {
         await setup({ isHistoryMode: true, needSearchField: true });
         routerMock.navigate.mockClear();

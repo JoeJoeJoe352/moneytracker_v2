@@ -56,30 +56,30 @@ describe('TransactionFilter (Vitest)', () => {
     });
 
     it('should fill the name input from the default data', async () => {
-        await render({ name: 'tej', date: null, transactionId: null});
+        await render({ name: 'tej', date: null, transactionId: null, type: null });
 
         expect(nameInput().value).toBe('tej');
     });
 
     it('should emit the default name and date when submitted without changes', async () => {
-        await render({ name: 'tej', date: defaultDate, transactionId: 1 });
+        await render({ name: 'tej', date: defaultDate, transactionId: 1, type: null });
 
         submitButton().click();
 
-        expect(submitted).toEqual([{ name: 'tej', date: defaultDate, transactionId: 1 }]);
+        expect(submitted).toEqual([{ name: 'tej', date: defaultDate, transactionId: 1, type: null }]);
     });
 
     it('should emit the trimmed name when submitted', async () => {
-        await render({ name: '', date: null, transactionId: null });
+        await render({ name: '', date: null, transactionId: null, type: null });
 
         typeName('  kenyér  ');
         submitButton().click();
 
-        expect(submitted).toEqual([{ name: 'kenyér', date: null, transactionId: null }]);
+        expect(submitted).toEqual([{ name: 'kenyér', date: null, transactionId: null, type: null }]);
     });
 
     it('should empty the inputs and emit resetForm when the clear button is clicked', async () => {
-        await render({ name: 'tej', date: defaultDate, transactionId: null });
+        await render({ name: 'tej', date: defaultDate, transactionId: null, type: null });
 
         clearButton().click();
 
@@ -87,18 +87,31 @@ describe('TransactionFilter (Vitest)', () => {
         expect(resetCount).toBe(1);
         // nem a kezdőértékekre áll vissza: a szülő is szűrők nélkül tölti újra a listát
         submitButton().click();
-        expect(submitted).toEqual([{ name: '', date: null, transactionId: null }]);
+        expect(submitted).toEqual([{ name: '', date: null, transactionId: null, type: null }]);
     });
 
     it('should disable all buttons while the transaction list is loading', async () => {
-        await render({ name: '', date: null, transactionId: null }, true);
+        await render({ name: '', date: null, transactionId: null, type: null }, true);
 
         expect(submitButton().disabled).toBe(true);
         expect(clearButton().disabled).toBe(true);
     });
 
+    it('should disable the type select only while the transaction list is loading', async () => {
+        await render({ name: '', date: null, transactionId: null, type: null }, true);
+        const typeSelect = (): HTMLElement => fixture.nativeElement.querySelector('#type');
+
+        expect(typeSelect().getAttribute('aria-disabled')).toBe('true');
+
+        fixture.componentRef.setInput('isTransactionListLoading', false);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(typeSelect().getAttribute('aria-disabled')).toBe('false');
+    });
+
     it('should enable all buttons when the transaction list is not loading', async () => {
-        await render({ name: '', date: null, transactionId: null }, false);
+        await render({ name: '', date: null, transactionId: null, type: null }, false);
 
         expect(submitButton().disabled).toBe(false);
         expect(clearButton().disabled).toBe(false);

@@ -81,8 +81,6 @@
     "date.invalid": "Date is invalid!",
     "expense": "Expense",
     "income": "Income",
-    "expenses": "Expenses",
-    "incomes": "Income",
     "detail_state_label": "Recording mode",
     "hide_details": "Single amount",
     "show_details": "Itemized",
@@ -173,14 +171,14 @@
       "name": "Transaction name",
       "date": "Transaction date",
       "date.open-calendar": "Open calendar",
+      "type": "Transaction type",
+      "default_type": "All types",
       "submit": "Search",
       "clear": "Clear filters"
     },
     "chart": {
-      "type": "Chart content",
-      "summary": "{{type}}: {{count}} transactions, {{total}} in total. Largest: {{name}}, {{amount}}.",
-      "summary.empty": "{{type}}: no transactions in this period.",
-      "total": "Total: {{total}}"
+      "summary": "{{count}} transactions ({{incomeCount}} income, {{expenseCount}} expense). Largest: {{name}}, {{amount}}.",
+      "summary.empty": "No transactions in this period."
     },
     "select_page": "Select page"
   },

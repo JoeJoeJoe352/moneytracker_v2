@@ -42,7 +42,13 @@
                 <!-- Tranzakció dátuma -->
                 <mat-form-field appearance="fill" class="filter">
                     <mat-label>{{ 'transaction_page.filter.date' | translate }}</mat-label>
-                    <input id="date" matInput [matDatepicker]="date" formControlName="date" [max]="lastSelectableDay" />
+                    <input
+                        id="date"
+                        matInput
+                        [matDatepicker]="date"
+                        formControlName="date"
+                        [max]="lastSelectableDay"
+                    />
                     <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
                     <mat-datepicker-toggle
                         matIconSuffix
@@ -50,6 +56,23 @@
                         [attr.aria-label]="'transaction_page.filter.date.open-calendar' | translate"
                     />
                     <mat-datepicker #date />
+                </mat-form-field>
+
+                <!-- Tranzakció típusa -->
+                <mat-form-field appearance="fill" class="filter">
+                    <mat-label>{{ 'transaction_page.filter.type' | translate }}</mat-label>
+                    <mat-select id="type" formControlName="type">
+                        <!-- Default, üres érték -->
+                        <mat-option [value]="null">{{
+                            'transaction_page.filter.default_type' | translate
+                        }}</mat-option>
+
+                        @for (type of types; track type.type) {
+                            <mat-option [value]="type.type">{{
+                                type.nameKey | translate
+                            }}</mat-option>
+                        }
+                    </mat-select>
                 </mat-form-field>
             </div>
 

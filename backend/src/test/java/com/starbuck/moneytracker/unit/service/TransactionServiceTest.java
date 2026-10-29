@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.unit.service;
 
+import static com.starbuck.moneytracker.service.TransactionService.HISTORY_PAGESIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -589,7 +590,7 @@ class TransactionServiceTest {
                 new BigDecimal(100),
                 GeneralStatusEnum.ACTIVE,
                 this.defaultWallet);
-        TransactionFilterDto filter = new TransactionFilterDto("teszt", null, null);
+        TransactionFilterDto filter = new TransactionFilterDto("teszt", null, null, null);
 
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(1l), any(HistoryQueryHelper.class)))
@@ -601,7 +602,7 @@ class TransactionServiceTest {
         Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(1l), captor.capture());
 
         assertEquals(List.of(transactionInDB), result.getContent());
-        assertEquals(15, captor.getValue().limit());
+        assertEquals(HISTORY_PAGESIZE, captor.getValue().limit());
         assertEquals(2, captor.getValue().pageNumber());
         assertNotNull(captor.getValue().spec());
     }
@@ -619,7 +620,8 @@ class TransactionServiceTest {
         Mockito.when(transactionRepo.findAllForUser(Mockito.eq(7l), any(HistoryQueryHelper.class)))
                 .thenReturn(pageInDB);
 
-        Page<Transaction> result = transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null), 1);
+        Page<Transaction> result =
+                transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null, null), 1);
 
         Mockito.verify(transactionRepo).findAllForUser(Mockito.eq(7l), any(HistoryQueryHelper.class));
         assertEquals(20, result.getTotalElements());
@@ -648,7 +650,7 @@ class TransactionServiceTest {
      */
     @Test
     void getHistoryPageData_throwsWhenPageNumberIsNegative() {
-        TransactionFilterDto filter = new TransactionFilterDto(null, null, null);
+        TransactionFilterDto filter = new TransactionFilterDto(null, null, null, null);
 
         assertThrows(IllegalArgumentException.class, () -> {
             transactionService.getHistoryPageData(filter, -1);

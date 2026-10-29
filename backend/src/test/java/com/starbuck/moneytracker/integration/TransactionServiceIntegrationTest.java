@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.integration;
 
+import static com.starbuck.moneytracker.service.TransactionService.HISTORY_PAGESIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -550,7 +551,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
         Page<Transaction> result =
-                transactionService.getHistoryPageData(new TransactionFilterDto("groceries", now, null), 0);
+                transactionService.getHistoryPageData(new TransactionFilterDto("groceries", now, null, null), 0);
 
         assertEquals(1, result.getTotalElements());
         assertEquals(matching.getId(), result.getContent().get(0).getId());
@@ -563,7 +564,7 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void getHistoryPageData_pagesAndCountsOnlyCurrentUsersTransactions() {
         var now = LocalDate.now();
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < HISTORY_PAGESIZE + 1; i++) {
             this.persistSimpleTransaction(
                     "own" + i, TransactionTypeEnum.INCOME, new BigDecimal(10), now.minusDays(i), this.wallet);
         }
@@ -575,12 +576,13 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         this.persistSimpleTransaction("foreign", TransactionTypeEnum.INCOME, new BigDecimal(10), now, anotherWallet);
         Mockito.when(currentUser.getUser()).thenReturn(this.user);
 
-        Page<Transaction> result = transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null), 1);
+        Page<Transaction> result =
+                transactionService.getHistoryPageData(new TransactionFilterDto(null, null, null, null), 1);
 
-        assertEquals(16, result.getTotalElements());
+        assertEquals(HISTORY_PAGESIZE + 1, result.getTotalElements());
         assertEquals(2, result.getTotalPages());
         assertEquals(1, result.getContent().size());
-        assertEquals("own15", result.getContent().get(0).getName());
+        assertEquals("own" + HISTORY_PAGESIZE, result.getContent().get(0).getName());
     }
 
     /**
@@ -596,7 +598,27 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         this.persistSimpleTransaction("salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
 
         Page<Transaction> result =
-                transactionService.getHistoryPageData(new TransactionFilterDto(null, now, matching.getId()), 0);
+                transactionService.getHistoryPageData(new TransactionFilterDto(null, now, matching.getId(), null), 0);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(matching.getId(), result.getContent().get(0).getId());
+    }
+
+    /**
+     * History oldalon a beállított típusnak megfelelő tranzakciókat adja vissza
+     */
+    @Test
+    void getHistoryPageData_filtersTransactionsByType() {
+        var now = LocalDate.now();
+
+        Transaction matching = this.persistSimpleTransaction(
+                "salary", TransactionTypeEnum.INCOME, new BigDecimal(1000), now, this.wallet);
+        // Nem egyező tranzakció
+        this.persistSimpleTransaction(
+                "groceries shopping", TransactionTypeEnum.OUTCOME, new BigDecimal(-10), now, this.wallet);
+
+        Page<Transaction> result = transactionService.getHistoryPageData(
+                new TransactionFilterDto(null, null, null, TransactionTypeEnum.INCOME), 0);
 
         assertEquals(1, result.getTotalElements());
         assertEquals(matching.getId(), result.getContent().get(0).getId());
