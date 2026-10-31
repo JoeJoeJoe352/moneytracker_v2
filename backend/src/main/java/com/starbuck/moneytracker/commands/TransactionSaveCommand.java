@@ -19,13 +19,13 @@ public class TransactionSaveCommand {
     private TransactionSpecialTypeEnum specialType;
 
     /**
-     * @param name              Tranzakció neve
-     * @param globalPrice       Tranzakció ára (lehet null, ha detailban lesz)
-     * @param date              Tranzakció ideje
-     * @param type              Tranzakció típusa
-     * @param detailCommands    Tranzakcióhoz tartozó detail-ek (lehet üres)
-     * @param categories        Tranzakcióhoz kategóriái (lehet üres)
-     * @param walletId          Tranzakcióhoz tartozó wallet
+     * @param name           Tranzakció neve
+     * @param globalPrice    Tranzakció ára (lehet null, ha detailban lesz)
+     * @param date           Tranzakció ideje
+     * @param type           Tranzakció típusa
+     * @param detailCommands Tranzakcióhoz tartozó detail-ek (lehet üres)
+     * @param categories     Tranzakcióhoz kategóriái (lehet üres)
+     * @param walletId       Tranzakcióhoz tartozó wallet
      */
     public TransactionSaveCommand(
             String name,
@@ -60,6 +60,10 @@ public class TransactionSaveCommand {
         }
         if (walletId == null) {
             throw new IllegalArgumentException("WalletId cannot be null");
+        }
+
+        if (categories == null) {
+            throw new IllegalArgumentException("CategoryIds cannot be null (use empty List instead)");
         }
 
         var set = new HashSet<Long>(categories);
