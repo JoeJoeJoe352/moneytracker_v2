@@ -30,7 +30,7 @@ import jakarta.persistence.Table;
 
 // soft delete (logikai törlés)
 @SQLDelete(sql = "UPDATE recurring_transaction SET status = 'DELETED' WHERE id = ?")
-// autogenerált sql-ekben csak a nem töröltek jelennek meg (a DISABLED, azaz
+// autogenerált sql-ekben csak a nem töröltek jelennek meg (a STOPPED, azaz
 // szüneteltetett is)
 @SQLRestriction("status <> 'DELETED'")
 @Entity
