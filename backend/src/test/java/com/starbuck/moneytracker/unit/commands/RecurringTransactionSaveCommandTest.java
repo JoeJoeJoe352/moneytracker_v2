@@ -26,7 +26,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -40,7 +41,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -54,7 +56,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -68,7 +71,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -82,7 +86,8 @@ class RecurringTransactionSaveCommandTest {
                         null,
                         TransactionTypeEnum.INCOME,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -96,7 +101,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         null,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -110,7 +116,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -124,7 +131,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.OUTCOME,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -138,7 +146,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         List.of(),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -152,7 +161,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         null,
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -166,7 +176,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         List.of(1L, 1L),
-                        1L));
+                        1L,
+                        false));
     }
 
     @Test
@@ -180,7 +191,8 @@ class RecurringTransactionSaveCommandTest {
                         RecurrenceIntervalEnum.MONTHLY,
                         TransactionTypeEnum.INCOME,
                         List.of(),
-                        null));
+                        null,
+                        false));
     }
 
     @Test
@@ -192,7 +204,8 @@ class RecurringTransactionSaveCommandTest {
                 RecurrenceIntervalEnum.MONTHLY,
                 TransactionTypeEnum.INCOME,
                 List.of(),
-                1L);
+                1L,
+                false);
 
         assertEquals(0, command.getCategoryIds().size());
     }
@@ -208,11 +221,12 @@ class RecurringTransactionSaveCommandTest {
                 RecurrenceIntervalEnum.WEEKLY,
                 TransactionTypeEnum.OUTCOME,
                 List.of(1L, 2L),
-                5L);
+                5L,
+                false);
 
         assertEquals("teszt", command.getName());
         assertEquals(new BigDecimal("-300"), command.getPriceSum());
-        assertEquals(date, command.getStartDate());
+        assertEquals(date, command.getTransactionCreateDate());
         assertEquals(RecurrenceIntervalEnum.WEEKLY, command.getRecurrenceInterval());
         assertEquals(TransactionTypeEnum.OUTCOME, command.getTransactionType());
         assertEquals(List.of(1L, 2L), command.getCategoryIds());

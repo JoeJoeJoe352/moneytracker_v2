@@ -31,4 +31,6 @@ public record RecurringTransactionSaveRequestDto(
 
         @NotNull List<Long> categoryIds,
 
-        @NotNull @Positive Long walletId) {}
+        @NotNull @Positive Long walletId,
+
+        @NotNull boolean isRestart) {}

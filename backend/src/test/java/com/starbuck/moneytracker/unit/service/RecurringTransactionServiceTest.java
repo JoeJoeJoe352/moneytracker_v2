@@ -153,6 +153,8 @@ public class RecurringTransactionServiceTest {
         verify(recurringTransactionRepo, never()).save(any());
     }
 
+    // UPDATE
+
     @Test
     void testUpdateRecurringTransaction() {
         var existing = existing();
@@ -166,7 +168,8 @@ public class RecurringTransactionServiceTest {
                 RecurrenceIntervalEnum.WEEKLY,
                 TransactionTypeEnum.INCOME,
                 List.of(),
-                2L);
+                2L,
+                false);
         service.updateRecurringTransaction(5L, command);
 
         verify(recurringTransactionRepo).save(existing);
@@ -178,36 +181,37 @@ public class RecurringTransactionServiceTest {
     }
 
     /**
-     * Ha a kezdő dátum nem változik, a következő esedékesség marad
+     * Ha a küldött dátum megegyezik a következő esedékességgel, a kezdő dátum
+     * marad (pl. a hónap végi levonások miatt kell az eredeti nap)
      */
     @Test
-    void testUpdateRecurringTransactionKeepsNextOccurrence() {
+    void testUpdateRecurringTransactionKeepsStartDate() {
         var existing = existing();
-        existing.setNextOccurrenceDate(START_DATE.plusMonths(2));
+        existing.setNextOccurrenceDate(START_DATE.plusMonths(1));
         when(walletService.getWalletById(1L)).thenReturn(wallet);
         when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
 
-        service.updateRecurringTransaction(5L, command(START_DATE, List.of(), 1L));
+        service.updateRecurringTransaction(5L, command(START_DATE.plusMonths(1), List.of(), 1L));
 
         assertEquals(START_DATE, existing.getStartDate());
-        assertEquals(START_DATE.plusMonths(2), existing.getNextOccurrenceDate());
+        assertEquals(START_DATE.plusMonths(1), existing.getNextOccurrenceDate());
     }
 
     /**
-     * Ha a kezdő dátum változik, a következő esedékesség az új kezdő dátum lesz
+     * Ha a következő előfordulás dátuma megváltozik, akkor új kezdő dátum lesz
      */
     @Test
-    void testUpdateRecurringTransactionResetsNextOccurrence() {
+    void testUpdateRecurringTransactionResetsStartDate() {
         var existing = existing();
-        existing.setNextOccurrenceDate(START_DATE.plusMonths(2));
+        existing.setNextOccurrenceDate(START_DATE.plusMonths(1));
         when(walletService.getWalletById(1L)).thenReturn(wallet);
         when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
 
-        var newStartDate = START_DATE.plusDays(10);
-        service.updateRecurringTransaction(5L, command(newStartDate, List.of(), 1L));
+        var newNextOccurenceDate = START_DATE.plusDays(10);
+        service.updateRecurringTransaction(5L, command(newNextOccurenceDate, List.of(), 1L));
 
-        assertEquals(newStartDate, existing.getStartDate());
-        assertEquals(newStartDate, existing.getNextOccurrenceDate());
+        assertEquals(newNextOccurenceDate, existing.getStartDate());
+        assertEquals(newNextOccurenceDate, existing.getNextOccurrenceDate());
     }
 
     /**
@@ -229,6 +233,50 @@ public class RecurringTransactionServiceTest {
         order.verify(recurringTransactionCategoryRepo).deleteAll(oldLinks);
         order.verify(recurringTransactionCategoryRepo).flush();
         order.verify(recurringTransactionCategoryRepo, times(2)).save(any(RecurringTransactionCategory.class));
+    }
+
+    @Test
+    void testUpdateRecurringTransactionRestartsStopped() {
+        var existing = existing();
+        existing.setStatus(RecurringTransactionStatusEnum.STOPPED);
+        when(walletService.getWalletById(1L)).thenReturn(wallet);
+        when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
+
+        service.updateRecurringTransaction(5L, command(START_DATE, List.of(), 1L, true));
+
+        assertEquals(RecurringTransactionStatusEnum.ACTIVE, existing.getStatus());
+        verify(recurringTransactionRepo).save(existing);
+    }
+
+    /**
+     * Csak megállított ismétlődő tranzakció indítható újra
+     */
+    @Test
+    void testUpdateRecurringTransactionRestartActive() {
+        var existing = existing();
+        when(walletService.getWalletById(1L)).thenReturn(wallet);
+        when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
+
+        assertThrowsExactly(
+                IllegalArgumentException.class,
+                () -> service.updateRecurringTransaction(5L, command(START_DATE, List.of(), 1L, true)));
+        verify(recurringTransactionRepo, never()).save(any());
+    }
+
+    /**
+     * Restart nélkül a megállított tranzakció szerkeszthető, és megállítva marad
+     */
+    @Test
+    void testUpdateRecurringTransactionStoppedWithoutRestart() {
+        var existing = existing();
+        existing.setStatus(RecurringTransactionStatusEnum.STOPPED);
+        when(walletService.getWalletById(1L)).thenReturn(wallet);
+        when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
+
+        service.updateRecurringTransaction(5L, command(START_DATE, List.of(), 1L));
+
+        assertEquals(RecurringTransactionStatusEnum.STOPPED, existing.getStatus());
+        verify(recurringTransactionRepo).save(existing);
     }
 
     @Test
@@ -296,26 +344,6 @@ public class RecurringTransactionServiceTest {
     }
 
     @Test
-    void testReActivateRecurringTransaction() {
-        var existing = existing();
-        existing.setStatus(RecurringTransactionStatusEnum.STOPPED);
-        when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
-
-        service.reActivateRecurringTransaction(5L);
-
-        assertEquals(RecurringTransactionStatusEnum.ACTIVE, existing.getStatus());
-        verify(recurringTransactionRepo).save(existing);
-    }
-
-    @Test
-    void testReActivateRecurringTransactionNotExisting() {
-        when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.empty());
-
-        assertThrowsExactly(EntityNotFoundException.class, () -> service.reActivateRecurringTransaction(5L));
-        verify(recurringTransactionRepo, never()).save(any());
-    }
-
-    @Test
     void testDeleteRecurringTransaction() {
         var existing = existing();
         when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
@@ -334,6 +362,11 @@ public class RecurringTransactionServiceTest {
     }
 
     private RecurringTransactionSaveCommand command(LocalDate startDate, List<Long> categoryIds, Long walletId) {
+        return command(startDate, categoryIds, walletId, false);
+    }
+
+    private RecurringTransactionSaveCommand command(
+            LocalDate startDate, List<Long> categoryIds, Long walletId, boolean isRestartMode) {
         return new RecurringTransactionSaveCommand(
                 "Netflix",
                 new BigDecimal("-4500"),
@@ -341,7 +374,8 @@ public class RecurringTransactionServiceTest {
                 RecurrenceIntervalEnum.MONTHLY,
                 TransactionTypeEnum.OUTCOME,
                 categoryIds,
-                walletId);
+                walletId,
+                isRestartMode);
     }
 
     private RecurringTransaction existing() {

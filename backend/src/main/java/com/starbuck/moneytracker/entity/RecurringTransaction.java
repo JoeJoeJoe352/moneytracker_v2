@@ -47,10 +47,20 @@ public class RecurringTransaction {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal priceSum;
 
+    /**
+     * Kezdő dátum. Azért fontos megtartani a kiindulási dátumot, hogy pontosan
+     * tudjuk melyik napon kell levonni
+     * Pl.: Május 31.-én van az első levonás. Június viszont csak 30 napos, ezért
+     * ott 30.-án lesz, de júliusban megint 31.-én kell levonni
+     * ezért fontos megtartani az alap dátumot és nem csak +1 hónapot hozzáadni a
+     * legutolsóhoz
+     */
     @Column(nullable = false)
     private LocalDate startDate;
 
-    /** A következő tranzakció létrehozásának dátuma */
+    /**
+     * A következő tranzakció létrehozásának dátuma
+     */
     @Column(nullable = false)
     private LocalDate nextOccurrenceDate;
 

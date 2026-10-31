@@ -49,10 +49,17 @@ public class RecurringTransactionService {
     public RecurringTransaction createRecurringTransaction(RecurringTransactionSaveCommand command) {
         Wallet wallet = walletService.getWalletById(command.getWalletId());
 
+        // TODO start_date az fixen a beállított idő (hogy meglegyen a pontos dátum, pl
+        // 31.-e, következő hónapban csak 30 nap van, akkor 30.-án fog létrejönni a
+        // tranzakció, a dkövetkező hónapban aztán megint 31.-én kellene-án )
+        // Tehát start_date create-nél elmentve, és update, ha változik a
+        // next_occular_date
+        // next_occular_date az, amit kezelünk frontenden (update-kor felülírjuk)
+
         RecurringTransaction recurringTransaction = new RecurringTransaction(
                 command.getName(),
                 command.getPriceSum(),
-                command.getStartDate(),
+                command.getTransactionCreateDate(),
                 command.getRecurrenceInterval(),
                 command.getTransactionType(),
                 wallet);
@@ -63,8 +70,8 @@ public class RecurringTransactionService {
     }
 
     /**
-     * Frissíti a user adott id-jú ismétlődő tranzakcióját. Ha a kezdő dátum
-     * változik, a következő esedékesség is az új kezdő dátumra áll
+     * Frissíti a user adott id-jú ismétlődő tranzakcióját. Ha a dátum
+     * változik, a következő esedékesség és a kezdődátum is az új kezdő dátumra áll
      *
      * @param id
      * @param command
@@ -74,16 +81,26 @@ public class RecurringTransactionService {
         Wallet wallet = walletService.getWalletById(command.getWalletId());
         RecurringTransaction recurringTransaction = this.getRecurringTransactionByIdForActualUser(id);
 
-        if (!recurringTransaction.getStartDate().equals(command.getStartDate())) {
-            recurringTransaction.setNextOccurrenceDate(command.getStartDate());
+        // Ha megváltozott a küldött dátum, akkor újra beállítjuk a kezdődátumot is
+        if (!recurringTransaction.getNextOccurrenceDate().equals(command.getTransactionCreateDate())) {
+            recurringTransaction.setStartDate(command.getTransactionCreateDate());
+        }
+
+        if (command.isRestartMode()) {
+            if (!recurringTransaction.getStatus().equals(RecurringTransactionStatusEnum.STOPPED)) {
+                throw new IllegalArgumentException(
+                        "Tried to restart a deleted or already activated recurring transaction");
+            }
+            recurringTransaction.setStatus(RecurringTransactionStatusEnum.ACTIVE);
         }
 
         recurringTransaction.setName(command.getName());
         recurringTransaction.setPriceSum(command.getPriceSum());
-        recurringTransaction.setStartDate(command.getStartDate());
+        recurringTransaction.setNextOccurrenceDate(command.getTransactionCreateDate());
         recurringTransaction.setRecurrenceInterval(command.getRecurrenceInterval());
         recurringTransaction.setTransactionType(command.getTransactionType());
         recurringTransaction.setWallet(wallet);
+
         recurringTransactionRepo.save(recurringTransaction);
 
         // egyszerűbb törölni a kategória kapcsolatokat, mint kikeresni a meglévőket.
@@ -118,24 +135,13 @@ public class RecurringTransactionService {
     }
 
     /**
-     * Megállítja az ismétlődő tranzakció futását
+     * LEállítja az ismétlődő tranzakciók létrehozását
      *
      * @param id
      */
     public void stopRecurringTransaction(long id) {
         RecurringTransaction recurringTransaction = this.getRecurringTransactionByIdForActualUser(id);
         recurringTransaction.setStatus(RecurringTransactionStatusEnum.STOPPED);
-        this.recurringTransactionRepo.save(recurringTransaction);
-    }
-
-    /**
-     * Újraindítja az ismétlődő tranzakció futását
-     *
-     * @param id
-     */
-    public void reActivateRecurringTransaction(long id) {
-        RecurringTransaction recurringTransaction = this.getRecurringTransactionByIdForActualUser(id);
-        recurringTransaction.setStatus(RecurringTransactionStatusEnum.ACTIVE);
         this.recurringTransactionRepo.save(recurringTransaction);
     }
 

@@ -11,29 +11,32 @@ import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 public class RecurringTransactionSaveCommand {
     private String name;
     private BigDecimal priceSum;
-    private LocalDate startDate;
+    private LocalDate transactionCreateDate;
     private RecurrenceIntervalEnum recurrenceInterval;
     private TransactionTypeEnum transactionType;
     private List<Long> categoryIds;
     private Long walletId;
+    private boolean isRestartMode;
 
     /**
      * @param name                  Ismétlődő tranzakció neve
      * @param priceSum              Az ismétlődő tranzakció összege
-     * @param startDate             Az első tranzakció dátuma
+     * @param transactionCreateDate Az első tranzakció dátuma
      * @param recurrenceInterval    Ismétlődés gyakorisága
      * @param transactionType       Tranzakció típusa
      * @param categoryIds           Kategóriák (lehet üres)
      * @param walletId              Tranzakcióhoz tartozó wallet
+     * @param isRestartMode         Tranzakcióhoz tartozó wallet
      */
     public RecurringTransactionSaveCommand(
             String name,
             BigDecimal priceSum,
-            LocalDate startDate,
+            LocalDate transactionCreateDate,
             RecurrenceIntervalEnum recurrenceInterval,
             TransactionTypeEnum transactionType,
             List<Long> categoryIds,
-            Long walletId) {
+            Long walletId,
+            boolean isRestartMode) {
 
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Recurring transaction name cannot be empty");
@@ -41,7 +44,7 @@ public class RecurringTransactionSaveCommand {
         if (priceSum == null) {
             throw new IllegalArgumentException("Price sum cannot be null");
         }
-        if (startDate == null) {
+        if (transactionCreateDate == null) {
             throw new IllegalArgumentException("Start date cannot be null");
         }
         if (recurrenceInterval == null) {
@@ -63,11 +66,12 @@ public class RecurringTransactionSaveCommand {
 
         this.name = name;
         this.priceSum = priceSum;
-        this.startDate = startDate;
+        this.transactionCreateDate = transactionCreateDate;
         this.recurrenceInterval = recurrenceInterval;
         this.transactionType = transactionType;
         this.categoryIds = categoryIds;
         this.walletId = walletId;
+        this.isRestartMode = isRestartMode;
     }
 
     public String getName() {
@@ -78,8 +82,8 @@ public class RecurringTransactionSaveCommand {
         return priceSum;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public LocalDate getTransactionCreateDate() {
+        return transactionCreateDate;
     }
 
     public RecurrenceIntervalEnum getRecurrenceInterval() {
@@ -96,5 +100,9 @@ public class RecurringTransactionSaveCommand {
 
     public Long getWalletId() {
         return walletId;
+    }
+
+    public boolean isRestartMode() {
+        return isRestartMode;
     }
 }

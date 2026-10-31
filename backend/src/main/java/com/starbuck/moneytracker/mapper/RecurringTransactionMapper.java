@@ -30,7 +30,8 @@ public class RecurringTransactionMapper {
                 request.recurrenceInterval(),
                 request.transactionType(),
                 request.categoryIds(),
-                request.walletId());
+                request.walletId(),
+                request.isRestart());
     }
 
     public RecurringTransactionResponseDto toDto(RecurringTransaction entity) {
