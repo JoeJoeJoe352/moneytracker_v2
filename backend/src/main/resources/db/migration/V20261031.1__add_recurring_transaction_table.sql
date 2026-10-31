@@ -7,7 +7,7 @@ CREATE TABLE
         next_occurrence_date DATE NOT NULL,
         recurrence_interval Enum ('WEEKLY', 'MONTHLY') NOT NULL,
         transaction_type Enum ('INCOME', 'OUTCOME') NOT NULL,
-        status Enum ('ACTIVE', 'DISABLED') NOT NULL DEFAULT 'ACTIVE',
+        status Enum ('ACTIVE', 'STOPPED', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
         wallet_id BIGINT NOT NULL,
         created_at DATETIME (6) DEFAULT NULL,
         updated_at DATETIME (6) DEFAULT NULL,
