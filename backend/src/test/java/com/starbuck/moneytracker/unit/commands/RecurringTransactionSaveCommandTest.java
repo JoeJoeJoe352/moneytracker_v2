@@ -9,17 +9,17 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.starbuck.moneytracker.commands.RecurringTransactionCreateCommand;
+import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
 import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
-class RecurringTransactionCreateCommandTest {
+class RecurringTransactionSaveCommandTest {
 
     @Test
     void nullName_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         null,
                         new BigDecimal("300"),
                         LocalDate.now(),
@@ -33,7 +33,7 @@ class RecurringTransactionCreateCommandTest {
     void blankName_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "   ",
                         new BigDecimal("300"),
                         LocalDate.now(),
@@ -47,7 +47,7 @@ class RecurringTransactionCreateCommandTest {
     void nullPriceSum_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         null,
                         LocalDate.now(),
@@ -61,7 +61,7 @@ class RecurringTransactionCreateCommandTest {
     void nullStartDate_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         new BigDecimal("300"),
                         null,
@@ -75,7 +75,7 @@ class RecurringTransactionCreateCommandTest {
     void nullRecurrenceInterval_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         new BigDecimal("300"),
                         LocalDate.now(),
@@ -89,7 +89,7 @@ class RecurringTransactionCreateCommandTest {
     void nullTransactionType_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         new BigDecimal("300"),
                         LocalDate.now(),
@@ -103,7 +103,7 @@ class RecurringTransactionCreateCommandTest {
     void incomeWithNegativePrice_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         new BigDecimal("-300"),
                         LocalDate.now(),
@@ -117,7 +117,7 @@ class RecurringTransactionCreateCommandTest {
     void outcomeWithPositivePrice_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         new BigDecimal("300"),
                         LocalDate.now(),
@@ -131,7 +131,7 @@ class RecurringTransactionCreateCommandTest {
     void zeroPrice_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         BigDecimal.ZERO,
                         LocalDate.now(),
@@ -145,7 +145,7 @@ class RecurringTransactionCreateCommandTest {
     void nullCategoryIds_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         new BigDecimal("300"),
                         LocalDate.now(),
@@ -159,7 +159,7 @@ class RecurringTransactionCreateCommandTest {
     void duplicatedCategoryIds_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         new BigDecimal("300"),
                         LocalDate.now(),
@@ -173,7 +173,7 @@ class RecurringTransactionCreateCommandTest {
     void nullWalletId_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new RecurringTransactionCreateCommand(
+                () -> new RecurringTransactionSaveCommand(
                         "teszt",
                         new BigDecimal("300"),
                         LocalDate.now(),
@@ -185,7 +185,7 @@ class RecurringTransactionCreateCommandTest {
 
     @Test
     void allowsEmptyCategoryIds() {
-        var command = new RecurringTransactionCreateCommand(
+        var command = new RecurringTransactionSaveCommand(
                 "teszt",
                 new BigDecimal("300"),
                 LocalDate.now(),
@@ -201,7 +201,7 @@ class RecurringTransactionCreateCommandTest {
     void validInput_assignsAllFields() {
         LocalDate date = LocalDate.of(2026, 11, 1);
 
-        var command = new RecurringTransactionCreateCommand(
+        var command = new RecurringTransactionSaveCommand(
                 "teszt",
                 new BigDecimal("-300"),
                 date,

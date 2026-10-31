@@ -8,7 +8,7 @@ import java.util.List;
 import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
-public class RecurringTransactionCreateCommand {
+public class RecurringTransactionSaveCommand {
     private String name;
     private BigDecimal priceSum;
     private LocalDate startDate;
@@ -26,7 +26,7 @@ public class RecurringTransactionCreateCommand {
      * @param categoryIds           Kategóriák (lehet üres)
      * @param walletId              Tranzakcióhoz tartozó wallet
      */
-    public RecurringTransactionCreateCommand(
+    public RecurringTransactionSaveCommand(
             String name,
             BigDecimal priceSum,
             LocalDate startDate,
