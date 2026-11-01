@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +29,7 @@ import com.starbuck.moneytracker.service.WalletService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
+@RequestMapping("/transaction")
 @RestController
 public class TransactionController {
 
@@ -42,7 +44,7 @@ public class TransactionController {
         this.walletService = walletService;
     }
 
-    @PostMapping(path = "/transaction")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createTransaction(@Valid @RequestBody TransactionCreateRequest request) {
         TransactionSaveCommand transaction = transactionMapper.fromTransactionSaveRequest(request);
@@ -56,7 +58,7 @@ public class TransactionController {
      * @param TransactionCreateRequest request
      * @param int                      id
      */
-    @PutMapping(path = "/transaction/{id}")
+    @PutMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void updateTransaction(@Valid @RequestBody TransactionCreateRequest request, @PathVariable Long id) {
         TransactionSaveCommand transaction = transactionMapper.fromTransactionSaveRequest(request);
@@ -69,7 +71,7 @@ public class TransactionController {
      *
      * @return double
      */
-    @GetMapping(path = "/transaction/sum")
+    @GetMapping(path = "/sum")
     public MoneySumResponseDto sumAllMoney() {
         return new MoneySumResponseDto(
                 this.walletService.sumAllMoney(),
@@ -82,7 +84,7 @@ public class TransactionController {
      *
      * @return List<TransactionDto>
      */
-    @GetMapping(path = "/transaction/last")
+    @GetMapping(path = "/last")
     public HistoryResponseDto getLastTransactions() {
         List<Transaction> transactions = this.transactionService.getLastTransactions();
         // Itt nincs lapozás, ezért lapméret nincs beállítva
@@ -95,7 +97,7 @@ public class TransactionController {
      * @param id
      * @return TransactionDto
      */
-    @GetMapping(path = "/transaction/{id}")
+    @GetMapping(path = "/{id}")
     public TransactionEditResponseDto getTransactionById(@PathVariable Long id) {
         return this.transactionMapper.toEditDto(transactionService.getTransactionByIdForActualUser(id));
     }
@@ -106,7 +108,7 @@ public class TransactionController {
      * @param id
      * @return TransactionDto
      */
-    @DeleteMapping(path = "/transaction/{id}")
+    @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteTransactionById(@PathVariable Long id) {
         transactionService.deleteTransaction(id);
@@ -122,7 +124,7 @@ public class TransactionController {
      * @param pageNumber
      * @return
      */
-    @GetMapping(path = "/transaction/history")
+    @GetMapping(path = "/history")
     public HistoryResponseDto listTransactionHistory(
             TransactionFilterDto filter, @RequestParam(defaultValue = "0") @Min(0) int pageNumber) {
         Page<Transaction> transactions = this.transactionService.getHistoryPageData(filter, pageNumber);

@@ -74,6 +74,11 @@ public class Transaction {
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
+    /** Az ismétlődő tranzakció, amiből ez a tranzakció létrejött */
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "recurring_transaction_id", nullable = true)
+    private RecurringTransaction recurringTransaction;
+
     /**
      * Törölt-e a tranzakció
      *
@@ -240,5 +245,13 @@ public class Transaction {
 
     public void setSpecialType(TransactionSpecialTypeEnum specialType) {
         this.specialType = specialType;
+    }
+
+    public RecurringTransaction getRecurringTransaction() {
+        return recurringTransaction;
+    }
+
+    public void setRecurringTransaction(RecurringTransaction recurringTransaction) {
+        this.recurringTransaction = recurringTransaction;
     }
 }
