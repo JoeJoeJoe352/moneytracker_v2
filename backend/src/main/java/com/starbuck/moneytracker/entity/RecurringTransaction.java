@@ -90,6 +90,10 @@ public class RecurringTransaction {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public boolean isStopped() {
+        return this.status.equals(RecurringTransactionStatusEnum.STOPPED);
+    }
+
     public RecurringTransaction() {}
 
     public RecurringTransaction(
@@ -146,6 +150,17 @@ public class RecurringTransaction {
 
     public void setNextOccurrenceDate(LocalDate nextOccurrenceDate) {
         this.nextOccurrenceDate = nextOccurrenceDate;
+    }
+
+    /**
+     * Beállítja az ismétlődő tranzakciók kezdő és a következő dátumát
+     * Dátumváltoztatás vagy reset után kell használni
+     *
+     * @param date
+     */
+    public void setDates(LocalDate date) {
+        this.startDate = date;
+        this.nextOccurrenceDate = date;
     }
 
     public RecurrenceIntervalEnum getRecurrenceInterval() {
