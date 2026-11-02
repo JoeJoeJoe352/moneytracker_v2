@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { WalletDataInterface } from './interfaces';
+import { WalletListDataInterface } from './interfaces';
 import { WalletCardComponent } from './wallet-card-component';
 
 @Component({
@@ -12,7 +12,7 @@ export class WalletsListComponent {
     /**
      * Wallet lista elemei
      */
-    public walletListData = input.required<WalletDataInterface[]>();
+    public walletListData = input.required<WalletListDataInterface[]>();
 
     /**
      * Ha true, a kártyák nem kattinthatók (pl. amíg a lista újratölt)
@@ -22,10 +22,10 @@ export class WalletsListComponent {
     /**
      * Event, hogy user rákattintott valamelyik elemre
      */
-    public walletCardClicked = output<WalletDataInterface>();
+    public walletCardClicked = output<WalletListDataInterface>();
 
     /**
      * Balance sync event, a modal felnyitására
      */
-    public syncRequested = output<WalletDataInterface>();
+    public syncRequested = output<WalletListDataInterface>();
 }
