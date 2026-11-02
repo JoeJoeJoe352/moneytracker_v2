@@ -1,0 +1,72 @@
+<mat-card class="title-card">
+    <mat-card-header>
+        <h1 mat-card-title>{{ 'recurring_transaction_page.title' | translate }}</h1>
+    </mat-card-header>
+</mat-card>
+
+<mat-card>
+    <div class="recurring-list" aria-live="polite" [attr.aria-busy]="isListLoading()">
+        @if (isListLoading()) {
+            <div class="spinner">
+                <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
+            </div>
+        } @else if (recurringTransactionListResource.error()) {
+            <p class="text-center">{{ 'etc.general-error' | translate }}</p>
+        } @else {
+            @for (transaction of recurringTransactionListResource.value(); track transaction.id) {
+                @let isIncome = transaction.transactionType === TransactionTypeEnum.INCOME;
+                <div class="recurring-row">
+                    <div class="icon-badge" [class.income]="isIncome" [class.outcome]="!isIncome">
+                        <mat-icon
+                            aria-hidden="false"
+                            [fontIcon]="isIncome ? 'arrow_upward' : 'arrow_downward'"
+                            [attr.aria-label]="
+                                (isIncome ? 'transaction.income' : 'transaction.expense')
+                                    | translate
+                            "
+                        />
+                    </div>
+
+                    <div class="info">
+                        <div class="price" [class.income]="isIncome" [class.outcome]="!isIncome">
+                            {{ transaction.priceSum | currencyFormat: transaction.wallet.currencyCode }}
+                            <span class="interval">
+                                /
+                                {{
+                                    'recurring_transaction_page.interval.' +
+                                        transaction.recurrenceInterval | translate
+                                }}
+                            </span>
+                        </div>
+                        <div class="base-data">
+                            <div class="name">{{ transaction.name }}</div>
+                            <div class="wallet-name">({{ transaction.wallet.name }})</div>
+                        </div>
+                        @if (transaction.categories.length) {
+                            <div class="categories">{{ categoryNames(transaction) }}</div>
+                        }
+                    </div>
+
+                    <div class="meta">
+                        <div
+                            class="status"
+                            [class.stopped]="
+                                transaction.status !== RecurringTransactionStatusEnum.ACTIVE
+                            "
+                        >
+                            {{ 'recurring_transaction_page.status.' + transaction.status | translate }}
+                        </div>
+                        @if (transaction.status === RecurringTransactionStatusEnum.ACTIVE) {
+                            <div class="date">
+                                {{ 'recurring_transaction_page.next_occurrence' | translate }}:
+                                {{ transaction.nextOccurrenceDate }}
+                            </div>
+                        }
+                    </div>
+                </div>
+            } @empty {
+                <p class="text-center">{{ 'recurring_transaction_page.empty' | translate }}</p>
+            }
+        }
+    </div>
+</mat-card>
