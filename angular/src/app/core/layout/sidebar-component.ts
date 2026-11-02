@@ -50,8 +50,8 @@ export class SidebarComponent {
                 icon: 'account_balance_wallet',
             });
             links.push({
-                url: '/reccuring-transactions',
-                langKey: 'header.reccuring_transactions',
+                url: '/recurring-transactions',
+                langKey: 'header.recurring_transactions',
                 icon: 'autorenew',
             });
         } else {
