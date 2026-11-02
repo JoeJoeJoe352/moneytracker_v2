@@ -45,9 +45,9 @@ export const routes: Routes = [
         canActivate: [authGuard],
     },
     {
-        path: 'reccuring-transactions',
+        path: 'recurring-transactions',
         loadComponent: () =>
-            import('./features/reccuring-transactions/reccuring-transactions-page-component').then((m) => m.ReccuringTransactionsPageComponent),
+            import('./features/recurring-transactions/recurring-transactions-page-component').then((m) => m.RecurringTransactionsPageComponent),
         canActivate: [authGuard],
     },
     {
