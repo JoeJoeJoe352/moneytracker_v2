@@ -24,3 +24,14 @@ export enum TransactionSpecialTypeEnum {
     SYNC = 'SYNC',
     RECURRING = 'RECURRING',
 }
+
+export enum RecurrenceIntervalEnum {
+    WEEKLY = 'WEEKLY',
+    MONTHLY = 'MONTHLY',
+}
+
+export enum RecurringTransactionStatusEnum {
+    ACTIVE = 'ACTIVE',
+    STOPPED = 'STOPPED',
+    DELETED = 'DELETED',
+}
