@@ -107,7 +107,9 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
     }
 
     function rows(): HTMLElement[] {
-        return Array.from(fixture.nativeElement.querySelectorAll('.recurring-row'));
+        return Array.from(
+            fixture.nativeElement.querySelectorAll('app-recurring-transaction-row-component'),
+        );
     }
 
     function text(element: Element | null): string {
@@ -130,50 +132,13 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         expect(rows().length).toBe(0);
     });
 
-    it('should render a row for every recurring transaction', async () => {
+    // A sor tartalmát a recurring-transaction-row-component.spec.ts teszteli
+    it('should render a row for every recurring transaction in order', async () => {
         await setup();
 
         expect(rows().length).toBe(2);
         expect(text(rows()[0]!.querySelector('.name'))).toBe('Albérlet');
-        expect(text(rows()[0]!.querySelector('.wallet-name'))).toBe('(Napi költés)');
-        expect(text(rows()[0]!.querySelector('.categories'))).toBe('Rezsi, Lakás');
-    });
-
-    it('should render an expense with the outcome style, its price and interval', async () => {
-        await setup();
-        const price = rows()[0]!.querySelector('.price')!;
-
-        expect(price.classList.contains('outcome')).toBe(true);
-        expect(price.classList.contains('income')).toBe(false);
-        expect(text(price)).toBe('-150 000 Ft / recurring_transaction.interval.MONTHLY');
-    });
-
-    it('should render an income with the income style', async () => {
-        await setup();
-        const price = rows()[1]!.querySelector('.price')!;
-
-        expect(price.classList.contains('income')).toBe(true);
-        expect(text(price)).toContain('recurring_transaction.interval.WEEKLY');
-    });
-
-    it('should not render the categories line when there are no categories', async () => {
-        await setup();
-
-        expect(rows()[1]!.querySelector('.categories')).toBeNull();
-    });
-
-    it('should show the next occurrence only for an active recurring transaction', async () => {
-        await setup();
-
-        expect(text(rows()[0]!.querySelector('.status'))).toBe(
-            'recurring_transaction.status.ACTIVE',
-        );
-        expect(text(rows()[0]!.querySelector('.date'))).toContain('2026-12-01');
-
-        const stoppedStatus = rows()[1]!.querySelector('.status')!;
-        expect(text(stoppedStatus)).toBe('recurring_transaction.status.STOPPED');
-        expect(stoppedStatus.classList.contains('stopped')).toBe(true);
-        expect(rows()[1]!.querySelector('.date')).toBeNull();
+        expect(text(rows()[1]!.querySelector('.name'))).toBe('Zsebpénz');
     });
 
     it('should show the empty message when there are no recurring transactions', async () => {

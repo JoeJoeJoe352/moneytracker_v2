@@ -2,16 +2,14 @@ import { Component, computed, inject, resource } from '@angular/core';
 import { RecurringTransactionService } from './recurring-transactions-service';
 import { firstValueFrom } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
-import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { TranslatePipe } from '@ngx-translate/core';
-import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { RESOURCE_STATUS_LOADING } from '@shared/constants';
-import { RecurringTransactionStatusEnum, TransactionTypeEnum } from '@shared/enums';
 import { RecurringTransactionResponseInterface } from './interfaces';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { RecurringTransactionModalComponent } from './recurring-transaction-modal';
+import { RecurringTransactionRowComponent } from './recurring-transaction-row-component';
 
 @Component({
     selector: 'app-recurring-transactions-page-component',
@@ -19,19 +17,15 @@ import { RecurringTransactionModalComponent } from './recurring-transaction-moda
     styleUrl: './recurring-transactions-page-component.scss',
     imports: [
         MatCardModule,
-        MatIcon,
         MatProgressSpinner,
         MatButtonModule,
         TranslatePipe,
-        CurrencyFormatPipe,
+        RecurringTransactionRowComponent,
     ],
 })
 export class RecurringTransactionsPageComponent {
     private readonly service = inject(RecurringTransactionService);
     private readonly dialog = inject(MatDialog);
-
-    protected readonly TransactionTypeEnum = TransactionTypeEnum;
-    protected readonly RecurringTransactionStatusEnum = RecurringTransactionStatusEnum;
 
     protected recurringTransactionListResource = resource({
         defaultValue: [],
@@ -46,13 +40,6 @@ export class RecurringTransactionsPageComponent {
     protected isListLoading = computed(() => {
         return this.recurringTransactionListResource.status() === RESOURCE_STATUS_LOADING;
     });
-
-    /**
-     * A rendszeres tranzakció kategóriái vesszővel elválasztva felsorolva
-     */
-    protected categoryNames(transaction: RecurringTransactionResponseInterface): string {
-        return transaction.categories.map((category) => category.name).join(', ');
-    }
 
     /**
      * Létrehozó/szerkesztő modal megnyitása, sikeres mentés után újratölti a listát
