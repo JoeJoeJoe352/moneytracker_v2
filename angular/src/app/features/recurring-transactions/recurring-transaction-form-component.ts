@@ -134,7 +134,7 @@ export class RecurringTransactionFormComponent implements OnChanges {
     /**
      * Szerkesztés történik-e
      */
-    protected readonly isEditMode = computed(() => this.recurringTransaction !== null);
+    protected readonly isEditMode = computed(() => this.recurringTransaction() !== null);
 
     /**
      * Leállított állapotú-e a szerkesztett ismétlődő tranzakció (csak ekkor indítható újra)
