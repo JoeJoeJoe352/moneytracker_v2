@@ -183,7 +183,7 @@
     },
     "select_page": "Seite auswählen"
   },
-  "recurring_transaction_page": {
+  "recurring_transaction": {
     "title": "Meine wiederkehrenden Transaktionen",
     "empty": "Noch keine wiederkehrenden Transaktionen",
     "next_occurrence": "Nächste",
@@ -206,7 +206,13 @@
       },
       "start_date": "Startdatum",
       "next_occurrence_date": "Nächste Fälligkeit",
-      "restart": "Erfolgreich und neu starten"
+      "restart": "Speichern und neu starten",
+      "delete": "Löschen",
+      "save": "Speichern",
+      "stop": "Stoppen",
+      "stop-success": "Wiederkehrende Transaktion gestoppt",
+      "delete_confirm": "Möchtest du diese wiederkehrende Transaktion wirklich löschen? Bereits erstellte Transaktionen bleiben erhalten.",
+      "date_before_today": "Das Datum darf nicht vor dem heutigen Tag liegen!"
     }
   },
   "language": {

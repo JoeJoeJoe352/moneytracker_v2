@@ -1,12 +1,12 @@
 <mat-card class="title-card">
     <mat-card-header>
-        <h1 mat-card-title>{{ 'recurring_transaction_page.title' | translate }}</h1>
+        <h1 mat-card-title>{{ 'recurring_transaction.title' | translate }}</h1>
     </mat-card-header>
 </mat-card>
 
 <div class="actions">
     <button matButton="filled" type="button" (click)="openModal()">
-        + {{ 'recurring_transaction_page.form.create' | translate }}
+        + {{ 'recurring_transaction.form.create' | translate }}
     </button>
 </div>
 
@@ -50,7 +50,7 @@
                             <span class="interval">
                                 /
                                 {{
-                                    'recurring_transaction_page.interval.' +
+                                    'recurring_transaction.interval.' +
                                         transaction.recurrenceInterval | translate
                                 }}
                             </span>
@@ -71,21 +71,18 @@
                                 transaction.status !== RecurringTransactionStatusEnum.ACTIVE
                             "
                         >
-                            {{
-                                'recurring_transaction_page.status.' + transaction.status
-                                    | translate
-                            }}
+                            {{ 'recurring_transaction.status.' + transaction.status | translate }}
                         </div>
                         @if (transaction.status === RecurringTransactionStatusEnum.ACTIVE) {
                             <div class="date">
-                                {{ 'recurring_transaction_page.next_occurrence' | translate }}:
+                                {{ 'recurring_transaction.next_occurrence' | translate }}:
                                 {{ transaction.nextOccurrenceDate }}
                             </div>
                         }
                     </div>
                 </div>
             } @empty {
-                <p class="text-center">{{ 'recurring_transaction_page.empty' | translate }}</p>
+                <p class="text-center">{{ 'recurring_transaction.empty' | translate }}</p>
             }
         }
     </div>

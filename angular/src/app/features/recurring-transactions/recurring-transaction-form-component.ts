@@ -39,6 +39,7 @@ import {
 import { UserDataStore } from '@shared/stores/user-data-store';
 import { WalletDataUtil } from '@shared/utils/wallet-data-util';
 import { TimeHelper } from '@shared/services/time-helper';
+import { notBeforeToday } from './not-before-today-validator';
 
 @Component({
     selector: 'app-recurring-transaction-form-component',
@@ -90,6 +91,22 @@ export class RecurringTransactionFormComponent implements OnChanges {
     public saved = output<RecurringTransactionSaveRequestInterface>();
 
     /**
+     * Törlés gombra kattintott a user
+     */
+    public deleted = output<void>();
+
+    /**
+     * Megállítás gombra kattintott a user
+     */
+    public stopped = output<void>();
+
+    /**
+     * Datepickerben első kiválasztható nap. A form előtt kell létrehozni, mert az alapértelmezett
+     * dátumként használja
+     */
+    protected readonly firstSelectableDay = new Date();
+
+    /**
      * Form. A selectedWalletId előtt kell létrehozni, mert annak a valueChanges-ét figyeli
      */
     protected readonly form = this.createForm();
@@ -113,6 +130,11 @@ export class RecurringTransactionFormComponent implements OnChanges {
             ? this.walletUtil.getCurrencySymbolForCurrencyCode(selectedWallet.currencyCode)
             : '';
     });
+
+    /**
+     * Szerkesztés történik-e
+     */
+    protected readonly isEditMode = computed(() => this.recurringTransaction !== null);
 
     /**
      * Leállított állapotú-e a szerkesztett ismétlődő tranzakció (csak ekkor indítható újra)
@@ -151,11 +173,16 @@ export class RecurringTransactionFormComponent implements OnChanges {
     /**
      * Form elküldésekori műveletek
      */
-    protected onSubmit(): void {
+    protected onSubmit(isRestartMode = false): void {
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;
         }
+
+        if (!this.isStopped() && isRestartMode) {
+            throw new Error('The user tries to restart a non stopped recurrent transaction ');
+        }
+
         const value = this.form.getRawValue();
         // Érvényes formban a kötelező mezők már nem lehetnek null-ok
         const price = value.price!;
@@ -172,7 +199,7 @@ export class RecurringTransactionFormComponent implements OnChanges {
                 : TransactionTypeEnum.OUTCOME,
             categoryIds: value.categories.map((category) => category.item_id),
             walletId: value.walletId,
-            isRestart: this.isStopped() && value.isRestart,
+            isRestart: isRestartMode,
         });
     }
 
@@ -195,7 +222,6 @@ export class RecurringTransactionFormComponent implements OnChanges {
             categories: this.categoryData().filter((category) =>
                 categoryIds.includes(category.item_id),
             ),
-            isRestart: false,
         });
     }
 
@@ -207,13 +233,12 @@ export class RecurringTransactionFormComponent implements OnChanges {
             name: ['', { validators: TRANSACTION_NAME_VALIDATORS }],
             isIncome: [false],
             price: this.fb.control<number | null>(null, { validators: POSITIVE_AMOUNT_VALIDATORS }),
-            date: this.fb.control<Date | null>(new Date(), {
-                validators: TRANSACTION_DATE_VALIDATORS,
+            date: this.fb.control<Date | null>(this.firstSelectableDay, {
+                validators: [...TRANSACTION_DATE_VALIDATORS, notBeforeToday],
             }),
             recurrenceInterval: [RecurrenceIntervalEnum.MONTHLY],
             walletId: [this.userData.getDefaultWallet().id],
             categories: this.fb.nonNullable.control<DropdownInterface[]>([]),
-            isRestart: [false],
         });
     }
 

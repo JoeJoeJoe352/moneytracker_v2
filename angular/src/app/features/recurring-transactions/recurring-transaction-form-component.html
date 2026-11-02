@@ -37,72 +37,6 @@
                     }
                 </mat-select>
             </mat-form-field>
-
-            <!-- Ismétlődés -->
-            <mat-form-field>
-                <mat-label>{{ 'recurring_transaction_page.form.interval' | translate }}</mat-label>
-                <mat-select
-                    id="recurring-transaction-interval"
-                    formControlName="recurrenceInterval"
-                >
-                    @for (interval of recurrenceIntervals; track interval) {
-                        <mat-option [value]="interval">{{
-                            'recurring_transaction_page.form.interval_option.' + interval
-                                | translate
-                        }}</mat-option>
-                    }
-                </mat-select>
-            </mat-form-field>
-        </div>
-
-        <div class="form-row">
-            <!-- Ár -->
-            <mat-form-field>
-                <mat-label>{{ 'transaction.price' | translate }}</mat-label>
-                <input
-                    id="recurring-transaction-price"
-                    matInput
-                    type="number"
-                    formControlName="price"
-                />
-                <span matTextSuffix>{{ selectedWalletsCurrency() }}</span>
-                @if (price.invalid && price.touched) {
-                    @if (price.hasError('required')) {
-                        <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
-                    }
-                    @if (price.hasError('greaterThan')) {
-                        <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
-                    }
-                }
-            </mat-form-field>
-
-            <!-- Dátum -->
-            <mat-form-field>
-                <mat-label>{{
-                    (recurringTransaction()
-                        ? 'recurring_transaction_page.form.next_occurrence_date'
-                        : 'recurring_transaction_page.form.start_date'
-                    ) | translate
-                }}</mat-label>
-                <input
-                    id="recurring-transaction-date"
-                    matInput
-                    [matDatepicker]="datePicker"
-                    formControlName="date"
-                    [placeholder]="'transaction.date.placeholder' | translate"
-                />
-                <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
-                <mat-datepicker-toggle matIconSuffix [for]="datePicker" />
-                <mat-datepicker #datePicker />
-                @if (date.invalid && date.touched) {
-                    @if (date.hasError('required')) {
-                        <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>
-                    }
-                    @if (date.hasError('invalidDate')) {
-                        <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
-                    }
-                }
-            </mat-form-field>
         </div>
 
         <div class="form-row toggler-row">
@@ -129,14 +63,79 @@
             </div>
         </div>
 
-        @if (isStopped()) {
-            <div class="form-row toggler-row">
-                <!-- Újraindítás -->
-                <mat-slide-toggle id="recurring-transaction-restart" formControlName="isRestart">
-                    {{ 'recurring_transaction_page.form.restart' | translate }}
-                </mat-slide-toggle>
-            </div>
-        }
+        <div class="form-row">
+            <!-- Ár -->
+            <mat-form-field>
+                <mat-label>{{ 'transaction.price' | translate }}</mat-label>
+                <input
+                    id="recurring-transaction-price"
+                    matInput
+                    type="number"
+                    formControlName="price"
+                />
+                <span matTextSuffix>{{ selectedWalletsCurrency() }}</span>
+                @if (price.invalid && price.touched) {
+                    @if (price.hasError('required')) {
+                        <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
+                    }
+                    @if (price.hasError('greaterThan')) {
+                        <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
+                    }
+                }
+            </mat-form-field>
+        </div>
+
+        <div class="form-row">
+            <!-- Ismétlődés -->
+            <mat-form-field>
+                <mat-label>{{ 'recurring_transaction.form.interval' | translate }}</mat-label>
+                <mat-select
+                    id="recurring-transaction-interval"
+                    formControlName="recurrenceInterval"
+                >
+                    @for (interval of recurrenceIntervals; track interval) {
+                        <mat-option [value]="interval">{{
+                            'recurring_transaction.form.interval_option.' + interval | translate
+                        }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Dátum -->
+            <mat-form-field>
+                <mat-label>{{
+                    (recurringTransaction()
+                        ? 'recurring_transaction.form.next_occurrence_date'
+                        : 'recurring_transaction.form.start_date'
+                    ) | translate
+                }}</mat-label>
+                <input
+                    id="recurring-transaction-date"
+                    matInput
+                    [matDatepicker]="datePicker"
+                    formControlName="date"
+                    [placeholder]="'transaction.date.placeholder' | translate"
+                    [min]="firstSelectableDay"
+                />
+                <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="datePicker" />
+                <mat-datepicker #datePicker />
+                @if (date.invalid && date.touched) {
+                    @if (date.hasError('required')) {
+                        <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>
+                    }
+                    @if (date.hasError('invalidDate')) {
+                        <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
+                    }
+                    <!-- a [min] miatt a datepicker saját matDatepickerMin hibát is ad -->
+                    @if (date.hasError('beforeToday') || date.hasError('matDatepickerMin')) {
+                        <mat-error>{{
+                            'recurring_transaction.form.date_before_today' | translate
+                        }}</mat-error>
+                    }
+                }
+            </mat-form-field>
+        </div>
 
         <div class="form-row">
             <div class="categories-field">
@@ -150,8 +149,41 @@
         </div>
     </mat-dialog-content>
     <mat-dialog-actions>
+        @if (isEditMode()) {
+            <button
+                mat-flat-button
+                type="button"
+                [disabled]="isFormDisabled()"
+                class="mat-button-danger"
+                (click)="deleted.emit()"
+            >
+                {{ 'recurring_transaction.form.delete' | translate }}
+            </button>
+
+            @if (isStopped()) {
+                <button
+                    mat-flat-button
+                    type="button"
+                    [disabled]="isFormDisabled()"
+                    (click)="onSubmit(true)"
+                    class="mat-button-danger"
+                >
+                    {{ 'recurring_transaction.form.restart' | translate }}
+                </button>
+            } @else {
+                <button
+                    mat-flat-button
+                    type="button"
+                    [disabled]="isFormDisabled()"
+                    (click)="stopped.emit()"
+                >
+                    {{ 'recurring_transaction.form.stop' | translate }}
+                </button>
+            }
+        }
+
         <button mat-flat-button type="submit" [disabled]="isFormDisabled()">
-            {{ 'transaction.save' | translate }}
+            {{ 'recurring_transaction.form.save' | translate }}
         </button>
     </mat-dialog-actions>
 </form>

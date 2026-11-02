@@ -6,9 +6,10 @@ import {
     MatDialogRef,
 } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { _, TranslatePipe } from '@ngx-translate/core';
-import { firstValueFrom, Observable, tap } from 'rxjs';
+import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { filter, firstValueFrom, Observable, switchMap, tap } from 'rxjs';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { NotificationService } from '@shared/services/notification-service';
 import { CategoryService } from '../transaction/category-service';
 import { CategoryResponseInterface } from '../transaction/interfaces';
@@ -46,6 +47,8 @@ export class RecurringTransactionModalComponent {
     private readonly service = inject(RecurringTransactionService);
     private readonly categoryService = inject(CategoryService);
     private readonly notification = inject(NotificationService);
+    private readonly dialog = inject(MatDialog);
+    private readonly translateService = inject(TranslateService);
 
     protected readonly data = inject<RecurringTransactionModalInputInterface>(MAT_DIALOG_DATA);
 
@@ -108,6 +111,59 @@ export class RecurringTransactionModalComponent {
             },
             error: () => this.isSaving.set(false),
         });
+    }
+
+    /**
+     * Leállítja a szerkesztett ismétlődő tranzakciót
+     */
+    protected stop(): void {
+        const id = this.data.recurringTransaction?.id;
+        if (id === undefined) {
+            console.error('Tried to stop a not yet created recurring transaction');
+            return;
+        }
+
+        this.isSaving.set(true);
+        this.service.stopRecurringTransaction(id).subscribe({
+            next: () => {
+                this.isSaving.set(false);
+                this.notification.show(_('recurring_transaction.form.stop-success'));
+                this.dialogRef.close(true);
+            },
+            error: () => this.isSaving.set(false),
+        });
+    }
+
+    /**
+     * Megerősítés után törli a szerkesztett ismétlődő tranzakciót
+     */
+    protected delete(): void {
+        const id = this.data.recurringTransaction?.id;
+        if (id === undefined) {
+            console.error('Tried to delete a not yet created recurring transaction');
+            return;
+        }
+
+        ConfirmDialogComponent.open(this.dialog, {
+            message: this.translateService.instant(
+                _('recurring_transaction.form.delete_confirm'),
+            ) as string,
+            danger: true,
+        })
+            .afterClosed()
+            .pipe(
+                filter((confirmed) => confirmed === true),
+                tap(() => this.isSaving.set(true)),
+                switchMap(() => this.service.deleteRecurringTransaction(id)),
+            )
+            .subscribe({
+                next: () => {
+                    this.isSaving.set(false);
+                    this.notification.show(_('etc.delete-success'));
+                    this.dialogRef.close(true);
+                },
+                error: () => this.isSaving.set(false),
+            });
     }
 
     /**

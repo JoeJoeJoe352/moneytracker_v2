@@ -2,8 +2,8 @@
     <h2 mat-dialog-title>
         {{
             (data.recurringTransaction
-                ? 'recurring_transaction_page.form.update'
-                : 'recurring_transaction_page.form.create'
+                ? 'recurring_transaction.form.update'
+                : 'recurring_transaction.form.create'
             ) | translate
         }}
     </h2>
@@ -25,6 +25,8 @@
             [isCategorySaveInProgress]="isAddingCategoryInProgress()"
             [addCategoryCallback]="saveCategory"
             (saved)="save($event)"
+            (stopped)="stop()"
+            (deleted)="delete()"
         />
     }
 </div>

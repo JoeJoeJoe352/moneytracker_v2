@@ -183,7 +183,7 @@
     },
     "select_page": "Válassz oldalt"
   },
-  "recurring_transaction_page": {
+  "recurring_transaction": {
     "title": "Ismétlődő tranzakcióim",
     "empty": "Nincs még felvett ismétlődő tranzakció",
     "next_occurrence": "Következő",
@@ -206,7 +206,13 @@
       },
       "start_date": "Kezdő dátum",
       "next_occurrence_date": "Következő esedékesség",
-      "restart": "Mentés és újraindítás"
+      "restart": "Mentés és újraindítás",
+      "delete": "Törlés",
+      "save": "Mentés",
+      "stop": "Leállítás",
+      "stop-success": "Az ismétlődő tranzakció leállítva",
+      "delete_confirm": "Biztosan törölni szeretnéd az ismétlődő tranzakciót? A már létrejött tranzakciók megmaradnak.",
+      "date_before_today": "A dátum nem lehet korábbi a mai napnál!"
     }
   },
   "language": {
