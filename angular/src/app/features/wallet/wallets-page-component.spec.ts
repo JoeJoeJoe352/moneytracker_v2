@@ -13,7 +13,7 @@ import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confir
 import { WalletService } from './wallet-service';
 import { WalletSyncFormComponent } from './wallet-sync-form-component';
 import {
-    WalletDataInterface,
+    WalletListDataInterface,
     WalletCreateRequest,
     WalletSyncData,
     WalletSyncFormInputInterface,
@@ -26,13 +26,13 @@ import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
     template: '',
 })
 class StubWalletsListComponent {
-    walletListData = input<WalletDataInterface[]>([]);
+    walletListData = input<WalletListDataInterface[]>([]);
 
     disabled = input(false);
 
-    walletCardClicked = output<WalletDataInterface>();
+    walletCardClicked = output<WalletListDataInterface>();
 
-    syncRequested = output<WalletDataInterface>();
+    syncRequested = output<WalletListDataInterface>();
 }
 
 /**
@@ -51,7 +51,7 @@ class FakeDialogRef<T> {
     }
 }
 
-const sampleWallet: WalletDataInterface = {
+const sampleWallet: WalletListDataInterface = {
     id: 1,
     name: 'Napi költés',
     currencyCode: CurrencyCodesEnum.huf,
@@ -81,7 +81,7 @@ describe('WalletsPageComponent (Vitest)', () => {
     let syncDialogData: WalletSyncFormInputInterface | undefined;
 
     async function setup(
-        listWalletsResult: Observable<WalletDataInterface[]> = of([sampleWallet]),
+        listWalletsResult: Observable<WalletListDataInterface[]> = of([sampleWallet]),
     ) {
         walletServiceMock = {
             listWallets: vi.fn(() => listWalletsResult),
@@ -200,7 +200,7 @@ describe('WalletsPageComponent (Vitest)', () => {
         const stub = getListStub();
         expect(stub.disabled()).toBe(false);
 
-        walletServiceMock.listWallets.mockReturnValue(new Subject<WalletDataInterface[]>());
+        walletServiceMock.listWallets.mockReturnValue(new Subject<WalletListDataInterface[]>());
         component['walletListResource'].reload();
         fixture.detectChanges();
 
@@ -214,7 +214,7 @@ describe('WalletsPageComponent (Vitest)', () => {
         const createButton = fixture.nativeElement.querySelector('button');
         expect(createButton.disabled).toBe(false);
 
-        walletServiceMock.listWallets.mockReturnValue(new Subject<WalletDataInterface[]>());
+        walletServiceMock.listWallets.mockReturnValue(new Subject<WalletListDataInterface[]>());
         component['walletListResource'].reload();
         fixture.detectChanges();
 
