@@ -1,0 +1,30 @@
+<div class="modal-header">
+    <h2 mat-dialog-title>
+        {{
+            (data.recurringTransaction
+                ? 'recurring_transaction_page.form.update'
+                : 'recurring_transaction_page.form.create'
+            ) | translate
+        }}
+    </h2>
+    <app-dialog-close-button />
+</div>
+
+<div aria-live="polite" [attr.aria-busy]="categoriesResource.isLoading()">
+    @if (categoriesResource.isLoading()) {
+        <mat-dialog-content>
+            <div class="text-center">
+                <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
+            </div>
+        </mat-dialog-content>
+    } @else {
+        <app-recurring-transaction-form-component
+            [isFormDisabled]="isSaving()"
+            [categoryList]="categoriesResource.value()"
+            [recurringTransaction]="data.recurringTransaction"
+            [isCategorySaveInProgress]="isAddingCategoryInProgress()"
+            [addCategoryCallback]="saveCategory"
+            (saved)="save($event)"
+        />
+    }
+</div>

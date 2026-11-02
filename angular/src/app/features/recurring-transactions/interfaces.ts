@@ -18,3 +18,20 @@ export interface RecurringTransactionResponseInterface {
     categories: CategoryResponseInterface[];
     wallet: WalletDataInterface;
 }
+
+export interface RecurringTransactionSaveRequestInterface {
+    name: string;
+    priceSum: number;
+    /**
+     * Létrehozáskor a kezdő dátum, módosításkor a következő esedékesség dátuma (Y-m-d)
+     */
+    startDate: string;
+    recurrenceInterval: RecurrenceIntervalEnum;
+    transactionType: TransactionTypeEnum;
+    categoryIds: number[];
+    walletId: number;
+    /**
+     * Leállított ismétlődő tranzakció újraindítása
+     */
+    isRestart: boolean;
+}

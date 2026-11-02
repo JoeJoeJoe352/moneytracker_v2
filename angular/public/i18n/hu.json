@@ -195,6 +195,18 @@
       "ACTIVE": "Aktív",
       "STOPPED": "Leállítva",
       "DELETED": "Törölve"
+    },
+    "form": {
+      "create": "Ismétlődő tranzakció létrehozása",
+      "update": "Ismétlődő tranzakció módosítása",
+      "interval": "Ismétlődés",
+      "interval_option": {
+        "WEEKLY": "Hetente",
+        "MONTHLY": "Havonta"
+      },
+      "start_date": "Kezdő dátum",
+      "next_occurrence_date": "Következő esedékesség",
+      "restart": "Mentés és újraindítás"
     }
   },
   "language": {

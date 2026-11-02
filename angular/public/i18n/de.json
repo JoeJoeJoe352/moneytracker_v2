@@ -195,6 +195,18 @@
       "ACTIVE": "Aktiv",
       "STOPPED": "Gestoppt",
       "DELETED": "Gelöscht"
+    },
+    "form": {
+      "create": "Wiederkehrende Transaktion erstellen",
+      "update": "Wiederkehrende Transaktion bearbeiten",
+      "interval": "Wiederholung",
+      "interval_option": {
+        "WEEKLY": "Wöchentlich",
+        "MONTHLY": "Monatlich"
+      },
+      "start_date": "Startdatum",
+      "next_occurrence_date": "Nächste Fälligkeit",
+      "restart": "Erfolgreich und neu starten"
     }
   },
   "language": {

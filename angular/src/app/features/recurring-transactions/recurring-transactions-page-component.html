@@ -4,6 +4,12 @@
     </mat-card-header>
 </mat-card>
 
+<div class="actions">
+    <button matButton="filled" type="button" (click)="openModal()">
+        + {{ 'recurring_transaction_page.form.create' | translate }}
+    </button>
+</div>
+
 <mat-card>
     <div class="recurring-list" aria-live="polite" [attr.aria-busy]="isListLoading()">
         @if (isListLoading()) {
@@ -15,7 +21,15 @@
         } @else {
             @for (transaction of recurringTransactionListResource.value(); track transaction.id) {
                 @let isIncome = transaction.transactionType === TransactionTypeEnum.INCOME;
-                <div class="recurring-row">
+                <div
+                    class="recurring-row"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="transaction.name"
+                    (click)="openModal(transaction)"
+                    (keydown.enter)="openModal(transaction)"
+                    (keydown.space)="$event.preventDefault(); openModal(transaction)"
+                >
                     <div class="icon-badge" [class.income]="isIncome" [class.outcome]="!isIncome">
                         <mat-icon
                             aria-hidden="false"
@@ -29,7 +43,10 @@
 
                     <div class="info">
                         <div class="price" [class.income]="isIncome" [class.outcome]="!isIncome">
-                            {{ transaction.priceSum | currencyFormat: transaction.wallet.currencyCode }}
+                            {{
+                                transaction.priceSum
+                                    | currencyFormat: transaction.wallet.currencyCode
+                            }}
                             <span class="interval">
                                 /
                                 {{
@@ -54,7 +71,10 @@
                                 transaction.status !== RecurringTransactionStatusEnum.ACTIVE
                             "
                         >
-                            {{ 'recurring_transaction_page.status.' + transaction.status | translate }}
+                            {{
+                                'recurring_transaction_page.status.' + transaction.status
+                                    | translate
+                            }}
                         </div>
                         @if (transaction.status === RecurringTransactionStatusEnum.ACTIVE) {
                             <div class="date">

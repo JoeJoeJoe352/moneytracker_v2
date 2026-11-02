@@ -1,3 +1,9 @@
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
 .recurring-list {
     border-radius: 20px;
     overflow: hidden;
@@ -14,6 +20,11 @@
     align-items: center;
     gap: 16px;
     padding: 16px 20px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--moneytracker-white);
+    }
 
     &:not(:last-child) {
         border-bottom: 1px solid var(--moneytracker-grey);

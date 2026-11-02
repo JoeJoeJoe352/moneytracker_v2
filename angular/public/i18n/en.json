@@ -195,6 +195,18 @@
       "ACTIVE": "Active",
       "STOPPED": "Stopped",
       "DELETED": "Deleted"
+    },
+    "form": {
+      "create": "Create recurring transaction",
+      "update": "Edit recurring transaction",
+      "interval": "Recurrence",
+      "interval_option": {
+        "WEEKLY": "Weekly",
+        "MONTHLY": "Monthly"
+      },
+      "start_date": "Start date",
+      "next_occurrence_date": "Next occurrence",
+      "restart": "Save and restart"
     }
   },
   "language": {

@@ -9,15 +9,26 @@ import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { RESOURCE_STATUS_LOADING } from '@shared/constants';
 import { RecurringTransactionStatusEnum, TransactionTypeEnum } from '@shared/enums';
 import { RecurringTransactionResponseInterface } from './interfaces';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { RecurringTransactionModalComponent } from './recurring-transaction-modal';
 
 @Component({
     selector: 'app-recurring-transactions-page-component',
     templateUrl: './recurring-transactions-page-component.html',
     styleUrl: './recurring-transactions-page-component.scss',
-    imports: [MatCardModule, MatIcon, MatProgressSpinner, TranslatePipe, CurrencyFormatPipe],
+    imports: [
+        MatCardModule,
+        MatIcon,
+        MatProgressSpinner,
+        MatButtonModule,
+        TranslatePipe,
+        CurrencyFormatPipe,
+    ],
 })
 export class RecurringTransactionsPageComponent {
     private readonly service = inject(RecurringTransactionService);
+    private readonly dialog = inject(MatDialog);
 
     protected readonly TransactionTypeEnum = TransactionTypeEnum;
     protected readonly RecurringTransactionStatusEnum = RecurringTransactionStatusEnum;
@@ -41,5 +52,20 @@ export class RecurringTransactionsPageComponent {
      */
     protected categoryNames(transaction: RecurringTransactionResponseInterface): string {
         return transaction.categories.map((category) => category.name).join(', ');
+    }
+
+    /**
+     * Létrehozó/szerkesztő modal megnyitása, sikeres mentés után újratölti a listát
+     *
+     * @param recurringTransaction Szerkesztendő ismétlődő tranzakció, null esetén új létrehozása
+     */
+    protected openModal(recurringTransaction: RecurringTransactionResponseInterface | null = null) {
+        RecurringTransactionModalComponent.open(this.dialog, { recurringTransaction })
+            .afterClosed()
+            .subscribe((saved) => {
+                if (saved) {
+                    this.recurringTransactionListResource.reload();
+                }
+            });
     }
 }
