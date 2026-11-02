@@ -58,7 +58,8 @@
     "menu.open": "Menü",
     "menu.close": "Menü schließen",
     "register": "Registrieren",
-    "login": "Anmelden"
+    "login": "Anmelden",
+    "recurring_transactions": "Wiederkehrende Transaktionen"
   },
   "transaction": {
     "create": "Transaktion erstellen",
@@ -181,6 +182,38 @@
       "summary.empty": "Keine Transaktionen in diesem Zeitraum."
     },
     "select_page": "Seite auswählen"
+  },
+  "recurring_transaction": {
+    "title": "Meine wiederkehrenden Transaktionen",
+    "empty": "Noch keine wiederkehrenden Transaktionen",
+    "next_occurrence": "Nächste",
+    "interval": {
+      "weekly": "Woche",
+      "monthly": "Monat"
+    },
+    "status": {
+      "active": "Aktiv",
+      "stopped": "Gestoppt",
+      "deleted": "Gelöscht"
+    },
+    "form": {
+      "create": "Wiederkehrende Transaktion erstellen",
+      "update": "Wiederkehrende Transaktion bearbeiten",
+      "interval": "Wiederholung",
+      "interval_option": {
+        "weekly": "Wöchentlich",
+        "monthly": "Monatlich"
+      },
+      "start_date": "Startdatum",
+      "next_occurrence_date": "Nächste Fälligkeit",
+      "restart": "Speichern und neu starten",
+      "delete": "Löschen",
+      "save": "Speichern",
+      "stop": "Stoppen",
+      "stop-success": "Wiederkehrende Transaktion gestoppt",
+      "delete_confirm": "Möchtest du diese wiederkehrende Transaktion wirklich löschen? Bereits erstellte Transaktionen bleiben erhalten.",
+      "date_before_today": "Das Datum darf nicht vor dem heutigen Tag liegen!"
+    }
   },
   "language": {
     "title": "Sprache",

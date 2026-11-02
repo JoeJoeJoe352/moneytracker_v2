@@ -2,14 +2,14 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 import { WalletsListComponent } from './wallets-list-component';
-import { WalletDataInterface } from './interfaces';
+import { WalletListDataInterface } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 describe('WalletsListComponent (Vitest)', () => {
     let fixture: ComponentFixture<WalletsListComponent>;
     let component: WalletsListComponent;
 
-    const wallets: WalletDataInterface[] = [
+    const wallets: WalletListDataInterface[] = [
         {
             id: 1,
             name: 'Napi költés',
@@ -51,7 +51,7 @@ describe('WalletsListComponent (Vitest)', () => {
     it('should emit walletCardClicked with the wallet that was clicked, not just the first one', () => {
         fixture.detectChanges();
 
-        let clicked: WalletDataInterface | undefined;
+        let clicked: WalletListDataInterface | undefined;
         component.walletCardClicked.subscribe((wallet) => (clicked = wallet));
 
         const cards = fixture.nativeElement.querySelectorAll('app-wallet-card-component');
@@ -64,7 +64,7 @@ describe('WalletsListComponent (Vitest)', () => {
         fixture.componentRef.setInput('disabled', true);
         fixture.detectChanges();
 
-        let clicked: WalletDataInterface | undefined;
+        let clicked: WalletListDataInterface | undefined;
         component.walletCardClicked.subscribe((wallet) => (clicked = wallet));
 
         fixture.nativeElement.querySelector('app-wallet-card-component .wallet-card').click();
@@ -75,7 +75,7 @@ describe('WalletsListComponent (Vitest)', () => {
     it('should emit syncRequested with the wallet whose sync button was clicked', () => {
         fixture.detectChanges();
 
-        let synced: WalletDataInterface | undefined;
+        let synced: WalletListDataInterface | undefined;
         component.syncRequested.subscribe((wallet) => (synced = wallet));
 
         const cards = fixture.nativeElement.querySelectorAll('app-wallet-card-component');

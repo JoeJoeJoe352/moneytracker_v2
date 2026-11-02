@@ -83,6 +83,17 @@ public class RecurringTransactionController {
     }
 
     /**
+     * Leállítja a user megadott id-jú ismétlődő tranzakcióját
+     *
+     * @param id
+     */
+    @PutMapping(path = "/{id}/stop")
+    @ResponseStatus(HttpStatus.OK)
+    public void stopRecurringTransaction(@PathVariable long id) {
+        recurringTransactionService.stopRecurringTransaction(id);
+    }
+
+    /**
      * Törli (soft delete) a user megadott id-jú ismétlődő tranzakcióját
      *
      * @param id

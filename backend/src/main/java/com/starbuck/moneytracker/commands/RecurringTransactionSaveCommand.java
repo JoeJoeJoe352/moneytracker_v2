@@ -24,9 +24,9 @@ public class RecurringTransactionSaveCommand {
      * @param transactionCreateDate Az első tranzakció dátuma
      * @param recurrenceInterval    Ismétlődés gyakorisága
      * @param transactionType       Tranzakció típusa
-     * @param categoryIds           Kategóriák (lehet üres)
+     * @param categoryIds           Kategóriák (lehet üres tömb)
      * @param walletId              Tranzakcióhoz tartozó wallet
-     * @param isRestartMode         Tranzakcióhoz tartozó wallet
+     * @param isRestartMode         Ismétlődő tranzakciót újraindítjuk-e
      */
     public RecurringTransactionSaveCommand(
             String name,

@@ -2,14 +2,14 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { WalletCardComponent } from './wallet-card-component';
-import { WalletDataInterface } from './interfaces';
+import { WalletListDataInterface } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 describe('WalletCardComponent (Vitest)', () => {
     let fixture: ComponentFixture<WalletCardComponent>;
     let component: WalletCardComponent;
 
-    const wallet: WalletDataInterface = {
+    const wallet: WalletListDataInterface = {
         id: 5,
         name: 'Napi költés',
         currencyCode: CurrencyCodesEnum.huf,

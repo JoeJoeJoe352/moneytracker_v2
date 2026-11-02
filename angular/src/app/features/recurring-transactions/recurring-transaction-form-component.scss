@@ -1,0 +1,25 @@
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    mat-form-field,
+    .toggle-field {
+        flex: 1 1 220px;
+    }
+
+    .categories-field {
+        flex: 2 1 320px;
+    }
+}
+
+.toggle-field-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.toggler-row {
+    margin: 12px 0;
+}

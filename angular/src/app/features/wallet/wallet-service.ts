@@ -2,26 +2,24 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
-    WalletDataInterface,
     WalletCreateRequest,
     WalletUpdateRequest,
     WalletSyncData,
     WalletSyncDataToBackend,
+    WalletListDataInterface,
 } from './interfaces';
-import { TimeHelper } from '@app/shared/services/time-helper';
 
 @Injectable({
     providedIn: 'root',
 })
 export class WalletService {
     private readonly http = inject(HttpClient);
-    private readonly timeHelper = inject(TimeHelper);
 
     /**
      * Visszatér a felhasználó walletjaival
      */
-    listWallets(): Observable<WalletDataInterface[]> {
-        return this.http.get<WalletDataInterface[]>('/api/wallet');
+    listWallets(): Observable<WalletListDataInterface[]> {
+        return this.http.get<WalletListDataInterface[]>('/api/wallet');
     }
 
     /**

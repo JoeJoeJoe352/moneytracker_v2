@@ -1,0 +1,36 @@
+<div class="icon-badge" [class.income]="isIncome()" [class.outcome]="!isIncome()">
+    <mat-icon
+        aria-hidden="false"
+        [fontIcon]="isIncome() ? 'arrow_upward' : 'arrow_downward'"
+        [attr.aria-label]="(isIncome() ? 'transaction.income' : 'transaction.expense') | translate"
+    />
+</div>
+
+<div class="info">
+    <div class="price" [class.income]="isIncome()" [class.outcome]="!isIncome()">
+        {{ transaction().priceSum | currencyFormat: transaction().wallet.currencyCode }}
+        <span class="interval">
+            /
+            {{ intervalTranslateKey() | translate }}
+        </span>
+    </div>
+    <div class="base-data">
+        <div class="name">{{ transaction().name }}</div>
+        <div class="wallet-name">({{ transaction().wallet.name }})</div>
+    </div>
+    @if (transaction().categories.length) {
+        <div class="categories">{{ categoryNames() }}</div>
+    }
+</div>
+
+<div class="meta">
+    <div class="status" [class.stopped]="!isActive()">
+        {{ statusTranslateKey() | translate }}
+    </div>
+    @if (isActive()) {
+        <div class="date">
+            {{ 'recurring_transaction.next_occurrence' | translate }}:
+            {{ transaction().nextOccurrenceDate }}
+        </div>
+    }
+</div>

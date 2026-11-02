@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit, output, Signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { WalletCreateRequest, WalletDataInterface, WalletUpdateRequest } from './interfaces';
+import { WalletCreateRequest, WalletListDataInterface, WalletUpdateRequest } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 import { WalletDataUtil } from '@shared/utils/wallet-data-util';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -13,7 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
 
 export interface WalletFormInputInterface {
-    wallet: WalletDataInterface | null;
+    wallet: WalletListDataInterface | null;
     isFormDisabled: Signal<boolean>;
 }
 
@@ -49,7 +49,7 @@ export class WalletFormComponent implements OnInit {
     /**
      * Ha meg van adva, akkor a form szerkesztő módban nyílik, egyébként létrehozó módban
      */
-    protected wallet: WalletDataInterface | null = null;
+    protected wallet: WalletListDataInterface | null = null;
 
     public deleted = output<number>();
     public saved = output<WalletCreateRequest | WalletUpdateRequest>();
@@ -76,7 +76,7 @@ export class WalletFormComponent implements OnInit {
     /**
      * Meglévő walletet szerkesztünk-e
      */
-    protected isEditMode(): this is { wallet: WalletDataInterface } {
+    protected isEditMode(): this is { wallet: WalletListDataInterface } {
         return this.wallet !== null;
     }
 

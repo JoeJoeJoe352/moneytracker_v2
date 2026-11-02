@@ -6,7 +6,7 @@ import { WalletsListComponent } from './wallets-list-component';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
     WalletCreateRequest,
-    WalletDataInterface,
+    WalletListDataInterface,
     WalletSyncFormInputInterface,
     WalletUpdateRequest,
 } from './interfaces';
@@ -53,7 +53,7 @@ export class WalletsPageComponent {
     /**
      * Megnyitja a wallet létrehozó/szerkesztő modalt. Ha van id, akkor szerkesztés, egyébként létrehozás
      */
-    protected openWalletModal(walletData: WalletDataInterface | null): void {
+    protected openWalletModal(walletData: WalletListDataInterface | null): void {
         const dialogRef = this.dialog.open(WalletFormComponent, {
             restoreFocus: true,
             width: '500px',
@@ -74,7 +74,7 @@ export class WalletsPageComponent {
     /**
      * Megnyitja a balance szinkronizáló modalt
      */
-    protected openSyncModal(walletData: WalletDataInterface): void {
+    protected openSyncModal(walletData: WalletListDataInterface): void {
         // a lista csak a sikeres kérés után tölt újra, ezért a kérés idejére külön tiltjuk a formot
         const isSyncing = signal(false);
 
@@ -114,7 +114,7 @@ export class WalletsPageComponent {
      * Elmenti a wallet adatait (létrehozás vagy módosítás), majd újratölti a listát
      */
     private onWalletSaved(
-        existingWalletData: WalletDataInterface | null,
+        existingWalletData: WalletListDataInterface | null,
         walletDataToSave: WalletCreateRequest | WalletUpdateRequest,
         dialogRef: MatDialogRef<WalletFormComponent>,
     ): void {

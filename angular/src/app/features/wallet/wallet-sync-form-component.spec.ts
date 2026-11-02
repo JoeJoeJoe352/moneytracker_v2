@@ -4,7 +4,11 @@ import { signal, WritableSignal } from '@angular/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WalletSyncFormComponent } from './wallet-sync-form-component';
-import { WalletDataInterface, WalletSyncData, WalletSyncFormInputInterface } from './interfaces';
+import {
+    WalletListDataInterface,
+    WalletSyncData,
+    WalletSyncFormInputInterface,
+} from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 describe('WalletSyncFormComponent (Vitest)', () => {
@@ -12,7 +16,7 @@ describe('WalletSyncFormComponent (Vitest)', () => {
     let component: WalletSyncFormComponent;
     let isLoading: WritableSignal<boolean>;
 
-    const wallet: WalletDataInterface = {
+    const wallet: WalletListDataInterface = {
         id: 7,
         name: 'Napi költés',
         currencyCode: CurrencyCodesEnum.huf,

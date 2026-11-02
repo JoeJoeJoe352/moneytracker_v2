@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, output } from '@angular/core';
-import { WalletDataInterface } from './interfaces';
+import { WalletListDataInterface } from './interfaces';
 import { WalletDataUtil } from '@shared/utils/wallet-data-util';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
@@ -26,9 +26,9 @@ export class WalletCardComponent {
     protected readonly walletDataUtil = inject(WalletDataUtil);
 
     /**
-     * Egy wallet adatai
+     * Egy wallet adatai (listából)
      */
-    public walletData = input.required<WalletDataInterface>();
+    public walletData = input.required<WalletListDataInterface>();
     /**
      * Ha true, a kártya nem kattintható (pl. amíg a lista újratölt)
      */

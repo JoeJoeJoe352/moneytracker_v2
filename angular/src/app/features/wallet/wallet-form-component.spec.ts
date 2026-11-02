@@ -4,14 +4,14 @@ import { signal } from '@angular/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
-import { WalletDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
+import { WalletListDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 
 describe('WalletFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<WalletFormComponent>;
     let component: WalletFormComponent;
 
-    async function setup(wallet: WalletDataInterface | null) {
+    async function setup(wallet: WalletListDataInterface | null) {
         await TestBed.configureTestingModule({
             imports: [WalletFormComponent],
             providers: [
@@ -78,7 +78,7 @@ describe('WalletFormComponent (Vitest)', () => {
     });
 
     describe('edit mode', () => {
-        const existingWallet: WalletDataInterface = {
+        const existingWallet: WalletListDataInterface = {
             id: 9,
             name: 'Fő tárca',
             currencyCode: CurrencyCodesEnum.usd,
@@ -128,7 +128,7 @@ describe('WalletFormComponent (Vitest)', () => {
     });
 
     describe('not deletable', () => {
-        const existingWallet: WalletDataInterface = {
+        const existingWallet: WalletListDataInterface = {
             id: 9,
             name: 'Fő tárca',
             currencyCode: CurrencyCodesEnum.usd,

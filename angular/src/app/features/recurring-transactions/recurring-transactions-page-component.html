@@ -1,0 +1,32 @@
+<mat-card class="title-card">
+    <mat-card-header>
+        <h1 mat-card-title>{{ 'recurring_transaction.title' | translate }}</h1>
+    </mat-card-header>
+</mat-card>
+
+<div class="actions">
+    <button matButton="filled" type="button" (click)="openModal()">
+        + {{ 'recurring_transaction.form.create' | translate }}
+    </button>
+</div>
+
+<mat-card>
+    <div class="recurring-list" aria-live="polite" [attr.aria-busy]="isListLoading()">
+        @if (isListLoading()) {
+            <div class="spinner">
+                <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
+            </div>
+        } @else if (recurringTransactionListResource.error()) {
+            <p class="text-center">{{ 'etc.general-error' | translate }}</p>
+        } @else {
+            @for (transaction of recurringTransactionListResource.value(); track transaction.id) {
+                <app-recurring-transaction-row-component
+                    [transaction]="transaction"
+                    (selected)="openModal(transaction)"
+                />
+            } @empty {
+                <p class="text-center">{{ 'recurring_transaction.empty' | translate }}</p>
+            }
+        }
+    </div>
+</mat-card>

@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
+import com.starbuck.moneytracker.validation.FutureOrPresentInZone;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -22,7 +23,8 @@ public record RecurringTransactionSaveRequestDto(
         @NotNull(message = "priceSum is mandatory") @Digits(integer = 8, fraction = 2)
         BigDecimal priceSum,
 
-        @NotNull(message = "startDate is mandatory") LocalDate startDate,
+        @NotNull(message = "startDate is mandatory") @FutureOrPresentInZone
+        LocalDate startDate,
 
         @NotNull(message = "recurrenceInterval is mandatory")
         RecurrenceIntervalEnum recurrenceInterval,

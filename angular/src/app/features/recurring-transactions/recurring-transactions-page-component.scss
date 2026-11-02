@@ -1,0 +1,16 @@
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.recurring-list {
+    border-radius: 20px;
+    overflow: hidden;
+
+    .spinner {
+        display: flex;
+        justify-content: center;
+        margin: 12px;
+    }
+}
