@@ -17,7 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDialogModule } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { _, TranslatePipe } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import {
     POSITIVE_AMOUNT_VALIDATORS,
@@ -240,6 +240,25 @@ export class RecurringTransactionFormComponent implements OnChanges {
             walletId: [this.userData.getDefaultWallet().id],
             categories: this.fb.nonNullable.control<DropdownInterface[]>([]),
         });
+    }
+
+    /**
+     * Az ismétlődés választó opciójának fordítási kulcsa. Új gyakoriság esetén a
+     * never típus miatt fordítási hibát kapunk, amíg nincs itt lekezelve
+     *
+     * @param intervalOption
+     */
+    protected getIntervalOptionTranslateKey(intervalOption: RecurrenceIntervalEnum) {
+        switch (intervalOption) {
+            case RecurrenceIntervalEnum.MONTHLY:
+                return _('recurring_transaction.form.interval_option.monthly');
+            case RecurrenceIntervalEnum.WEEKLY:
+                return _('recurring_transaction.form.interval_option.weekly');
+            default: {
+                const unknownInterval: never = intervalOption;
+                throw new Error(`Unknown interval: ${String(unknownInterval)}`);
+            }
+        }
     }
 
     // Getterek

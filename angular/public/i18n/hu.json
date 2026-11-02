@@ -188,21 +188,21 @@
     "empty": "Nincs még felvett ismétlődő tranzakció",
     "next_occurrence": "Következő",
     "interval": {
-      "WEEKLY": "hét",
-      "MONTHLY": "hónap"
+      "weekly": "hét",
+      "monthly": "hónap"
     },
     "status": {
-      "ACTIVE": "Aktív",
-      "STOPPED": "Leállítva",
-      "DELETED": "Törölve"
+      "active": "Aktív",
+      "stopped": "Leállítva",
+      "deleted": "Törölve"
     },
     "form": {
       "create": "Ismétlődő tranzakció létrehozása",
       "update": "Ismétlődő tranzakció módosítása",
       "interval": "Ismétlődés",
       "interval_option": {
-        "WEEKLY": "Hetente",
-        "MONTHLY": "Havonta"
+        "weekly": "Hetente",
+        "monthly": "Havonta"
       },
       "start_date": "Kezdő dátum",
       "next_occurrence_date": "Következő esedékesség",

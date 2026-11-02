@@ -188,21 +188,21 @@
     "empty": "No recurring transactions yet",
     "next_occurrence": "Next",
     "interval": {
-      "WEEKLY": "week",
-      "MONTHLY": "month"
+      "weekly": "week",
+      "monthly": "month"
     },
     "status": {
-      "ACTIVE": "Active",
-      "STOPPED": "Stopped",
-      "DELETED": "Deleted"
+      "active": "Active",
+      "stopped": "Stopped",
+      "deleted": "Deleted"
     },
     "form": {
       "create": "Create recurring transaction",
       "update": "Edit recurring transaction",
       "interval": "Recurrence",
       "interval_option": {
-        "WEEKLY": "Weekly",
-        "MONTHLY": "Monthly"
+        "weekly": "Weekly",
+        "monthly": "Monthly"
       },
       "start_date": "Start date",
       "next_occurrence_date": "Next occurrence",

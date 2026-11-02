@@ -1,8 +1,12 @@
 import { Component, computed, input, output } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
-import { TranslatePipe } from '@ngx-translate/core';
+import { _, TranslatePipe } from '@ngx-translate/core';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
-import { RecurringTransactionStatusEnum, TransactionTypeEnum } from '@shared/enums';
+import {
+    RecurrenceIntervalEnum,
+    RecurringTransactionStatusEnum,
+    TransactionTypeEnum,
+} from '@shared/enums';
 import { RecurringTransactionResponseInterface } from './interfaces';
 
 @Component({
@@ -51,5 +55,42 @@ export class RecurringTransactionRowComponent {
         return this.transaction()
             .categories.map((category) => category.name)
             .join(', ');
+    });
+
+    /**
+     * A státusz fordítási kulcsa. Új státusz esetén a never típus miatt fordítási
+     * hibát kapunk, amíg nincs itt lekezelve
+     */
+    protected statusTranslateKey = computed(() => {
+        const status = this.transaction().status;
+        switch (status) {
+            case RecurringTransactionStatusEnum.ACTIVE:
+                return _('recurring_transaction.status.active');
+            case RecurringTransactionStatusEnum.STOPPED:
+                return _('recurring_transaction.status.stopped');
+            case RecurringTransactionStatusEnum.DELETED:
+                return _('recurring_transaction.status.deleted');
+            default: {
+                const unknownStatus: never = status;
+                throw new Error(`Unknown status: ${String(unknownStatus)}`);
+            }
+        }
+    });
+
+    /**
+     * Az ismétlődés gyakoriságának fordítási kulcsa
+     */
+    protected intervalTranslateKey = computed(() => {
+        const interval = this.transaction().recurrenceInterval;
+        switch (interval) {
+            case RecurrenceIntervalEnum.WEEKLY:
+                return _('recurring_transaction.interval.weekly');
+            case RecurrenceIntervalEnum.MONTHLY:
+                return _('recurring_transaction.interval.monthly');
+            default: {
+                const unknownInterval: never = interval;
+                throw new Error(`Unknown interval: ${String(unknownInterval)}`);
+            }
+        }
     });
 }

@@ -95,7 +95,7 @@
                 >
                     @for (interval of recurrenceIntervals; track interval) {
                         <mat-option [value]="interval">{{
-                            'recurring_transaction.form.interval_option.' + interval | translate
+                            getIntervalOptionTranslateKey(interval) | translate
                         }}</mat-option>
                     }
                 </mat-select>

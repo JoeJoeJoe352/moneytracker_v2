@@ -85,7 +85,7 @@ describe('RecurringTransactionRowComponent (Vitest)', () => {
 
         expect(price.classList.contains('outcome')).toBe(true);
         expect(price.classList.contains('income')).toBe(false);
-        expect(text(price)).toBe('-150 000 Ft / recurring_transaction.interval.MONTHLY');
+        expect(text(price)).toBe('-150 000 Ft / recurring_transaction.interval.monthly');
     });
 
     it('should render an income with the income style', () => {
@@ -93,7 +93,7 @@ describe('RecurringTransactionRowComponent (Vitest)', () => {
         const price = host().querySelector('.price')!;
 
         expect(price.classList.contains('income')).toBe(true);
-        expect(text(price)).toContain('recurring_transaction.interval.WEEKLY');
+        expect(text(price)).toContain('recurring_transaction.interval.weekly');
     });
 
     it('should not render the categories line when there are no categories', () => {
@@ -105,7 +105,7 @@ describe('RecurringTransactionRowComponent (Vitest)', () => {
     it('should show the next occurrence for an active recurring transaction', () => {
         setup(rent);
 
-        expect(text(host().querySelector('.status'))).toBe('recurring_transaction.status.ACTIVE');
+        expect(text(host().querySelector('.status'))).toBe('recurring_transaction.status.active');
         expect(host().querySelector('.status')!.classList.contains('stopped')).toBe(false);
         expect(text(host().querySelector('.date'))).toContain('2026-12-01');
     });
@@ -114,9 +114,17 @@ describe('RecurringTransactionRowComponent (Vitest)', () => {
         setup(pocketMoney);
         const status = host().querySelector('.status')!;
 
-        expect(text(status)).toBe('recurring_transaction.status.STOPPED');
+        expect(text(status)).toBe('recurring_transaction.status.stopped');
         expect(status.classList.contains('stopped')).toBe(true);
         expect(host().querySelector('.date')).toBeNull();
+    });
+
+    it('should render the deleted status label', () => {
+        setup({ ...rent, status: RecurringTransactionStatusEnum.DELETED });
+        const status = host().querySelector('.status')!;
+
+        expect(text(status)).toBe('recurring_transaction.status.deleted');
+        expect(status.classList.contains('stopped')).toBe(true);
     });
 
     it('should be focusable as a button labelled with the name', () => {

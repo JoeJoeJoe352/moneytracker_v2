@@ -188,21 +188,21 @@
     "empty": "Noch keine wiederkehrenden Transaktionen",
     "next_occurrence": "Nächste",
     "interval": {
-      "WEEKLY": "Woche",
-      "MONTHLY": "Monat"
+      "weekly": "Woche",
+      "monthly": "Monat"
     },
     "status": {
-      "ACTIVE": "Aktiv",
-      "STOPPED": "Gestoppt",
-      "DELETED": "Gelöscht"
+      "active": "Aktiv",
+      "stopped": "Gestoppt",
+      "deleted": "Gelöscht"
     },
     "form": {
       "create": "Wiederkehrende Transaktion erstellen",
       "update": "Wiederkehrende Transaktion bearbeiten",
       "interval": "Wiederholung",
       "interval_option": {
-        "WEEKLY": "Wöchentlich",
-        "MONTHLY": "Monatlich"
+        "weekly": "Wöchentlich",
+        "monthly": "Monatlich"
       },
       "start_date": "Startdatum",
       "next_occurrence_date": "Nächste Fälligkeit",
