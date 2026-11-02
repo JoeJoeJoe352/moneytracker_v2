@@ -49,6 +49,11 @@ export class SidebarComponent {
                 langKey: 'header.wallets',
                 icon: 'account_balance_wallet',
             });
+            links.push({
+                url: '/reccuring-transactions',
+                langKey: 'header.reccuring_transactions',
+                icon: 'autorenew',
+            });
         } else {
             links.push({ langKey: 'header.login', icon: 'login', action: this.openLoginModal });
             links.push({

@@ -45,6 +45,12 @@ export const routes: Routes = [
         canActivate: [authGuard],
     },
     {
+        path: 'reccuring-transactions',
+        loadComponent: () =>
+            import('./features/reccuring-transactions/reccuring-transactions-page-component').then((m) => m.ReccuringTransactionsPageComponent),
+        canActivate: [authGuard],
+    },
+    {
         path: '**',
         loadComponent: () =>
             import('./features/error/error-page-component').then((m) => m.ErrorPageComponent),
