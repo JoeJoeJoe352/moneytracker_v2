@@ -6,6 +6,13 @@ export interface WalletDataInterface {
     name: string;
     currencyCode: CurrencyCodesEnum;
     type: WalletTypesEnum;
+}
+
+export interface WalletListDataInterface {
+    id: number;
+    name: string;
+    currencyCode: CurrencyCodesEnum;
+    type: WalletTypesEnum;
     lastSyncDate: string;
     // note: ez lehet elavult tranzakció változás esetén.
     // Akkor használható csak biztonsággal, ha előtte valami betölti a garantáltan frisset
@@ -25,7 +32,7 @@ export interface WalletUpdateRequest {
 }
 
 export interface WalletSyncFormInputInterface {
-    wallet: WalletDataInterface;
+    wallet: WalletListDataInterface;
     isLoading: Signal<boolean>;
 }
 
