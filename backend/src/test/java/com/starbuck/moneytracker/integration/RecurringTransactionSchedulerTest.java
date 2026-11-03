@@ -429,7 +429,8 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
                 List.of());
 
         // WHEN
-        // a cron naponta többször fut, a második futás már a következő esedékességet látja
+        // a cron naponta többször fut, a második futás már a következő esedékességet
+        // látja
         scheduler.generateRecurrentTransactions();
         scheduler.generateRecurrentTransactions();
 
@@ -503,6 +504,39 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
                 .map(link -> link.getCategory().getId())
                 .collect(Collectors.toSet());
         assertEquals(Set.of(category1.getId(), category2.getId()), categoryIds);
+    }
+
+    /**
+     * Élesben a scheduler a saját szálán fut, request nélkül, így nincs
+     * bejelentkezett user a SecurityContextben
+     */
+    @Test
+    void testSchedulerWorksWithoutLoggedInUser() {
+        // GIVEN
+        Category category = categoryRepo.save(new Category("előfizetés", this.user, LangEnum.HU));
+        var recurringTransaction = createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of(category.getId()));
+        // nincs bejelentkezett user
+        Mockito.when(currentUser.getUser()).thenReturn(null);
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        List<Transaction> transactions = transactionrepo.findAll();
+        assertEquals(1, transactions.size());
+        assertEquals(wallet.getId(), transactions.getFirst().getWallet().getId());
+        assertEquals(
+                recurringTransaction.getId(),
+                transactions.getFirst().getRecurringTransaction().getId());
+        assertEquals(
+                category.getId(),
+                detailCategoryRepo.findAll().getFirst().getCategory().getId());
     }
 
     private RecurringTransaction createRecurringTransaction(

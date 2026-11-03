@@ -45,7 +45,8 @@ public class RecurringTransactionScheduler {
             TransactionSaveCommand command =
                     transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
                             recurringTransaction, recurringTransaction.getNextOccurrenceDate());
-            transactionService.createTransaction(command);
+            // nincs bejelentkezett user, ezért a jogosultság-ellenőrzés nélküli ágat hívjuk
+            transactionService.createTransactionFromRecurringTransaction(command, recurringTransaction);
 
             LocalDate nextOccurrence = recurringTransaction
                     .getRecurrenceInterval()

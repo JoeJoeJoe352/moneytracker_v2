@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -50,7 +49,6 @@ import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
-import com.starbuck.moneytracker.service.RecurringTransactionService;
 import com.starbuck.moneytracker.service.TransactionDetailService;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
@@ -61,9 +59,6 @@ import com.starbuck.moneytracker.util.TransactionDetailFactory;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
-
-    @Autowired
-    private RecurringTransactionService rtService;
 
     @Mock
     private TransactionRepository transactionRepo;
@@ -108,7 +103,7 @@ class TransactionServiceTest {
         var transactionDetailService = new TransactionDetailService(
                 transactionDetailRepo, categoryRepo, transactionDetailCategoryRepository, currentUser, detailFactory);
         transactionService = new TransactionService(
-                transactionRepo, transactionDetailService, currentUser, walletService, balanceSyncRepo, rtService);
+                transactionRepo, transactionDetailService, currentUser, walletService, balanceSyncRepo);
     }
 
     @BeforeEach

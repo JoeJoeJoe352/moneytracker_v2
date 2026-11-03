@@ -12,9 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
+import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
@@ -33,7 +33,6 @@ public class TransactionService {
     private final CurrentUserUtil currentUser;
     private final WalletService walletService;
     private final BalanceSyncRepository balanceSyncRepo;
-    private final RecurringTransactionService recurringTransactionService;
 
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
@@ -42,40 +41,56 @@ public class TransactionService {
             TransactionDetailService transactionDetailService,
             CurrentUserUtil currentUser,
             WalletService walletService,
-            BalanceSyncRepository balanceSyncRepo,
-            RecurringTransactionService recurringTransactionService) {
+            BalanceSyncRepository balanceSyncRepo) {
         this.transactionRepo = transactionRepo;
         this.transactionDetailService = transactionDetailService;
         this.currentUser = currentUser;
         this.walletService = walletService;
         this.balanceSyncRepo = balanceSyncRepo;
-        this.recurringTransactionService = recurringTransactionService;
     }
 
     /**
-     * Tranzakció létrehozása
+     * Tranzakció létrehozása a bejelentkezett user nevében. A wallet és a
+     * kategóriák id-ját ellenőrzi, hogy a userhez tartoznak-e
      */
     @Transactional
     public Transaction createTransaction(TransactionSaveCommand createCommand) {
         Wallet wallet = walletService.getWalletById(createCommand.getWalletId());
 
-        Transaction transaction = new Transaction(
-                createCommand.getTransactionName(),
-                createCommand.getTransactionDate(),
-                createCommand.getTransactionType(),
-                costCalculator.calculateTransactionCost(createCommand),
-                wallet);
-        transaction.setSpecialType(createCommand.getSpecialType());
-
-        if (createCommand.getSpecialType() == TransactionSpecialTypeEnum.RECURRING) {
-            var recurringTransactionModel = recurringTransactionService.getRecurringTransactionByIdForActualUser(
-                    createCommand.getRecurringTransactionId());
-            transaction.setRecurringTransaction(recurringTransactionModel);
-        }
-        Transaction savedTransactionModel = this.transactionRepo.save(transaction);
+        Transaction savedTransactionModel = this.transactionRepo.save(newTransaction(createCommand, wallet));
 
         transactionDetailService.saveDetails(savedTransactionModel, createCommand);
         return savedTransactionModel;
+    }
+
+    /**
+     * Ismétlődő tranzakcióból generál tranzakciót (scheduler). Nincs bejelentkezett
+     * user, ezért nem ellenőrzi a jogosultságot: a wallet és a kategóriák az ismétlődő
+     * tranzakcióból jönnek, ami már a userhez tartozik
+     *
+     * @param command              a recurring tranzakció adataiból készült parancs
+     * @param recurringTransaction a sablon ismétlődő tranzakció
+     */
+    @Transactional
+    public Transaction createTransactionFromRecurringTransaction(
+            TransactionSaveCommand command, RecurringTransaction recurringTransaction) {
+        Transaction transaction = newTransaction(command, recurringTransaction.getWallet());
+        transaction.setRecurringTransaction(recurringTransaction);
+        Transaction savedTransactionModel = this.transactionRepo.save(transaction);
+
+        transactionDetailService.saveDetailsWithoutOwnershipCheck(savedTransactionModel, command);
+        return savedTransactionModel;
+    }
+
+    private Transaction newTransaction(TransactionSaveCommand command, Wallet wallet) {
+        Transaction transaction = new Transaction(
+                command.getTransactionName(),
+                command.getTransactionDate(),
+                command.getTransactionType(),
+                costCalculator.calculateTransactionCost(command),
+                wallet);
+        transaction.setSpecialType(command.getSpecialType());
+        return transaction;
     }
 
     /**

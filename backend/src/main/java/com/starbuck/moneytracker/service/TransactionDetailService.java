@@ -46,12 +46,30 @@ public class TransactionDetailService {
     }
 
     /**
-     * Feltölti és elmenti a tranzakciós részleteket
+     * Feltölti és elmenti a tranzakciós részleteket. A kategóriákat ellenőrzi,
+     * hogy a bejelentkezett userhez tartoznak-e
      *
      * @param savedTransaction
      * @param createCommand
      */
     public void saveDetails(Transaction savedTransaction, TransactionSaveCommand createCommand) {
+        this.saveDetails(savedTransaction, createCommand, true);
+    }
+
+    /**
+     * Feltölti és elmenti a tranzakciós részleteket a kategóriák ellenőrzése
+     * nélkül. Csak akkor hívható, ha a kategóriák már ellenőrzött forrásból jönnek
+     * (pl. ismétlődő tranzakció), mert nincs bejelentkezett user
+     *
+     * @param savedTransaction
+     * @param createCommand
+     */
+    public void saveDetailsWithoutOwnershipCheck(Transaction savedTransaction, TransactionSaveCommand createCommand) {
+        this.saveDetails(savedTransaction, createCommand, false);
+    }
+
+    private void saveDetails(
+            Transaction savedTransaction, TransactionSaveCommand createCommand, boolean checkCategoryOwnership) {
         List<TransactionDetailSaveCommand> details =
                 detailFactory.resolveDetailCommands(createCommand, savedTransaction);
 
@@ -66,6 +84,9 @@ public class TransactionDetailService {
 
             if (detailCommand.getCategories() != null
                     && !detailCommand.getCategories().isEmpty()) {
+                if (checkCategoryOwnership) {
+                    this.validateCategoriesBelongToUser(detailCommand.getCategories());
+                }
                 this.saveCategoryDetailEntries(detailAfterSave, detailCommand.getCategories());
             }
         }
@@ -89,12 +110,6 @@ public class TransactionDetailService {
      * @param categoryIds
      */
     private void saveCategoryDetailEntries(TransactionDetail savedDetail, List<Long> categoryIds) {
-        var foundCategories =
-                categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
-        boolean isAllCategoryAvailableForUser = foundCategories.size() == categoryIds.size();
-        if (!isAllCategoryAvailableForUser) {
-            throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
-        }
         categoryIds.forEach((id) -> {
             Category categoryDummyObject = new Category();
             categoryDummyObject.setId(id);
@@ -102,5 +117,19 @@ public class TransactionDetailService {
                     new TransactionDetailCategory(categoryDummyObject, savedDetail);
             transactionDetailCategoryRepository.save(detailCategoryModel);
         });
+    }
+
+    /**
+     * @throws IllegalArgumentException, ha van olyan kategória, ami nem a
+     *                                   bejelentkezett useré
+     * @param categoryIds
+     */
+    private void validateCategoriesBelongToUser(List<Long> categoryIds) {
+        var foundCategories =
+                categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
+        boolean isAllCategoryAvailableForUser = foundCategories.size() == categoryIds.size();
+        if (!isAllCategoryAvailableForUser) {
+            throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
+        }
     }
 }
