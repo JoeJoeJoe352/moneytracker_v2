@@ -14,6 +14,7 @@ import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.Wallet;
+import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
@@ -32,6 +33,7 @@ public class TransactionService {
     private final CurrentUserUtil currentUser;
     private final WalletService walletService;
     private final BalanceSyncRepository balanceSyncRepo;
+    private final RecurringTransactionService recurringTransactionService;
 
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
@@ -40,12 +42,14 @@ public class TransactionService {
             TransactionDetailService transactionDetailService,
             CurrentUserUtil currentUser,
             WalletService walletService,
-            BalanceSyncRepository balanceSyncRepo) {
+            BalanceSyncRepository balanceSyncRepo,
+            RecurringTransactionService recurringTransactionService) {
         this.transactionRepo = transactionRepo;
         this.transactionDetailService = transactionDetailService;
         this.currentUser = currentUser;
         this.walletService = walletService;
         this.balanceSyncRepo = balanceSyncRepo;
+        this.recurringTransactionService = recurringTransactionService;
     }
 
     /**
@@ -62,6 +66,12 @@ public class TransactionService {
                 costCalculator.calculateTransactionCost(createCommand),
                 wallet);
         transaction.setSpecialType(createCommand.getSpecialType());
+
+        if (createCommand.getSpecialType() == TransactionSpecialTypeEnum.RECURRING) {
+            var recurringTransactionModel = recurringTransactionService.getRecurringTransactionByIdForActualUser(
+                    createCommand.getRecurringTransactionId());
+            transaction.setRecurringTransaction(recurringTransactionModel);
+        }
         Transaction savedTransactionModel = this.transactionRepo.save(transaction);
 
         transactionDetailService.saveDetails(savedTransactionModel, createCommand);

@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +12,8 @@ import com.starbuck.moneytracker.entity.RecurringTransaction;
 public interface RecurringTransactionRepository extends JpaRepository<RecurringTransaction, Long> {
 
     /**
-     * A user adott id-jú ismétlődő tranzakciója (a töröltek nem, az @SQLRestriction miatt)
+     * A user adott id-jú ismétlődő tranzakciója (a töröltek nem, az @SQLRestriction
+     * miatt)
      *
      * @param id
      * @param userId
@@ -29,4 +31,12 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
     @Query(
             "SELECT r FROM RecurringTransaction r WHERE r.wallet.user.id = ?1 ORDER BY r.nextOccurrenceDate ASC, r.id ASC")
     List<RecurringTransaction> findAllForUser(long userId);
+
+    /**
+     * Összes user, adott napon aktuális ismétlődő tranzakciói
+     * TODO ne listázza, amihez adott napon már van generált tranzakció
+     */
+    @Query(
+            "SELECT r FROM RecurringTransaction r LEFT JOIN FETCH r.categoryLinks WHERE r.nextOccurrenceDate = ?1 ORDER BY r.nextOccurrenceDate ASC, r.id ASC")
+    List<RecurringTransaction> listAllExpiredRecurringTransactions(LocalDate date);
 }

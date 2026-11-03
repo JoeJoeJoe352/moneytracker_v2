@@ -49,7 +49,7 @@ public class TransactionFactoryTest {
                 .thenReturn("Szinkronizálás");
         var date = LocalDate.of(2026, 10, 1);
 
-        var result = transactionFactory.createTransactionEntryFromBalanceChange(
+        var result = transactionFactory.createTransactionCommandFromBalanceChange(
                 wallet, new BigDecimal("50.00"), new BigDecimal("60.00"), date);
 
         assertEquals("Szinkronizálás: wallet", result.getTransactionName());
@@ -66,7 +66,7 @@ public class TransactionFactoryTest {
     void testCreateIncomeWhenUserBalanceIsHigher() {
         when(messageSource.getMessage(eq("synchronizeTransactionNamePrefix"), any(), any(Locale.class)))
                 .thenReturn("Szinkronizálás");
-        var result = transactionFactory.createTransactionEntryFromBalanceChange(
+        var result = transactionFactory.createTransactionCommandFromBalanceChange(
                 wallet, new BigDecimal("100.00"), new BigDecimal("60.00"), LocalDate.of(2026, 10, 1));
 
         assertEquals(TransactionTypeEnum.INCOME, result.getTransactionType());
@@ -76,7 +76,7 @@ public class TransactionFactoryTest {
     @Test
     void testCreateWithEqualBalancesThrows() {
         assertThrowsExactly(IllegalArgumentException.class, () -> {
-            transactionFactory.createTransactionEntryFromBalanceChange(
+            transactionFactory.createTransactionCommandFromBalanceChange(
                     wallet, new BigDecimal("60.00"), new BigDecimal("60.00"), LocalDate.of(2026, 10, 1));
         });
     }
@@ -84,7 +84,7 @@ public class TransactionFactoryTest {
     @Test
     void testCreateWithMissingBalanceFromUserThrows() {
         assertThrowsExactly(IllegalArgumentException.class, () -> {
-            transactionFactory.createTransactionEntryFromBalanceChange(
+            transactionFactory.createTransactionCommandFromBalanceChange(
                     wallet, null, new BigDecimal("60.00"), LocalDate.of(2026, 10, 1));
         });
     }
@@ -92,7 +92,7 @@ public class TransactionFactoryTest {
     @Test
     void testCreateWithMissingDateThrows() {
         assertThrowsExactly(IllegalArgumentException.class, () -> {
-            transactionFactory.createTransactionEntryFromBalanceChange(
+            transactionFactory.createTransactionCommandFromBalanceChange(
                     wallet, new BigDecimal("50.00"), new BigDecimal("60.00"), null);
         });
     }

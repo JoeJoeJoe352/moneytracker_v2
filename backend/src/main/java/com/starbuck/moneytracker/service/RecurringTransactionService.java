@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -127,7 +128,7 @@ public class RecurringTransactionService {
     }
 
     /**
-     * LEállítja az ismétlődő tranzakciók létrehozását
+     * Leállítja az ismétlődő tranzakciók létrehozását
      *
      * @param id
      */
@@ -169,5 +170,15 @@ public class RecurringTransactionService {
         for (Category category : foundCategories) {
             recurringTransactionCategoryRepo.save(new RecurringTransactionCategory(recurringTransaction, category));
         }
+    }
+
+    /**
+     * Listázza adott napon aktuális ismétlődő tranzakciókat
+     *
+     * @param date
+     * @return
+     */
+    public List<RecurringTransaction> listRecurringTransactionsForDay(LocalDate date) {
+        return this.recurringTransactionRepo.listAllExpiredRecurringTransactions(date);
     }
 }
