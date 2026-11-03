@@ -34,9 +34,8 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
 
     /**
      * Összes user, adott napon aktuális ismétlődő tranzakciói
-     * TODO ne listázza, amihez adott napon már van generált tranzakció
      */
     @Query(
-            "SELECT r FROM RecurringTransaction r LEFT JOIN FETCH r.categoryLinks WHERE r.nextOccurrenceDate = ?1 ORDER BY r.nextOccurrenceDate ASC, r.id ASC")
+            "SELECT r FROM RecurringTransaction r LEFT JOIN FETCH r.categoryLinks WHERE r.nextOccurrenceDate <= ?1 AND r.status = 'ACTIVE' ORDER BY r.nextOccurrenceDate ASC, r.id ASC")
     List<RecurringTransaction> listAllExpiredRecurringTransactions(LocalDate date);
 }

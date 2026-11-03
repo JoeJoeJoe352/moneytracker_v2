@@ -41,14 +41,16 @@ public class RecurringTransactionScheduler {
                 this.recurringTransactionService.listRecurringTransactionsForDay(actualDate);
 
         for (RecurringTransaction recurringTransaction : recurringTransactions) {
+            // az esedékesség napjára jön létre, akkor is, ha a scheduler csak később futott le
             TransactionSaveCommand command =
                     transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
-                            recurringTransaction, LocalDate.now(clock));
+                            recurringTransaction, recurringTransaction.getNextOccurrenceDate());
             transactionService.createTransaction(command);
 
             LocalDate nextOccurrence = recurringTransaction
                     .getRecurrenceInterval()
-                    .calculateNextOccurrence(recurringTransaction.getStartDate(), actualDate);
+                    .calculateNextOccurrence(
+                            recurringTransaction.getStartDate(), recurringTransaction.getNextOccurrenceDate());
             recurringTransaction.setNextOccurrenceDate(nextOccurrence);
             recurringTransactionRepository.save(recurringTransaction);
         }

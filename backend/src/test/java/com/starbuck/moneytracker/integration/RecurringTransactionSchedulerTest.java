@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -262,5 +264,255 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
         RecurringTransaction recurringTransaction = recurringTransactions.getFirst();
         assertEquals(LocalDate.of(2026, 03, 31), recurringTransaction.getNextOccurrenceDate());
         assertEquals(LocalDate.of(2026, 01, 31), recurringTransaction.getStartDate());
+    }
+
+    @Test
+    void testWeeklyRecurringTransactionMovesOneWeek() {
+        // GIVEN
+        createRecurringTransaction(
+                "Edzés",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.WEEKLY,
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-5000"),
+                List.of());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        assertEquals(1, transactionrepo.count());
+        assertEquals(
+                LocalDate.of(2026, 11, 7),
+                recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
+    }
+
+    @Test
+    void testIncomeRecurringTransactionKeepsType() {
+        // GIVEN
+        createRecurringTransaction(
+                "Fizetés",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.INCOME,
+                new BigDecimal("500000"),
+                List.of());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        Transaction transaction = transactionrepo.findAll().getFirst();
+        assertEquals(TransactionTypeEnum.INCOME, transaction.getTransactionType());
+        assertEquals(0, new BigDecimal("500000").compareTo(transaction.getPriceSum()));
+    }
+
+    @Test
+    void testNotDueRecurringTransactionIsSkipped() {
+        // GIVEN
+        // holnap esedékes
+        createRecurringTransaction(
+                "Spotify",
+                LocalDate.of(2026, 11, 1),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        assertEquals(0, transactionrepo.count());
+        assertEquals(
+                LocalDate.of(2026, 11, 1),
+                recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
+    }
+
+    @Test
+    void testMissedRecurringTransactionIsGeneratedLater() {
+        // GIVEN
+        // tegnap lett volna esedékes, de nem futott le a scheduler
+        createRecurringTransaction(
+                "Spotify",
+                LocalDate.of(2026, 10, 30),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        List<Transaction> transactions = transactionrepo.findAll();
+        assertEquals(1, transactions.size());
+        // az esedékesség napjára jön létre, nem a futás napjára
+        assertEquals(LocalDate.of(2026, 10, 30), transactions.getFirst().getTransactionDate());
+        // a kezdő nap (30.) alapján számol tovább
+        assertEquals(
+                LocalDate.of(2026, 11, 30),
+                recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
+    }
+
+    @Test
+    void testMissedWeeklyRecurringTransactionKeepsItsWeekday() {
+        // GIVEN
+        // pénteken lett volna esedékes, a scheduler csak szombaton fut le
+        createRecurringTransaction(
+                "Edzés",
+                LocalDate.of(2026, 10, 30),
+                RecurrenceIntervalEnum.WEEKLY,
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-5000"),
+                List.of());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        assertEquals(
+                LocalDate.of(2026, 10, 30), transactionrepo.findAll().getFirst().getTransactionDate());
+        // a következő is pénteken lesz, nem szombaton
+        assertEquals(
+                LocalDate.of(2026, 11, 6),
+                recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
+    }
+
+    @Test
+    void testOnlyDueRecurringTransactionsAreGenerated() {
+        // GIVEN
+        createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+        createRecurringTransaction(
+                "Netflix",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.WEEKLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.ONE.negate(),
+                List.of());
+        var notDue = createRecurringTransaction(
+                "Edzés",
+                LocalDate.of(2026, 11, 1),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-5000"),
+                List.of());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        Set<String> names =
+                transactionrepo.findAll().stream().map(Transaction::getName).collect(Collectors.toSet());
+        assertEquals(Set.of("Spotify", "Netflix"), names);
+
+        assertEquals(
+                LocalDate.of(2026, 11, 1),
+                recurringTransactionRepo.findById(notDue.getId()).orElseThrow().getNextOccurrenceDate());
+    }
+
+    @Test
+    void testRunningTwiceOnTheSameDayDoesNotDuplicate() {
+        // GIVEN
+        createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+
+        // WHEN
+        // a cron naponta többször fut, a második futás már a következő esedékességet látja
+        scheduler.generateRecurrentTransactions();
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        assertEquals(1, transactionrepo.count());
+        assertEquals(
+                LocalDate.of(2026, 11, 30),
+                recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
+    }
+
+    @Test
+    void testStoppedRecurringTransactionIsSkipped() {
+        // GIVEN
+        var recurringTransaction = createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+        service.stopRecurringTransaction(recurringTransaction.getId());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        assertEquals(0, transactionrepo.count());
+        assertEquals(
+                LocalDate.now(fixedClock),
+                recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
+    }
+
+    @Test
+    void testDeletedRecurringTransactionIsSkipped() {
+        // GIVEN
+        var recurringTransaction = createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+        service.deleteRecurringTransaction(recurringTransaction.getId());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        assertEquals(0, transactionrepo.count());
+    }
+
+    @Test
+    void testMultipleCategoriesAreLinkedToTheDetail() {
+        // GIVEN
+        Category category1 = categoryRepo.save(new Category("előfizetés", this.user, LangEnum.HU));
+        Category category2 = categoryRepo.save(new Category("szórakozás", this.user, LangEnum.HU));
+        createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of(category1.getId(), category2.getId()));
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        assertEquals(1, transactionDetailRepo.count());
+        Set<Long> categoryIds = detailCategoryRepo.findAll().stream()
+                .map(link -> link.getCategory().getId())
+                .collect(Collectors.toSet());
+        assertEquals(Set.of(category1.getId(), category2.getId()), categoryIds);
+    }
+
+    private RecurringTransaction createRecurringTransaction(
+            String name,
+            LocalDate date,
+            RecurrenceIntervalEnum interval,
+            TransactionTypeEnum type,
+            BigDecimal price,
+            List<Long> categoryIds) {
+        return service.createRecurringTransaction(new RecurringTransactionSaveCommand(
+                name, price, date, interval, type, categoryIds, wallet.getId(), false));
     }
 }
