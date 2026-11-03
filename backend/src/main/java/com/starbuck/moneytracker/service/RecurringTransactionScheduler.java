@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
@@ -33,7 +34,7 @@ public class RecurringTransactionScheduler {
         this.transactionFactory = transactionFactory;
     }
 
-    // @Scheduled(cron = "0 */30 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void generateRecurrentTransactions() {
         LocalDate actualDate = LocalDate.now(clock);
 
@@ -41,7 +42,8 @@ public class RecurringTransactionScheduler {
                 this.recurringTransactionService.listRecurringTransactionsForDay(actualDate);
 
         for (RecurringTransaction recurringTransaction : recurringTransactions) {
-            // az esedékesség napjára jön létre, akkor is, ha a scheduler csak később futott le
+            // az esedékesség napjára jön létre, akkor is, ha a scheduler csak később futott
+            // le
             TransactionSaveCommand command =
                     transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
                             recurringTransaction, recurringTransaction.getNextOccurrenceDate());
