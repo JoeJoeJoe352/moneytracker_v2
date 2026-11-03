@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
@@ -17,6 +18,7 @@ import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.TransactionFactory;
 
 @Service
 public class RecurringTransactionService {
@@ -26,18 +28,24 @@ public class RecurringTransactionService {
     private final CategoryRepository categoryRepo;
     private final WalletService walletService;
     private final CurrentUserUtil currentUser;
+    private final TransactionService transactionService;
+    private final TransactionFactory transactionFactory;
 
     public RecurringTransactionService(
             RecurringTransactionRepository recurringTransactionRepo,
             RecurringTransactionCategoryRepository recurringTransactionCategoryRepo,
             CategoryRepository categoryRepo,
             WalletService walletService,
-            CurrentUserUtil currentUser) {
+            CurrentUserUtil currentUser,
+            TransactionService transactionService,
+            TransactionFactory transactionFactory) {
         this.recurringTransactionRepo = recurringTransactionRepo;
         this.recurringTransactionCategoryRepo = recurringTransactionCategoryRepo;
         this.categoryRepo = categoryRepo;
         this.walletService = walletService;
         this.currentUser = currentUser;
+        this.transactionService = transactionService;
+        this.transactionFactory = transactionFactory;
     }
 
     /**
@@ -102,6 +110,36 @@ public class RecurringTransactionService {
         recurringTransactionCategoryRepo.deleteAll(recurringTransaction.getCategoryLinks());
         recurringTransactionCategoryRepo.flush();
         this.saveCategoryLinks(recurringTransaction, command.getCategoryIds());
+    }
+
+    /**
+     * Felveszi a tranzakciót a a recurrentTranzakció bejegyzés mintájára
+     * Az esedékesség napjára jön létre, akkor is, ha a scheduler csak később futott
+     *
+     * @param recurringTransaction
+     */
+    @Transactional
+    public void generateTransactionFromTemplate(RecurringTransaction recurringTransaction) {
+        TransactionSaveCommand command = transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                recurringTransaction, recurringTransaction.getNextOccurrenceDate());
+        // nincs bejelentkezett user, ezért a jogosultság-ellenőrzés nélküli ágat hívjuk
+        transactionService.createTransactionFromRecurringTransaction(command, recurringTransaction);
+
+        this.updateNextOccurrence(recurringTransaction);
+    }
+
+    /**
+     * Frissíti a következő előfordulási idejét az ismétlődő tranzakciónak
+     *
+     * @param recurringTransaction
+     */
+    public void updateNextOccurrence(RecurringTransaction recurringTransaction) {
+        LocalDate nextOccurrence = recurringTransaction
+                .getRecurrenceInterval()
+                .calculateNextOccurrence(
+                        recurringTransaction.getStartDate(), recurringTransaction.getNextOccurrenceDate());
+        recurringTransaction.setNextOccurrenceDate(nextOccurrence);
+        recurringTransactionRepo.save(recurringTransaction);
     }
 
     /**

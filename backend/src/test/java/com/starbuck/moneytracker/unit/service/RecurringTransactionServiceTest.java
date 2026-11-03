@@ -42,8 +42,10 @@ import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
 import com.starbuck.moneytracker.service.RecurringTransactionService;
+import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
+import com.starbuck.moneytracker.util.TransactionFactory;
 
 @ExtendWith(MockitoExtension.class)
 public class RecurringTransactionServiceTest {
@@ -65,6 +67,12 @@ public class RecurringTransactionServiceTest {
     @Mock
     private CurrentUserUtil currentUser;
 
+    @Mock
+    private TransactionService transactionService;
+
+    @Mock
+    private TransactionFactory transactionFactory;
+
     private RecurringTransactionService service;
 
     private final User user = new User(1L, "name", "password", "email");
@@ -76,7 +84,13 @@ public class RecurringTransactionServiceTest {
     @BeforeEach
     void setUp() {
         service = new RecurringTransactionService(
-                recurringTransactionRepo, recurringTransactionCategoryRepo, categoryRepo, walletService, currentUser);
+                recurringTransactionRepo,
+                recurringTransactionCategoryRepo,
+                categoryRepo,
+                walletService,
+                currentUser,
+                transactionService,
+                transactionFactory);
         // nem minden ág kérdezi le a usert (pl. kategória nélküli létrehozás)
         lenient().when(currentUser.getUser()).thenReturn(user);
     }

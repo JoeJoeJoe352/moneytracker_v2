@@ -49,11 +49,9 @@ import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.RecurringTransactionScheduler;
 import com.starbuck.moneytracker.service.RecurringTransactionService;
-import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
-import com.starbuck.moneytracker.util.TransactionFactory;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -87,12 +85,6 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
     private UserService userService;
 
     @Autowired
-    private TransactionService transactionService;
-
-    @Autowired
-    private TransactionFactory transactionFactory;
-
-    @Autowired
     private TransactionRepository transactionrepo;
 
     @Autowired
@@ -120,8 +112,7 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
         // Minden teszt előtt beállítjuk ezt, mert van olyan teszt, ami felülírja
         fixedClock = Clock.fixed(Instant.parse("2026-10-31T00:00:00Z"), ZoneOffset.UTC);
 
-        scheduler = new RecurringTransactionScheduler(
-                transactionService, service, fixedClock, recurringTransactionRepo, transactionFactory);
+        scheduler = new RecurringTransactionScheduler(service, fixedClock);
     }
 
     /**
@@ -232,8 +223,7 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
         // GIVEN
         fixedClock = Clock.fixed(Instant.parse("2026-02-28T00:00:00Z"), ZoneOffset.UTC);
 
-        scheduler = new RecurringTransactionScheduler(
-                transactionService, service, fixedClock, recurringTransactionRepo, transactionFactory);
+        scheduler = new RecurringTransactionScheduler(service, fixedClock);
 
         RecurringTransactionSaveCommand command = new RecurringTransactionSaveCommand(
                 "Spotify",
