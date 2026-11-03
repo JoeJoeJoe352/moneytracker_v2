@@ -207,11 +207,11 @@ public class RecurringTransactionServiceTest {
         when(walletService.getWalletById(1L)).thenReturn(wallet);
         when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
 
-        var newNextOccurenceDate = START_DATE.plusDays(10);
-        service.updateRecurringTransaction(5L, command(newNextOccurenceDate, List.of(), 1L));
+        var newNextOccurrenceDate = START_DATE.plusDays(10);
+        service.updateRecurringTransaction(5L, command(newNextOccurrenceDate, List.of(), 1L));
 
-        assertEquals(newNextOccurenceDate, existing.getStartDate());
-        assertEquals(newNextOccurenceDate, existing.getNextOccurrenceDate());
+        assertEquals(newNextOccurrenceDate, existing.getStartDate());
+        assertEquals(newNextOccurrenceDate, existing.getNextOccurrenceDate());
     }
 
     /**

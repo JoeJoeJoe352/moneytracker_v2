@@ -18,9 +18,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 
+import com.starbuck.moneytracker.entity.Category;
+import com.starbuck.moneytracker.entity.RecurringTransaction;
+import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enums.LangEnum;
+import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
@@ -95,5 +100,59 @@ public class TransactionFactoryTest {
             transactionFactory.createTransactionCommandFromBalanceChange(
                     wallet, new BigDecimal("50.00"), new BigDecimal("60.00"), null);
         });
+    }
+
+    @Test
+    void testCreateFromRecurringTransactionCopiesTemplateData() {
+        var recurringTransaction = recurringTransaction(TransactionTypeEnum.OUTCOME, new BigDecimal("-10.00"));
+        var category1 = new Category(3L, "előfizetés", user, LangEnum.HU);
+        var category2 = new Category(4L, "szórakozás", user, LangEnum.HU);
+        recurringTransaction.setCategoryLinks(List.of(
+                new RecurringTransactionCategory(recurringTransaction, category1),
+                new RecurringTransactionCategory(recurringTransaction, category2)));
+        // a tranzakció dátuma a kapott dátum, nem a recurring kezdő dátuma
+        var date = LocalDate.of(2026, 11, 30);
+
+        var result =
+                transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(recurringTransaction, date);
+
+        assertEquals("Spotify", result.getTransactionName());
+        assertEquals(new BigDecimal("-10.00"), result.getGlobalPrice());
+        assertEquals(date, result.getTransactionDate());
+        assertEquals(TransactionTypeEnum.OUTCOME, result.getTransactionType());
+        assertEquals(TransactionSpecialTypeEnum.RECURRING, result.getSpecialType());
+        assertEquals(5L, result.getRecurringTransactionId());
+        assertEquals(1L, result.getWalletId());
+        assertEquals(List.of(), result.getDetailCommands());
+        assertEquals(List.of(3L, 4L), result.getCategories());
+    }
+
+    @Test
+    void testCreateFromRecurringTransactionWithoutCategories() {
+        // nem állítunk be kategória kapcsolatot, az alapértelmezett üres lista marad
+        var recurringTransaction = recurringTransaction(TransactionTypeEnum.OUTCOME, new BigDecimal("-10.00"));
+
+        var result = transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                recurringTransaction, LocalDate.of(2026, 11, 30));
+
+        assertEquals(List.of(), result.getCategories());
+    }
+
+    @Test
+    void testCreateFromRecurringIncomeTransactionKeepsType() {
+        var recurringTransaction = recurringTransaction(TransactionTypeEnum.INCOME, new BigDecimal("500.00"));
+
+        var result = transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                recurringTransaction, LocalDate.of(2026, 11, 30));
+
+        assertEquals(TransactionTypeEnum.INCOME, result.getTransactionType());
+        assertEquals(new BigDecimal("500.00"), result.getGlobalPrice());
+    }
+
+    private RecurringTransaction recurringTransaction(TransactionTypeEnum type, BigDecimal priceSum) {
+        var recurringTransaction = new RecurringTransaction(
+                "Spotify", priceSum, LocalDate.of(2026, 10, 31), RecurrenceIntervalEnum.MONTHLY, type, wallet);
+        recurringTransaction.setId(5L);
+        return recurringTransaction;
     }
 }

@@ -35,10 +35,10 @@ public class RecurringTransactionScheduler {
 
     // @Scheduled(cron = "0 */30 * * * *")
     public void generateRecurrentTransactions() {
-        LocalDate date = LocalDate.now(clock);
+        LocalDate actualDate = LocalDate.now(clock);
 
         List<RecurringTransaction> recurringTransactions =
-                this.recurringTransactionService.listRecurringTransactionsForDay(date);
+                this.recurringTransactionService.listRecurringTransactionsForDay(actualDate);
 
         for (RecurringTransaction recurringTransaction : recurringTransactions) {
             TransactionSaveCommand command =
@@ -46,9 +46,10 @@ public class RecurringTransactionScheduler {
                             recurringTransaction, LocalDate.now(clock));
             transactionService.createTransaction(command);
 
-            LocalDate nextOccurence =
-                    recurringTransaction.getRecurrenceInterval().calculateNextOccurence(date);
-            recurringTransaction.setNextOccurrenceDate(nextOccurence);
+            LocalDate nextOccurrence = recurringTransaction
+                    .getRecurrenceInterval()
+                    .calculateNextOccurrence(recurringTransaction.getStartDate(), actualDate);
+            recurringTransaction.setNextOccurrenceDate(nextOccurrence);
             recurringTransactionRepository.save(recurringTransaction);
         }
     }
