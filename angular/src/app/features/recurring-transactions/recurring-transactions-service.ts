@@ -18,6 +18,15 @@ export class RecurringTransactionService {
     }
 
     /**
+     * Visszatér a felhasználó megadott id-jú ismétlődő tranzakciójával
+     */
+    getRecurringTransactionById(id: number): Observable<RecurringTransactionResponseInterface> {
+        return this.http.get<RecurringTransactionResponseInterface>(
+            `/api/recurring-transaction/${id}`,
+        );
+    }
+
+    /**
      * Ismétlődő tranzakció létrehozása
      */
     createRecurringTransaction(data: RecurringTransactionSaveRequestInterface): Observable<void> {

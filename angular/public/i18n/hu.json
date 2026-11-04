@@ -188,6 +188,7 @@
   "recurring_transaction": {
     "title": "Ismétlődő tranzakcióim",
     "empty": "Nincs még felvett ismétlődő tranzakció",
+    "not_found": "A keresett ismétlődő tranzakció nem található!",
     "next_occurrence": "Következő",
     "interval": {
       "weekly": "hét",

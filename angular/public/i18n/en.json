@@ -188,6 +188,7 @@
   "recurring_transaction": {
     "title": "My recurring transactions",
     "empty": "No recurring transactions yet",
+    "not_found": "The requested recurring transaction was not found!",
     "next_occurrence": "Next",
     "interval": {
       "weekly": "week",

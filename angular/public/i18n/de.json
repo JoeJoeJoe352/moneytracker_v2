@@ -188,6 +188,7 @@
   "recurring_transaction": {
     "title": "Meine wiederkehrenden Transaktionen",
     "empty": "Noch keine wiederkehrenden Transaktionen",
+    "not_found": "Die gesuchte wiederkehrende Transaktion wurde nicht gefunden!",
     "next_occurrence": "Nächste",
     "interval": {
       "weekly": "Woche",

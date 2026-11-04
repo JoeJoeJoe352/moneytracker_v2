@@ -41,6 +41,7 @@ const sampleTransactions: TransactionListElementData[] = [
         transactionDate: '2024-01-10',
         isComplexTransaction: false,
         transactionDetails: [],
+        specialType: null,
         wallet: {
             id: 1,
             name: 'Napi költés',
