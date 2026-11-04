@@ -97,7 +97,7 @@ export class WalletFormComponent implements OnInit {
     /**
      * A wallet ismétlődő tranzakciói. Létrehozáskor üres
      */
-    protected recurringTransactions = computed(() => this.data.wallet?.recurringTransactions ?? []);
+    protected readonly recurringTransactions = this.data.wallet?.recurringTransactions ?? [];
 
     /**
      * Az ismétlődő tranzakciók oldalára navigál, ahol a kiválasztott modalja nyílik fel.

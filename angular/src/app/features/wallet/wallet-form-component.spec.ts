@@ -1,17 +1,28 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
 import { WalletListDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
-import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
+import {
+    CurrencyCodesEnum,
+    RecurrenceIntervalEnum,
+    RecurringTransactionStatusEnum,
+    TransactionTypeEnum,
+    WalletTypesEnum,
+} from '@shared/enums';
+import { RecurringTransactionResponseInterface } from '../recurring-transactions/interfaces';
 
 describe('WalletFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<WalletFormComponent>;
     let component: WalletFormComponent;
+    let routerMock: { navigate: ReturnType<typeof vi.fn> };
 
     async function setup(wallet: WalletListDataInterface | null) {
+        routerMock = { navigate: vi.fn(() => Promise.resolve(true)) };
+
         await TestBed.configureTestingModule({
             imports: [WalletFormComponent],
             providers: [
@@ -20,6 +31,7 @@ describe('WalletFormComponent (Vitest)', () => {
                     provide: MAT_DIALOG_DATA,
                     useValue: { wallet, isFormDisabled: signal(false) } as WalletFormInputInterface,
                 },
+                { provide: Router, useValue: routerMock },
             ],
         }).compileComponents();
 
@@ -46,6 +58,10 @@ describe('WalletFormComponent (Vitest)', () => {
 
         it('should not render a delete button', () => {
             expect(fixture.nativeElement.querySelector('.mat-button-danger')).toBeNull();
+        });
+
+        it('should not render the recurring transactions section', () => {
+            expect(fixture.nativeElement.querySelector('.recurring-transactions')).toBeNull();
         });
 
         it('should not emit "saved" and should mark controls touched when submitting an invalid form', () => {
@@ -144,6 +160,79 @@ describe('WalletFormComponent (Vitest)', () => {
         it('Must not show the delete button', () => {
             const deleteButton = fixture.nativeElement.querySelector('.mat-button-danger');
             expect(deleteButton).toBeFalsy();
+        });
+    });
+
+    describe('recurring transactions', () => {
+        const walletData = {
+            id: 9,
+            name: 'Fő tárca',
+            currencyCode: CurrencyCodesEnum.huf,
+            type: WalletTypesEnum.default,
+        };
+        const rent: RecurringTransactionResponseInterface = {
+            id: 5,
+            name: 'Albérlet',
+            priceSum: -150000,
+            startDate: '2026-01-01',
+            nextOccurrenceDate: '2026-12-01',
+            recurrenceInterval: RecurrenceIntervalEnum.MONTHLY,
+            transactionType: TransactionTypeEnum.OUTCOME,
+            status: RecurringTransactionStatusEnum.ACTIVE,
+            categories: [],
+            wallet: walletData,
+        };
+        const pocketMoney: RecurringTransactionResponseInterface = {
+            ...rent,
+            id: 6,
+            name: 'Zsebpénz',
+            priceSum: 5000,
+            transactionType: TransactionTypeEnum.INCOME,
+        };
+
+        function walletWith(
+            recurringTransactions: RecurringTransactionResponseInterface[],
+        ): WalletListDataInterface {
+            return {
+                ...walletData,
+                sum: 0,
+                lastSyncDate: '2026-09-15',
+                deletable: true,
+                recurringTransactions,
+            };
+        }
+
+        function rows(): HTMLElement[] {
+            return Array.from(
+                fixture.nativeElement.querySelectorAll('app-recurring-transaction-row-component'),
+            );
+        }
+
+        it('should list the recurring transactions of the wallet in order, without the wallet name', async () => {
+            await setup(walletWith([rent, pocketMoney]));
+
+            expect(
+                fixture.nativeElement.querySelector('.recurring-transactions h3').textContent,
+            ).toContain('wallet.recurring_transactions');
+            expect(rows().map((row) => row.querySelector('.name')?.textContent?.trim())).toEqual([
+                'Albérlet',
+                'Zsebpénz',
+            ]);
+            expect(fixture.nativeElement.querySelector('.wallet-name')).toBeNull();
+        });
+
+        it('should navigate to the recurring transaction when its row is selected', async () => {
+            await setup(walletWith([rent, pocketMoney]));
+
+            rows()[1]!.click();
+
+            expect(routerMock.navigate).toHaveBeenCalledWith(['/recurring-transactions', 6]);
+        });
+
+        it('should not render the section when the wallet has no recurring transactions', async () => {
+            await setup(walletWith([]));
+
+            expect(fixture.nativeElement.querySelector('.recurring-transactions')).toBeNull();
         });
     });
 });

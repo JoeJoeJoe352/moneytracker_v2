@@ -41,21 +41,33 @@ describe('WalletCardComponent (Vitest)', () => {
     it('should render the wallet name and currency amount with the currency symbol as a suffix', () => {
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('.wallet-name').textContent.replace(/\s+/g, ' ').trim()).toBe(
-            'Napi költés',
-        );
-        expect(fixture.nativeElement.querySelector('.wallet-balance-amount').textContent.replace(/\s+/g, ' ').trim()).toBe(
-            '550 Ft',
-        );
+        expect(
+            fixture.nativeElement
+                .querySelector('.wallet-name')
+                .textContent.replace(/\s+/g, ' ')
+                .trim(),
+        ).toBe('Napi költés');
+        expect(
+            fixture.nativeElement
+                .querySelector('.wallet-balance-amount')
+                .textContent.replace(/\s+/g, ' ')
+                .trim(),
+        ).toBe('550 Ft');
     });
 
     it('should render the euro symbol for an EUR wallet', () => {
-        fixture.componentRef.setInput('walletData', { ...wallet, currencyCode: CurrencyCodesEnum.eur });
+        fixture.componentRef.setInput('walletData', {
+            ...wallet,
+            currencyCode: CurrencyCodesEnum.eur,
+        });
         fixture.detectChanges();
 
-        expect(fixture.nativeElement.querySelector('.wallet-balance-amount').textContent.replace(/\s+/g, ' ').trim()).toBe(
-            '550 €',
-        );
+        expect(
+            fixture.nativeElement
+                .querySelector('.wallet-balance-amount')
+                .textContent.replace(/\s+/g, ' ')
+                .trim(),
+        ).toBe('550 €');
     });
 
     it('should emit cardClicked when clicked', () => {

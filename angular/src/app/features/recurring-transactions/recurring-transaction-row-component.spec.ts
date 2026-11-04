@@ -79,6 +79,15 @@ describe('RecurringTransactionRowComponent (Vitest)', () => {
         expect(text(host().querySelector('.categories'))).toBe('Rezsi, Lakás');
     });
 
+    it('should hide the wallet name when showWalletName is false', () => {
+        setup(rent);
+        fixture.componentRef.setInput('showWalletName', false);
+        fixture.detectChanges();
+
+        expect(host().querySelector('.wallet-name')).toBeNull();
+        expect(text(host().querySelector('.name'))).toBe('Albérlet');
+    });
+
     it('should render an expense with the outcome style, its price and interval', () => {
         setup(rent);
         const price = host().querySelector('.price')!;

@@ -120,6 +120,7 @@
     "update": "Tárca módosítása",
     "delete": "Tárca törlése",
     "delete.confirm": "Biztosan törölni szeretnéd ezt a tárcát?",
+    "recurring_transactions": "A tárca ismétlődő tranzakciói",
     "name": "Tárca neve",
     "name.required": "A tárca nevének megadása kötelező!",
     "name.minlength": "A tárca nevének legalább 3 karakter hosszúnak kell lennie!",

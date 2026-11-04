@@ -59,13 +59,13 @@
             {{ getDescriptionTranslateKeyForWalletType() | translate }}
         </div>
 
-        @if (recurringTransactions().length) {
+        @if (recurringTransactions.length) {
             <section class="recurring-transactions" aria-labelledby="wallet-recurring-title">
                 <h3 id="wallet-recurring-title">
                     {{ 'wallet.recurring_transactions' | translate }}
                 </h3>
                 <div class="recurring-list">
-                    @for (transaction of recurringTransactions(); track transaction.id) {
+                    @for (transaction of recurringTransactions; track transaction.id) {
                         <app-recurring-transaction-row-component
                             [transaction]="transaction"
                             [showWalletName]="false"
