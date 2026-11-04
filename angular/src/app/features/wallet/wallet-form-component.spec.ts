@@ -1,9 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideTranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
 import { WalletListDataInterface, WalletCreateRequest, WalletUpdateRequest } from './interfaces';
 import {
@@ -18,11 +17,8 @@ import { RecurringTransactionResponseInterface } from '../recurring-transactions
 describe('WalletFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<WalletFormComponent>;
     let component: WalletFormComponent;
-    let routerMock: { navigate: ReturnType<typeof vi.fn> };
 
     async function setup(wallet: WalletListDataInterface | null) {
-        routerMock = { navigate: vi.fn(() => Promise.resolve(true)) };
-
         await TestBed.configureTestingModule({
             imports: [WalletFormComponent],
             providers: [
@@ -31,7 +27,6 @@ describe('WalletFormComponent (Vitest)', () => {
                     provide: MAT_DIALOG_DATA,
                     useValue: { wallet, isFormDisabled: signal(false) } as WalletFormInputInterface,
                 },
-                { provide: Router, useValue: routerMock },
             ],
         }).compileComponents();
 
@@ -221,12 +216,14 @@ describe('WalletFormComponent (Vitest)', () => {
             expect(fixture.nativeElement.querySelector('.wallet-name')).toBeNull();
         });
 
-        it('should navigate to the recurring transaction when its row is selected', async () => {
+        it('should emit the id of the recurring transaction when its row is selected', async () => {
             await setup(walletWith([rent, pocketMoney]));
+            const selectedIds: number[] = [];
+            component.recurringTransactionSelected.subscribe((id) => selectedIds.push(id));
 
             rows()[1]!.click();
 
-            expect(routerMock.navigate).toHaveBeenCalledWith(['/recurring-transactions', 6]);
+            expect(selectedIds).toEqual([6]);
         });
 
         it('should not render the section when the wallet has no recurring transactions', async () => {

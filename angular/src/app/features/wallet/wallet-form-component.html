@@ -69,7 +69,7 @@
                         <app-recurring-transaction-row-component
                             [transaction]="transaction"
                             [showWalletName]="false"
-                            (selected)="openRecurringTransaction(transaction.id)"
+                            (selected)="recurringTransactionSelected.emit(transaction.id)"
                         />
                     }
                 </div>

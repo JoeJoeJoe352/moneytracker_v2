@@ -11,7 +11,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
-import { Router } from '@angular/router';
 import { RecurringTransactionRowComponent } from '../recurring-transactions/recurring-transaction-row-component';
 
 export interface WalletFormInputInterface {
@@ -43,7 +42,6 @@ const WALLET_TYPE_TO_DESCRIPTION: Record<WalletTypesEnum, string> = {
 })
 export class WalletFormComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
-    private readonly router = inject(Router);
     protected readonly walletDataUtil = inject(WalletDataUtil);
     protected readonly currencyOptions = Object.values(CurrencyCodesEnum);
     protected readonly walletTypeOptions = Object.values(WalletTypesEnum);
@@ -57,6 +55,10 @@ export class WalletFormComponent implements OnInit {
 
     public deleted = output<number>();
     public saved = output<WalletCreateRequest | WalletUpdateRequest>();
+    /**
+     * A listában kiválasztott ismétlődő tranzakció id-ja
+     */
+    public recurringTransactionSelected = output<number>();
 
     protected walletForm = this.fb.nonNullable.group({
         name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
@@ -98,14 +100,6 @@ export class WalletFormComponent implements OnInit {
      * A wallet ismétlődő tranzakciói. Létrehozáskor üres
      */
     protected readonly recurringTransactions = this.data.wallet?.recurringTransactions ?? [];
-
-    /**
-     * Az ismétlődő tranzakciók oldalára navigál, ahol a kiválasztott modalja nyílik fel.
-     * A navigáció a wallet modalt is bezárja (MatDialog closeOnNavigation)
-     */
-    protected openRecurringTransaction(recurringTransactionId: number): void {
-        void this.router.navigate(['/recurring-transactions', recurringTransactionId]);
-    }
 
     /**
      * Form adatainak elküldése
