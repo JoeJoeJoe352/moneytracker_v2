@@ -120,7 +120,7 @@
     "update": "Update wallet",
     "delete": "Delete wallet",
     "delete.confirm": "Are you sure you want to delete this wallet?",
-    "delete.confirm_with_recurring_transactions": "This wallet has recurring transactions. After deleting it, they will no longer create new transactions. Are you sure you want to delete this wallet?",
+    "delete.confirm_with_recurring_transactions": "This wallet has recurring transactions, which will be deleted together with it. Transactions already created will be kept. Are you sure you want to delete this wallet?",
     "recurring_transactions": "Recurring transactions of this wallet",
     "name": "Wallet name",
     "name.required": "Wallet name is required!",

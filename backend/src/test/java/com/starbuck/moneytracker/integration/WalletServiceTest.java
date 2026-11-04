@@ -507,6 +507,46 @@ public class WalletServiceTest extends MySqlContainerTest {
         walletRepo.delete(walletAnother);
     }
 
+    /**
+     * Wallet törlésekor a hozzá tartozó ismétlődő tranzakciók is törlődnek (soft delete, a
+     * leállítottak is), más wallet ismétlődő tranzakciói megmaradnak
+     */
+    @Test
+    public void testSoftDeleteWalletDeletesItsRecurringTransactions() {
+        // Given
+        var wallet = walletService.createWallet(
+                new CreateWalletCommand("ToDelete", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+        var walletAnother = walletService.createWallet(
+                new CreateWalletCommand("Remaining", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+
+        var active = saveRecurringTransaction("Netflix", LocalDate.of(2026, 12, 5), wallet);
+        var stopped = saveRecurringTransaction("Spotify", LocalDate.of(2026, 11, 20), wallet);
+        stopped.setStatus(RecurringTransactionStatusEnum.STOPPED);
+        recurringTransactionRepo.save(stopped);
+        var otherWallets = saveRecurringTransaction("Albérlet", LocalDate.of(2026, 12, 1), walletAnother);
+
+        // When
+        walletService.softDeleteWallet(wallet.getId());
+
+        // Then
+        // natív sql, mert a soft delete miatt a repository a töröltet nem látja
+        assertEquals("DELETED", recurringTransactionStatusInDb(active.getId()));
+        assertEquals("DELETED", recurringTransactionStatusInDb(stopped.getId()));
+        assertEquals("ACTIVE", recurringTransactionStatusInDb(otherWallets.getId()));
+        assertEquals(List.of(), recurringTransactionRepo.findByWalletId(wallet.getId()));
+
+        // Cleanup
+        jdbcTemplate.update(
+                "DELETE FROM recurring_transaction WHERE wallet_id IN (?, ?)", wallet.getId(), walletAnother.getId());
+        walletRepo.delete(walletRepo.findById(wallet.getId()).orElseThrow());
+        walletRepo.delete(walletAnother);
+    }
+
+    private String recurringTransactionStatusInDb(long recurringTransactionId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT status FROM recurring_transaction WHERE id = ?", String.class, recurringTransactionId);
+    }
+
     // HIBÁS ESETEK
 
     /**

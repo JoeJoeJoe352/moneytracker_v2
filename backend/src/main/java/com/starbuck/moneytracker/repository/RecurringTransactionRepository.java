@@ -26,6 +26,14 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
     Optional<RecurringTransaction> findByIdForUser(long id, long userId);
 
     /**
+     * Adott wallet (nem törölt, az @SQLRestriction miatt) ismétlődő tranzakciói
+     *
+     * @param walletId
+     * @return
+     */
+    List<RecurringTransaction> findByWalletId(long walletId);
+
+    /**
      * A user összes ismétlődő tranzakciója, a legközelebb esedékes elöl. A kategória
      * kapcsolatokat is betölti, hogy a mapper ne kérdezze le őket egyenként
      *

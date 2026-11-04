@@ -151,8 +151,8 @@ export class WalletsPageComponent {
 
     /**
      * Törli a walletet megerősítés után, majd újratölti a listát. Ha vannak (nem törölt) ismétlődő
-     * tranzakciói, a megerősítő üzenet erre is figyelmeztet, mert törlés után azokból már nem
-     * jönnek létre tranzakciók
+     * tranzakciói, a megerősítő üzenet erre is figyelmeztet, mert azokat a backend a wallettel
+     * együtt törli
      */
     private onWalletDeleted(
         walletId: number,
