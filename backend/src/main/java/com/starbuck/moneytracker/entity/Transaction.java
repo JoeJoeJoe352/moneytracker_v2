@@ -98,6 +98,15 @@ public class Transaction {
     }
 
     /**
+     * Szinkronizáció során létrejött tranzakció-e
+     *
+     * @return boolean
+     */
+    public boolean isRecurringTransaction() {
+        return this.specialType == TransactionSpecialTypeEnum.RECURRING;
+    }
+
+    /**
      * Meghatározza, hogy a tranzakció komplex-e, azaz több tételből áll-e, vagy egy
      * tétel van, de annak a neve kézzel lett felvéve
      *

@@ -787,6 +787,35 @@ class TransactionServiceTest {
         assertEquals(3L, transaction.getWallet().getId());
     }
 
+    /**
+     * Ismétlődő tranzakciót nem lehet másik walletbe áthelyezni, mert az eredeti
+     * wallethez tartozik
+     */
+    @Test
+    void updateTransaction_throwsWhenRecurringTransactionWalletChanged() {
+        Transaction transaction = createTransactionForUser1(5L);
+        transaction.getWallet().setId(3L);
+        transaction.setSpecialType(TransactionSpecialTypeEnum.RECURRING);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
+                .thenReturn(Optional.of(transaction));
+
+        TransactionSaveCommand updateCommand = new TransactionSaveCommand(
+                "moved",
+                new BigDecimal("-10.00"),
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                List.of(),
+                List.of(),
+                4L);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.updateTransaction(5L, updateCommand);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).save(any(Transaction.class));
+        assertEquals(3L, transaction.getWallet().getId());
+    }
+
     private Transaction createTransactionForUser1(Long id) {
         Wallet wallet = new Wallet(
                 "wallet", new User(1L, "name", "password", "email"), CurrencyEnum.HUF, WalletTypeEnum.DEFAULT);
