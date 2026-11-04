@@ -186,10 +186,12 @@ public class WalletService {
     }
 
     /**
-     * Soft delete-eli a walletet
+     * Soft delete-eli a walletet, és vele együtt a hozzá tartozó ismétlődő tranzakciókat is
+     * (szintén soft delete, a már létrejött tranzakciók megmaradnak)
      *
      * @param id
      */
+    @Transactional
     public void softDeleteWallet(long id) {
         Wallet walletFromDb = this.getWalletById(id);
 
@@ -201,6 +203,9 @@ public class WalletService {
         walletFromDb.setStatus(GeneralStatusEnum.DISABLED);
 
         walletRepo.save(walletFromDb);
+
+        // törölt walletből már nem generálódna tranzakció, a listában se maradjanak meg
+        recurringTransactionRepo.deleteAll(recurringTransactionRepo.findByWalletId(id));
     }
 
     /**

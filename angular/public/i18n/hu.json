@@ -120,6 +120,7 @@
     "update": "Tárca módosítása",
     "delete": "Tárca törlése",
     "delete.confirm": "Biztosan törölni szeretnéd ezt a tárcát?",
+    "delete.confirm_with_recurring_transactions": "Ehhez a tárcához ismétlődő tranzakciók tartoznak, amelyekből a törlés után már nem jönnek létre új tranzakciók. Biztosan törölni szeretnéd ezt a tárcát?",
     "recurring_transactions": "A tárca ismétlődő tranzakciói",
     "name": "Tárca neve",
     "name.required": "A tárca nevének megadása kötelező!",

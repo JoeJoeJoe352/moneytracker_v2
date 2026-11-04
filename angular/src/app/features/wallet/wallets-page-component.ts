@@ -69,7 +69,11 @@ export class WalletsPageComponent {
             this.onWalletSaved(walletData, payload, dialogRef),
         );
         dialogRef.componentInstance.deleted.subscribe((walletId) =>
-            this.onWalletDeleted(walletId, dialogRef),
+            this.onWalletDeleted(
+                walletId,
+                (walletData?.recurringTransactions.length ?? 0) > 0,
+                dialogRef,
+            ),
         );
         dialogRef.componentInstance.recurringTransactionSelected.subscribe(
             (recurringTransactionId) =>
@@ -146,11 +150,21 @@ export class WalletsPageComponent {
     }
 
     /**
-     * Törli a walletet megerősítés után, majd újratölti a listát
+     * Törli a walletet megerősítés után, majd újratölti a listát. Ha vannak (nem törölt) ismétlődő
+     * tranzakciói, a megerősítő üzenet erre is figyelmeztet, mert törlés után azokból már nem
+     * jönnek létre tranzakciók
      */
-    private onWalletDeleted(walletId: number, dialogRef: MatDialogRef<WalletFormComponent>): void {
+    private onWalletDeleted(
+        walletId: number,
+        hasRecurringTransactions: boolean,
+        dialogRef: MatDialogRef<WalletFormComponent>,
+    ): void {
+        const messageKey = hasRecurringTransactions
+            ? _('wallet.delete.confirm_with_recurring_transactions')
+            : _('wallet.delete.confirm');
+
         ConfirmDialogComponent.open(this.dialog, {
-            message: this.translateService.instant(_('wallet.delete.confirm')) as string,
+            message: this.translateService.instant(messageKey) as string,
             danger: true,
         })
             .afterClosed()
