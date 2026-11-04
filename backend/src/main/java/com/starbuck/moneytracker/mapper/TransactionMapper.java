@@ -212,9 +212,6 @@ public class TransactionMapper {
      * @return
      */
     private List<Long> categoryIdsOf(TransactionDetail detail) {
-        if (detail.getCategoryLinks() == null) {
-            return List.of();
-        }
         return detail.getCategoryLinks().stream()
                 .map(categoryLink -> categoryLink.getCategory().getId())
                 .collect(Collectors.toList());

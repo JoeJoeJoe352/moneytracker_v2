@@ -56,10 +56,11 @@ public class BalanceSyncService {
         // és a createtransaction-ben
         var wallet = walletService.getWalletByIdForUpdate(command.getWalletId());
 
-        // A sync időpontja UTC-ben (időzónától független statisztikákhoz), a korrekciós tranzakció
-        // dátuma viszont üzleti dátum: ugyanennek az időpontnak a napja a user időzónája szerint.
-        // A zónát a kliens küldi, szándékosan nem validáljuk: csak a kliensen ismert, és legfeljebb
-        // ±1 nap eltérést okozhat a user saját adataiban
+        // A sync időpontja UTC-ben (időzónától független statisztikákhoz), a korrekciós
+        // tranzakció dátuma viszont üzleti dátum: ugyanennek az időpontnak a napja a user
+        // időzónája szerint.
+        // A zónát a kliens küldi, szándékosan nem validáljuk: csak a kliensen ismert,
+        // és legfeljebb ±1 nap eltérést okozhat a user saját adataiban
         Instant syncedAt = clock.instant();
         LocalDate date = userDateUtil.toUserDate(syncedAt);
         var balanceSync = new BalanceSync(syncedAt, wallet, command.getBalanceFromUser());
@@ -67,7 +68,7 @@ public class BalanceSyncService {
         var balanceOfWalletInDb = walletService.getBalanceForWallet(command.getWalletId());
         var balancesDiffer = balanceOfWalletInDb.compareTo(command.getBalanceFromUser()) != 0;
         if (balancesDiffer) {
-            var transactionSaveCommand = this.transactionFactory.createTransactionEntryFromBalanceChange(
+            var transactionSaveCommand = this.transactionFactory.createTransactionCommandFromBalanceChange(
                     wallet, command.getBalanceFromUser(), balanceOfWalletInDb, date);
             var transaction = transactionService.createTransaction(transactionSaveCommand);
             balanceSync.setSyncTransaction(transaction);

@@ -81,12 +81,23 @@ public class TransactionSaveCommand {
     }
 
     /**
-     * Hozzáadja az opcionális specialType paramétert. Builder pattern
+     * Beállítja, hogy a tranzakció "SYNC" speciális típusú. Opcionális
      */
-    public TransactionSaveCommand setSpecialType(TransactionSpecialTypeEnum specialType) {
-        this.specialType = specialType;
+    public TransactionSaveCommand setSyncSpecialType() {
+        this.specialType = TransactionSpecialTypeEnum.SYNC;
         return this;
     }
+
+    /**
+     * Beállítja, hogy a tranzakció "RECURRING" speciális típusú. Az ismétlődő
+     * tranzakcióhoz kötést a TransactionService végzi az entitás alapján
+     */
+    public TransactionSaveCommand setRecurringSpecialType() {
+        this.specialType = TransactionSpecialTypeEnum.RECURRING;
+        return this;
+    }
+
+    // GETTEREK
 
     public String getTransactionName() {
         return transactionName;

@@ -2,6 +2,7 @@ package com.starbuck.moneytracker.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -55,7 +56,7 @@ public class TransactionDetail {
     private Transaction transaction;
 
     @OneToMany(mappedBy = "transactionDetail", cascade = CascadeType.REMOVE)
-    private List<TransactionDetailCategory> categoryLinks;
+    private List<TransactionDetailCategory> categoryLinks = new ArrayList<>();
 
     /**
      * Frontenden egyszerű (csak price van megadva), vagy komplex (egységár és

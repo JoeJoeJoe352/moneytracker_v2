@@ -35,11 +35,9 @@ public class RecurringTransactionMapper {
     }
 
     public RecurringTransactionResponseDto toDto(RecurringTransaction entity) {
-        List<CategoryResponseDto> categories = entity.getCategoryLinks() == null
-                ? List.of()
-                : entity.getCategoryLinks().stream()
-                        .map(link -> categoryMapper.toDto(link.getCategory()))
-                        .collect(Collectors.toList());
+        List<CategoryResponseDto> categories = entity.getCategoryLinks().stream()
+                .map(link -> categoryMapper.toDto(link.getCategory()))
+                .collect(Collectors.toList());
 
         return new RecurringTransactionResponseDto(
                 entity.getId(),

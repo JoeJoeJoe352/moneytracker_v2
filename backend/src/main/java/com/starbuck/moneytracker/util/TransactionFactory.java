@@ -3,14 +3,15 @@ package com.starbuck.moneytracker.util;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.Wallet;
-import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 
 @Component
@@ -22,14 +23,15 @@ public class TransactionFactory {
     }
 
     /**
-     * Létrehoz egy korrekciós tranzakciót a user által megadott és a db-ben lévő egyenleg különbségéből
+     * Létrehoz egy korrekciós tranzakciót a user által megadott és a db-ben lévő
+     * egyenleg különbségéből
      *
      * @param wallet              a szinkronizált wallet
      * @param balanceFromUser     a user által megadott, valós egyenleg
      * @param balanceOfWalletInDb a wallet db-ben nyilvántartott egyenlege
      * @param date                a tranzakció dátuma (a szinkronizálás napja)
      */
-    public TransactionSaveCommand createTransactionEntryFromBalanceChange(
+    public TransactionSaveCommand createTransactionCommandFromBalanceChange(
             Wallet wallet, BigDecimal balanceFromUser, BigDecimal balanceOfWalletInDb, LocalDate date) {
 
         if (wallet == null || balanceFromUser == null || balanceOfWalletInDb == null || date == null) {
@@ -50,6 +52,29 @@ public class TransactionFactory {
 
         return new TransactionSaveCommand(
                         transactionName, differenceFromActualBalance, date, type, List.of(), List.of(), wallet.getId())
-                .setSpecialType(TransactionSpecialTypeEnum.SYNC);
+                .setSyncSpecialType();
+    }
+
+    /**
+     * Ismétlődő tranzakció adataiból létrehoz egy új tranzakció mentés parancsot
+     *
+     * @param recurringTransaction
+     * @param date
+     * @return
+     */
+    public TransactionSaveCommand createTransactionCommandFromRecurrentTransactionTemplate(
+            RecurringTransaction recurringTransaction, LocalDate date) {
+        return new TransactionSaveCommand(
+                        recurringTransaction.getName(),
+                        recurringTransaction.getPriceSum(),
+                        date,
+                        recurringTransaction.getTransactionType(),
+                        List.of(),
+                        recurringTransaction.getCategoryLinks().stream()
+                                .map((categoryLinks) ->
+                                        categoryLinks.getCategory().getId())
+                                .collect(Collectors.toList()),
+                        recurringTransaction.getWallet().getId())
+                .setRecurringSpecialType();
     }
 }

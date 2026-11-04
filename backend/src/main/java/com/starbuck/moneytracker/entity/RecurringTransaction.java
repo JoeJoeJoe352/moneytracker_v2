@@ -3,6 +3,7 @@ package com.starbuck.moneytracker.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -82,7 +83,7 @@ public class RecurringTransaction {
     private Wallet wallet;
 
     @OneToMany(mappedBy = "recurringTransaction", cascade = CascadeType.REMOVE)
-    private List<RecurringTransactionCategory> categoryLinks;
+    private List<RecurringTransactionCategory> categoryLinks = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

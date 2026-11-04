@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -50,7 +51,7 @@ public class Category {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "category")
-    private List<TransactionDetailCategory> transactionDetailLinks;
+    private List<TransactionDetailCategory> transactionDetailLinks = new ArrayList<>();
 
     /**
      * A mindenki számára elérhető kategóriák nyelvi kulcsként vannak az
