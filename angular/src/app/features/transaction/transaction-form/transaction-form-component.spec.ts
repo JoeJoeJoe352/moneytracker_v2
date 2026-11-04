@@ -428,7 +428,7 @@ describe('TransactionFormComponent (Vitest)', () => {
         fixture.detectChanges();
 
         expect(component.walletId.disabled).toBe(true);
-        expect(fixture.nativeElement.querySelector('.wallet-sync-locked-hint').textContent).toContain(
+        expect(fixture.nativeElement.querySelector('.wallet-locked-hint').textContent).toContain(
             'transaction.wallet.sync_locked',
         );
 
@@ -460,6 +460,6 @@ describe('TransactionFormComponent (Vitest)', () => {
         fixture.detectChanges();
 
         expect(component.walletId.enabled).toBe(true);
-        expect(fixture.nativeElement.querySelector('.wallet-sync-locked-hint')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.wallet-locked-hint')).toBeNull();
     });
 });

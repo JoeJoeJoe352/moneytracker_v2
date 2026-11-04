@@ -89,6 +89,7 @@
     "categories.add": "Add categories",
     "is_sync_transaction": "Transaction created during a balance sync",
     "wallet.sync_locked": "The wallet of a sync transaction cannot be changed",
+    "wallet.recurring_transaction_locked": "The wallet of a recurring transaction cannot be changed",
     "category": {
       "add": "Click here to add a new category!",
       "remove": "Remove {{name}}"

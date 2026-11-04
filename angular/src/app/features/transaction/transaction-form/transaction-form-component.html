@@ -27,7 +27,7 @@
         </div>
         <div class="form-row">
             <!-- Wallet -->
-            <mat-form-field [subscriptSizing]="isSyncTransaction() ? 'dynamic' : 'fixed'">
+            <mat-form-field [subscriptSizing]="isSyncTransaction() || isRecurringTransaction() ? 'dynamic' : 'fixed'">
                 <mat-label>{{ 'transaction.wallet' | translate }}</mat-label>
                 <mat-select id="transaction-wallet" formControlName="walletId">
                     @for (item of userData.getWallets(); track item.id) {
@@ -37,8 +37,12 @@
                     }
                 </mat-select>
                 @if (isSyncTransaction()) {
-                    <mat-hint class="wallet-sync-locked-hint">{{
+                    <mat-hint class="wallet-locked-hint">{{
                         'transaction.wallet.sync_locked' | translate
+                    }}</mat-hint>
+                } @else if (isRecurringTransaction()) {
+                    <mat-hint class="wallet-locked-hint">{{
+                        'transaction.wallet.recurring_transaction_locked' | translate
                     }}</mat-hint>
                 }
             </mat-form-field>

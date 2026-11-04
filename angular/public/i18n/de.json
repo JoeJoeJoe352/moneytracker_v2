@@ -89,6 +89,7 @@
     "categories.add": "Kategorien hinzufügen",
     "is_sync_transaction": "Bei einer Guthaben-Synchronisierung erstellte Transaktion",
     "wallet.sync_locked": "Das Wallet einer Synchronisierungstransaktion kann nicht geändert werden",
+    "wallet.recurring_transaction_locked": "Das Wallet einer wiederkehrenden Transaktion kann nicht geändert werden",
     "category": {
       "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!",
       "remove": "{{name}} entfernen"
@@ -112,7 +113,7 @@
       "complex_price_mode": "Menge und Einzelpreis angeben",
       "total_price": "Gesamtpreis"
     },
-    "recurring_transaction": "Wiederkehrenden Transaktion"
+    "recurring_transaction": "Wiederkehrende Transaktion"
   },
   "wallet": {
     "create": "Wallet erstellen",

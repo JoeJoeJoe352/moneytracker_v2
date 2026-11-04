@@ -140,6 +140,13 @@ export class TransactionFormComponent implements OnChanges {
     );
 
     /**
+     * Ismétlődő tranzakció-e
+     */
+    protected readonly isRecurringTransaction = computed(
+        () => this.transaction()?.specialType === TransactionSpecialTypeEnum.RECURRING,
+    );
+
+    /**
      * Kategória adatokat átalakítja a dropdown számára értelmezhető formátumra
      */
     protected categoryData: Signal<DropdownInterface[]> = computed(() => {
@@ -182,9 +189,9 @@ export class TransactionFormComponent implements OnChanges {
         }
 
         // A szinkronizációs tranzakció walletja nem módosítható (a backend is elutasítja).
-        // A végén kell, mert a fenti enable() újra engedélyezné. A getRawValue() a letiltott
+        // Ngonchanges végén kell deaktiválni, mert a fenti enable() újra engedélyezné. A getRawValue() a letiltott
         // mező értékét is elküldi, így az eredeti wallet id megy a backendre
-        if (this.isSyncTransaction()) {
+        if (this.isSyncTransaction() || this.isRecurringTransaction()) {
             this.walletId.disable({ emitEvent: false });
         }
     }
