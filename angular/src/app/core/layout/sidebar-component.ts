@@ -52,7 +52,7 @@ export class SidebarComponent {
             links.push({
                 url: '/recurring-transactions',
                 langKey: 'header.recurring_transactions',
-                icon: 'autorenew',
+                icon: 'event_repeat',
             });
         } else {
             links.push({ langKey: 'header.login', icon: 'login', action: this.openLoginModal });
