@@ -10,7 +10,6 @@ public enum RecurrenceIntervalEnum {
         }
     },
     MONTHLY {
-        @Override
         /**
          * start date-ből indulunk ki, mert az tartalmazza a napot, amikor elindította a
          * user a kalkulációt
@@ -19,6 +18,7 @@ public enum RecurrenceIntervalEnum {
          * Pl.: január 31.-én indul, február 28.-án lesz új tranzakció, viszont
          * márciusban újra 31.-én kell lenni
          */
+        @Override
         public LocalDate calculateNextOccurrence(LocalDate startDate, LocalDate actualDate) {
             LocalDate nextOccurrenceRaw = actualDate.plusMonths(1);
             int dayFromStartDate = startDate.getDayOfMonth();

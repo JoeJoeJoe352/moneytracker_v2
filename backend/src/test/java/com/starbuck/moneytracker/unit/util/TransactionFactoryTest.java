@@ -121,7 +121,6 @@ public class TransactionFactoryTest {
         assertEquals(date, result.getTransactionDate());
         assertEquals(TransactionTypeEnum.OUTCOME, result.getTransactionType());
         assertEquals(TransactionSpecialTypeEnum.RECURRING, result.getSpecialType());
-        assertEquals(5L, result.getRecurringTransactionId());
         assertEquals(1L, result.getWalletId());
         assertEquals(List.of(), result.getDetailCommands());
         assertEquals(List.of(3L, 4L), result.getCategories());

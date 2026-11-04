@@ -64,19 +64,17 @@ public class TransactionFactory {
      */
     public TransactionSaveCommand createTransactionCommandFromRecurrentTransactionTemplate(
             RecurringTransaction recurringTransaction, LocalDate date) {
-        var command = new TransactionSaveCommand(
-                recurringTransaction.getName(),
-                recurringTransaction.getPriceSum(),
-                date,
-                recurringTransaction.getTransactionType(),
-                List.of(),
-                recurringTransaction.getCategoryLinks().stream()
-                        .map((categoryLinks) -> categoryLinks.getCategory().getId())
-                        .collect(Collectors.toList()),
-                recurringTransaction.getWallet().getId());
-
-        command.setRecurrentTransactionType(recurringTransaction.getId());
-
-        return command;
+        return new TransactionSaveCommand(
+                        recurringTransaction.getName(),
+                        recurringTransaction.getPriceSum(),
+                        date,
+                        recurringTransaction.getTransactionType(),
+                        List.of(),
+                        recurringTransaction.getCategoryLinks().stream()
+                                .map((categoryLinks) ->
+                                        categoryLinks.getCategory().getId())
+                                .collect(Collectors.toList()),
+                        recurringTransaction.getWallet().getId())
+                .setRecurringSpecialType();
     }
 }

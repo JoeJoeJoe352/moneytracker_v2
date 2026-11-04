@@ -17,7 +17,6 @@ public class TransactionSaveCommand {
     private List<Long> categories;
     private Long walletId;
     private TransactionSpecialTypeEnum specialType;
-    private long recurringTransactionId;
 
     /**
      * @param name           Tranzakció neve
@@ -90,13 +89,11 @@ public class TransactionSaveCommand {
     }
 
     /**
-     * Beállítja, hogy a tranzakció "RECURRING" speciális típusú
-     *
-     * @param recurringTransactionId
+     * Beállítja, hogy a tranzakció "RECURRING" speciális típusú. Az ismétlődő
+     * tranzakcióhoz kötést a TransactionService végzi az entitás alapján
      */
-    public TransactionSaveCommand setRecurrentTransactionType(long recurringTransactionId) {
+    public TransactionSaveCommand setRecurringSpecialType() {
         this.specialType = TransactionSpecialTypeEnum.RECURRING;
-        this.recurringTransactionId = recurringTransactionId;
         return this;
     }
 
@@ -132,9 +129,5 @@ public class TransactionSaveCommand {
 
     public TransactionSpecialTypeEnum getSpecialType() {
         return specialType;
-    }
-
-    public long getRecurringTransactionId() {
-        return recurringTransactionId;
     }
 }
