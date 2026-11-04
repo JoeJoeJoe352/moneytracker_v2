@@ -37,7 +37,9 @@ public class TransactionMapper {
      * @return
      */
     public TransactionResponseDto toDto(Transaction entity) {
-        if (entity == null) return null;
+        if (entity == null) {
+            return null;
+        }
 
         List<TransactionDetailResponseDto> detailDto = entity.getTransactionDetails().stream()
                 .map(detail -> {
@@ -77,7 +79,9 @@ public class TransactionMapper {
      * @return
      */
     public TransactionEditResponseDto toEditDto(Transaction entity) {
-        if (entity == null) return null;
+        if (entity == null) {
+            return null;
+        }
 
         List<TransactionDetailEditResponseDto> detailDto = entity.getTransactionDetails().stream()
                 .map(detail -> {
@@ -100,7 +104,10 @@ public class TransactionMapper {
                 entity.isComplexTransaction(),
                 detailDto,
                 entity.getWallet().getId(),
-                entity.getSpecialType());
+                entity.getSpecialType(),
+                entity.getRecurringTransaction() == null
+                        ? null
+                        : entity.getRecurringTransaction().getId());
 
         return dto;
     }
@@ -185,7 +192,8 @@ public class TransactionMapper {
                 .map((detail) -> {
                     if (detail.isComplexPriceMode()) {
                         return new TransactionDetailSaveCommand(
-                                detail.getName(), detail.getWeight(), detail.getUnitPrice(), categoryIdsOf(detail));
+                                detail.getName(), detail.getWeight(),
+                                detail.getUnitPrice(), categoryIdsOf(detail));
                     }
                     return new TransactionDetailSaveCommand(
                             detail.getName(),

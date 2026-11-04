@@ -16,4 +16,5 @@ public record TransactionEditResponseDto(
         boolean isComplexTransaction,
         List<TransactionDetailEditResponseDto> transactionDetails,
         Long walletId,
-        TransactionSpecialTypeEnum specialType) {}
+        TransactionSpecialTypeEnum specialType,
+        Long recurringTransactionId) {}
