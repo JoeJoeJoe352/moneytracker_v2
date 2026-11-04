@@ -111,7 +111,8 @@
       "simple_price_mode": "Preis angeben",
       "complex_price_mode": "Menge und Einzelpreis angeben",
       "total_price": "Gesamtpreis"
-    }
+    },
+    "recurring_transaction": "Wiederkehrenden Transaktion"
   },
   "wallet": {
     "create": "Wallet erstellen",

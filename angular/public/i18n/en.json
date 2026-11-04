@@ -111,7 +111,8 @@
       "simple_price_mode": "Enter price",
       "complex_price_mode": "Enter quantity and unit price",
       "total_price": "Total price"
-    }
+    },
+    "recurring_transaction": "Recurring transaction"
   },
   "wallet": {
     "create": "Create wallet",

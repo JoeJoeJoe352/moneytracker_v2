@@ -143,6 +143,7 @@ export interface TransactionListElementData {
     isComplexTransaction: boolean;
     transactionDetails: TransactionDetailListElementData[];
     wallet: WalletDataInterface;
+    specialType: TransactionSpecialTypeEnum | null;
 }
 
 /**

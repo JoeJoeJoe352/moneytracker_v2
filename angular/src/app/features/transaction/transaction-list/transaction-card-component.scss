@@ -41,7 +41,12 @@
     min-width: 0;
 
     .transaction-base-data {
+        line-height: 24px;
         display: flex;
+
+        mat-icon {
+            margin-right: 5px;
+        }
 
         .transaction-name {
             font-weight: 600;

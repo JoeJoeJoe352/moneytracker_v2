@@ -3,14 +3,15 @@ import { TransactionListElementData } from '../interfaces';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { TransactionTypeEnum } from '@shared/enums';
+import { TransactionSpecialTypeEnum, TransactionTypeEnum } from '@shared/enums';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-transaction-card',
     templateUrl: './transaction-card-component.html',
     styleUrl: './transaction-card-component.scss',
-    imports: [CurrencyFormatPipe, MatCard, MatIcon, TranslatePipe],
+    imports: [CurrencyFormatPipe, MatCard, MatIcon, TranslatePipe, MatTooltip],
     host: {
         role: 'button',
         tabindex: '0',
@@ -51,4 +52,11 @@ export default class TransactionCardComponent {
         );
         return [...new Set(categories)].join(', ');
     });
+
+    /**
+     * Ismétlődő tranzakció-e
+     */
+    protected isRecurringTransaction = computed(() => {
+        return this.transaction().specialType === TransactionSpecialTypeEnum.RECURRING
+    })
 }

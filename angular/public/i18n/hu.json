@@ -111,7 +111,8 @@
       "simple_price_mode": "Teljes ár",
       "complex_price_mode": "Mennyiség és egységár",
       "total_price": "Teljes ár"
-    }
+    },
+    "recurring_transaction": "Ismétlődő tranzakció"
   },
   "wallet": {
     "create": "Tárca létrehozása",
