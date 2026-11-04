@@ -13,6 +13,7 @@ import { TransactionModalComponent, TransactionModalInputInterface } from './tra
 import { NotificationService } from '@shared/services/notification-service';
 import { _ } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 interface ModalParams {
     isOpen: boolean;
@@ -32,6 +33,7 @@ export class TransactionModalStateService {
     private categoryService = inject(CategoryService);
     private dialog = inject(MatDialog);
     private notification = inject(NotificationService);
+    private router = inject(Router);
 
     /**
      * Nyitva van-e a modal
@@ -178,6 +180,15 @@ export class TransactionModalStateService {
         );
 
         dialogRef.componentInstance.saved.subscribe((payload) => this.save(payload));
+
+        // Előbb a navigációt indítjuk, hogy a bezárásra reagáló kód (closed) már lássa a folyamatban
+        // lévő navigációt, és ne írja felül
+        dialogRef.componentInstance.recurringTransactionOpenRequest.subscribe(
+            (recurringTransactionId) => {
+                void this.router.navigate(['/recurring-transactions', recurringTransactionId]);
+                this.dialogRef?.close();
+            },
+        );
 
         dialogRef.afterClosed().subscribe(() => {
             this.isOpen.set(false);

@@ -88,7 +88,11 @@
     "categories": "Kategorien",
     "categories.add": "Kategorien hinzufügen",
     "is_sync_transaction": "Bei einer Guthaben-Synchronisierung erstellte Transaktion",
+    "is_recurring_transaction": "Aus einer wiederkehrenden Transaktion erstellte Transaktion",
+    "recurring_transaction.open": "Wiederkehrende Transaktion öffnen",
+    "recurring_transaction.open_unsaved_confirm": "Deine nicht gespeicherten Änderungen gehen verloren. Möchtest du die wiederkehrende Transaktion trotzdem öffnen?",
     "wallet.sync_locked": "Das Wallet einer Synchronisierungstransaktion kann nicht geändert werden",
+    "wallet.recurring_transaction_locked": "Das Wallet einer wiederkehrenden Transaktion kann nicht geändert werden",
     "category": {
       "add": "Klicke hier, um eine neue Kategorie hinzuzufügen!",
       "remove": "{{name}} entfernen"
@@ -111,13 +115,16 @@
       "simple_price_mode": "Preis angeben",
       "complex_price_mode": "Menge und Einzelpreis angeben",
       "total_price": "Gesamtpreis"
-    }
+    },
+    "recurring_transaction": "Wiederkehrende Transaktion"
   },
   "wallet": {
     "create": "Wallet erstellen",
     "update": "Wallet bearbeiten",
     "delete": "Wallet löschen",
     "delete.confirm": "Möchtest du dieses Wallet wirklich löschen?",
+    "delete.confirm_with_recurring_transactions": "Zu diesem Wallet gehören wiederkehrende Transaktionen, die zusammen mit dem Wallet gelöscht werden. Bereits erstellte Transaktionen bleiben erhalten. Möchtest du dieses Wallet wirklich löschen?",
+    "recurring_transactions": "Wiederkehrende Transaktionen dieses Wallets",
     "name": "Wallet-Name",
     "name.required": "Der Wallet-Name ist erforderlich!",
     "name.minlength": "Der Wallet-Name muss mindestens 2 Zeichen lang sein!",
@@ -186,6 +193,7 @@
   "recurring_transaction": {
     "title": "Meine wiederkehrenden Transaktionen",
     "empty": "Noch keine wiederkehrenden Transaktionen",
+    "not_found": "Die gesuchte wiederkehrende Transaktion wurde nicht gefunden!",
     "next_occurrence": "Nächste",
     "interval": {
       "weekly": "Woche",

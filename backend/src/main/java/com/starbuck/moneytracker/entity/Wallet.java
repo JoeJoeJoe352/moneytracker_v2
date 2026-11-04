@@ -60,6 +60,9 @@ public class Wallet {
     @OneToMany(mappedBy = "wallet")
     private List<BalanceSync> balanceSyncs;
 
+    @OneToMany(mappedBy = "wallet")
+    private List<RecurringTransaction> recurringTransactions;
+
     public Wallet() {}
 
     public Wallet(String name, User user, CurrencyEnum currencyCode, WalletTypeEnum type) {
@@ -155,5 +158,13 @@ public class Wallet {
 
     public void setBalanceSyncs(List<BalanceSync> balanceSyncs) {
         this.balanceSyncs = balanceSyncs;
+    }
+
+    public List<RecurringTransaction> getRecurringTransactions() {
+        return recurringTransactions;
+    }
+
+    public void setRecurringTransactions(List<RecurringTransaction> recurringTransactions) {
+        this.recurringTransactions = recurringTransactions;
     }
 }

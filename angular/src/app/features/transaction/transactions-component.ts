@@ -100,6 +100,11 @@ export class TransactionsListComponent implements OnChanges {
 
         // Modal bezárásakor kivesszük az id-t az URL-ből, a query paramétereket (szűrőket) megtartjuk
         this.modal.closed.pipe(takeUntilDestroyed()).subscribe(() => {
+            // Ha a modal egy navigáció közben zárult be (pl. az ismétlődő tranzakció megnyitásakor),
+            // azt nem írjuk felül, különben a /transactions navigáció megszakítaná
+            if (this.router.currentNavigation() !== null) {
+                return;
+            }
             if (this.route.snapshot.params['id'] !== undefined) {
                 void this.router.navigate(['/transactions'], {
                     queryParamsHandling: 'preserve',

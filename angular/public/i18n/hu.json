@@ -88,7 +88,11 @@
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
     "is_sync_transaction": "Szinkronizáció során létrejött tranzakció",
+    "is_recurring_transaction": "Ismétlődő tranzakció során létrejött tranzakció",
+    "recurring_transaction.open": "Ismétlődő tranzakció megnyitása",
+    "recurring_transaction.open_unsaved_confirm": "A nem mentett módosításaid elvesznek. Biztosan megnyitod az ismétlődő tranzakciót?",
     "wallet.sync_locked": "Szinkronizációs tranzakció tárcája nem módosítható",
+    "wallet.recurring_transaction_locked": "Ismétlődő tranzakció tárcája nem módosítható",
     "category": {
       "add": "Új kategória hozzáadásához kattints ide!",
       "remove": "{{name}} eltávolítása"
@@ -111,13 +115,16 @@
       "simple_price_mode": "Teljes ár",
       "complex_price_mode": "Mennyiség és egységár",
       "total_price": "Teljes ár"
-    }
+    },
+    "recurring_transaction": "Ismétlődő tranzakció"
   },
   "wallet": {
     "create": "Tárca létrehozása",
     "update": "Tárca módosítása",
     "delete": "Tárca törlése",
     "delete.confirm": "Biztosan törölni szeretnéd ezt a tárcát?",
+    "delete.confirm_with_recurring_transactions": "Ehhez a tárcához ismétlődő tranzakciók tartoznak, amelyek a tárcával együtt törlődnek. A már létrejött tranzakciók megmaradnak. Biztosan törölni szeretnéd ezt a tárcát?",
+    "recurring_transactions": "A tárca ismétlődő tranzakciói",
     "name": "Tárca neve",
     "name.required": "A tárca nevének megadása kötelező!",
     "name.minlength": "A tárca nevének legalább 3 karakter hosszúnak kell lennie!",
@@ -186,6 +193,7 @@
   "recurring_transaction": {
     "title": "Ismétlődő tranzakcióim",
     "empty": "Nincs még felvett ismétlődő tranzakció",
+    "not_found": "A keresett ismétlődő tranzakció nem található!",
     "next_occurrence": "Következő",
     "interval": {
       "weekly": "hét",

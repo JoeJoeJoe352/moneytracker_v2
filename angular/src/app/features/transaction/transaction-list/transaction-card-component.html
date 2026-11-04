@@ -23,6 +23,14 @@
                 {{ transaction().priceSum | currencyFormat: transaction().wallet.currencyCode }}
             </div>
             <div class="transaction-base-data">
+                @if (isRecurringTransaction()) {
+                    <mat-icon
+                        aria-hidden="false"
+                        fontIcon="event_repeat"
+                        [attr.aria-label]="'transaction.recurring_transaction' | translate"
+                        [matTooltip]="'transaction.recurring_transaction' | translate"
+                    />
+                }
                 <div class="transaction-name">{{ transaction().name }}</div>
                 <div class="wallet-name">({{ transaction().wallet.name }})</div>
             </div>

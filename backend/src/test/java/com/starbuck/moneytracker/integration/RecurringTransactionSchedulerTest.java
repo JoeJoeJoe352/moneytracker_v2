@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -22,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.UserCreateCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
@@ -39,6 +42,7 @@ import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
 import com.starbuck.moneytracker.entity.enums.RecurringTransactionStatusEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
+import com.starbuck.moneytracker.mapper.TransactionMapper;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
@@ -49,6 +53,7 @@ import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.RecurringTransactionScheduler;
 import com.starbuck.moneytracker.service.RecurringTransactionService;
+import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.UserService;
 import com.starbuck.moneytracker.testsupport.MySqlContainerTest;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -92,6 +97,15 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
 
     @Autowired
     private RecurringTransactionService service;
+
+    @Autowired
+    private TransactionService transactionService;
+
+    @Autowired
+    private TransactionMapper transactionMapper;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private RecurringTransactionScheduler scheduler;
     private Wallet wallet;
@@ -627,6 +641,78 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
                         .findById(recurringTransaction.getId())
                         .orElseThrow()
                         .getNextOccurrenceDate());
+    }
+
+    /**
+     * A szerkesztő felületnek küldött adatban benne van az ismétlődő tranzakció id-ja, amíg az
+     * nincs törölve. Törlés után a tranzakció továbbra is betölthető, de az id már nem jön
+     */
+    @Test
+    void testEditDtoContainsRecurringTransactionIdUntilItIsDeleted() {
+        // GIVEN
+        var recurringTransaction = createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+        scheduler.generateRecurrentTransactions();
+        long transactionId = transactionrepo.findAll().getFirst().getId();
+
+        // WHEN
+        // a controllerhez hasonlóan session-ön belül, hogy a lazy kapcsolatok betölthetők legyenek
+        var dtoBeforeDelete = transactionTemplate.execute(status ->
+                transactionMapper.toEditDto(transactionService.getTransactionByIdForActualUser(transactionId)));
+        service.deleteRecurringTransaction(recurringTransaction.getId());
+        var dtoAfterDelete = transactionTemplate.execute(status ->
+                transactionMapper.toEditDto(transactionService.getTransactionByIdForActualUser(transactionId)));
+
+        // THEN
+        assertEquals(recurringTransaction.getId(), dtoBeforeDelete.recurringTransactionId());
+        assertEquals(TransactionSpecialTypeEnum.RECURRING, dtoAfterDelete.specialType());
+        assertNull(dtoAfterDelete.recurringTransactionId());
+    }
+
+    /**
+     * A törölt ismétlődő tranzakciót a Hibernate null-ként tölti be. A tranzakció módosítása ezt a
+     * null-t nem írhatja vissza, a kapcsolatnak meg kell maradnia
+     */
+    @Test
+    void testEditingTransactionKeepsLinkToDeletedRecurringTransaction() {
+        // GIVEN
+        var recurringTransaction = createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+        scheduler.generateRecurrentTransactions();
+        long transactionId = transactionrepo.findAll().getFirst().getId();
+        service.deleteRecurringTransaction(recurringTransaction.getId());
+
+        // WHEN
+        transactionService.updateTransaction(
+                transactionId,
+                new TransactionSaveCommand(
+                        "Spotify átnevezve",
+                        BigDecimal.TEN.negate(),
+                        LocalDate.now(fixedClock),
+                        TransactionTypeEnum.OUTCOME,
+                        List.of(),
+                        List.of(),
+                        wallet.getId()));
+
+        // THEN
+        // natív sql, mert a törölt ismétlődő tranzakciót a repository nem látja
+        assertEquals(
+                recurringTransaction.getId(),
+                jdbcTemplate.queryForObject(
+                        "SELECT recurring_transaction_id FROM transactions WHERE id = ?", Long.class, transactionId));
+        assertEquals(
+                "Spotify átnevezve",
+                transactionrepo.findById(transactionId).orElseThrow().getName());
     }
 
     private RecurringTransaction createRecurringTransaction(

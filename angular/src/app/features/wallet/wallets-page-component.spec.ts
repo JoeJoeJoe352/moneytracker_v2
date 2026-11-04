@@ -4,6 +4,7 @@ import { Component, EventEmitter, input, output } from '@angular/core';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
@@ -19,7 +20,13 @@ import {
     WalletSyncFormInputInterface,
     WalletUpdateRequest,
 } from './interfaces';
-import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
+import {
+    CurrencyCodesEnum,
+    RecurrenceIntervalEnum,
+    RecurringTransactionStatusEnum,
+    TransactionTypeEnum,
+    WalletTypesEnum,
+} from '@shared/enums';
 
 @Component({
     selector: 'app-wallets-list-component',
@@ -58,6 +65,7 @@ const sampleWallet: WalletListDataInterface = {
     type: WalletTypesEnum.default,
     sum: 0,
     lastSyncDate: '2026-09-15',
+    recurringTransactions: [],
     deletable: false,
 };
 
@@ -75,7 +83,9 @@ describe('WalletsPageComponent (Vitest)', () => {
     let walletFormDialogRefs: FakeDialogRef<{
         saved: EventEmitter<WalletCreateRequest | WalletUpdateRequest>;
         deleted: EventEmitter<number>;
+        recurringTransactionSelected: EventEmitter<number>;
     }>[];
+    let routerMock: { navigate: ReturnType<typeof vi.fn> };
     let confirmDialogRefs: FakeDialogRef<unknown>[];
     let syncDialogRefs: FakeDialogRef<{ syncFormSended: EventEmitter<WalletSyncData> }>[];
     let syncDialogData: WalletSyncFormInputInterface | undefined;
@@ -94,6 +104,7 @@ describe('WalletsPageComponent (Vitest)', () => {
         confirmDialogRefs = [];
         syncDialogRefs = [];
         syncDialogData = undefined;
+        routerMock = { navigate: vi.fn(() => Promise.resolve(true)) };
 
         dialogOpenSpy = vi.fn((componentType: unknown, config?: { data?: unknown }) => {
             if (componentType === WalletSyncFormComponent) {
@@ -108,6 +119,7 @@ describe('WalletsPageComponent (Vitest)', () => {
                 const dialogRef = new FakeDialogRef({
                     saved: new EventEmitter<WalletCreateRequest | WalletUpdateRequest>(),
                     deleted: new EventEmitter<number>(),
+                    recurringTransactionSelected: new EventEmitter<number>(),
                 });
                 walletFormDialogRefs.push(dialogRef);
                 return dialogRef;
@@ -126,6 +138,7 @@ describe('WalletsPageComponent (Vitest)', () => {
                 provideTranslateService(),
                 { provide: WalletService, useValue: walletServiceMock },
                 { provide: MatDialog, useValue: { open: dialogOpenSpy } },
+                { provide: Router, useValue: routerMock },
             ],
         });
         TestBed.overrideComponent(WalletsPageComponent, {
@@ -315,6 +328,58 @@ describe('WalletsPageComponent (Vitest)', () => {
         expect(walletServiceMock.softDeleteWallet).not.toHaveBeenCalled();
     });
 
+    it('should ask with the simple confirm message when the wallet has no recurring transactions', async () => {
+        await setup();
+
+        component['openWalletModal'](sampleWallet);
+        lastWalletFormDialogRef().componentInstance.deleted.emit(sampleWallet.id);
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(
+            ConfirmDialogComponent,
+            expect.objectContaining({
+                data: expect.objectContaining({ message: 'wallet.delete.confirm' }),
+            }),
+        );
+    });
+
+    it('should warn about the recurring transactions in the confirm message when the wallet has any', async () => {
+        const walletWithRecurring: WalletListDataInterface = {
+            ...sampleWallet,
+            recurringTransactions: [
+                {
+                    id: 6,
+                    name: 'Spotify',
+                    priceSum: -2000,
+                    startDate: '2026-01-01',
+                    nextOccurrenceDate: '2026-12-01',
+                    recurrenceInterval: RecurrenceIntervalEnum.MONTHLY,
+                    transactionType: TransactionTypeEnum.OUTCOME,
+                    status: RecurringTransactionStatusEnum.STOPPED,
+                    categories: [],
+                    wallet: sampleWallet,
+                },
+            ],
+        };
+        await setup(of([walletWithRecurring]));
+
+        component['openWalletModal'](walletWithRecurring);
+        lastWalletFormDialogRef().componentInstance.deleted.emit(walletWithRecurring.id);
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(
+            ConfirmDialogComponent,
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    message: 'wallet.delete.confirm_with_recurring_transactions',
+                }),
+            }),
+        );
+
+        lastConfirmDialogRef().close(true);
+        await fixture.whenStable();
+
+        expect(walletServiceMock.softDeleteWallet).toHaveBeenCalledWith(walletWithRecurring.id);
+    });
+
     it('should delete the wallet, reload the list and close the dialog when confirmed', async () => {
         await setup();
         walletServiceMock.listWallets.mockClear();
@@ -328,6 +393,17 @@ describe('WalletsPageComponent (Vitest)', () => {
         expect(walletServiceMock.softDeleteWallet).toHaveBeenCalledWith(sampleWallet.id);
         expect(walletServiceMock.listWallets).toHaveBeenCalledTimes(1);
         expect(formDialogRef.close).toHaveBeenCalled();
+    });
+
+    it('should close the wallet dialog and navigate to the recurring transaction when one is selected in it', async () => {
+        await setup();
+
+        component['openWalletModal'](sampleWallet);
+        const formDialogRef = lastWalletFormDialogRef();
+        formDialogRef.componentInstance.recurringTransactionSelected.emit(6);
+
+        expect(formDialogRef.close).toHaveBeenCalled();
+        expect(routerMock.navigate).toHaveBeenCalledWith(['/recurring-transactions', 6]);
     });
 
     it('should open the sync dialog with the wallet when a sync is requested from the list', async () => {

@@ -41,6 +41,7 @@ const sampleTransactions: TransactionListElementData[] = [
         transactionDate: '2024-01-10',
         isComplexTransaction: false,
         transactionDetails: [],
+        specialType: null,
         wallet: {
             id: 1,
             name: 'Napi költés',
@@ -72,7 +73,10 @@ describe('TransactionsListComponent (Vitest)', () => {
         getTransactionHistory: ReturnType<typeof vi.fn>;
         getTransactionById: ReturnType<typeof vi.fn>;
     };
-    let routerMock: { navigate: ReturnType<typeof vi.fn> };
+    let routerMock: {
+        navigate: ReturnType<typeof vi.fn>;
+        currentNavigation: ReturnType<typeof vi.fn>;
+    };
     let notificationMock: {
         show: ReturnType<typeof vi.fn>;
         showGeneralError: ReturnType<typeof vi.fn>;
@@ -82,6 +86,7 @@ describe('TransactionsListComponent (Vitest)', () => {
     let transactionModalDialogRefs: FakeDialogRef<{
         deleteTransactionRequested: EventEmitter<number>;
         saved: EventEmitter<unknown>;
+        recurringTransactionOpenRequest: EventEmitter<number>;
     }>[];
 
     async function setup(
@@ -99,10 +104,13 @@ describe('TransactionsListComponent (Vitest)', () => {
             getLastTransactions: vi.fn(
                 () => options.getLastTransactionsResult ?? of(sampleLastTransactions),
             ),
-            getTransactionHistory: vi.fn(() => options.getTransactionHistoryResult ?? of(sampleHistory)),
+            getTransactionHistory: vi.fn(
+                () => options.getTransactionHistoryResult ?? of(sampleHistory),
+            ),
             getTransactionById: vi.fn(() => options.getTransactionByIdResult ?? of(null)),
         };
-        routerMock = { navigate: vi.fn() };
+        // currentNavigation: null = nincs folyamatban lévő navigáció
+        routerMock = { navigate: vi.fn(), currentNavigation: vi.fn(() => null) };
         notificationMock = { show: vi.fn(), showGeneralError: vi.fn() };
         queryParamsSubject = new BehaviorSubject<Record<string, string>>(options.queryParams ?? {});
 
@@ -112,6 +120,7 @@ describe('TransactionsListComponent (Vitest)', () => {
                 const dialogRef = new FakeDialogRef({
                     deleteTransactionRequested: new EventEmitter<number>(),
                     saved: new EventEmitter<unknown>(),
+                    recurringTransactionOpenRequest: new EventEmitter<number>(),
                 });
                 transactionModalDialogRefs.push(dialogRef);
                 return dialogRef;
@@ -428,15 +437,45 @@ describe('TransactionsListComponent (Vitest)', () => {
         expect(routerMock.navigate).not.toHaveBeenCalled();
     });
 
+    it('should navigate to the recurring transaction and close the modal when it is requested from the modal', async () => {
+        await setup({ isHistoryMode: false });
+        fixture.nativeElement.querySelector('app-transaction-card').click();
+        fixture.detectChanges();
+        const dialogRef = transactionModalDialogRefs[0]!;
+
+        dialogRef.componentInstance.recurringTransactionOpenRequest.emit(7);
+
+        expect(routerMock.navigate).toHaveBeenCalledWith(['/recurring-transactions', 7]);
+        expect(dialogRef.close).toHaveBeenCalled();
+    });
+
+    it('should not remove the id from the url when the modal opened from the route closes during another navigation', async () => {
+        await setup({ routeParams: { id: '5' } });
+        // pl. az ismétlődő tranzakció megnyitása közben zárul be a modal
+        routerMock.currentNavigation.mockReturnValue({});
+
+        transactionModalDialogRefs[0]?.close();
+
+        expect(routerMock.navigate).not.toHaveBeenCalledWith(['/transactions'], expect.anything());
+    });
+
     it('should merge the selected page into the query params, keeping the filters', async () => {
         await setup({ isHistoryMode: true, queryParams: { name: 'kávé' } });
         routerMock.navigate.mockClear();
 
-        component['handlePageChange']({ pageIndex: 1, previousPageIndex: 0, pageSize: 15, length: 16 });
+        component['handlePageChange']({
+            pageIndex: 1,
+            previousPageIndex: 0,
+            pageSize: 15,
+            length: 16,
+        });
 
         expect(routerMock.navigate).toHaveBeenCalledWith(
             [],
-            expect.objectContaining({ queryParams: { pageNumber: 1 }, queryParamsHandling: 'merge' }),
+            expect.objectContaining({
+                queryParams: { pageNumber: 1 },
+                queryParamsHandling: 'merge',
+            }),
         );
     });
 

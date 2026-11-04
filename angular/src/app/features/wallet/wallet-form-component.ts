@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
+import { RecurringTransactionRowComponent } from '../recurring-transactions/recurring-transaction-row-component';
 
 export interface WalletFormInputInterface {
     wallet: WalletListDataInterface | null;
@@ -36,6 +37,7 @@ const WALLET_TYPE_TO_DESCRIPTION: Record<WalletTypesEnum, string> = {
         MatDialogModule,
         MatIconModule,
         DialogCloseButton,
+        RecurringTransactionRowComponent,
     ],
 })
 export class WalletFormComponent implements OnInit {
@@ -53,6 +55,10 @@ export class WalletFormComponent implements OnInit {
 
     public deleted = output<number>();
     public saved = output<WalletCreateRequest | WalletUpdateRequest>();
+    /**
+     * A listában kiválasztott ismétlődő tranzakció id-ja
+     */
+    public recurringTransactionSelected = output<number>();
 
     protected walletForm = this.fb.nonNullable.group({
         name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
@@ -89,6 +95,11 @@ export class WalletFormComponent implements OnInit {
         }
         return this.wallet.deletable;
     });
+
+    /**
+     * A wallet ismétlődő tranzakciói. Létrehozáskor üres
+     */
+    protected readonly recurringTransactions = this.data.wallet?.recurringTransactions ?? [];
 
     /**
      * Form adatainak elküldése

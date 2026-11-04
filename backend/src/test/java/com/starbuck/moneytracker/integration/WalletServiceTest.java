@@ -26,21 +26,33 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.BalanceSyncCommand;
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
+import com.starbuck.moneytracker.dto.CategoryResponseDto;
+import com.starbuck.moneytracker.dto.RecurringTransactionResponseDto;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
+import com.starbuck.moneytracker.entity.Category;
+import com.starbuck.moneytracker.entity.RecurringTransaction;
+import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enums.LangEnum;
+import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
+import com.starbuck.moneytracker.entity.enums.RecurringTransactionStatusEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
+import com.starbuck.moneytracker.repository.CategoryRepository;
+import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
+import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
@@ -74,6 +86,18 @@ public class WalletServiceTest extends MySqlContainerTest {
 
     @Autowired
     TransactionDetailRepository transactionDetailRepo;
+
+    @Autowired
+    RecurringTransactionRepository recurringTransactionRepo;
+
+    @Autowired
+    RecurringTransactionCategoryRepository recurringTransactionCategoryRepo;
+
+    @Autowired
+    CategoryRepository categoryRepo;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @MockitoBean
     CurrentUserUtil currentUser;
@@ -197,6 +221,82 @@ public class WalletServiceTest extends MySqlContainerTest {
         walletRepo.delete(wallet3);
         walletRepo.delete(wallet4);
         userRepository.delete(savedAnotherUser);
+    }
+
+    /**
+     * Minden wallet a saját ismétlődő tranzakcióit kapja, a legközelebb esedékes elöl. A leállított
+     * is benne van, a törölt nem
+     */
+    @Test
+    public void testListWalletsWithRecurringTransactions() {
+        // Given
+        var wallet1 = walletService.createWallet(
+                new CreateWalletCommand("Wallet1", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+        var wallet2 = walletService.createWallet(
+                new CreateWalletCommand("Wallet2", CurrencyEnum.EUR, WalletTypeEnum.SAVINGS, this.user));
+        var walletWithoutRecurring = walletService.createWallet(
+                new CreateWalletCommand("Wallet3", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+
+        var category = categoryRepo.save(new Category("előfizetés", this.user, LangEnum.HU));
+        var netflix = saveRecurringTransaction("Netflix", LocalDate.of(2026, 12, 5), wallet1);
+        recurringTransactionCategoryRepo.save(new RecurringTransactionCategory(netflix, category));
+        var stoppedSpotify = saveRecurringTransaction("Spotify", LocalDate.of(2026, 11, 20), wallet1);
+        stoppedSpotify.setStatus(RecurringTransactionStatusEnum.STOPPED);
+        recurringTransactionRepo.save(stoppedSpotify);
+        var deleted = saveRecurringTransaction("Törölt", LocalDate.of(2026, 11, 10), wallet1);
+        recurringTransactionRepo.delete(deleted);
+        saveRecurringTransaction("Albérlet", LocalDate.of(2026, 12, 1), wallet2);
+
+        // When
+        List<WalletListResponseDto> wallets = walletService.listWalletsForUser();
+
+        // Then
+        assertEquals(3, wallets.size());
+        var wallet1Dto = findWallet(wallets, wallet1.getId());
+        assertEquals(
+                List.of("Spotify", "Netflix"),
+                wallet1Dto.recurringTransactions().stream()
+                        .map(RecurringTransactionResponseDto::name)
+                        .toList());
+        assertEquals(
+                RecurringTransactionStatusEnum.STOPPED,
+                wallet1Dto.recurringTransactions().get(0).status());
+        assertEquals(
+                List.of(category.getId()),
+                wallet1Dto.recurringTransactions().get(1).categories().stream()
+                        .map(CategoryResponseDto::id)
+                        .toList());
+
+        assertEquals(
+                List.of("Albérlet"),
+                findWallet(wallets, wallet2.getId()).recurringTransactions().stream()
+                        .map(RecurringTransactionResponseDto::name)
+                        .toList());
+        assertEquals(
+                List.of(), findWallet(wallets, walletWithoutRecurring.getId()).recurringTransactions());
+
+        // Cleanup (natív sql, mert a soft delete miatt a repository a törölt ismétlődő tranzakciót nem látja)
+        recurringTransactionCategoryRepo.deleteAllInBatch();
+        jdbcTemplate.update(
+                "DELETE FROM recurring_transaction WHERE wallet_id IN (?, ?)", wallet1.getId(), wallet2.getId());
+        categoryRepo.delete(category);
+        walletRepo.delete(wallet1);
+        walletRepo.delete(wallet2);
+        walletRepo.delete(walletWithoutRecurring);
+    }
+
+    private RecurringTransaction saveRecurringTransaction(String name, LocalDate nextOccurrenceDate, Wallet wallet) {
+        return recurringTransactionRepo.save(new RecurringTransaction(
+                name,
+                new BigDecimal("-1000"),
+                nextOccurrenceDate,
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                wallet));
+    }
+
+    private WalletListResponseDto findWallet(List<WalletListResponseDto> wallets, long walletId) {
+        return wallets.stream().filter(w -> w.id() == walletId).findFirst().orElseThrow();
     }
 
     /**
@@ -405,6 +505,46 @@ public class WalletServiceTest extends MySqlContainerTest {
 
         walletRepo.delete(deletedWallet);
         walletRepo.delete(walletAnother);
+    }
+
+    /**
+     * Wallet törlésekor a hozzá tartozó ismétlődő tranzakciók is törlődnek (soft delete, a
+     * leállítottak is), más wallet ismétlődő tranzakciói megmaradnak
+     */
+    @Test
+    public void testSoftDeleteWalletDeletesItsRecurringTransactions() {
+        // Given
+        var wallet = walletService.createWallet(
+                new CreateWalletCommand("ToDelete", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+        var walletAnother = walletService.createWallet(
+                new CreateWalletCommand("Remaining", CurrencyEnum.HUF, WalletTypeEnum.DEFAULT, this.user));
+
+        var active = saveRecurringTransaction("Netflix", LocalDate.of(2026, 12, 5), wallet);
+        var stopped = saveRecurringTransaction("Spotify", LocalDate.of(2026, 11, 20), wallet);
+        stopped.setStatus(RecurringTransactionStatusEnum.STOPPED);
+        recurringTransactionRepo.save(stopped);
+        var otherWallets = saveRecurringTransaction("Albérlet", LocalDate.of(2026, 12, 1), walletAnother);
+
+        // When
+        walletService.softDeleteWallet(wallet.getId());
+
+        // Then
+        // natív sql, mert a soft delete miatt a repository a töröltet nem látja
+        assertEquals("DELETED", recurringTransactionStatusInDb(active.getId()));
+        assertEquals("DELETED", recurringTransactionStatusInDb(stopped.getId()));
+        assertEquals("ACTIVE", recurringTransactionStatusInDb(otherWallets.getId()));
+        assertEquals(List.of(), recurringTransactionRepo.findByWalletId(wallet.getId()));
+
+        // Cleanup
+        jdbcTemplate.update(
+                "DELETE FROM recurring_transaction WHERE wallet_id IN (?, ?)", wallet.getId(), walletAnother.getId());
+        walletRepo.delete(walletRepo.findById(wallet.getId()).orElseThrow());
+        walletRepo.delete(walletAnother);
+    }
+
+    private String recurringTransactionStatusInDb(long recurringTransactionId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT status FROM recurring_transaction WHERE id = ?", String.class, recurringTransactionId);
     }
 
     // HIBÁS ESETEK

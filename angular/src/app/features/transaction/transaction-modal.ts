@@ -42,11 +42,19 @@ export class TransactionModalComponent {
 
     public deleteTransactionRequested = output<number>();
     public saved = output<NewTransaction>();
+    public recurringTransactionOpenRequest = output<number>();
 
     /**
      * Szinkronizációs tranzakció-e
      */
     protected isSyncTransaction = computed(() => {
         return this.data.transaction()?.specialType === TransactionSpecialTypeEnum.SYNC;
+    });
+
+    /**
+     * Ismétlődő tranzakció-e
+     */
+    protected isRecurringTransaction = computed(() => {
+        return this.data.transaction()?.specialType === TransactionSpecialTypeEnum.RECURRING;
     });
 }

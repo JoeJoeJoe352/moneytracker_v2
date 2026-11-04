@@ -28,6 +28,7 @@ import com.starbuck.moneytracker.dto.TransactionDetailResponseDto;
 import com.starbuck.moneytracker.dto.TransactionEditResponseDto;
 import com.starbuck.moneytracker.dto.TransactionResponseDto;
 import com.starbuck.moneytracker.entity.Category;
+import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
@@ -35,6 +36,8 @@ import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
+import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
+import com.starbuck.moneytracker.entity.enums.RecurringTransactionStatusEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
@@ -161,6 +164,48 @@ class TransactionMapperTest {
         TransactionEditResponseDto dto = mapper.toEditDto(createSyncTransaction());
 
         assertEquals(TransactionSpecialTypeEnum.SYNC, dto.specialType());
+        assertNull(dto.recurringTransactionId());
+    }
+
+    /**
+     * Ismétlődő tranzakcióból létrejött tranzakciónál az ismétlődő tranzakció id-ja is benne van
+     */
+    @Test
+    void toEditDto_mapsRecurringTransactionId() {
+        TransactionEditResponseDto dto =
+                mapper.toEditDto(createRecurringTransaction(RecurringTransactionStatusEnum.ACTIVE));
+
+        assertEquals(TransactionSpecialTypeEnum.RECURRING, dto.specialType());
+        assertEquals(5L, dto.recurringTransactionId());
+    }
+
+    /**
+     * A leállított ismétlődő tranzakció még megnyitható, ezért az id-ja is megjelenik
+     */
+    @Test
+    void toEditDto_mapsStoppedRecurringTransactionId() {
+        TransactionEditResponseDto dto =
+                mapper.toEditDto(createRecurringTransaction(RecurringTransactionStatusEnum.STOPPED));
+
+        assertEquals(5L, dto.recurringTransactionId());
+    }
+
+    private Transaction createRecurringTransaction(RecurringTransactionStatusEnum recurringStatus) {
+        Transaction transaction = createSyncTransaction();
+        transaction.setSpecialType(TransactionSpecialTypeEnum.RECURRING);
+
+        RecurringTransaction recurringTransaction = new RecurringTransaction(
+                "Spotify",
+                new BigDecimal("-10.00"),
+                LocalDate.of(2026, 10, 1),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                defaultWallet);
+        recurringTransaction.setId(5L);
+        recurringTransaction.setStatus(recurringStatus);
+        transaction.setRecurringTransaction(recurringTransaction);
+
+        return transaction;
     }
 
     private Transaction createSyncTransaction() {

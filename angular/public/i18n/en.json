@@ -88,7 +88,11 @@
     "categories": "Categories",
     "categories.add": "Add categories",
     "is_sync_transaction": "Transaction created during a balance sync",
+    "is_recurring_transaction": "Transaction created from a recurring transaction",
+    "recurring_transaction.open": "Open recurring transaction",
+    "recurring_transaction.open_unsaved_confirm": "Your unsaved changes will be lost. Do you want to open the recurring transaction anyway?",
     "wallet.sync_locked": "The wallet of a sync transaction cannot be changed",
+    "wallet.recurring_transaction_locked": "The wallet of a recurring transaction cannot be changed",
     "category": {
       "add": "Click here to add a new category!",
       "remove": "Remove {{name}}"
@@ -111,13 +115,16 @@
       "simple_price_mode": "Enter price",
       "complex_price_mode": "Enter quantity and unit price",
       "total_price": "Total price"
-    }
+    },
+    "recurring_transaction": "Recurring transaction"
   },
   "wallet": {
     "create": "Create wallet",
     "update": "Update wallet",
     "delete": "Delete wallet",
     "delete.confirm": "Are you sure you want to delete this wallet?",
+    "delete.confirm_with_recurring_transactions": "This wallet has recurring transactions, which will be deleted together with it. Transactions already created will be kept. Are you sure you want to delete this wallet?",
+    "recurring_transactions": "Recurring transactions of this wallet",
     "name": "Wallet name",
     "name.required": "Wallet name is required!",
     "name.minlength": "Wallet name must be at least 2 characters long!",
@@ -186,6 +193,7 @@
   "recurring_transaction": {
     "title": "My recurring transactions",
     "empty": "No recurring transactions yet",
+    "not_found": "The requested recurring transaction was not found!",
     "next_occurrence": "Next",
     "interval": {
       "weekly": "week",

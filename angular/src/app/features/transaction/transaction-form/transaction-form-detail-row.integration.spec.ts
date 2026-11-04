@@ -27,6 +27,7 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         isComplexTransaction: true,
         walletId: 1,
         specialType: null,
+        recurringTransactionId: null,
         transactionDetails: [
             {
                 name: 'Kenyér',
@@ -193,8 +194,9 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
         fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
         fixture.detectChanges();
 
-        const firstCategorySelect = fixture.debugElement.query(By.directive(CategorySelectComponent))
-            .componentInstance as CategorySelectComponent;
+        const firstCategorySelect = fixture.debugElement.query(
+            By.directive(CategorySelectComponent),
+        ).componentInstance as CategorySelectComponent;
 
         expect(firstCategorySelect.addCategoryCallback()).toBe(addCategoryCallback);
     });

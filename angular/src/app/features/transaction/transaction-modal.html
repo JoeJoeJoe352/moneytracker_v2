@@ -13,11 +13,15 @@
             </div>
         </mat-dialog-content>
     } @else {
-        @if (isSyncTransaction()) {
+        @if (isSyncTransaction() || isRecurringTransaction()) {
             <mat-dialog-content>
                 <div class="warning-block">
                     <div>
-                        {{ 'transaction.is_sync_transaction' | translate }}
+                        @if (isSyncTransaction()) {
+                            {{ 'transaction.is_sync_transaction' | translate }}
+                        } @else if (isRecurringTransaction()) {
+                            {{ 'transaction.is_recurring_transaction' | translate }}
+                        }
                     </div>
                 </div>
             </mat-dialog-content>
@@ -30,6 +34,7 @@
             (deleted)="deleteTransactionRequested.emit($event)"
             (saved)="saved.emit($event)"
             [isCategorySaveInProgress]="data.isCategorySaveInProgress()"
+            (recurringTransactionOpenRequest)="recurringTransactionOpenRequest.emit($event)"
         />
     }
 </div>

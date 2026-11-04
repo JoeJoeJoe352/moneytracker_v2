@@ -30,6 +30,11 @@ export class RecurringTransactionRowComponent {
     transaction = input.required<RecurringTransactionResponseInterface>();
 
     /**
+     * Megjelenjen-e a wallet neve (pl. a wallet saját modaljában felesleges)
+     */
+    showWalletName = input(true);
+
+    /**
      * Sor kiválasztása (kattintás, enter vagy space)
      */
     selected = output<void>();

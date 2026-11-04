@@ -2,16 +2,19 @@ import { Routes, UrlMatchResult, UrlSegment } from '@angular/router';
 import { authGuard } from './auth-guard';
 
 /**
- * A /transactions és a /transactions/:id URL-t is ugyanarra a route-ra illeszti (opcionális id),
+ * A /{path} és a /{path}/:id URL-t is ugyanarra a route-ra illeszti (opcionális id), így az id
+ * hozzáadásakor/elvételekor nem jön létre újra a komponens
  */
-export function transactionsMatcher(segments: UrlSegment[]): UrlMatchResult | null {
-    const [first, id] = segments;
-    if (first?.path !== 'transactions' || segments.length > 2) {
-        return null;
-    }
-    return {
-        consumed: segments,
-        posParams: id ? { id } : {},
+export function optionalIdMatcher(path: string) {
+    return (segments: UrlSegment[]): UrlMatchResult | null => {
+        const [first, id] = segments;
+        if (first?.path !== path || segments.length > 2) {
+            return null;
+        }
+        return {
+            consumed: segments,
+            posParams: id ? { id } : {},
+        };
     };
 }
 
@@ -31,7 +34,7 @@ export const routes: Routes = [
             import('./features/welcome/welcome-component').then((m) => m.WelcomeComponent),
     },
     {
-        matcher: transactionsMatcher,
+        matcher: optionalIdMatcher('transactions'),
         loadComponent: () =>
             import('./features/transaction/transactions-page-component').then(
                 (m) => m.TransactionsPageComponent,
@@ -45,9 +48,11 @@ export const routes: Routes = [
         canActivate: [authGuard],
     },
     {
-        path: 'recurring-transactions',
+        matcher: optionalIdMatcher('recurring-transactions'),
         loadComponent: () =>
-            import('./features/recurring-transactions/recurring-transactions-page-component').then((m) => m.RecurringTransactionsPageComponent),
+            import('./features/recurring-transactions/recurring-transactions-page-component').then(
+                (m) => m.RecurringTransactionsPageComponent,
+            ),
         canActivate: [authGuard],
     },
     {

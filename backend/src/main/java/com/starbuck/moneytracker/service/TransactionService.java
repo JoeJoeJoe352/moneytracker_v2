@@ -107,9 +107,9 @@ public class TransactionService {
 
         // A szinkronizációs tranzakció a BalanceSync-en keresztül egy wallethez kötött,
         // áthelyezve rossz wallet egyenlegét korrigálná
-        if (transaction.isSyncTransaction()
+        if ((transaction.isSyncTransaction() || transaction.isRecurringTransaction())
                 && !Objects.equals(transaction.getWallet().getId(), updateCommand.getWalletId())) {
-            throw new IllegalArgumentException("Wallet of sync transaction " + id + " cannot be changed");
+            throw new IllegalArgumentException("Wallet of sync or recurring transaction " + id + " cannot be changed");
         }
 
         transaction.setName(updateCommand.getTransactionName());

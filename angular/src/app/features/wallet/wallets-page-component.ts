@@ -15,6 +15,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatButton } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { WalletFormComponent, WalletFormInputInterface } from './wallet-form-component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { NotificationService } from '@shared/services/notification-service';
@@ -33,6 +34,7 @@ export class WalletsPageComponent {
     private readonly userData = inject(UserDataStore);
     private readonly dialog = inject(MatDialog);
     private readonly notification = inject(NotificationService);
+    private readonly router = inject(Router);
 
     protected readonly RESOURCE_STATUS_LOADING = RESOURCE_STATUS_LOADING;
 
@@ -67,8 +69,28 @@ export class WalletsPageComponent {
             this.onWalletSaved(walletData, payload, dialogRef),
         );
         dialogRef.componentInstance.deleted.subscribe((walletId) =>
-            this.onWalletDeleted(walletId, dialogRef),
+            this.onWalletDeleted(
+                walletId,
+                (walletData?.recurringTransactions.length ?? 0) > 0,
+                dialogRef,
+            ),
         );
+        dialogRef.componentInstance.recurringTransactionSelected.subscribe(
+            (recurringTransactionId) =>
+                this.onRecurringTransactionSelected(recurringTransactionId, dialogRef),
+        );
+    }
+
+    /**
+     * Bezárja a wallet modalt, és az ismétlődő tranzakciók oldalára navigál, ahol a kiválasztott
+     * ismétlődő tranzakció modalja nyílik fel
+     */
+    private onRecurringTransactionSelected(
+        recurringTransactionId: number,
+        dialogRef: MatDialogRef<WalletFormComponent>,
+    ): void {
+        dialogRef.close();
+        void this.router.navigate(['/recurring-transactions', recurringTransactionId]);
     }
 
     /**
@@ -128,11 +150,21 @@ export class WalletsPageComponent {
     }
 
     /**
-     * Törli a walletet megerősítés után, majd újratölti a listát
+     * Törli a walletet megerősítés után, majd újratölti a listát. Ha vannak (nem törölt) ismétlődő
+     * tranzakciói, a megerősítő üzenet erre is figyelmeztet, mert azokat a backend a wallettel
+     * együtt törli
      */
-    private onWalletDeleted(walletId: number, dialogRef: MatDialogRef<WalletFormComponent>): void {
+    private onWalletDeleted(
+        walletId: number,
+        hasRecurringTransactions: boolean,
+        dialogRef: MatDialogRef<WalletFormComponent>,
+    ): void {
+        const messageKey = hasRecurringTransactions
+            ? _('wallet.delete.confirm_with_recurring_transactions')
+            : _('wallet.delete.confirm');
+
         ConfirmDialogComponent.open(this.dialog, {
-            message: this.translateService.instant(_('wallet.delete.confirm')) as string,
+            message: this.translateService.instant(messageKey) as string,
             danger: true,
         })
             .afterClosed()

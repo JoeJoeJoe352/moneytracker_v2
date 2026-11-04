@@ -1,5 +1,6 @@
 import { Signal } from '@angular/core';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
+import type { RecurringTransactionResponseInterface } from '../recurring-transactions/interfaces';
 
 export interface WalletDataInterface {
     id: number;
@@ -18,6 +19,10 @@ export interface WalletListDataInterface {
     // Akkor használható csak biztonsággal, ha előtte valami betölti a garantáltan frisset
     sum: number;
     deletable: boolean;
+    /**
+     * A wallethez tartozó (nem törölt) ismétlődő tranzakciók, a legközelebb esedékes elöl
+     */
+    recurringTransactions: RecurringTransactionResponseInterface[];
 }
 
 export interface WalletCreateRequest {

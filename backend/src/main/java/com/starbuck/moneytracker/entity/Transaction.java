@@ -74,9 +74,13 @@ public class Transaction {
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
-    /** Az ismétlődő tranzakció, amiből ez a tranzakció létrejött */
+    /**
+     * Az ismétlődő tranzakció, amiből ez a tranzakció létrejött. Csak létrehozáskor íródik: a törölt
+     * ismétlődő tranzakciót a Hibernate null-ként tölti be (@SQLRestriction), és módosításkor
+     * különben ezt a null-t írná vissza, elveszítve a kapcsolatot
+     */
     @ManyToOne(optional = true)
-    @JoinColumn(name = "recurring_transaction_id", nullable = true)
+    @JoinColumn(name = "recurring_transaction_id", nullable = true, updatable = false)
     private RecurringTransaction recurringTransaction;
 
     /**
@@ -95,6 +99,15 @@ public class Transaction {
      */
     public boolean isSyncTransaction() {
         return this.specialType == TransactionSpecialTypeEnum.SYNC;
+    }
+
+    /**
+     * Szinkronizáció során létrejött tranzakció-e
+     *
+     * @return boolean
+     */
+    public boolean isRecurringTransaction() {
+        return this.specialType == TransactionSpecialTypeEnum.RECURRING;
     }
 
     /**
