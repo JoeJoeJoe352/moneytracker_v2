@@ -13,6 +13,7 @@ import { TransactionModalComponent, TransactionModalInputInterface } from './tra
 import { NotificationService } from '@shared/services/notification-service';
 import { _ } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 interface ModalParams {
     isOpen: boolean;
@@ -32,6 +33,7 @@ export class TransactionModalStateService {
     private categoryService = inject(CategoryService);
     private dialog = inject(MatDialog);
     private notification = inject(NotificationService);
+    private router = inject(Router);
 
     /**
      * Nyitva van-e a modal
@@ -178,6 +180,13 @@ export class TransactionModalStateService {
         );
 
         dialogRef.componentInstance.saved.subscribe((payload) => this.save(payload));
+
+        dialogRef.componentInstance.recurringTransactionOpenRequest.subscribe(
+            (recurringTransactionId) => {
+                this.dialogRef?.close();
+                void this.router.navigate(['/recurring-transactions', recurringTransactionId]);
+            },
+        );
 
         dialogRef.afterClosed().subscribe(() => {
             this.isOpen.set(false);

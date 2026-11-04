@@ -34,6 +34,7 @@
             (deleted)="deleteTransactionRequested.emit($event)"
             (saved)="saved.emit($event)"
             [isCategorySaveInProgress]="data.isCategorySaveInProgress()"
+            (recurringTransactionOpenRequest)="recurringTransactionOpenRequest.emit($event)"
         />
     }
 </div>

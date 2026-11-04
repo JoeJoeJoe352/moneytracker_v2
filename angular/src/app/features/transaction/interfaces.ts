@@ -88,6 +88,7 @@ export interface TransactionDataFromBackend {
     transactionDetails: TransactionDetailsDataFromBackend[];
     walletId: number;
     specialType: TransactionSpecialTypeEnum | null;
+    recurringTransactionId: number | null;
 }
 
 /**

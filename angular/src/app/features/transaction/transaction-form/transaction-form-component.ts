@@ -107,6 +107,10 @@ export class TransactionFormComponent implements OnChanges {
      */
     public deleted = output<number>();
     /**
+     * Ismétlődő tranzakció felnyitás gombjára kattintott a user
+     */
+    public recurringTransactionOpenRequest = output<number>();
+    /**
      * Tranzakciós form. A selectedWalletId előtt kell létrehozni, mert annak a valueChanges-ét figyeli
      */
     protected readonly transactionForm = this.createForm();
@@ -332,6 +336,24 @@ export class TransactionFormComponent implements OnChanges {
         if (this.isComplexTransaction.value && this.details.length === 0) {
             this.addRow();
         }
+    }
+
+    /**
+     * A user az ismétlődőt tranzakció linkre kattintott
+     */
+    protected recurringTransactionLinkClicked() {
+        const transactionData = this.transaction();
+        if (transactionData === null) {
+            console.error('transaction data not exists');
+            return;
+        }
+
+        if (transactionData.recurringTransactionId === null) {
+            console.error('transaction recurringTransactionId not set');
+            return;
+        }
+
+        this.recurringTransactionOpenRequest.emit(transactionData.recurringTransactionId);
     }
 
     // Getterek

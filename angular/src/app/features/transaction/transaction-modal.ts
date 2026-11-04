@@ -42,6 +42,7 @@ export class TransactionModalComponent {
 
     public deleteTransactionRequested = output<number>();
     public saved = output<NewTransaction>();
+    public recurringTransactionOpenRequest = output<number>();
 
     /**
      * Szinkronizációs tranzakció-e
