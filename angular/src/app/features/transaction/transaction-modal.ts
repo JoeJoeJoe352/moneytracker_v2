@@ -49,4 +49,11 @@ export class TransactionModalComponent {
     protected isSyncTransaction = computed(() => {
         return this.data.transaction()?.specialType === TransactionSpecialTypeEnum.SYNC;
     });
+
+    /**
+     * Ismétlődő tranzakció-e
+     */
+    protected isRecurringTransaction = computed(() => {
+        return this.data.transaction()?.specialType === TransactionSpecialTypeEnum.RECURRING;
+    });
 }

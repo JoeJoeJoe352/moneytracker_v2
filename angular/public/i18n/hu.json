@@ -88,6 +88,7 @@
     "categories": "Kategóriák",
     "categories.add": "Kategóriák hozzáadása",
     "is_sync_transaction": "Szinkronizáció során létrejött tranzakció",
+    "is_recurring_transaction": "Ismétlődő tranzakció során létrejött tranzakció",
     "wallet.sync_locked": "Szinkronizációs tranzakció tárcája nem módosítható",
     "wallet.recurring_transaction_locked": "Ismétlődő tranzakció tárcája nem módosítható",
     "category": {
