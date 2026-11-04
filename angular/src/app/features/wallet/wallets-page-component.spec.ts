@@ -58,6 +58,7 @@ const sampleWallet: WalletListDataInterface = {
     type: WalletTypesEnum.default,
     sum: 0,
     lastSyncDate: '2026-09-15',
+    recurringTransactions: [],
     deletable: false,
 };
 

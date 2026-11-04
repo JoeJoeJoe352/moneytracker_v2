@@ -17,6 +17,7 @@ describe('WalletsListComponent (Vitest)', () => {
             type: WalletTypesEnum.default,
             sum: 0,
             lastSyncDate: '2026-09-15',
+            recurringTransactions: [],
             deletable: false,
         },
         {
@@ -26,6 +27,7 @@ describe('WalletsListComponent (Vitest)', () => {
             type: WalletTypesEnum.savings,
             sum: 0,
             lastSyncDate: '2026-09-15',
+            recurringTransactions: [],
             deletable: false,
         },
     ];

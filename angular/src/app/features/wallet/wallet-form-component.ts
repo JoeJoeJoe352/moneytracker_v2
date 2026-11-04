@@ -11,6 +11,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
+import { Router } from '@angular/router';
+import { RecurringTransactionRowComponent } from '../recurring-transactions/recurring-transaction-row-component';
 
 export interface WalletFormInputInterface {
     wallet: WalletListDataInterface | null;
@@ -36,10 +38,12 @@ const WALLET_TYPE_TO_DESCRIPTION: Record<WalletTypesEnum, string> = {
         MatDialogModule,
         MatIconModule,
         DialogCloseButton,
+        RecurringTransactionRowComponent,
     ],
 })
 export class WalletFormComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
+    private readonly router = inject(Router);
     protected readonly walletDataUtil = inject(WalletDataUtil);
     protected readonly currencyOptions = Object.values(CurrencyCodesEnum);
     protected readonly walletTypeOptions = Object.values(WalletTypesEnum);
@@ -89,6 +93,19 @@ export class WalletFormComponent implements OnInit {
         }
         return this.wallet.deletable;
     });
+
+    /**
+     * A wallet ismétlődő tranzakciói. Létrehozáskor üres
+     */
+    protected recurringTransactions = computed(() => this.data.wallet?.recurringTransactions ?? []);
+
+    /**
+     * Az ismétlődő tranzakciók oldalára navigál, ahol a kiválasztott modalja nyílik fel.
+     * A navigáció a wallet modalt is bezárja (MatDialog closeOnNavigation)
+     */
+    protected openRecurringTransaction(recurringTransactionId: number): void {
+        void this.router.navigate(['/recurring-transactions', recurringTransactionId]);
+    }
 
     /**
      * Form adatainak elküldése

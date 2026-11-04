@@ -5,13 +5,17 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.CreateWalletCommand;
 import com.starbuck.moneytracker.commands.UpdateWalletCommand;
+import com.starbuck.moneytracker.dto.RecurringTransactionResponseDto;
 import com.starbuck.moneytracker.dto.WalletListResponseDto;
 import com.starbuck.moneytracker.dto.WalletListRowResponseDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
@@ -21,6 +25,8 @@ import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
+import com.starbuck.moneytracker.mapper.RecurringTransactionMapper;
+import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.UserDateUtil;
@@ -32,16 +38,23 @@ public class WalletService {
     private final MessageSource messageSource;
     private final CurrentUserUtil userUtil;
     private final UserDateUtil userDateUtil;
+    // a RecurringTransactionService helyett a repository, mert az a WalletService-től függ
+    private final RecurringTransactionRepository recurringTransactionRepo;
+    private final RecurringTransactionMapper recurringTransactionMapper;
 
     public WalletService(
             WalletRepository walletRepo,
             MessageSource messageSource,
             CurrentUserUtil userUtil,
-            UserDateUtil userDateUtil) {
+            UserDateUtil userDateUtil,
+            RecurringTransactionRepository recurringTransactionRepo,
+            RecurringTransactionMapper recurringTransactionMapper) {
         this.walletRepo = walletRepo;
         this.messageSource = messageSource;
         this.userUtil = userUtil;
         this.userDateUtil = userDateUtil;
+        this.recurringTransactionRepo = recurringTransactionRepo;
+        this.recurringTransactionMapper = recurringTransactionMapper;
     }
 
     /**
@@ -95,14 +108,31 @@ public class WalletService {
     }
 
     /**
-     * Visszatér a user tárcáival
+     * Visszatér a user tárcáival, mindegyiknél a hozzá tartozó ismétlődő tranzakciókkal
      */
+    @Transactional(readOnly = true)
     public List<WalletListResponseDto> listWalletsForUser() {
-        var wallets = walletRepo.listWalletsWithSumByUserId(userUtil.getUser().getId());
+        long userId = userUtil.getUser().getId();
+        var wallets = walletRepo.listWalletsWithSumByUserId(userId);
         boolean deletable = isWalletsDeletable(wallets.size());
+
+        // egy lekérdezéssel az összes, walletenként csoportosítva (a lekérdezés sorrendje megmarad)
+        Map<Long, List<RecurringTransactionResponseDto>> recurringTransactionsByWalletId =
+                recurringTransactionRepo.findAllForUser(userId).stream()
+                        .collect(Collectors.groupingBy(
+                                r -> r.getWallet().getId(),
+                                Collectors.mapping(recurringTransactionMapper::toDto, Collectors.toList())));
+
         return wallets.stream()
                 .map(w -> new WalletListResponseDto(
-                        w.id(), w.name(), w.currencyCode(), w.type(), w.sum(), getLastSyncDate(w), deletable))
+                        w.id(),
+                        w.name(),
+                        w.currencyCode(),
+                        w.type(),
+                        w.sum(),
+                        getLastSyncDate(w),
+                        deletable,
+                        recurringTransactionsByWalletId.getOrDefault(w.id(), List.of())))
                 .toList();
     }
 

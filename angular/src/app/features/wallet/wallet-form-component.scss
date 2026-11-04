@@ -21,4 +21,20 @@
         text-align: justify;
         color: #6b7280;
     }
+
+    .recurring-transactions {
+        margin-top: 24px;
+
+        h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .recurring-list {
+            border: 1px solid var(--moneytracker-grey);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    }
 }

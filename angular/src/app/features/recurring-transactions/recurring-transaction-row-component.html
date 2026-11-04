@@ -16,7 +16,9 @@
     </div>
     <div class="base-data">
         <div class="name">{{ transaction().name }}</div>
-        <div class="wallet-name">({{ transaction().wallet.name }})</div>
+        @if (showWalletName()) {
+            <div class="wallet-name">({{ transaction().wallet.name }})</div>
+        }
     </div>
     @if (transaction().categories.length) {
         <div class="categories">{{ categoryNames() }}</div>

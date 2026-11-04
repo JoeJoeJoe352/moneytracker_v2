@@ -25,6 +25,8 @@ import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
+import com.starbuck.moneytracker.mapper.RecurringTransactionMapper;
+import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.WalletService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -45,6 +47,12 @@ public class WalletServiceTest {
     @Mock
     private UserDateUtil userDateUtil;
 
+    @Mock
+    private RecurringTransactionRepository recurringTransactionRepo;
+
+    @Mock
+    private RecurringTransactionMapper recurringTransactionMapper;
+
     private WalletService walletService;
 
     private final User user = new User(1L, "name", "password", "email");
@@ -53,7 +61,13 @@ public class WalletServiceTest {
 
     @BeforeEach
     void setUp() {
-        walletService = new WalletService(walletRepo, messageSource, currentUser, userDateUtil);
+        walletService = new WalletService(
+                walletRepo,
+                messageSource,
+                currentUser,
+                userDateUtil,
+                recurringTransactionRepo,
+                recurringTransactionMapper);
         when(currentUser.getUser()).thenReturn(user);
     }
 
