@@ -26,7 +26,7 @@ public class RecurringTransactionScheduler {
      * venni a régebbi tranzakciókat is, a jó időpontban, de futásonként (jelenleg
      * óránként) csak egyet
      */
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 */15 * * * *")
     public void generateRecurrentTransactions() {
         LocalDate actualDate = LocalDate.now(clock);
 
