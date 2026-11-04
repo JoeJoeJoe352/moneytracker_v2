@@ -21,6 +21,7 @@ describe('TransactionUtils', () => {
                 isComplexTransaction: false,
                 walletId: 1,
                 specialType: null,
+                recurringTransactionId: null,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -62,6 +63,7 @@ describe('TransactionUtils', () => {
                 categories: [],
                 walletId: 1,
                 specialType: null,
+                recurringTransactionId: null,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -93,6 +95,7 @@ describe('TransactionUtils', () => {
                 isComplexTransaction: true,
                 walletId: 1,
                 specialType: null,
+                recurringTransactionId: null,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',
@@ -149,6 +152,7 @@ describe('TransactionUtils', () => {
                 categories: [],
                 walletId: 1,
                 specialType: null,
+                recurringTransactionId: null,
                 transactionDetails: [
                     {
                         name: 'Részlet 1',

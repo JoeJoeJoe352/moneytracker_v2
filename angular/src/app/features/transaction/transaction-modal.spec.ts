@@ -32,6 +32,7 @@ const baseTransaction: TransactionDataFromBackend = {
     transactionDetails: [],
     walletId: 1,
     specialType: null,
+    recurringTransactionId: null,
 };
 
 describe('TransactionModalComponent (Vitest)', () => {
@@ -88,10 +89,11 @@ describe('TransactionModalComponent (Vitest)', () => {
         expect(warningBlock()).toBeNull();
     });
 
-    it('should not show the sync warning for a recurring transaction', async () => {
+    it('should show the recurring warning instead of the sync warning for a recurring transaction', async () => {
         await setup({ ...baseTransaction, specialType: TransactionSpecialTypeEnum.RECURRING });
 
-        expect(warningBlock()).toBeNull();
+        expect(warningBlock()?.textContent).toContain('transaction.is_recurring_transaction');
+        expect(warningBlock()?.textContent).not.toContain('transaction.is_sync_transaction');
     });
 
     it('should not show the sync warning when creating a new transaction', async () => {

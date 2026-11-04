@@ -203,8 +203,13 @@
             </button>
         }
 
-        @if (isRecurringTransaction()) {
-            <button type="button" matButton="outlined" (click)="recurringTransactionLinkClicked()">
+        @if (recurringTransactionId(); as recurringTransactionId) {
+            <button
+                type="button"
+                matButton="outlined"
+                class="open-recurring-transaction"
+                (click)="openRecurringTransaction(recurringTransactionId)"
+            >
                 {{ 'transaction.recurring_transaction.open' | translate }}
             </button>
         }

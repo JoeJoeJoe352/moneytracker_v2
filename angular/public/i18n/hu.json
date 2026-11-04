@@ -90,6 +90,7 @@
     "is_sync_transaction": "Szinkronizáció során létrejött tranzakció",
     "is_recurring_transaction": "Ismétlődő tranzakció során létrejött tranzakció",
     "recurring_transaction.open": "Ismétlődő tranzakció megnyitása",
+    "recurring_transaction.open_unsaved_confirm": "A nem mentett módosításaid elvesznek. Biztosan megnyitod az ismétlődő tranzakciót?",
     "wallet.sync_locked": "Szinkronizációs tranzakció tárcája nem módosítható",
     "wallet.recurring_transaction_locked": "Ismétlődő tranzakció tárcája nem módosítható",
     "category": {

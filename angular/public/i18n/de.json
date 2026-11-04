@@ -88,6 +88,9 @@
     "categories": "Kategorien",
     "categories.add": "Kategorien hinzufügen",
     "is_sync_transaction": "Bei einer Guthaben-Synchronisierung erstellte Transaktion",
+    "is_recurring_transaction": "Aus einer wiederkehrenden Transaktion erstellte Transaktion",
+    "recurring_transaction.open": "Wiederkehrende Transaktion öffnen",
+    "recurring_transaction.open_unsaved_confirm": "Deine nicht gespeicherten Änderungen gehen verloren. Möchtest du die wiederkehrende Transaktion trotzdem öffnen?",
     "wallet.sync_locked": "Das Wallet einer Synchronisierungstransaktion kann nicht geändert werden",
     "wallet.recurring_transaction_locked": "Das Wallet einer wiederkehrenden Transaktion kann nicht geändert werden",
     "category": {

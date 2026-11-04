@@ -27,7 +27,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslatePipe } from '@ngx-translate/core';
+import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DropdownInterface } from '@shared/interfaces';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
@@ -41,7 +41,8 @@ import {
 import { UserDataStore } from '@app/shared/stores/user-data-store';
 import { WalletDataUtil } from '@shared/utils/wallet-data-util';
 import { TransactionSpecialTypeEnum } from '@shared/enums';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { Observable } from 'rxjs';
 import { TransactionUtils } from '../transaction-utils';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -67,6 +68,8 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 })
 export class TransactionFormComponent implements OnChanges {
     private readonly fb = inject(FormBuilder);
+    private readonly dialog = inject(MatDialog);
+    private readonly translateService = inject(TranslateService);
     protected readonly userData = inject(UserDataStore);
     protected readonly walletUtil = inject(WalletDataUtil);
     protected readonly transactionUtils = inject(TransactionUtils);
@@ -148,6 +151,14 @@ export class TransactionFormComponent implements OnChanges {
      */
     protected readonly isRecurringTransaction = computed(
         () => this.transaction()?.specialType === TransactionSpecialTypeEnum.RECURRING,
+    );
+
+    /**
+     * Az ismétlődő tranzakció id-ja, amiből a tranzakció létrejött. Null, ha nincs (vagy már
+     * törölték), ilyenkor a megnyitás gomb sem jelenik meg
+     */
+    protected readonly recurringTransactionId = computed(
+        () => this.transaction()?.recurringTransactionId ?? null,
     );
 
     /**
@@ -339,21 +350,26 @@ export class TransactionFormComponent implements OnChanges {
     }
 
     /**
-     * A user az ismétlődőt tranzakció linkre kattintott
+     * A user az ismétlődő tranzakció megnyitása gombra kattintott. Ha vannak nem mentett
+     * módosítások a formban, előbb megerősítést kér, mert azok a megnyitással elvesznek
      */
-    protected recurringTransactionLinkClicked() {
-        const transactionData = this.transaction();
-        if (transactionData === null) {
-            console.error('transaction data not exists');
+    protected openRecurringTransaction(recurringTransactionId: number): void {
+        if (!this.transactionForm.dirty) {
+            this.recurringTransactionOpenRequest.emit(recurringTransactionId);
             return;
         }
 
-        if (transactionData.recurringTransactionId === null) {
-            console.error('transaction recurringTransactionId not set');
-            return;
-        }
-
-        this.recurringTransactionOpenRequest.emit(transactionData.recurringTransactionId);
+        ConfirmDialogComponent.open(this.dialog, {
+            message: this.translateService.instant(
+                _('transaction.recurring_transaction.open_unsaved_confirm'),
+            ) as string,
+        })
+            .afterClosed()
+            .subscribe((confirmed) => {
+                if (confirmed) {
+                    this.recurringTransactionOpenRequest.emit(recurringTransactionId);
+                }
+            });
     }
 
     // Getterek

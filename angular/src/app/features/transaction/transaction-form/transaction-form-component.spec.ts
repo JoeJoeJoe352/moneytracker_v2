@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { inject } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -22,9 +24,12 @@ import { UserDataStore } from '@app/shared/stores/user-data-store';
 describe('TransactionFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionFormComponent>;
     let component: TransactionFormComponent;
+    let dialogOpenSpy: ReturnType<typeof vi.fn>;
+    let confirmResult: boolean;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
+        confirmResult = true;
+        TestBed.configureTestingModule({
             imports: [TransactionFormComponent],
             providers: [
                 provideTranslateService(),
@@ -36,31 +41,37 @@ describe('TransactionFormComponent (Vitest)', () => {
                 {
                     provide: UserDataStore,
                     useValue: {
-                        getDefaultWallet: () => ({
-                            id: 1,
-                            name: 'Test Wallet',
-                            type: WalletTypesEnum.default,
-                            currencyCode: CurrencyCodesEnum.huf
-
-                        }) as WalletDataInterface,
-                        getWallets: () => [
-                            {
+                        getDefaultWallet: () =>
+                            ({
                                 id: 1,
                                 name: 'Test Wallet',
                                 type: WalletTypesEnum.default,
                                 currencyCode: CurrencyCodesEnum.huf,
-                            },
-                            {
-                                id: 2,
-                                name: 'Euro Wallet',
-                                type: WalletTypesEnum.default,
-                                currencyCode: CurrencyCodesEnum.eur,
-                            },
-                        ] as WalletDataInterface[],
+                            }) as WalletDataInterface,
+                        getWallets: () =>
+                            [
+                                {
+                                    id: 1,
+                                    name: 'Test Wallet',
+                                    type: WalletTypesEnum.default,
+                                    currencyCode: CurrencyCodesEnum.huf,
+                                },
+                                {
+                                    id: 2,
+                                    name: 'Euro Wallet',
+                                    type: WalletTypesEnum.default,
+                                    currencyCode: CurrencyCodesEnum.eur,
+                                },
+                            ] as WalletDataInterface[],
                     },
                 },
             ],
-        }).compileComponents();
+        });
+        // A komponens importálja a MatDialogModule-t, ami saját MatDialog-ot ad, ezért providers helyett
+        // overrideProvider kell. A megerősítő dialog eredménye tesztenként a confirmResult-tal állítható
+        dialogOpenSpy = vi.fn(() => ({ afterClosed: () => of(confirmResult) }));
+        TestBed.overrideProvider(MatDialog, { useValue: { open: dialogOpenSpy } });
+        await TestBed.compileComponents();
 
         fixture = TestBed.createComponent(TransactionFormComponent);
         component = fixture.componentInstance;
@@ -205,6 +216,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             isComplexTransaction: false,
             walletId: 1,
             specialType: null,
+            recurringTransactionId: null,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -266,6 +278,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             isComplexTransaction: false,
             walletId: 1,
             specialType: null,
+            recurringTransactionId: null,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -320,7 +333,9 @@ describe('TransactionFormComponent (Vitest)', () => {
         fixture.componentRef.setInput('addCategoryCallback', addCategoryCallback);
         fixture.detectChanges();
 
-        const categorySelects = fixture.debugElement.queryAll(By.directive(CategorySelectComponent));
+        const categorySelects = fixture.debugElement.queryAll(
+            By.directive(CategorySelectComponent),
+        );
         expect(categorySelects.length).toBeGreaterThan(0);
         categorySelects.forEach((categorySelect) => {
             expect(
@@ -356,6 +371,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             isComplexTransaction: false,
             walletId: 2,
             specialType: null,
+            recurringTransactionId: null,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -407,6 +423,7 @@ describe('TransactionFormComponent (Vitest)', () => {
             isComplexTransaction: false,
             walletId: 2,
             specialType,
+            recurringTransactionId: null,
             transactionDetails: [
                 {
                     name: 'sum',
@@ -461,5 +478,65 @@ describe('TransactionFormComponent (Vitest)', () => {
 
         expect(component.walletId.enabled).toBe(true);
         expect(fixture.nativeElement.querySelector('.wallet-locked-hint')).toBeNull();
+    });
+
+    function openRecurringButton(): HTMLButtonElement | null {
+        return fixture.nativeElement.querySelector('.open-recurring-transaction');
+    }
+
+    function setRecurringTransaction(recurringTransactionId: number | null): number[] {
+        fixture.componentRef.setInput('transaction', {
+            ...createBackendTransaction(TransactionSpecialTypeEnum.RECURRING),
+            recurringTransactionId,
+        });
+        fixture.detectChanges();
+
+        const emittedIds: number[] = [];
+        component.recurringTransactionOpenRequest.subscribe((id) => emittedIds.push(id));
+        return emittedIds;
+    }
+
+    it('should show the open button for a recurring transaction and emit its id without confirm when the form is untouched', () => {
+        const emittedIds = setRecurringTransaction(5);
+
+        openRecurringButton()!.click();
+
+        expect(emittedIds).toEqual([5]);
+        expect(dialogOpenSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not show the open button when the recurring transaction id is missing (e.g. it was deleted)', () => {
+        setRecurringTransaction(null);
+
+        expect(openRecurringButton()).toBeNull();
+    });
+
+    it('should not show the open button for a normal transaction', () => {
+        fixture.componentRef.setInput('transaction', createBackendTransaction(null));
+        fixture.detectChanges();
+
+        expect(openRecurringButton()).toBeNull();
+    });
+
+    it('should ask for confirmation and emit the id when the form has unsaved changes and the user confirms', () => {
+        const emittedIds = setRecurringTransaction(5);
+        component.name.setValue('Módosított név');
+        component.name.markAsDirty();
+
+        openRecurringButton()!.click();
+
+        expect(dialogOpenSpy).toHaveBeenCalledTimes(1);
+        expect(emittedIds).toEqual([5]);
+    });
+
+    it('should not emit the id when the form has unsaved changes and the user cancels the confirmation', () => {
+        confirmResult = false;
+        const emittedIds = setRecurringTransaction(5);
+        component.name.markAsDirty();
+
+        openRecurringButton()!.click();
+
+        expect(dialogOpenSpy).toHaveBeenCalledTimes(1);
+        expect(emittedIds).toEqual([]);
     });
 });

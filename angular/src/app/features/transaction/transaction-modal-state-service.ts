@@ -181,10 +181,12 @@ export class TransactionModalStateService {
 
         dialogRef.componentInstance.saved.subscribe((payload) => this.save(payload));
 
+        // Előbb a navigációt indítjuk, hogy a bezárásra reagáló kód (closed) már lássa a folyamatban
+        // lévő navigációt, és ne írja felül
         dialogRef.componentInstance.recurringTransactionOpenRequest.subscribe(
             (recurringTransactionId) => {
-                this.dialogRef?.close();
                 void this.router.navigate(['/recurring-transactions', recurringTransactionId]);
+                this.dialogRef?.close();
             },
         );
 
