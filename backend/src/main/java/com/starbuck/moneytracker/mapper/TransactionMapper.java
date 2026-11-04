@@ -105,6 +105,8 @@ public class TransactionMapper {
                 detailDto,
                 entity.getWallet().getId(),
                 entity.getSpecialType(),
+                // a törölt ismétlődő tranzakciót az entitáson lévő @SQLRestriction miatt a Hibernate
+                // nem tölti be, ilyenkor null
                 entity.getRecurringTransaction() == null
                         ? null
                         : entity.getRecurringTransaction().getId());
