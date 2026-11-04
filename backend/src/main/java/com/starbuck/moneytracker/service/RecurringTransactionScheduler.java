@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.starbuck.moneytracker.entity.RecurringTransaction;
-
 @Component
 public class RecurringTransactionScheduler {
 
@@ -24,7 +22,7 @@ public class RecurringTransactionScheduler {
     }
 
     /**
-     * Note: ha hosszabb szerverleállás van és kiamrad pár hét, akkor fel fogja
+     * Note: ha hosszabb szerverleállás van és kimarad pár hét, akkor fel fogja
      * venni a régebbi tranzakciókat is, a jó időpontban, de futásonként (jelenleg
      * óránként) csak egyet
      */
@@ -32,14 +30,16 @@ public class RecurringTransactionScheduler {
     public void generateRecurrentTransactions() {
         LocalDate actualDate = LocalDate.now(clock);
 
-        List<RecurringTransaction> recurringTransactions =
-                this.recurringTransactionService.listRecurringTransactionsForDay(actualDate);
+        List<Long> recurringTransactionIds =
+                this.recurringTransactionService.listExpiredRecurringTransactionIds(actualDate);
 
-        for (RecurringTransaction recurringTransaction : recurringTransactions) {
+        // mindegyik külön tranzakcióban fut, így egy hibás nem akasztja meg a többit
+        for (Long recurringTransactionId : recurringTransactionIds) {
             try {
-                recurringTransactionService.generateTransactionFromTemplate(recurringTransaction);
+                recurringTransactionService.generateTransactionFromTemplate(recurringTransactionId, actualDate);
             } catch (RuntimeException e) {
-                logger.warn("RecurringTransaction with ID {} has error: {}", recurringTransaction.getId(), e);
+                logger.error(
+                        "Generating transaction failed for RecurringTransaction with ID {}", recurringTransactionId, e);
             }
         }
     }
