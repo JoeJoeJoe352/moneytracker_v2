@@ -8,9 +8,11 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -27,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
+import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
@@ -390,6 +393,36 @@ public class RecurringTransactionServiceTest {
                 categoryIds,
                 walletId,
                 isRestartMode);
+    }
+
+    @Test
+    void testGenerateTransactionFromTemplateCreatesTransactionAndMovesNextOccurrence() {
+        var recurringTransaction = existing();
+        var command = mock(TransactionSaveCommand.class);
+        when(recurringTransactionRepo.findDueRecurringTransactionByIdForUpdate(5L, START_DATE))
+                .thenReturn(Optional.of(recurringTransaction));
+        when(transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                        recurringTransaction, START_DATE))
+                .thenReturn(command);
+
+        service.generateTransactionFromTemplate(5L, START_DATE);
+
+        // a frissen betöltött példányból generál, nem a scheduler által listázottból
+        verify(transactionService).createTransactionFromRecurringTransaction(command, recurringTransaction);
+        assertEquals(START_DATE.plusMonths(1), recurringTransaction.getNextOccurrenceDate());
+        verify(recurringTransactionRepo).save(recurringTransaction);
+    }
+
+    @Test
+    void testGenerateTransactionFromTemplateSkipsWhenNoLongerDue() {
+        // a listázás óta leállították, törölték vagy már legenerálta egy másik futás
+        when(recurringTransactionRepo.findDueRecurringTransactionByIdForUpdate(5L, START_DATE))
+                .thenReturn(Optional.empty());
+
+        service.generateTransactionFromTemplate(5L, START_DATE);
+
+        verifyNoInteractions(transactionFactory, transactionService);
+        verify(recurringTransactionRepo, never()).save(any());
     }
 
     private RecurringTransaction existing() {

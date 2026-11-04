@@ -529,6 +529,106 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
                 detailCategoryRepo.findAll().getFirst().getCategory().getId());
     }
 
+    @Test
+    void testFailingRecurringTransactionDoesNotBlockOthers() {
+        // GIVEN
+        // a hibás van elöl a listában (kisebb id, ugyanaz a nap)
+        var broken = createRecurringTransaction(
+                "Hibás",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+        var valid = createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+        // rossz adat a db-ben: kiadás pozitív összeggel, a tranzakció parancs
+        // validációja eldobja
+        jdbcTemplate.update("UPDATE recurring_transaction SET price_sum = 10 WHERE id = ?", broken.getId());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        List<Transaction> transactions = transactionrepo.findAll();
+        assertEquals(1, transactions.size());
+        assertEquals("Spotify", transactions.getFirst().getName());
+
+        // a hibás nem lépett tovább, a következő futás újra megpróbálja
+        assertEquals(
+                LocalDate.now(fixedClock),
+                recurringTransactionRepo.findById(broken.getId()).orElseThrow().getNextOccurrenceDate());
+        assertEquals(
+                LocalDate.of(2026, 11, 30),
+                recurringTransactionRepo.findById(valid.getId()).orElseThrow().getNextOccurrenceDate());
+    }
+
+    /**
+     * A scheduler listázása és a generálás között a user leállítja az ismétlődő
+     * tranzakciót. A generálás a friss állapotot nézi, nem a listázáskorit, és nem
+     * írja vissza a régi státuszt
+     */
+    @Test
+    void testRecurringTransactionStoppedAfterListingIsSkipped() {
+        // GIVEN
+        var recurringTransaction = createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+        List<Long> listedIds = service.listExpiredRecurringTransactionIds(LocalDate.now(fixedClock));
+        assertEquals(List.of(recurringTransaction.getId()), listedIds);
+
+        service.stopRecurringTransaction(recurringTransaction.getId());
+
+        // WHEN
+        service.generateTransactionFromTemplate(listedIds.getFirst(), LocalDate.now(fixedClock));
+
+        // THEN
+        assertEquals(0, transactionrepo.count());
+        RecurringTransaction fromDb =
+                recurringTransactionRepo.findById(recurringTransaction.getId()).orElseThrow();
+        assertEquals(RecurringTransactionStatusEnum.STOPPED, fromDb.getStatus());
+        assertEquals(LocalDate.now(fixedClock), fromDb.getNextOccurrenceDate());
+    }
+
+    /**
+     * Ha két futás (pl. két szerver példány) ugyanazt az id-t listázta, a második
+     * már nem esedékesnek látja, így nem jön létre duplikált tranzakció
+     */
+    @Test
+    void testAlreadyGeneratedRecurringTransactionIsNotGeneratedAgain() {
+        // GIVEN
+        var recurringTransaction = createRecurringTransaction(
+                "Spotify",
+                LocalDate.now(fixedClock),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                BigDecimal.TEN.negate(),
+                List.of());
+
+        // WHEN
+        service.generateTransactionFromTemplate(recurringTransaction.getId(), LocalDate.now(fixedClock));
+        service.generateTransactionFromTemplate(recurringTransaction.getId(), LocalDate.now(fixedClock));
+
+        // THEN
+        assertEquals(1, transactionrepo.count());
+        // csak egyszer lépett tovább
+        assertEquals(
+                LocalDate.of(2026, 11, 30),
+                recurringTransactionRepo
+                        .findById(recurringTransaction.getId())
+                        .orElseThrow()
+                        .getNextOccurrenceDate());
+    }
+
     private RecurringTransaction createRecurringTransaction(
             String name,
             LocalDate date,

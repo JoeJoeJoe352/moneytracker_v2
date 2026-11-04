@@ -113,13 +113,22 @@ public class RecurringTransactionService {
     }
 
     /**
-     * Felveszi a tranzakciót a a recurrentTranzakció bejegyzés mintájára
-     * Az esedékesség napjára jön létre, akkor is, ha a scheduler csak később futott
+     * Felveszi a tranzakciót az ismétlődő tranzakció mintájára, és továbblépteti a
+     * következő esedékességet.
      *
-     * @param recurringTransaction
+     * @param recurringTransactionId
+     * @param date                   a scheduler futásának napja
      */
     @Transactional
-    public void generateTransactionFromTemplate(RecurringTransaction recurringTransaction) {
+    public void generateTransactionFromTemplate(long recurringTransactionId, LocalDate date) {
+        var found = recurringTransactionRepo.findDueRecurringTransactionByIdForUpdate(recurringTransactionId, date);
+        // Ez akkor fordulhat elő, ha a user a listázás után, de e függvény meghívása
+        // előtt inaktiválta a recurringTransactiont
+        if (found.isEmpty()) {
+            return;
+        }
+        RecurringTransaction recurringTransaction = found.get();
+
         TransactionSaveCommand command = transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
                 recurringTransaction, recurringTransaction.getNextOccurrenceDate());
         // nincs bejelentkezett user, ezért a jogosultság-ellenőrzés nélküli ágat hívjuk
@@ -133,7 +142,7 @@ public class RecurringTransactionService {
      *
      * @param recurringTransaction
      */
-    public void updateNextOccurrence(RecurringTransaction recurringTransaction) {
+    private void updateNextOccurrence(RecurringTransaction recurringTransaction) {
         LocalDate nextOccurrence = recurringTransaction
                 .getRecurrenceInterval()
                 .calculateNextOccurrence(
@@ -211,12 +220,12 @@ public class RecurringTransactionService {
     }
 
     /**
-     * Listázza adott napon aktuális ismétlődő tranzakciókat
+     * Listázza az adott napig esedékes, aktív ismétlődő tranzakciók id-jait
      *
      * @param date
      * @return
      */
-    public List<RecurringTransaction> listRecurringTransactionsForDay(LocalDate date) {
-        return this.recurringTransactionRepo.listAllExpiredRecurringTransactions(date);
+    public List<Long> listExpiredRecurringTransactionIds(LocalDate date) {
+        return this.recurringTransactionRepo.findDueTransactionIds(date);
     }
 }
