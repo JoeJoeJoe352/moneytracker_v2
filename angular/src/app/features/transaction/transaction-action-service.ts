@@ -77,4 +77,17 @@ export class TransactionActionService {
             error: () => isDisabled.set(false),
         });
     }
+
+    /**
+     * User olyan formról akar elnavigálni, amibe mentetlen változtatások vannak
+     */
+    public confirmNavigationFromDirtyForm(): Observable<boolean> {
+        return ConfirmDialogComponent.open(this.dialog, {
+            message: this.translateService.instant(
+                _('transaction.recurring_transaction.open_unsaved_confirm'),
+            ) as string,
+        })
+            .afterClosed()
+            .pipe(map((confirmed) => confirmed ?? false));
+    }
 }

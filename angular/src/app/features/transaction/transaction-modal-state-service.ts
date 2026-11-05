@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, resource, ResourceRef, signal } from '@angular/core';
-import { firstValueFrom, Observable, Subject, tap } from 'rxjs';
+import { filter, firstValueFrom, Observable, of, Subject, tap } from 'rxjs';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TransactionService } from './transaction-service';
 import { TransactionActionService } from './transaction-action-service';
@@ -183,12 +183,19 @@ export class TransactionModalStateService {
 
         // Előbb a navigációt indítjuk, hogy a bezárásra reagáló kód (closed) már lássa a folyamatban
         // lévő navigációt, és ne írja felül
-        dialogRef.componentInstance.recurringTransactionOpenRequest.subscribe(
-            (recurringTransactionId) => {
-                void this.router.navigate(['/recurring-transactions', recurringTransactionId]);
+        dialogRef.componentInstance.recurringTransactionOpenRequest.subscribe((navigationData) => {
+            const isConfirmed$ = navigationData.isDirty
+                ? this.transactionActionService.confirmNavigationFromDirtyForm()
+                : of(true);
+
+            isConfirmed$.pipe(filter(Boolean)).subscribe(() => {
+                void this.router.navigate([
+                    '/recurring-transactions',
+                    navigationData.recurringTransactionId,
+                ]);
                 this.dialogRef?.close();
-            },
-        );
+            });
+        });
 
         dialogRef.afterClosed().subscribe(() => {
             this.isOpen.set(false);

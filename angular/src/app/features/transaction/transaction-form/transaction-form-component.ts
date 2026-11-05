@@ -27,13 +27,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { DropdownInterface } from '@shared/interfaces';
 import { TransactionDetailFormComponent } from './transaction-detail-form-component';
 import { CategorySelectComponent } from './category-select-component';
 import {
     CategoryResponseInterface,
     DetailForm,
+    NavigationDataToRecurringTransaction,
     NewTransaction,
     TransactionDataFromBackend,
     TransactionInputDefaultValuesWithDetails,
@@ -41,8 +42,7 @@ import {
 import { UserDataStore } from '@app/shared/stores/user-data-store';
 import { WalletDataUtil } from '@shared/utils/wallet-data-util';
 import { TransactionSpecialTypeEnum } from '@shared/enums';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
+import { MatDialogModule } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { TransactionUtils } from '../transaction-utils';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -68,8 +68,6 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 })
 export class TransactionFormComponent implements OnChanges {
     private readonly fb = inject(FormBuilder);
-    private readonly dialog = inject(MatDialog);
-    private readonly translateService = inject(TranslateService);
     protected readonly userData = inject(UserDataStore);
     protected readonly walletUtil = inject(WalletDataUtil);
     protected readonly transactionUtils = inject(TransactionUtils);
@@ -112,7 +110,7 @@ export class TransactionFormComponent implements OnChanges {
     /**
      * Ismétlődő tranzakció felnyitás gombjára kattintott a user
      */
-    public recurringTransactionOpenRequest = output<number>();
+    public recurringTransactionOpenRequest = output<NavigationDataToRecurringTransaction>();
     /**
      * Tranzakciós form. A selectedWalletId előtt kell létrehozni, mert annak a valueChanges-ét figyeli
      */
@@ -354,22 +352,10 @@ export class TransactionFormComponent implements OnChanges {
      * módosítások a formban, előbb megerősítést kér, mert azok a megnyitással elvesznek
      */
     protected openRecurringTransaction(recurringTransactionId: number): void {
-        if (!this.transactionForm.dirty) {
-            this.recurringTransactionOpenRequest.emit(recurringTransactionId);
-            return;
-        }
-
-        ConfirmDialogComponent.open(this.dialog, {
-            message: this.translateService.instant(
-                _('transaction.recurring_transaction.open_unsaved_confirm'),
-            ) as string,
-        })
-            .afterClosed()
-            .subscribe((confirmed) => {
-                if (confirmed) {
-                    this.recurringTransactionOpenRequest.emit(recurringTransactionId);
-                }
-            });
+        this.recurringTransactionOpenRequest.emit({
+            recurringTransactionId,
+            isDirty: this.transactionForm.dirty,
+        });
     }
 
     // Getterek

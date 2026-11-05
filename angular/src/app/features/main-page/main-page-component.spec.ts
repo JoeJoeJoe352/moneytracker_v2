@@ -7,7 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MainPageComponent } from './main-page-component';
 import { TransactionService } from '../transaction/transaction-service';
 import { CategoryService } from '../transaction/category-service';
-import { MoneySumInterface } from '../transaction/interfaces';
+import { MoneySumInterface, NavigationDataToRecurringTransaction } from '../transaction/interfaces';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { CurrencyCodesEnum } from '@shared/enums';
@@ -23,10 +23,10 @@ import { MatButton } from '@angular/material/button';
     template: '',
 })
 class StubTransactionsListComponent {
-    public isHistoryMode = input(false)
-    public needSearchField = input(false)
-    public reloadTrigger = input(0)
-    public transactionsChanged = output()
+    public isHistoryMode = input(false);
+    public needSearchField = input(false);
+    public reloadTrigger = input(0);
+    public transactionsChanged = output();
 }
 
 /**
@@ -53,7 +53,7 @@ describe('MainPageComponent (Vitest)', () => {
     let transactionModalDialogRefs: FakeDialogRef<{
         deleteTransactionRequested: EventEmitter<number>;
         saved: EventEmitter<unknown>;
-        recurringTransactionOpenRequest: EventEmitter<number>;
+        recurringTransactionOpenRequest: EventEmitter<NavigationDataToRecurringTransaction>;
     }>[];
 
     function setup() {
@@ -66,7 +66,8 @@ describe('MainPageComponent (Vitest)', () => {
                 const dialogRef = new FakeDialogRef({
                     deleteTransactionRequested: new EventEmitter<number>(),
                     saved: new EventEmitter<unknown>(),
-                    recurringTransactionOpenRequest: new EventEmitter<number>(),
+                    recurringTransactionOpenRequest:
+                        new EventEmitter<NavigationDataToRecurringTransaction>(),
                 });
                 transactionModalDialogRefs.push(dialogRef);
                 return dialogRef;
@@ -83,7 +84,11 @@ describe('MainPageComponent (Vitest)', () => {
                     useValue: {
                         getMoneySum: getMoneySumSpy,
                         getLastTransactions: () => of({ transactions: [] }),
-                        getTransactionHistory: () => of({ transactions: [], pageData: { elementCount: 0, elementPerPage: 15 } }),
+                        getTransactionHistory: () =>
+                            of({
+                                transactions: [],
+                                pageData: { elementCount: 0, elementPerPage: 15 },
+                            }),
                         getTransactionById: () => of(null),
                     },
                 },
@@ -131,10 +136,12 @@ describe('MainPageComponent (Vitest)', () => {
         await fixture.whenStable();
 
         expect(fixture.nativeElement.querySelector('.balance-card mat-spinner')).toBeNull();
-        expect(fixture.nativeElement.querySelector('.balance-card .stat-value').textContent).toContain(
-            '15,000',
+        expect(
+            fixture.nativeElement.querySelector('.balance-card .stat-value').textContent,
+        ).toContain('15,000');
+        expect(fixture.nativeElement.querySelector('.stat-value.income').textContent).toContain(
+            '5,000',
         );
-        expect(fixture.nativeElement.querySelector('.stat-value.income').textContent).toContain('5,000');
         expect(fixture.nativeElement.querySelector('.stat-value.expense').textContent).toContain(
             '2,000',
         );

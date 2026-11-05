@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
     CategoryResponseInterface,
+    NavigationDataToRecurringTransaction,
     NewTransaction,
     TransactionDataFromBackend,
 } from './interfaces';
@@ -42,7 +43,7 @@ export class TransactionModalComponent {
 
     public deleteTransactionRequested = output<number>();
     public saved = output<NewTransaction>();
-    public recurringTransactionOpenRequest = output<number>();
+    public recurringTransactionOpenRequest = output<NavigationDataToRecurringTransaction>();
 
     /**
      * Szinkronizációs tranzakció-e
