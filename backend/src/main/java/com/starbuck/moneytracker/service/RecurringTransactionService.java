@@ -13,11 +13,13 @@ import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDt
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
+import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.RecurringTransactionStatusEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
+import com.starbuck.moneytracker.service.domainservice.RecurringTransactionSummaryDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionFactory;
 
@@ -31,6 +33,9 @@ public class RecurringTransactionService {
     private final CurrentUserUtil currentUser;
     private final TransactionService transactionService;
     private final TransactionFactory transactionFactory;
+
+    private final RecurringTransactionSummaryDomainService summaryCalculator =
+            new RecurringTransactionSummaryDomainService();
 
     public RecurringTransactionService(
             RecurringTransactionRepository recurringTransactionRepo,
@@ -163,17 +168,21 @@ public class RecurringTransactionService {
     }
 
     /**
-     * Statisztikát csinál az ismétlődő tranzakciokból, az adott hónapra
+     * Statisztikát csinál az ismétlődő tranzakciókból az adott hónapra. Betölti a
+     * hónapban már létrejött tranzakciókat és a user ismétlődő tranzakcióit, a
+     * számolást a RecurringTransactionSummaryDomainService végzi
      *
-     * @param fixedDate
+     * @param yearMonth
      * @return
      */
-    public List<RecurringTransactionSummaryCreatedInMonthDto> summarizeRecurrentTransactions(YearMonth fixedDate) {
-        List<RecurringTransactionSummaryCreatedInMonthDto> recurringTransactionSummary =
-                this.transactionService.summarizeRecurringTransactionCreatedInThisMonth(
-                        fixedDate.atDay(1), fixedDate.plusMonths(1).atDay(1));
+    @Transactional(readOnly = true)
+    public List<RecurringTransactionSummaryCreatedInMonthDto> summarizeRecurrentTransactions(YearMonth yearMonth) {
+        List<Transaction> createdTransactions = transactionService.summarizeRecurringTransactionCreatedInThisMonth(
+                yearMonth.atDay(1), yearMonth.plusMonths(1).atDay(1));
+        List<RecurringTransaction> recurringTransactions =
+                recurringTransactionRepo.findAllForUser(currentUser.getUser().getId());
 
-        return List.of();
+        return summaryCalculator.summarize(yearMonth, createdTransactions, recurringTransactions);
     }
 
     /**
