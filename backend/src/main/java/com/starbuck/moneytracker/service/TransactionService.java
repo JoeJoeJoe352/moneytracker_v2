@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
-import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
@@ -274,9 +273,8 @@ public class TransactionService {
      * @param to
      * @return
      */
-    public List<RecurringTransactionSummaryCreatedInMonthDto> summarizeRecurringTransactionCreatedInThisMonth(
-            LocalDate from, LocalDate to) {
+    public List<Transaction> summarizeRecurringTransactionCreatedInThisMonth(LocalDate from, LocalDate to) {
         Long userId = currentUser.getUser().getId();
-        return this.transactionRepo.summarizeRecurringTransactionCreatedInThisMonth(userId, from, to);
+        return this.transactionRepo.findRecurringGeneratedTransactionsInRange(userId, from, to);
     }
 }

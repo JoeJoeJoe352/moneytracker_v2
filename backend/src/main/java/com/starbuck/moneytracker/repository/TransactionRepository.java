@@ -15,7 +15,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
@@ -80,20 +79,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      * @return
      */
     @Query("""
-                SELECT new com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto(
-                    rt.id,
-                    SUM(t.priceSum),
-                    rt.name,
-                    w.currencyCode
-                )
-                FROM Transaction t
-                JOIN t.wallet w
-                JOIN t.recurringTransaction rt
-                WHERE t.transactionDate >= :from AND t.transactionDate < :to
-                    AND w.user.id = :userId AND w.status = ACTIVE AND rt.status <> DELETED
-                GROUP BY rt.id, rt.name, w.currencyCode
-            """)
-    List<RecurringTransactionSummaryCreatedInMonthDto> summarizeRecurringTransactionCreatedInThisMonth(
+            SELECT t
+            FROM Transaction t
+            LEFT JOIN FETCH t.wallet w
+            JOIN FETCH t.recurringTransaction rt
+            WHERE t.transactionDate >= :from AND t.transactionDate < :to
+                AND w.user.id = :userId AND w.status = ACTIVE AND rt.status <> DELETED
+            ORDER BY t.transactionDate ASC
+                """)
+    List<Transaction> findRecurringGeneratedTransactionsInRange(
             @Param("userId") long userId, @Param("from") LocalDate from, @Param("to") LocalDate to);
 
     /**
