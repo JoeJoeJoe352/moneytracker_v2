@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.service;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -61,5 +62,27 @@ public class CategoryService {
         return categoryRepository.findAllForUser(
                 currentUser.getUser().getId(),
                 conversionService.convert(LocaleContextHolder.getLocale(), LangEnum.class));
+    }
+
+    /**
+     * Visszaadja az adott id-jú kategóriákat, ha mindegyik a bejelentkezett user
+     * saját vagy közös, aktív kategóriája
+     *
+     * @param categoryIds
+     * @return
+     * @throws IllegalArgumentException, ha egy id többször szerepel, vagy van
+     *                                   olyan kategória, ami nem a bejelentkezett useré
+     */
+    public List<Category> getCategoriesForUser(List<Long> categoryIds) {
+        if (new HashSet<>(categoryIds).size() != categoryIds.size()) {
+            throw new IllegalArgumentException("Input contains duplicated category ids");
+        }
+
+        var foundCategories = categoryRepository.findAllByIdsForUser(
+                categoryIds, currentUser.getUser().getId());
+        if (foundCategories.size() != categoryIds.size()) {
+            throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
+        }
+        return foundCategories;
     }
 }

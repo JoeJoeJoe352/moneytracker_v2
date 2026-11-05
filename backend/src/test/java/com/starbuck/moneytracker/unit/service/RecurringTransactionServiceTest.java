@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.convert.ConversionService;
 
 import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
@@ -44,6 +45,7 @@ import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
+import com.starbuck.moneytracker.service.CategoryService;
 import com.starbuck.moneytracker.service.RecurringTransactionService;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
@@ -63,6 +65,9 @@ public class RecurringTransactionServiceTest {
 
     @Mock
     private CategoryRepository categoryRepo;
+
+    @Mock
+    private ConversionService conversionService;
 
     @Mock
     private WalletService walletService;
@@ -86,10 +91,12 @@ public class RecurringTransactionServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Valódi CategoryService a mockolt repóval, így a kategória ellenőrzés is tesztelve van
+        var categoryService = new CategoryService(categoryRepo, currentUser, conversionService);
         service = new RecurringTransactionService(
                 recurringTransactionRepo,
                 recurringTransactionCategoryRepo,
-                categoryRepo,
+                categoryService,
                 walletService,
                 currentUser,
                 transactionService,
@@ -126,7 +133,7 @@ public class RecurringTransactionServiceTest {
 
         service.createRecurringTransaction(command(START_DATE, List.of(), 1L));
 
-        verify(categoryRepo, never()).findAllById(anyList(), anyLong());
+        verify(categoryRepo, never()).findAllByIdsForUser(anyList(), anyLong());
         verify(recurringTransactionCategoryRepo, never()).save(any());
     }
 
@@ -134,7 +141,7 @@ public class RecurringTransactionServiceTest {
     void testCreateRecurringTransactionWithCategories() {
         when(walletService.getWalletById(1L)).thenReturn(wallet);
         when(recurringTransactionRepo.save(any(RecurringTransaction.class))).thenAnswer(i -> i.getArgument(0));
-        when(categoryRepo.findAllById(List.of(10L, 11L), 1L)).thenReturn(List.of(category(10L), category(11L)));
+        when(categoryRepo.findAllByIdsForUser(List.of(10L, 11L), 1L)).thenReturn(List.of(category(10L), category(11L)));
 
         var result = service.createRecurringTransaction(command(START_DATE, List.of(10L, 11L), 1L));
 
@@ -152,7 +159,7 @@ public class RecurringTransactionServiceTest {
         when(walletService.getWalletById(1L)).thenReturn(wallet);
         when(recurringTransactionRepo.save(any(RecurringTransaction.class))).thenAnswer(i -> i.getArgument(0));
         // a 11-es kategória nem a useré, ezért nem jön vissza
-        when(categoryRepo.findAllById(List.of(10L, 11L), 1L)).thenReturn(List.of(category(10L)));
+        when(categoryRepo.findAllByIdsForUser(List.of(10L, 11L), 1L)).thenReturn(List.of(category(10L)));
 
         assertThrowsExactly(
                 IllegalArgumentException.class,
@@ -242,7 +249,7 @@ public class RecurringTransactionServiceTest {
         existing.setCategoryLinks(oldLinks);
         when(walletService.getWalletById(1L)).thenReturn(wallet);
         when(recurringTransactionRepo.findByIdForUser(5L, 1L)).thenReturn(Optional.of(existing));
-        when(categoryRepo.findAllById(List.of(10L, 12L), 1L)).thenReturn(List.of(category(10L), category(12L)));
+        when(categoryRepo.findAllByIdsForUser(List.of(10L, 12L), 1L)).thenReturn(List.of(category(10L), category(12L)));
 
         service.updateRecurringTransaction(5L, command(START_DATE, List.of(10L, 12L), 1L));
 

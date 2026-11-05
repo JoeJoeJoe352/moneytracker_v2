@@ -10,11 +10,9 @@ import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
-import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.service.domainservice.CostCalculatorDomainService;
-import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionDetailFactory;
 
 /**
@@ -25,23 +23,20 @@ import com.starbuck.moneytracker.util.TransactionDetailFactory;
 public class TransactionDetailService {
 
     private final TransactionDetailRepository transactionDetailRepo;
-    private final CategoryRepository categoryRepo;
+    private final CategoryService categoryService;
     private final TransactionDetailCategoryRepository transactionDetailCategoryRepository;
-    private final CurrentUserUtil currentUser;
     private final TransactionDetailFactory detailFactory;
 
     private final CostCalculatorDomainService costCalculator = new CostCalculatorDomainService();
 
     public TransactionDetailService(
             TransactionDetailRepository transactionDetailRepo,
-            CategoryRepository categoryRepo,
+            CategoryService categoryService,
             TransactionDetailCategoryRepository transactionDetailCategoryRepository,
-            CurrentUserUtil currentUser,
             TransactionDetailFactory detailFactory) {
         this.transactionDetailRepo = transactionDetailRepo;
-        this.categoryRepo = categoryRepo;
+        this.categoryService = categoryService;
         this.transactionDetailCategoryRepository = transactionDetailCategoryRepository;
-        this.currentUser = currentUser;
         this.detailFactory = detailFactory;
     }
 
@@ -85,7 +80,8 @@ public class TransactionDetailService {
             if (detailCommand.getCategories() != null
                     && !detailCommand.getCategories().isEmpty()) {
                 if (checkCategoryOwnership) {
-                    this.validateCategoriesBelongToUser(detailCommand.getCategories());
+                    // kivételt dob, ha van olyan kategória, ami nem a bejelentkezett useré
+                    categoryService.getCategoriesForUser(detailCommand.getCategories());
                 }
                 this.saveCategoryDetailEntries(detailAfterSave, detailCommand.getCategories());
             }
@@ -117,19 +113,5 @@ public class TransactionDetailService {
                     new TransactionDetailCategory(categoryDummyObject, savedDetail);
             transactionDetailCategoryRepository.save(detailCategoryModel);
         });
-    }
-
-    /**
-     * @throws IllegalArgumentException, ha van olyan kategória, ami nem a
-     *                                   bejelentkezett useré
-     * @param categoryIds
-     */
-    private void validateCategoriesBelongToUser(List<Long> categoryIds) {
-        var foundCategories =
-                categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
-        boolean isAllCategoryAvailableForUser = foundCategories.size() == categoryIds.size();
-        if (!isAllCategoryAvailableForUser) {
-            throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
-        }
     }
 }

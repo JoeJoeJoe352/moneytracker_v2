@@ -14,7 +14,6 @@ import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.RecurringTransactionStatusEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
-import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
@@ -25,7 +24,7 @@ public class RecurringTransactionService {
 
     private final RecurringTransactionRepository recurringTransactionRepo;
     private final RecurringTransactionCategoryRepository recurringTransactionCategoryRepo;
-    private final CategoryRepository categoryRepo;
+    private final CategoryService categoryService;
     private final WalletService walletService;
     private final CurrentUserUtil currentUser;
     private final TransactionService transactionService;
@@ -34,14 +33,14 @@ public class RecurringTransactionService {
     public RecurringTransactionService(
             RecurringTransactionRepository recurringTransactionRepo,
             RecurringTransactionCategoryRepository recurringTransactionCategoryRepo,
-            CategoryRepository categoryRepo,
+            CategoryService categoryService,
             WalletService walletService,
             CurrentUserUtil currentUser,
             TransactionService transactionService,
             TransactionFactory transactionFactory) {
         this.recurringTransactionRepo = recurringTransactionRepo;
         this.recurringTransactionCategoryRepo = recurringTransactionCategoryRepo;
-        this.categoryRepo = categoryRepo;
+        this.categoryService = categoryService;
         this.walletService = walletService;
         this.currentUser = currentUser;
         this.transactionService = transactionService;
@@ -208,13 +207,7 @@ public class RecurringTransactionService {
             return;
         }
 
-        var foundCategories =
-                categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
-        if (foundCategories.size() != categoryIds.size()) {
-            throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
-        }
-
-        for (Category category : foundCategories) {
+        for (Category category : categoryService.getCategoriesForUser(categoryIds)) {
             recurringTransactionCategoryRepo.save(new RecurringTransactionCategory(recurringTransaction, category));
         }
     }

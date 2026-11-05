@@ -176,4 +176,37 @@ public class CategoryServiceTest extends MySqlContainerTest {
         walletRepo.delete(walletRepo.findByUserId(savedUser2.getId()).get(0));
         userRepo.delete(savedUser2);
     }
+
+    @Test
+    @DisplayName("GetCategoriesForUser - Kivételt dob, ha egy kategória id többször szerepel")
+    void testGetCategoriesForUserWithDuplicatedIds() throws CategoryNonUniqueException {
+        // given
+        var savedCategory = categoryService.createCategory(new CategoryCreateCommand("ownCategory"));
+        var ids = List.of(savedCategory.getId(), savedCategory.getId());
+
+        // when
+        var exception = assertThrows(IllegalArgumentException.class, () -> categoryService.getCategoriesForUser(ids));
+
+        // then
+        assertEquals("Input contains duplicated category ids", exception.getMessage());
+
+        categoryRepository.delete(savedCategory);
+    }
+
+    @Test
+    @DisplayName("GetCategoriesForUser - Visszaadja a user saját kategóriáit, ha minden id egyszer szerepel")
+    void testGetCategoriesForUser() throws CategoryNonUniqueException {
+        // given
+        var savedCategory1 = categoryService.createCategory(new CategoryCreateCommand("ownCategory1"));
+        var savedCategory2 = categoryService.createCategory(new CategoryCreateCommand("ownCategory2"));
+
+        // when
+        var categories = categoryService.getCategoriesForUser(List.of(savedCategory1.getId(), savedCategory2.getId()));
+
+        // then
+        assertEquals(2, categories.size());
+
+        categoryRepository.delete(savedCategory1);
+        categoryRepository.delete(savedCategory2);
+    }
 }
