@@ -4,11 +4,15 @@ import static com.starbuck.moneytracker.service.TransactionService.HISTORY_PAGES
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -28,9 +32,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.UserCreateCommand;
+import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Category;
+import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
@@ -39,10 +45,12 @@ import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enums.LangEnum;
+import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.CategoryRepository;
+import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
@@ -86,8 +94,16 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private RecurringTransactionRepository recurringTransactionRepo;
+
     @MockitoBean
     private CurrentUserUtil currentUser;
+
+    /** Az ismétlődő tranzakció összegzés tesztjeinek intervalluma: [from, to) */
+    private static final LocalDate SUMMARY_FROM = LocalDate.of(2026, 10, 1);
+
+    private static final LocalDate SUMMARY_TO = LocalDate.of(2026, 11, 1);
 
     private User user;
     private Wallet wallet;
@@ -123,6 +139,10 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         jdbcTemplate.update(
                 "DELETE FROM transactions WHERE wallet_id IN (SELECT id FROM wallet WHERE user_id = ?)",
                 this.user.getId());
+        // Natív sql, mert a soft delete miatt a repository a törölt ismétlődő tranzakciókat nem látja
+        jdbcTemplate.update(
+                "DELETE FROM recurring_transaction WHERE wallet_id IN (SELECT id FROM wallet WHERE user_id = ?)",
+                this.user.getId());
         // Az előre definiált (user nélküli) kategóriák megmaradnak
         jdbcTemplate.update("DELETE FROM category WHERE user_id IS NOT NULL");
         // Natív sql, mert a letiltott walleteket a repository nem adja vissza
@@ -130,6 +150,9 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         if (this.anotherUser != null) {
             jdbcTemplate.update(
                     "DELETE FROM transactions WHERE wallet_id IN (SELECT id FROM wallet WHERE user_id = ?)",
+                    this.anotherUser.getId());
+            jdbcTemplate.update(
+                    "DELETE FROM recurring_transaction WHERE wallet_id IN (SELECT id FROM wallet WHERE user_id = ?)",
                     this.anotherUser.getId());
             jdbcTemplate.update("DELETE FROM wallet WHERE user_id = ?", this.anotherUser.getId());
             userRepo.delete(this.anotherUser);
@@ -639,6 +662,145 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
             transactionService.getTransactionByIdForActualUser(transaction.getId());
         });
         assertEquals(0, transactionRepo.count());
+    }
+
+    /**
+     * Ismétlődő tranzakciónként összegzi a [from, to) intervallumban létrejött
+     * tranzakciókat: a from napja benne van, a to napja már nincs
+     */
+    @Test
+    void summarizeRecurringTransactionCreatedInThisMonth_sumsPerRecurringTransactionWithinRange() {
+        RecurringTransaction rent = this.persistRecurringTransaction("Albérlet", this.wallet);
+        RecurringTransaction netflix = this.persistRecurringTransaction("Netflix", this.wallet);
+        this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM, new BigDecimal("-150000"));
+        this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.plusDays(14), new BigDecimal("-150000"));
+        this.persistRecurringGeneratedTransaction(netflix, SUMMARY_TO.minusDays(1), new BigDecimal("-4000"));
+        // intervallumon kívül: előző hónap utolsó napja és a to napja
+        this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.minusDays(1), new BigDecimal("-1"));
+        this.persistRecurringGeneratedTransaction(netflix, SUMMARY_TO, new BigDecimal("-1"));
+
+        var result = transactionService.summarizeRecurringTransactionCreatedInThisMonth(SUMMARY_FROM, SUMMARY_TO);
+
+        Map<Long, BigDecimal> sums = this.toSumMap(result);
+        assertEquals(Set.of(rent.getId(), netflix.getId()), sums.keySet());
+        assertEquals(0, new BigDecimal("-300000").compareTo(sums.get(rent.getId())));
+        assertEquals(0, new BigDecimal("-4000").compareTo(sums.get(netflix.getId())));
+    }
+
+    /**
+     * A kézzel felvett (nem ismétlődő tranzakcióból létrejött) tranzakciók nem
+     * számítanak bele
+     */
+    @Test
+    void summarizeRecurringTransactionCreatedInThisMonth_ignoresNonRecurringTransactions() {
+        this.persistSimpleTransaction(
+                "manual", TransactionTypeEnum.OUTCOME, new BigDecimal(-500), SUMMARY_FROM.plusDays(3), this.wallet);
+
+        var result = transactionService.summarizeRecurringTransactionCreatedInThisMonth(SUMMARY_FROM, SUMMARY_TO);
+
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Más user ismétlődő tranzakcióiból létrejött tranzakciók nem jelennek meg
+     */
+    @Test
+    void summarizeRecurringTransactionCreatedInThisMonth_ignoresOtherUsersTransactions() {
+        this.anotherUser = userService.createUser(new UserCreateCommand("otheruser", "other@email.com", "password"));
+        Wallet otherWallet = walletRepo.findByUserId(this.anotherUser.getId()).get(0);
+        RecurringTransaction othersRecurring = this.persistRecurringTransaction("Másé", otherWallet);
+        this.persistRecurringGeneratedTransaction(othersRecurring, SUMMARY_FROM.plusDays(1), new BigDecimal("-100"));
+
+        var result = transactionService.summarizeRecurringTransactionCreatedInThisMonth(SUMMARY_FROM, SUMMARY_TO);
+
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * A (soft delete-tel) törölt tranzakciók nem számítanak bele
+     */
+    @Test
+    void summarizeRecurringTransactionCreatedInThisMonth_ignoresDeletedTransactions() {
+        RecurringTransaction rent = this.persistRecurringTransaction("Albérlet", this.wallet);
+        this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.plusDays(1), new BigDecimal("-150000"));
+        Transaction deleted =
+                this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.plusDays(2), new BigDecimal("-1"));
+        transactionRepo.delete(deleted);
+
+        var result = transactionService.summarizeRecurringTransactionCreatedInThisMonth(SUMMARY_FROM, SUMMARY_TO);
+
+        Map<Long, BigDecimal> sums = this.toSumMap(result);
+        assertEquals(Set.of(rent.getId()), sums.keySet());
+        assertEquals(0, new BigDecimal("-150000").compareTo(sums.get(rent.getId())));
+    }
+
+    /**
+     * A törölt ismétlődő tranzakció már létrejött tranzakciói nem jelennek meg
+     */
+    @Test
+    void summarizeRecurringTransactionCreatedInThisMonth_ignoresDeletedRecurringTransactions() {
+        RecurringTransaction deletedRecurring = this.persistRecurringTransaction("Lemondott", this.wallet);
+        this.persistRecurringGeneratedTransaction(deletedRecurring, SUMMARY_FROM.plusDays(1), new BigDecimal("-100"));
+        recurringTransactionRepo.delete(deletedRecurring);
+
+        var result = transactionService.summarizeRecurringTransactionCreatedInThisMonth(SUMMARY_FROM, SUMMARY_TO);
+
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Letiltott wallet tranzakciói nem számítanak bele
+     */
+    @Test
+    void summarizeRecurringTransactionCreatedInThisMonth_ignoresDisabledWallets() {
+        Wallet disabledWallet = new Wallet("Régi", this.user, CurrencyEnum.HUF, WalletTypeEnum.SAVINGS);
+        disabledWallet.setStatus(GeneralStatusEnum.DISABLED);
+        disabledWallet = walletRepo.save(disabledWallet);
+        RecurringTransaction recurring = this.persistRecurringTransaction("Régi előfizetés", disabledWallet);
+        this.persistRecurringGeneratedTransaction(recurring, SUMMARY_FROM.plusDays(1), new BigDecimal("-100"));
+
+        var result = transactionService.summarizeRecurringTransactionCreatedInThisMonth(SUMMARY_FROM, SUMMARY_TO);
+
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Segédfüggvény: havi, kiadás típusú ismétlődő tranzakció mentése
+     */
+    private RecurringTransaction persistRecurringTransaction(String name, Wallet wallet) {
+        return recurringTransactionRepo.save(new RecurringTransaction(
+                name,
+                new BigDecimal("-1000"),
+                SUMMARY_FROM.minusMonths(1),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                wallet));
+    }
+
+    /**
+     * Segédfüggvény: az ismétlődő tranzakcióból létrejött tranzakció mentése
+     * (detail nélkül, mert az összegzés csak a tranzakció priceSum-ját nézi)
+     */
+    private Transaction persistRecurringGeneratedTransaction(
+            RecurringTransaction recurringTransaction, LocalDate date, BigDecimal price) {
+        Transaction transaction = new Transaction(
+                recurringTransaction.getName(),
+                date,
+                TransactionTypeEnum.OUTCOME,
+                price,
+                recurringTransaction.getWallet());
+        transaction.setRecurringTransaction(recurringTransaction);
+        return transactionRepo.save(transaction);
+    }
+
+    /**
+     * Az összegzés sorrendje nem definiált, ezért id alapján map-be rendezzük
+     */
+    private Map<Long, BigDecimal> toSumMap(List<RecurringTransactionSummaryCreatedInMonthDto> result) {
+        return result.stream()
+                .collect(Collectors.toMap(
+                        RecurringTransactionSummaryCreatedInMonthDto::recurringTransactionId,
+                        RecurringTransactionSummaryCreatedInMonthDto::sum));
     }
 
     /**

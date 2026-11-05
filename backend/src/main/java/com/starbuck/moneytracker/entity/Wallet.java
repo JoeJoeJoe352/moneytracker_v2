@@ -28,31 +28,43 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Tárca neve
+     */
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    /**
+     * Valuda kódja. Mentéskor kell beállítani, később nem módosítható
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true, updatable = false)
+    private CurrencyEnum currencyCode = null;
 
+    /**
+     * Tárca típusa
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private WalletTypeEnum type;
+
+    /**
+     * Tárca státusza
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @ColumnDefault("'ACTIVE'")
     private GeneralStatusEnum status = GeneralStatusEnum.ACTIVE;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    private CurrencyEnum currencyCode = null;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private WalletTypeEnum type;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @OneToMany(mappedBy = "wallet")
     private List<Transaction> transactions;

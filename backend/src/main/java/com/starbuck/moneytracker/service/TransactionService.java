@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
@@ -65,7 +67,8 @@ public class TransactionService {
 
     /**
      * Ismétlődő tranzakcióból generál tranzakciót (scheduler). Nincs bejelentkezett
-     * user, ezért nem ellenőrzi a jogosultságot: a wallet és a kategóriák az ismétlődő
+     * user, ezért nem ellenőrzi a jogosultságot: a wallet és a kategóriák az
+     * ismétlődő
      * tranzakcióból jönnek, ami már a userhez tartozik
      *
      * @param command              a recurring tranzakció adataiból készült parancs
@@ -262,5 +265,18 @@ public class TransactionService {
         }
 
         this.transactionRepo.delete(transaction);
+    }
+
+    /**
+     * Adott hónapra összegzi az automatikusan létrehozott tranzakciók összegeit
+     *
+     * @param from
+     * @param to
+     * @return
+     */
+    public List<RecurringTransactionSummaryCreatedInMonthDto> summarizeRecurringTransactionCreatedInThisMonth(
+            LocalDate from, LocalDate to) {
+        Long userId = currentUser.getUser().getId();
+        return this.transactionRepo.summarizeRecurringTransactionCreatedInThisMonth(userId, from, to);
     }
 }

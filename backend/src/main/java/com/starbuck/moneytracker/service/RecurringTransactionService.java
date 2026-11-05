@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
@@ -158,6 +160,20 @@ public class RecurringTransactionService {
     @Transactional(readOnly = true)
     public List<RecurringTransaction> listRecurringTransactions() {
         return recurringTransactionRepo.findAllForUser(currentUser.getUser().getId());
+    }
+
+    /**
+     * Statisztikát csinál az ismétlődő tranzakciokból, az adott hónapra
+     *
+     * @param fixedDate
+     * @return
+     */
+    public List<RecurringTransactionSummaryCreatedInMonthDto> summarizeRecurrentTransactions(YearMonth fixedDate) {
+        List<RecurringTransactionSummaryCreatedInMonthDto> recurringTransactionSummary =
+                this.transactionService.summarizeRecurringTransactionCreatedInThisMonth(
+                        fixedDate.atDay(1), fixedDate.plusMonths(1).atDay(1));
+
+        return List.of();
     }
 
     /**
