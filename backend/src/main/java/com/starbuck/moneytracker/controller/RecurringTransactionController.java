@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.controller;
 
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.starbuck.moneytracker.dto.RecurringTransactionMonthlySummaryDto;
 import com.starbuck.moneytracker.dto.RecurringTransactionResponseDto;
 import com.starbuck.moneytracker.dto.RecurringTransactionSaveRequestDto;
 import com.starbuck.moneytracker.mapper.RecurringTransactionMapper;
@@ -54,6 +56,15 @@ public class RecurringTransactionController {
     @GetMapping
     public List<RecurringTransactionResponseDto> listRecurringTransactions() {
         return recurringTransactionMapper.toDtoList(recurringTransactionService.listRecurringTransactions());
+    }
+
+    /**
+     * Statisztikát készít a hónapban történt és a hónapban még tervezett ismétlődő tranzakciókról
+     * @return
+     */
+    @GetMapping("/monthly-stat")
+    public List<RecurringTransactionMonthlySummaryDto> createStatisticForMonthlyRecurringTransaction() {
+        return recurringTransactionService.summarizeRecurrentTransactions(YearMonth.now());
     }
 
     /**

@@ -2,11 +2,13 @@ package com.starbuck.moneytracker.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
 import com.starbuck.moneytracker.commands.UserCreateCommand;
+import com.starbuck.moneytracker.dto.RecurringTransactionMonthlySummaryDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
@@ -40,6 +43,8 @@ import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
+import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
+import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.UserRepository;
 import com.starbuck.moneytracker.repository.WalletRepository;
 import com.starbuck.moneytracker.service.RecurringTransactionService;
@@ -54,6 +59,11 @@ import com.starbuck.moneytracker.util.CurrentUserUtil;
 class RecurringTransactionServiceIntegrationTest extends MySqlContainerTest {
 
     private static final LocalDate START_DATE = LocalDate.of(2026, 5, 31);
+
+    /** A havi összegzés tesztjeinek hónapja */
+    private static final YearMonth FEBRUARY = YearMonth.of(2026, 2);
+
+    private static final LocalDate FEB_5 = FEBRUARY.atDay(5);
 
     @Autowired
     private RecurringTransactionService recurringTransactionService;
@@ -78,6 +88,12 @@ class RecurringTransactionServiceIntegrationTest extends MySqlContainerTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private TransactionDetailRepository transactionDetailRepo;
+
+    @Autowired
+    private TransactionDetailCategoryRepository detailCategoryRepo;
 
     @MockitoBean
     private CurrentUserUtil currentUser;
@@ -109,6 +125,18 @@ class RecurringTransactionServiceIntegrationTest extends MySqlContainerTest {
      */
     @AfterEach
     void cleanUp() {
+        // a summarizeRecurrentTransactions tesztek által létrehozott tranzakciók
+        detailCategoryRepo.deleteAllInBatch();
+        transactionDetailRepo.deleteAllInBatch();
+        // Natív sql, mert a soft delete miatt a repository a törölt tranzakciókat nem látja
+        jdbcTemplate.update(
+                "DELETE FROM transactions WHERE wallet_id IN (SELECT id FROM wallet WHERE user_id = ?)",
+                this.user.getId());
+        if (this.anotherUser != null) {
+            jdbcTemplate.update(
+                    "DELETE FROM transactions WHERE wallet_id IN (SELECT id FROM wallet WHERE user_id = ?)",
+                    this.anotherUser.getId());
+        }
         recurringTransactionCategoryRepo.deleteAllInBatch();
         // Natív sql, mert a soft delete miatt a repository a törölt ismétlődő
         // tranzakciókat nem látja
@@ -633,6 +661,131 @@ class RecurringTransactionServiceIntegrationTest extends MySqlContainerTest {
 
         // THEN
         assertTrue(recurringTransactionRepo.findById(foreign.getId()).isPresent());
+    }
+
+    /**
+     * Valós adatokkal: a létrejött tranzakciót a schedulerrel azonos
+     * generateTransactionFromTemplate hozza létre (ez a következő esedékességet is
+     * továbblépteti). Sorrend: findAllForUser, azaz nextOccurrenceDate szerint
+     */
+    @Test
+    void summarizeRecurrentTransactions_combinesCreatedAndPlannedFromDatabase() {
+        // GIVEN: a lakbér februári esedékessége már létrejött, a következő márciusi
+        RecurringTransaction rent = this.persistRecurringTransaction(
+                "Albérlet", new BigDecimal("-150000.00"), TransactionTypeEnum.OUTCOME, List.of(), FEB_5);
+        recurringTransactionService.generateTransactionFromTemplate(rent.getId(), FEB_5);
+        // a netflix februári esedékessége még tervezett
+        RecurringTransaction netflix = this.persistRecurringTransaction(
+                "Netflix", new BigDecimal("-4000.00"), TransactionTypeEnum.OUTCOME, List.of(), FEB_5.plusDays(15));
+
+        // WHEN
+        List<RecurringTransactionMonthlySummaryDto> result =
+                recurringTransactionService.summarizeRecurrentTransactions(FEBRUARY);
+
+        // THEN: a netflix (02-20) a lakbér (03-05) előtt
+        assertEquals(List.of(netflix.getId(), rent.getId()), this.toIds(result));
+
+        RecurringTransactionMonthlySummaryDto netflixSummary = result.get(0);
+        assertAmount("0", netflixSummary.createdSum());
+        assertAmount("-4000", netflixSummary.plannedSum());
+        assertEquals(FEB_5.plusDays(15), netflixSummary.nextOccurrenceDate());
+        assertEquals(CurrencyEnum.HUF, netflixSummary.currencyCode());
+
+        RecurringTransactionMonthlySummaryDto rentSummary = result.get(1);
+        assertAmount("-150000", rentSummary.createdSum());
+        assertAmount("0", rentSummary.plannedSum());
+        assertEquals(LocalDate.of(2026, 3, 5), rentSummary.nextOccurrenceDate());
+    }
+
+    /**
+     * Az előző hónapban létrejött tranzakció nem számít bele, a hónapi esedékesség
+     * tervezettként jelenik meg
+     */
+    @Test
+    void summarizeRecurrentTransactions_ignoresTransactionsCreatedInOtherMonths() {
+        RecurringTransaction rent = this.persistRecurringTransaction(
+                "Albérlet", new BigDecimal("-150000.00"), TransactionTypeEnum.OUTCOME, List.of(), FEB_5.minusMonths(1));
+        recurringTransactionService.generateTransactionFromTemplate(rent.getId(), FEB_5.minusMonths(1));
+
+        List<RecurringTransactionMonthlySummaryDto> result =
+                recurringTransactionService.summarizeRecurrentTransactions(FEBRUARY);
+
+        assertEquals(List.of(rent.getId()), this.toIds(result));
+        assertAmount("0", result.get(0).createdSum());
+        assertAmount("-150000", result.get(0).plannedSum());
+    }
+
+    /**
+     * Leállított heti ismétlődő tranzakció: a már létrejött összeg megmarad, a
+     * hónap hátralévő esedékességei (02-09, 02-16, 02-23) nem számítanak tervezettnek
+     */
+    @Test
+    void summarizeRecurrentTransactions_stoppedRecurringTransactionHasCreatedButNoPlannedSum() {
+        LocalDate monday = LocalDate.of(2026, 2, 2);
+        RecurringTransaction weekly = recurringTransactionService.createRecurringTransaction(this.createCommand(
+                "Heti bevásárlás",
+                new BigDecimal("-20000.00"),
+                monday,
+                RecurrenceIntervalEnum.WEEKLY,
+                TransactionTypeEnum.OUTCOME,
+                List.of(),
+                this.wallet.getId(),
+                false));
+        recurringTransactionService.generateTransactionFromTemplate(weekly.getId(), monday);
+        recurringTransactionService.stopRecurringTransaction(weekly.getId());
+
+        List<RecurringTransactionMonthlySummaryDto> result =
+                recurringTransactionService.summarizeRecurrentTransactions(FEBRUARY);
+
+        assertEquals(List.of(weekly.getId()), this.toIds(result));
+        assertAmount("-20000", result.get(0).createdSum());
+        assertAmount("0", result.get(0).plannedSum());
+        assertNull(result.get(0).nextOccurrenceDate());
+    }
+
+    /**
+     * A törölt ismétlődő tranzakció és a belőle létrejött tranzakciók sem
+     * jelennek meg. Mindkét lekérdezés kiszűri a törölteket, így a domain service
+     * hiányzó ismétlődő tranzakció miatti ellenőrzése sem dob
+     */
+    @Test
+    void summarizeRecurrentTransactions_ignoresDeletedRecurringTransactionAndItsTransactions() {
+        RecurringTransaction rent = this.persistRecurringTransaction(
+                "Albérlet", new BigDecimal("-150000.00"), TransactionTypeEnum.OUTCOME, List.of(), FEB_5);
+        recurringTransactionService.generateTransactionFromTemplate(rent.getId(), FEB_5);
+        recurringTransactionService.deleteRecurringTransaction(rent.getId());
+
+        List<RecurringTransactionMonthlySummaryDto> result =
+                recurringTransactionService.summarizeRecurrentTransactions(FEBRUARY);
+
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Más user ismétlődő tranzakciói és azok tranzakciói nem jelennek meg
+     */
+    @Test
+    void summarizeRecurrentTransactions_ignoresOtherUsersData() {
+        RecurringTransaction foreign = this.persistForAnotherUser();
+        recurringTransactionService.generateTransactionFromTemplate(foreign.getId(), START_DATE);
+
+        List<RecurringTransactionMonthlySummaryDto> result =
+                recurringTransactionService.summarizeRecurrentTransactions(YearMonth.from(START_DATE));
+
+        assertTrue(result.isEmpty());
+    }
+
+    private List<Long> toIds(List<RecurringTransactionMonthlySummaryDto> summaries) {
+        return summaries.stream()
+                .map(RecurringTransactionMonthlySummaryDto::recurringTransactionId)
+                .toList();
+    }
+
+    /**
+     * BigDecimal összehasonlítás a scale-től függetlenül (pl. -150000 == -150000.00)
+     */
+    private static void assertAmount(String expected, BigDecimal actual) {
+        assertEquals(0, new BigDecimal(expected).compareTo(actual), "expected " + expected + " but was " + actual);
     }
 
     private RecurringTransactionSaveCommand createCommand(

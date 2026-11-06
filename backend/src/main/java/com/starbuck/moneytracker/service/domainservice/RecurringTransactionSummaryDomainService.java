@@ -26,6 +26,8 @@ public final class RecurringTransactionSummaryDomainService {
      * Csak azok szerepelnek, amelyeknek van létrejött vagy tervezett összege, a
      * recurringTransactions sorrendjében.
      *
+     * Bízhatunk benne, hogy az utolsó tranzakció ideje és a next_occurance_date sosem lehet ugyanazon a napon
+     *
      * @param month                 a statisztika hónapja
      * @param createdTransactions   a hónapban ismétlődő tranzakcióból létrejött
      *                              tranzakciók
