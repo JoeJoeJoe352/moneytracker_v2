@@ -1,13 +1,13 @@
 package com.starbuck.moneytracker.unit.service.domainservice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.starbuck.moneytracker.dto.RecurringTransactionMonthlySummaryDto;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.Wallet;
@@ -111,27 +112,7 @@ public class RecurringTransactionSummaryDomainServiceTest {
         assertEquals(expectedResult, result);
     }
 
-    // countPlannedOccurrences - hibás bemenetek
-
-    @Test
-    void countPlannedOccurrences_throwsWhenRecurringTransactionIsNull() {
-        assertInvalidInput(
-                () -> this.service.countPlannedOccurrences(null, FROM, TO), "recurringTransaction cannot be null");
-    }
-
-    @Test
-    void countPlannedOccurrences_throwsWhenFromIsNull() {
-        assertInvalidInput(
-                () -> this.service.countPlannedOccurrences(this.recurringTransaction(1L), null, TO),
-                "from cannot be null");
-    }
-
-    @Test
-    void countPlannedOccurrences_throwsWhenToIsNull() {
-        assertInvalidInput(
-                () -> this.service.countPlannedOccurrences(this.recurringTransaction(1L), FROM, null),
-                "to cannot be null");
-    }
+    // hibás bemenetek
 
     @Test
     void countPlannedOccurrences_throwsWhenFromIsAfterTo() {
@@ -141,118 +122,13 @@ public class RecurringTransactionSummaryDomainServiceTest {
     }
 
     @Test
-    void countPlannedOccurrences_throwsWhenNextOccurrenceDateIsNull() {
-        RecurringTransaction recurringTransaction = this.recurringTransaction(1L);
-        recurringTransaction.setNextOccurrenceDate(null);
-
-        assertInvalidInput(
-                () -> this.service.countPlannedOccurrences(recurringTransaction, FROM, TO),
-                "nextOccurrenceDate cannot be null");
-    }
-
-    @Test
-    void countPlannedOccurrences_throwsWhenStartDateIsNull() {
-        RecurringTransaction recurringTransaction = this.recurringTransaction(1L);
-        recurringTransaction.setStartDate(null);
-
-        assertInvalidInput(
-                () -> this.service.countPlannedOccurrences(recurringTransaction, FROM, TO), "startDate cannot be null");
-    }
-
-    @Test
-    void countPlannedOccurrences_throwsWhenRecurrenceIntervalIsNull() {
-        RecurringTransaction recurringTransaction = this.recurringTransaction(1L);
-        recurringTransaction.setRecurrenceInterval(null);
-
-        assertInvalidInput(
-                () -> this.service.countPlannedOccurrences(recurringTransaction, FROM, TO),
-                "recurrenceInterval cannot be null");
-    }
-
-    // summarize - hibás bemenetek
-
-    @Test
-    void summarize_throwsWhenYearMonthIsNull() {
-        assertInvalidInput(() -> this.service.summarize(null, List.of(), List.of()), "yearMonth cannot be null");
-    }
-
-    @Test
-    void summarize_throwsWhenCreatedTransactionsIsNull() {
-        assertInvalidInput(() -> this.service.summarize(MONTH, null, List.of()), "createdTransactions cannot be null");
-    }
-
-    @Test
-    void summarize_throwsWhenRecurringTransactionsIsNull() {
-        assertInvalidInput(
-                () -> this.service.summarize(MONTH, List.of(), null), "recurringTransactions cannot be null");
-    }
-
-    @Test
-    void summarize_throwsWhenRecurringTransactionElementIsNull() {
-        assertInvalidInput(
-                () -> this.service.summarize(MONTH, List.of(), Arrays.asList((RecurringTransaction) null)),
-                "recurringTransactions element cannot be null");
-    }
-
-    @Test
-    void summarize_throwsWhenCreatedTransactionElementIsNull() {
-        assertInvalidInput(
-                () -> this.service.summarize(
-                        MONTH, Arrays.asList((Transaction) null), List.of(this.recurringTransaction(1L))),
-                "createdTransactions element cannot be null");
-    }
-
-    @Test
     void summarize_throwsWhenCreatedTransactionIsNotFromRecurringTransaction() {
         Transaction manual = this.createdTransaction(7L, null, new BigDecimal("-100"));
 
         assertInvalidInput(
-                () -> this.service.summarize(MONTH, List.of(manual), List.of(this.recurringTransaction(1L))),
+                () -> this.service.summarizeMonthlyStatistic(
+                        MONTH, List.of(manual), List.of(this.recurringTransaction(1L))),
                 "Transaction 7 was not created from a recurring transaction");
-    }
-
-    @Test
-    void summarize_throwsWhenCreatedTransactionPriceSumIsNull() {
-        RecurringTransaction recurringTransaction = this.recurringTransaction(1L);
-        Transaction transaction = this.createdTransaction(7L, recurringTransaction, null);
-
-        assertInvalidInput(
-                () -> this.service.summarize(MONTH, List.of(transaction), List.of(recurringTransaction)),
-                "priceSum of transaction 7 cannot be null");
-    }
-
-    @Test
-    void summarize_throwsWhenPlannedRecurringTransactionPriceSumIsNull() {
-        RecurringTransaction recurringTransaction = this.recurringTransaction(1L);
-        recurringTransaction.setPriceSum(null);
-
-        assertInvalidInput(
-                () -> this.service.summarize(MONTH, List.of(), List.of(recurringTransaction)),
-                "priceSum of recurringTransaction 1 cannot be null");
-    }
-
-    /**
-     * A priceSum-ot csak akkor ellenőrzi, ha használja: leállított ismétlődő
-     * tranzakciónál nem dob, és nem is kerül az eredménybe
-     */
-    @Test
-    void summarize_doesNotThrowWhenStoppedRecurringTransactionPriceSumIsNull() {
-        RecurringTransaction stopped = this.recurringTransaction(1L);
-        stopped.setStatus(RecurringTransactionStatusEnum.STOPPED);
-        stopped.setPriceSum(null);
-
-        var result = this.service.summarize(MONTH, List.of(), List.of(stopped));
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void summarize_throwsWhenRecurringTransactionIdIsNull() {
-        RecurringTransaction unsaved = this.recurringTransaction(null);
-
-        assertInvalidInput(
-                () -> this.service.summarize(MONTH, List.of(), List.of(unsaved)),
-                "recurringTransaction id cannot be null");
     }
 
     /**
@@ -260,26 +136,199 @@ public class RecurringTransactionSummaryDomainServiceTest {
      * összege csendben kimaradna, ezért kivételt dob
      */
     @Test
-    void summarize_throwsWhenCreatedTransactionsTemplateIsMissing() {
+    void summarize_throwsWhenCreatedTransactionsRecurringTransactionIsMissing() {
         RecurringTransaction listed = this.recurringTransaction(1L);
         RecurringTransaction missing = this.recurringTransaction(2L);
         Transaction created = this.createdTransaction(7L, missing, new BigDecimal("-100"));
 
         IllegalStateException exception = assertThrows(
-                IllegalStateException.class, () -> this.service.summarize(MONTH, List.of(created), List.of(listed)));
+                IllegalStateException.class,
+                () -> this.service.summarizeMonthlyStatistic(MONTH, List.of(created), List.of(listed)));
         assertEquals(
-                "Created transactions reference recurring transactions that are missing from the templates: [2]",
+                "Created transactions reference recurring transactions that are missing from the list: [2]",
                 exception.getMessage());
     }
 
+    /**
+     * Leállított ismétlődő tranzakció priceSum-ját nem használja: nem dob, és
+     * létrejött tranzakció nélkül nem is kerül az eredménybe
+     */
     @Test
-    void testSumCreatedTransactions() {}
+    void summarize_ignoresStoppedRecurringTransactionWithoutCreatedTransactions() {
+        RecurringTransaction stopped = this.recurringTransaction(1L);
+        stopped.setStatus(RecurringTransactionStatusEnum.STOPPED);
+        stopped.setPriceSum(null);
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(), List.of(stopped));
+
+        assertTrue(result.isEmpty());
+    }
+
+    // summarizeMonthlyStatistic
 
     @Test
-    void testSumPlannedTransactions() {}
+    void summarizeMonthlyStatistic_returnsEmptyListWhenThereAreNoRecurringTransactions() {
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(), List.of());
 
+        assertTrue(result.isEmpty());
+    }
+
+    /**
+     * Csak tervezett: a hónapban még nem jött létre belőle tranzakció. A DTO
+     * minden mezőjét ellenőrzi
+     */
     @Test
-    void testSummarize() {}
+    void summarizeMonthlyStatistic_returnsOnlyPlannedSumWhenNothingWasCreatedYet() {
+        RecurringTransaction rent = this.recurringTransaction(1L);
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(), List.of(rent));
+
+        assertEquals(1, result.size());
+        RecurringTransactionMonthlySummaryDto summary = result.get(0);
+        assertEquals(1L, summary.recurringTransactionId());
+        assertEquals("Albérlet", summary.name());
+        assertAmount("-150000", summary.recurringTransactionPrice());
+        assertEquals(FROM.plusDays(9), summary.nextOccurrenceDate());
+        assertEquals(TransactionTypeEnum.OUTCOME, summary.transactionType());
+        assertAmount("0", summary.createdSum());
+        assertAmount("-150000", summary.plannedSum());
+        assertEquals(CurrencyEnum.HUF, summary.currencyCode());
+    }
+
+    /**
+     * A hónapi esedékesség már létrejött, a következő a jövő hónapban van, így
+     * nincs
+     * tervezett összeg
+     */
+    @Test
+    void summarizeMonthlyStatistic_returnsOnlyCreatedSumWhenThisMonthsOccurrenceWasAlreadyCreated() {
+        RecurringTransaction rent = this.recurringTransaction(1L, TO.plusDays(9));
+        Transaction created = this.createdTransaction(7L, rent, new BigDecimal("-150000"));
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(created), List.of(rent));
+
+        assertEquals(1, result.size());
+        assertAmount("-150000", result.get(0).createdSum());
+        assertAmount("0", result.get(0).plannedSum());
+    }
+
+    /**
+     * Heti ismétlődés a hónap közepén: két előfordulás már létrejött (02-02,
+     * 02-09), kettő még tervezett (02-16, 02-23)
+     */
+    @Test
+    void summarizeMonthlyStatistic_returnsBothCreatedAndPlannedSums() {
+        RecurringTransaction weekly = this.recurringTransaction(1L, LocalDate.of(2026, 2, 16));
+        weekly.setStartDate(LocalDate.of(2026, 2, 2));
+        weekly.setRecurrenceInterval(RecurrenceIntervalEnum.WEEKLY);
+        weekly.setPriceSum(new BigDecimal("-1000"));
+        Transaction first = this.createdTransaction(7L, weekly, new BigDecimal("-1000"));
+        Transaction second = this.createdTransaction(8L, weekly, new BigDecimal("-1000"));
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(first, second), List.of(weekly));
+
+        assertEquals(1, result.size());
+        assertAmount("-2000", result.get(0).createdSum());
+        assertAmount("-2000", result.get(0).plannedSum());
+    }
+
+    /**
+     * A létrejött összeg a valós tranzakciókból jön, nem a sablon (azóta
+     * módosított) árából
+     */
+    @Test
+    void summarizeMonthlyStatistic_usesRealTransactionAmountForCreatedSum() {
+        RecurringTransaction rent = this.recurringTransaction(1L, TO.plusDays(9));
+        rent.setPriceSum(new BigDecimal("-160000"));
+        Transaction created = this.createdTransaction(7L, rent, new BigDecimal("-150000"));
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(created), List.of(rent));
+
+        assertAmount("-150000", result.get(0).createdSum());
+        assertAmount("-160000", result.get(0).recurringTransactionPrice());
+    }
+
+    /**
+     * Leállított ismétlődő tranzakció: a létrejött összeg megjelenik, tervezett
+     * nincs, és a következő esedékesség null
+     */
+    @Test
+    void summarizeMonthlyStatistic_returnsCreatedSumButNoPlannedSumForStoppedRecurringTransaction() {
+        RecurringTransaction stopped = this.recurringTransaction(1L);
+        stopped.setStatus(RecurringTransactionStatusEnum.STOPPED);
+        Transaction created = this.createdTransaction(7L, stopped, new BigDecimal("-150000"));
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(created), List.of(stopped));
+
+        assertEquals(1, result.size());
+        assertAmount("-150000", result.get(0).createdSum());
+        assertAmount("0", result.get(0).plannedSum());
+        assertNull(result.get(0).nextOccurrenceDate());
+    }
+
+    /**
+     * Ami ebben a hónapban se létre nem jött, se nem lesz esedékes, nem kerül az
+     * eredménybe
+     */
+    @Test
+    void summarizeMonthlyStatistic_excludesRecurringTransactionsWithNothingInTheMonth() {
+        RecurringTransaction thisMonth = this.recurringTransaction(1L);
+        RecurringTransaction laterMonth = this.recurringTransaction(2L, LocalDate.of(2026, 4, 10));
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(), List.of(thisMonth, laterMonth));
+
+        assertEquals(List.of(1L), this.toIds(result));
+    }
+
+    /**
+     * Ismétlődő tranzakciónként külön összegez, több létrejött tranzakciót is
+     * összead
+     */
+    @Test
+    void summarizeMonthlyStatistic_sumsCreatedTransactionsPerRecurringTransaction() {
+        RecurringTransaction rent = this.recurringTransaction(1L, TO.plusDays(9));
+        RecurringTransaction netflix = this.recurringTransaction(2L, TO.plusDays(9));
+        Transaction rentFirst = this.createdTransaction(7L, rent, new BigDecimal("-100000"));
+        Transaction netflixOnly = this.createdTransaction(8L, netflix, new BigDecimal("-4000"));
+        Transaction rentSecond = this.createdTransaction(9L, rent, new BigDecimal("-50000"));
+
+        var result = this.service.summarizeMonthlyStatistic(
+                MONTH, List.of(rentFirst, netflixOnly, rentSecond), List.of(rent, netflix));
+
+        assertEquals(List.of(1L, 2L), this.toIds(result));
+        assertAmount("-150000", result.get(0).createdSum());
+        assertAmount("-4000", result.get(1).createdSum());
+    }
+
+    /**
+     * Az eredmény sorrendje a recurringTransactions sorrendje, nem a létrejött
+     * tranzakcióké
+     */
+    @Test
+    void summarizeMonthlyStatistic_keepsTheOrderOfRecurringTransactions() {
+        RecurringTransaction first = this.recurringTransaction(2L);
+        RecurringTransaction second = this.recurringTransaction(1L);
+        Transaction createdForSecond = this.createdTransaction(7L, second, new BigDecimal("-150000"));
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(createdForSecond), List.of(first, second));
+
+        assertEquals(List.of(2L, 1L), this.toIds(result));
+    }
+
+    /**
+     * Ha a létrejött tranzakciók összege pontosan 0 és nincs tervezett összeg, a
+     * sor kimarad (a szűrő az összegeket nézi, nem azt, hogy volt-e tranzakció)
+     */
+    @Test
+    void summarizeMonthlyStatistic_excludesRowWhenCreatedSumIsExactlyZeroAndNothingIsPlanned() {
+        RecurringTransaction rent = this.recurringTransaction(1L, TO.plusDays(9));
+        Transaction plus = this.createdTransaction(7L, rent, new BigDecimal("100"));
+        Transaction minus = this.createdTransaction(8L, rent, new BigDecimal("-100"));
+
+        var result = this.service.summarizeMonthlyStatistic(MONTH, List.of(plus, minus), List.of(rent));
+
+        assertTrue(result.isEmpty());
+    }
 
     /**
      * Ellenőrzi, hogy IllegalArgumentException-t dob a megadott üzenettel
@@ -294,6 +343,14 @@ public class RecurringTransactionSummaryDomainServiceTest {
      * van esedékessége
      */
     private RecurringTransaction recurringTransaction(Long id) {
+        return this.recurringTransaction(id, FROM.plusDays(9));
+    }
+
+    /**
+     * Mint a recurringTransaction(id), de adott következő esedékességgel (pl. ha a
+     * hónapi már létrejött)
+     */
+    private RecurringTransaction recurringTransaction(Long id, LocalDate nextOccurrenceDate) {
         RecurringTransaction recurringTransaction = new RecurringTransaction(
                 "Albérlet",
                 new BigDecimal("-150000"),
@@ -302,11 +359,29 @@ public class RecurringTransactionSummaryDomainServiceTest {
                 TransactionTypeEnum.OUTCOME,
                 new Wallet(1L, "wallet", null, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
         recurringTransaction.setId(id);
+        recurringTransaction.setNextOccurrenceDate(nextOccurrenceDate);
         return recurringTransaction;
     }
 
     /**
-     * Ismétlődő tranzakcióból létrejött tranzakció (recurringTransaction null esetén
+     * BigDecimal összehasonlítás a scale-től függetlenül (pl. -150000 ==
+     * -150000.00)
+     *
+     * Csak az eltérés irányát adja vissza (pl.: 1: nagyobb az actual, mint az expected)
+     */
+    private static void assertAmount(String expected, BigDecimal actual) {
+        assertEquals(0, new BigDecimal(expected).compareTo(actual), "expected " + expected + " but was " + actual);
+    }
+
+    private List<Long> toIds(List<RecurringTransactionMonthlySummaryDto> summaries) {
+        return summaries.stream()
+                .map(RecurringTransactionMonthlySummaryDto::recurringTransactionId)
+                .toList();
+    }
+
+    /**
+     * Ismétlődő tranzakcióból létrejött tranzakció (recurringTransaction null
+     * esetén
      * kézzel felvett)
      */
     private Transaction createdTransaction(Long id, RecurringTransaction recurringTransaction, BigDecimal price) {

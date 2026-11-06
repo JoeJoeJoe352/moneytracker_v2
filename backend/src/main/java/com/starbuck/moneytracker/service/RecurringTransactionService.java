@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
-import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto;
+import com.starbuck.moneytracker.dto.RecurringTransactionMonthlySummaryDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
@@ -176,13 +176,13 @@ public class RecurringTransactionService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<RecurringTransactionSummaryCreatedInMonthDto> summarizeRecurrentTransactions(YearMonth yearMonth) {
+    public List<RecurringTransactionMonthlySummaryDto> summarizeRecurrentTransactions(YearMonth yearMonth) {
         List<Transaction> createdTransactions = transactionService.summarizeRecurringTransactionCreatedInThisMonth(
                 yearMonth.atDay(1), yearMonth.plusMonths(1).atDay(1));
         List<RecurringTransaction> recurringTransactions =
                 recurringTransactionRepo.findAllForUser(currentUser.getUser().getId());
 
-        return summaryCalculator.summarize(yearMonth, createdTransactions, recurringTransactions);
+        return summaryCalculator.summarizeMonthlyStatistic(yearMonth, createdTransactions, recurringTransactions);
     }
 
     /**

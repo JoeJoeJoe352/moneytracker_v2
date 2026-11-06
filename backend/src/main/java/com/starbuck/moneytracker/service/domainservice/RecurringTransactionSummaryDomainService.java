@@ -3,190 +3,73 @@ package com.starbuck.moneytracker.service.domainservice;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto;
+import com.starbuck.moneytracker.dto.RecurringTransactionMonthlySummaryDto;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.Transaction;
 
 /**
  * Az ismétlődő tranzakciók havi statisztikáját számolja ki.
+ * Nincs függősége, sem állapota (az adatokat a hívó tölti be), ezért
+ * nem @Service
  */
 public final class RecurringTransactionSummaryDomainService {
 
     /**
-     * Ismétlődő tranzakciónként összegzi az adott hónapot, külön a hónapban már
-     * létrejött (createdSum) és a hónap végéig még tervezett tranzakciókat.
+     * Ismétlődő tranzakciónként összegzi a hónapot: külön a hónapban már létrejött
+     * (createdSum) és a hónap végéig még tervezett (plannedSum) tranzakciókat.
+     * Csak azok szerepelnek, amelyeknek van létrejött vagy tervezett összege, a
+     * recurringTransactions sorrendjében.
      *
-     * @param yearMonth
+     * @param month                 a statisztika hónapja
      * @param createdTransactions   a hónapban ismétlődő tranzakcióból létrejött
-     *                              tranzakciók. Mindegyik ismétlődő tranzakciójának
-     *                              szerepelnie kell a recurringTransactions-ben
+     *                              tranzakciók
      * @param recurringTransactions a user (nem törölt) ismétlődő tranzakciói
-     * @return
-     * @throws IllegalArgumentException, ha valamelyik paraméter, elem vagy
-     *                                   ismétlődő tranzakció id null
-     * @throws IllegalStateException,    ha egy létrejött tranzakció ismétlődő
-     *                                   tranzakciója hiányzik a
-     *                                   recurringTransactions-ből
+     * @throws IllegalArgumentException ha egy tranzakció nem ismétlődő
+     *                                  tranzakcióból jött létre
+     * @throws IllegalStateException    ha egy létrejött tranzakció ismétlődő
+     *                                  tranzakciója
+     *                                  hiányzik a recurringTransactions-ből
      */
-    public List<RecurringTransactionSummaryCreatedInMonthDto> summarize(
-            YearMonth yearMonth,
-            List<Transaction> createdTransactions,
-            List<RecurringTransaction> recurringTransactions) {
-        requireNonNull(yearMonth, "yearMonth");
-        requireNonNull(createdTransactions, "createdTransactions");
-        requireNonNull(recurringTransactions, "recurringTransactions");
-        for (RecurringTransaction recurringTransaction : recurringTransactions) {
-            requireNonNull(recurringTransaction, "recurringTransactions element");
-            // a templates kulcsa, null id-val (el nem mentett entitás) nem azonosítható
-            requireNonNull(recurringTransaction.getId(), "recurringTransaction id");
-        }
+    public List<RecurringTransactionMonthlySummaryDto> summarizeMonthlyStatistic(
+            YearMonth month, List<Transaction> createdTransactions, List<RecurringTransaction> recurringTransactions) {
+        Map<Long, BigDecimal> priceSumByRecurringTransactionId =
+                this.sumTransactionPriceByRecurringTransactionId(createdTransactions);
+        this.validateAllCreatedHaveRecurringTransaction(priceSumByRecurringTransactionId, recurringTransactions);
 
-        LocalDate from = yearMonth.atDay(1);
-        LocalDate to = yearMonth.plusMonths(1).atDay(1);
-
-        // Az eredmény sorrendje a recurringTransactions sorrendje. LinkedHashMap, hogy
-        // garantáltan ugyanaz a sorrend legyen minden futás alkalmával (frontend
-        // számára).
-        Map<Long, RecurringTransaction> templates = recurringTransactions.stream()
-                .collect(Collectors.toMap(
-                        RecurringTransaction::getId,
-                        Function.identity(),
-                        (first, second) -> first,
-                        LinkedHashMap::new));
-
-        Map<Long, BigDecimal> createdSums = this.sumCreatedTransactions(createdTransactions);
-        this.validateAllCreatedHaveTemplate(createdSums, templates);
-        Map<Long, BigDecimal> plannedSums = this.sumPlannedTransactions(templates.values(), from, to);
-
-        // csak azok, amelyekből a hónapban létrejött vagy még létre fog jönni
-        // tranzakció
-        return templates.values().stream()
-                .filter(template ->
-                        createdSums.containsKey(template.getId()) || plannedSums.containsKey(template.getId()))
-                .map(template -> this.toDto(
-                        template,
-                        createdSums.getOrDefault(template.getId(), BigDecimal.ZERO),
-                        plannedSums.getOrDefault(template.getId(), BigDecimal.ZERO)))
+        return recurringTransactions.stream()
+                .map(recurringTransaction -> this.toDto(
+                        recurringTransaction,
+                        priceSumByRecurringTransactionId.getOrDefault(recurringTransaction.getId(), BigDecimal.ZERO),
+                        this.plannedSum(recurringTransaction, month)))
+                .filter(summary -> summary.createdSum().signum() != 0
+                        || summary.plannedSum().signum() != 0)
                 .toList();
-    }
-
-    /**
-     * Már létrejött tranzakciók összegzése, a valós összeggel, mert a sablon
-     * azóta módosulhatott
-     *
-     * @param createdTransactions
-     * @return ismétlődő tranzakció id -> létrejött tranzakciók összege
-     * @throws IllegalArgumentException, ha egy elem vagy a priceSum-ja null, vagy
-     *                                   egy tranzakció nem ismétlődő tranzakcióból
-     *                                   jött létre
-     */
-    private Map<Long, BigDecimal> sumCreatedTransactions(List<Transaction> createdTransactions) {
-        Map<Long, BigDecimal> createdSums = new HashMap<>();
-        for (Transaction transaction : createdTransactions) {
-            requireNonNull(transaction, "createdTransactions element");
-            if (transaction.getRecurringTransaction() == null) {
-                throw new IllegalArgumentException(
-                        "Transaction " + transaction.getId() + " was not created from a recurring transaction");
-            }
-            requireNonNull(transaction.getPriceSum(), "priceSum of transaction " + transaction.getId());
-
-            createdSums.merge(
-                    transaction.getRecurringTransaction().getId(), transaction.getPriceSum(), BigDecimal::add);
-        }
-        return createdSums;
-    }
-
-    /**
-     * Ellenőrzi, hogy minden létrejött tranzakció ismétlődő tranzakciója szerepel-e
-     * a templates-ben. Ha nem, a létrejött összeg csendben kimaradna az
-     * eredményből.
-     *
-     * @param createdSums
-     * @param templates
-     * @throws IllegalStateException, ha valamelyik hiányzik
-     */
-    private void validateAllCreatedHaveTemplate(
-            Map<Long, BigDecimal> createdSums, Map<Long, RecurringTransaction> templates) {
-        List<Long> missingIds = createdSums.keySet().stream()
-                .filter(id -> !templates.containsKey(id))
-                .sorted()
-                .toList();
-        if (!missingIds.isEmpty()) {
-            throw new IllegalStateException(
-                    "Created transactions reference recurring transactions that are missing from the templates: "
-                            + missingIds);
-        }
-    }
-
-    /**
-     * Még létre nem jött, tervezett tranzakciók összegzése, a sablon aktuális
-     * összegével
-     *
-     * @param recurringTransactions
-     * @param from
-     * @param to
-     * @return ismétlődő tranzakció id -> tervezett tranzakciók összege
-     * @throws IllegalArgumentException, ha egy tervezett előfordulással bíró
-     *                                   ismétlődő tranzakció priceSum-ja null
-     */
-    private Map<Long, BigDecimal> sumPlannedTransactions(
-            Collection<RecurringTransaction> recurringTransactions, LocalDate from, LocalDate to) {
-        Map<Long, BigDecimal> plannedSums = new HashMap<>();
-        for (RecurringTransaction recurringTransaction : recurringTransactions) {
-            if (recurringTransaction.isStopped()) {
-                continue;
-            }
-            int plannedCount = this.countPlannedOccurrences(recurringTransaction, from, to);
-            if (plannedCount == 0) {
-                continue;
-            }
-            // csak itt ellenőrizzük, mert leállított vagy esedékesség nélküli
-            // ismétlődő tranzakciónál nem használjuk
-            requireNonNull(
-                    recurringTransaction.getPriceSum(),
-                    "priceSum of recurringTransaction " + recurringTransaction.getId());
-            plannedSums.merge(
-                    recurringTransaction.getId(),
-                    recurringTransaction.getPriceSum().multiply(BigDecimal.valueOf(plannedCount)),
-                    BigDecimal::add);
-        }
-        return plannedSums;
     }
 
     /**
      * Megszámolja, hogy a [from, to) intervallumba hány, még létre nem jött
      * előfordulás esik. A nextOccurrenceDate-től indul, így a már létrejötteket
      * nem számolja újra. A from előtti, lemaradt (még le nem generált)
-     * előfordulásokat nem számolja bele
+     * előfordulásokat nem számolja bele.
      *
-     * @param recurringTransaction
-     * @param from
-     * @param to
-     * @return
-     * @throws IllegalArgumentException, ha valamelyik paraméter, vagy az ismétlődő
-     *                                   tranzakció dátumai / intervalluma null,
-     *                                   vagy a from a to után van
+     * @throws IllegalArgumentException ha a from a to után van
      */
     public int countPlannedOccurrences(RecurringTransaction recurringTransaction, LocalDate from, LocalDate to) {
-        requireNonNull(recurringTransaction, "recurringTransaction");
-        validateRange(from, to);
-        requireNonNull(recurringTransaction.getNextOccurrenceDate(), "nextOccurrenceDate");
-        requireNonNull(recurringTransaction.getStartDate(), "startDate");
-        requireNonNull(recurringTransaction.getRecurrenceInterval(), "recurrenceInterval");
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("from (" + from + ") cannot be after to (" + to + ")");
+        }
 
         int count = 0;
         LocalDate occurrence = recurringTransaction.getNextOccurrenceDate();
         while (occurrence.isBefore(to)) {
-            boolean isNextOccurenceAfterFromDate = !occurrence.isBefore(from);
-            if (isNextOccurenceAfterFromDate) {
+            boolean isInRange = !occurrence.isBefore(from);
+            if (isInRange) {
                 count++;
             }
             occurrence = recurringTransaction
@@ -197,48 +80,69 @@ public final class RecurringTransactionSummaryDomainService {
     }
 
     /**
-     * Dto-vá alakítás
-     *
-     * @param template
-     * @param createdSum
-     * @param plannedSum
-     * @return
+     * A létrejött tranzakciók összege ismétlődő tranzakciónként. A valós összeget
+     * használja, mert a sablon azóta módosulhatott.
      */
-    private RecurringTransactionSummaryCreatedInMonthDto toDto(
-            RecurringTransaction template, BigDecimal createdSum, BigDecimal plannedSum) {
-        return new RecurringTransactionSummaryCreatedInMonthDto(
-                template.getId(),
-                template.getName(),
-                template.getPriceSum(),
+    private Map<Long, BigDecimal> sumTransactionPriceByRecurringTransactionId(List<Transaction> createdTransactions) {
+        Map<Long, BigDecimal> sums = new HashMap<>();
+        for (Transaction transaction : createdTransactions) {
+            if (transaction.getRecurringTransaction() == null) {
+                throw new IllegalArgumentException(
+                        "Transaction " + transaction.getId() + " was not created from a recurring transaction");
+            }
+            sums.merge(transaction.getRecurringTransaction().getId(), transaction.getPriceSum(), BigDecimal::add);
+        }
+        return sums;
+    }
+
+    /**
+     * Ha egy létrejött tranzakció ismétlődő tranzakciója nincs a listában, az
+     * összege csendben kimaradna az eredményből, ezért kivételt dob.
+     */
+    private void validateAllCreatedHaveRecurringTransaction(
+            Map<Long, BigDecimal> priceSumByRecurringTransactionId, List<RecurringTransaction> recurringTransactions) {
+        Set<Long> knownRecurringTransactionIds =
+                recurringTransactions.stream().map(RecurringTransaction::getId).collect(Collectors.toSet());
+
+        Set<Long> recurringTransactionIds = priceSumByRecurringTransactionId.keySet();
+        List<Long> missingIds = recurringTransactionIds.stream()
+                .filter(id -> !knownRecurringTransactionIds.contains(id))
+                .toList();
+        if (!missingIds.isEmpty()) {
+            throw new IllegalStateException(
+                    "Created transactions reference recurring transactions that are missing from the list: "
+                            + missingIds);
+        }
+    }
+
+    /**
+     * A hónap végéig még tervezett tranzakciók összege, a sablon aktuális
+     * összegével.
+     * Leállított ismétlődő tranzakcióból már nem jön létre több.
+     */
+    private BigDecimal plannedSum(RecurringTransaction recurringTransaction, YearMonth month) {
+        if (recurringTransaction.isStopped()) {
+            return BigDecimal.ZERO;
+        }
+        int plannedCount = this.countPlannedOccurrences(
+                recurringTransaction, month.atDay(1), month.plusMonths(1).atDay(1));
+        if (plannedCount == 0) {
+            return BigDecimal.ZERO;
+        }
+        return recurringTransaction.getPriceSum().multiply(BigDecimal.valueOf(plannedCount));
+    }
+
+    private RecurringTransactionMonthlySummaryDto toDto(
+            RecurringTransaction recurringTransaction, BigDecimal createdSum, BigDecimal plannedSum) {
+        return new RecurringTransactionMonthlySummaryDto(
+                recurringTransaction.getId(),
+                recurringTransaction.getName(),
+                recurringTransaction.getPriceSum(),
                 // leállított ismétlődő tranzakcióból nem jön létre több
-                template.isStopped() ? null : template.getNextOccurrenceDate(),
-                template.getTransactionType(),
+                recurringTransaction.isStopped() ? null : recurringTransaction.getNextOccurrenceDate(),
+                recurringTransaction.getTransactionType(),
                 createdSum,
                 plannedSum,
-                template.getWallet().getCurrencyCode());
-    }
-
-    /**
-     * @throws IllegalArgumentException, ha a value null
-     */
-    private static void requireNonNull(Object value, String name) {
-        if (value == null) {
-            throw new IllegalArgumentException(name + " cannot be null");
-        }
-    }
-
-    /**
-     * Ellenőrzi a [from, to) intervallumot. from == to megengedett (üres
-     * intervallum)
-     *
-     * @throws IllegalArgumentException, ha valamelyik null, vagy a from a to után
-     *                                   van
-     */
-    private static void validateRange(LocalDate from, LocalDate to) {
-        requireNonNull(from, "from");
-        requireNonNull(to, "to");
-        if (from.isAfter(to)) {
-            throw new IllegalArgumentException("from (" + from + ") cannot be after to (" + to + ")");
-        }
+                recurringTransaction.getWallet().getCurrencyCode());
     }
 }
