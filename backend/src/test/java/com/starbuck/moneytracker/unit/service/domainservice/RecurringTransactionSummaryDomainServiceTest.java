@@ -1,6 +1,5 @@
 package com.starbuck.moneytracker.unit.service.domainservice;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,9 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -172,105 +169,6 @@ public class RecurringTransactionSummaryDomainServiceTest {
                 "recurrenceInterval cannot be null");
     }
 
-    // sumCreatedTransactions - hibás bemenetek
-
-    @Test
-    void sumCreatedTransactions_throwsWhenListIsNull() {
-        assertInvalidInput(
-                () -> this.service.sumCreatedTransactions(null, new HashMap<>()), "createdTransactions cannot be null");
-    }
-
-    @Test
-    void sumCreatedTransactions_throwsWhenSumsIsNull() {
-        assertInvalidInput(() -> this.service.sumCreatedTransactions(List.of(), null), "sums cannot be null");
-    }
-
-    @Test
-    void sumCreatedTransactions_throwsWhenElementIsNull() {
-        assertInvalidInput(
-                () -> this.service.sumCreatedTransactions(Arrays.asList((Transaction) null), new HashMap<>()),
-                "createdTransactions element cannot be null");
-    }
-
-    @Test
-    void sumCreatedTransactions_throwsWhenTransactionIsNotFromRecurringTransaction() {
-        Transaction manual = this.createdTransaction(7L, null, new BigDecimal("-100"));
-
-        assertInvalidInput(
-                () -> this.service.sumCreatedTransactions(List.of(manual), new HashMap<>()),
-                "Transaction 7 was not created from a recurring transaction");
-    }
-
-    @Test
-    void sumCreatedTransactions_throwsWhenPriceSumIsNull() {
-        Transaction transaction = this.createdTransaction(7L, this.recurringTransaction(1L), null);
-
-        assertInvalidInput(
-                () -> this.service.sumCreatedTransactions(List.of(transaction), new HashMap<>()),
-                "priceSum of transaction 7 cannot be null");
-    }
-
-    // sumPlannedTransactions - hibás bemenetek
-
-    @Test
-    void sumPlannedTransactions_throwsWhenCollectionIsNull() {
-        assertInvalidInput(
-                () -> this.service.sumPlannedTransactions(null, FROM, TO, new HashMap<>()),
-                "recurringTransactions cannot be null");
-    }
-
-    @Test
-    void sumPlannedTransactions_throwsWhenSumsIsNull() {
-        assertInvalidInput(() -> this.service.sumPlannedTransactions(List.of(), FROM, TO, null), "sums cannot be null");
-    }
-
-    /**
-     * Az intervallumot akkor is ellenőrzi, ha a countPlannedOccurrences meg sem
-     * hívódna (pl. csak leállított ismétlődő tranzakció van)
-     */
-    @Test
-    void sumPlannedTransactions_throwsWhenFromIsAfterToEvenIfAllAreStopped() {
-        RecurringTransaction stopped = this.recurringTransaction(1L);
-        stopped.setStatus(RecurringTransactionStatusEnum.STOPPED);
-
-        assertInvalidInput(
-                () -> this.service.sumPlannedTransactions(List.of(stopped), TO, FROM, new HashMap<>()),
-                "from (2026-03-01) cannot be after to (2026-02-01)");
-    }
-
-    @Test
-    void sumPlannedTransactions_throwsWhenElementIsNull() {
-        assertInvalidInput(
-                () -> this.service.sumPlannedTransactions(
-                        Arrays.asList((RecurringTransaction) null), FROM, TO, new HashMap<>()),
-                "recurringTransactions element cannot be null");
-    }
-
-    @Test
-    void sumPlannedTransactions_throwsWhenPriceSumIsNullAndItIsPlanned() {
-        RecurringTransaction recurringTransaction = this.recurringTransaction(1L);
-        recurringTransaction.setPriceSum(null);
-
-        assertInvalidInput(
-                () -> this.service.sumPlannedTransactions(List.of(recurringTransaction), FROM, TO, new HashMap<>()),
-                "priceSum of recurringTransaction 1 cannot be null");
-    }
-
-    /**
-     * A priceSum-ot csak akkor ellenőrzi, ha használja: leállított ismétlődő
-     * tranzakciónál nem dob
-     */
-    @Test
-    void sumPlannedTransactions_doesNotThrowWhenPriceSumIsNullButItIsStopped() {
-        RecurringTransaction stopped = this.recurringTransaction(1L);
-        stopped.setStatus(RecurringTransactionStatusEnum.STOPPED);
-        stopped.setPriceSum(null);
-        Map<Long, BigDecimal> sums = new HashMap<>();
-
-        assertDoesNotThrow(() -> this.service.sumPlannedTransactions(List.of(stopped), FROM, TO, sums));
-        assertTrue(sums.isEmpty());
-    }
-
     // summarize - hibás bemenetek
 
     @Test
@@ -294,6 +192,58 @@ public class RecurringTransactionSummaryDomainServiceTest {
         assertInvalidInput(
                 () -> this.service.summarize(MONTH, List.of(), Arrays.asList((RecurringTransaction) null)),
                 "recurringTransactions element cannot be null");
+    }
+
+    @Test
+    void summarize_throwsWhenCreatedTransactionElementIsNull() {
+        assertInvalidInput(
+                () -> this.service.summarize(
+                        MONTH, Arrays.asList((Transaction) null), List.of(this.recurringTransaction(1L))),
+                "createdTransactions element cannot be null");
+    }
+
+    @Test
+    void summarize_throwsWhenCreatedTransactionIsNotFromRecurringTransaction() {
+        Transaction manual = this.createdTransaction(7L, null, new BigDecimal("-100"));
+
+        assertInvalidInput(
+                () -> this.service.summarize(MONTH, List.of(manual), List.of(this.recurringTransaction(1L))),
+                "Transaction 7 was not created from a recurring transaction");
+    }
+
+    @Test
+    void summarize_throwsWhenCreatedTransactionPriceSumIsNull() {
+        RecurringTransaction recurringTransaction = this.recurringTransaction(1L);
+        Transaction transaction = this.createdTransaction(7L, recurringTransaction, null);
+
+        assertInvalidInput(
+                () -> this.service.summarize(MONTH, List.of(transaction), List.of(recurringTransaction)),
+                "priceSum of transaction 7 cannot be null");
+    }
+
+    @Test
+    void summarize_throwsWhenPlannedRecurringTransactionPriceSumIsNull() {
+        RecurringTransaction recurringTransaction = this.recurringTransaction(1L);
+        recurringTransaction.setPriceSum(null);
+
+        assertInvalidInput(
+                () -> this.service.summarize(MONTH, List.of(), List.of(recurringTransaction)),
+                "priceSum of recurringTransaction 1 cannot be null");
+    }
+
+    /**
+     * A priceSum-ot csak akkor ellenőrzi, ha használja: leállított ismétlődő
+     * tranzakciónál nem dob, és nem is kerül az eredménybe
+     */
+    @Test
+    void summarize_doesNotThrowWhenStoppedRecurringTransactionPriceSumIsNull() {
+        RecurringTransaction stopped = this.recurringTransaction(1L);
+        stopped.setStatus(RecurringTransactionStatusEnum.STOPPED);
+        stopped.setPriceSum(null);
+
+        var result = this.service.summarize(MONTH, List.of(), List.of(stopped));
+
+        assertTrue(result.isEmpty());
     }
 
     @Test

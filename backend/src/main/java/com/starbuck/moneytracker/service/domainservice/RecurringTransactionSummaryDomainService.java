@@ -17,20 +17,12 @@ import com.starbuck.moneytracker.entity.Transaction;
 
 /**
  * Az ismétlődő tranzakciók havi statisztikáját számolja ki.
- * Nincs függősége, sem állapota (az adatokat a hívó tölti be), ezért
- * nem @Service
  */
 public final class RecurringTransactionSummaryDomainService {
 
     /**
      * Ismétlődő tranzakciónként összegzi az adott hónapot, külön a hónapban már
-     * létrejött (createdSum) és a hónap végéig még tervezett, le nem állított
-     * ismétlődő tranzakcióból várható (plannedSum) tranzakciókat. Ha valamelyik
-     * nincs, az összege 0. Csak azok az ismétlődő tranzakciók szerepelnek,
-     * amelyekből
-     * a hónapban létrejött vagy még létre fog jönni tranzakció, a
-     * recurringTransactions
-     * sorrendjében
+     * létrejött (createdSum) és a hónap végéig még tervezett tranzakciókat.
      *
      * @param yearMonth
      * @param createdTransactions   a hónapban ismétlődő tranzakcióból létrejött
@@ -62,19 +54,17 @@ public final class RecurringTransactionSummaryDomainService {
 
         // Az eredmény sorrendje a recurringTransactions sorrendje. LinkedHashMap, hogy
         // garantáltan ugyanaz a sorrend legyen minden futás alkalmával (frontend
-        // számára)
+        // számára).
         Map<Long, RecurringTransaction> templates = recurringTransactions.stream()
                 .collect(Collectors.toMap(
                         RecurringTransaction::getId,
                         Function.identity(),
                         (first, second) -> first,
                         LinkedHashMap::new));
-        Map<Long, BigDecimal> createdSums = new HashMap<>();
-        Map<Long, BigDecimal> plannedSums = new HashMap<>();
 
-        this.sumCreatedTransactions(createdTransactions, createdSums);
+        Map<Long, BigDecimal> createdSums = this.sumCreatedTransactions(createdTransactions);
         this.validateAllCreatedHaveTemplate(createdSums, templates);
-        this.sumPlannedTransactions(templates.values(), from, to, plannedSums);
+        Map<Long, BigDecimal> plannedSums = this.sumPlannedTransactions(templates.values(), from, to);
 
         // csak azok, amelyekből a hónapban létrejött vagy még létre fog jönni
         // tranzakció
@@ -93,15 +83,13 @@ public final class RecurringTransactionSummaryDomainService {
      * azóta módosulhatott
      *
      * @param createdTransactions
-     * @param sums
-     * @throws IllegalArgumentException, ha valamelyik paraméter vagy elem null,
-     *                                   vagy egy tranzakció nem ismétlődő
-     *                                   tranzakcióból jött létre
+     * @return ismétlődő tranzakció id -> létrejött tranzakciók összege
+     * @throws IllegalArgumentException, ha egy elem vagy a priceSum-ja null, vagy
+     *                                   egy tranzakció nem ismétlődő tranzakcióból
+     *                                   jött létre
      */
-    public void sumCreatedTransactions(List<Transaction> createdTransactions, Map<Long, BigDecimal> sums) {
-        requireNonNull(createdTransactions, "createdTransactions");
-        requireNonNull(sums, "sums");
-
+    private Map<Long, BigDecimal> sumCreatedTransactions(List<Transaction> createdTransactions) {
+        Map<Long, BigDecimal> createdSums = new HashMap<>();
         for (Transaction transaction : createdTransactions) {
             requireNonNull(transaction, "createdTransactions element");
             if (transaction.getRecurringTransaction() == null) {
@@ -110,16 +98,16 @@ public final class RecurringTransactionSummaryDomainService {
             }
             requireNonNull(transaction.getPriceSum(), "priceSum of transaction " + transaction.getId());
 
-            sums.merge(transaction.getRecurringTransaction().getId(), transaction.getPriceSum(), BigDecimal::add);
+            createdSums.merge(
+                    transaction.getRecurringTransaction().getId(), transaction.getPriceSum(), BigDecimal::add);
         }
+        return createdSums;
     }
 
     /**
      * Ellenőrzi, hogy minden létrejött tranzakció ismétlődő tranzakciója szerepel-e
      * a templates-ben. Ha nem, a létrejött összeg csendben kimaradna az
      * eredményből.
-     * A tervezett összegeket nem kell ellenőrizni, mert azok a templates-ből
-     * készülnek
      *
      * @param createdSums
      * @param templates
@@ -145,23 +133,14 @@ public final class RecurringTransactionSummaryDomainService {
      * @param recurringTransactions
      * @param from
      * @param to
-     * @param sums
-     * @throws IllegalArgumentException, ha valamelyik paraméter vagy elem null,
-     *                                   vagy a from a to után van
+     * @return ismétlődő tranzakció id -> tervezett tranzakciók összege
+     * @throws IllegalArgumentException, ha egy tervezett előfordulással bíró
+     *                                   ismétlődő tranzakció priceSum-ja null
      */
-    public void sumPlannedTransactions(
-            Collection<RecurringTransaction> recurringTransactions,
-            LocalDate from,
-            LocalDate to,
-            Map<Long, BigDecimal> sums) {
-        requireNonNull(recurringTransactions, "recurringTransactions");
-        requireNonNull(sums, "sums");
-        // itt is ellenőrizzük, mert csupa leállított ismétlődő tranzakciónál a
-        // countPlannedOccurrences meg sem hívódna
-        validateRange(from, to);
-
+    private Map<Long, BigDecimal> sumPlannedTransactions(
+            Collection<RecurringTransaction> recurringTransactions, LocalDate from, LocalDate to) {
+        Map<Long, BigDecimal> plannedSums = new HashMap<>();
         for (RecurringTransaction recurringTransaction : recurringTransactions) {
-            requireNonNull(recurringTransaction, "recurringTransactions element");
             if (recurringTransaction.isStopped()) {
                 continue;
             }
@@ -169,14 +148,17 @@ public final class RecurringTransactionSummaryDomainService {
             if (plannedCount == 0) {
                 continue;
             }
+            // csak itt ellenőrizzük, mert leállított vagy esedékesség nélküli
+            // ismétlődő tranzakciónál nem használjuk
             requireNonNull(
                     recurringTransaction.getPriceSum(),
                     "priceSum of recurringTransaction " + recurringTransaction.getId());
-            sums.merge(
+            plannedSums.merge(
                     recurringTransaction.getId(),
                     recurringTransaction.getPriceSum().multiply(BigDecimal.valueOf(plannedCount)),
                     BigDecimal::add);
         }
+        return plannedSums;
     }
 
     /**
