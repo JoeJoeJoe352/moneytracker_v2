@@ -191,6 +191,12 @@
     "select_page": "Seite auswählen"
   },
   "recurring_transaction": {
+    "chart": {
+      "title": "Wiederkehrende Ausgaben in diesem Monat",
+      "total": "Gesamt",
+      "other": "Sonstiges",
+      "empty": "In diesem Monat gibt es keine wiederkehrenden Ausgaben."
+    },
     "title": "Meine wiederkehrenden Transaktionen",
     "empty": "Noch keine wiederkehrenden Transaktionen",
     "not_found": "Die gesuchte wiederkehrende Transaktion wurde nicht gefunden!",

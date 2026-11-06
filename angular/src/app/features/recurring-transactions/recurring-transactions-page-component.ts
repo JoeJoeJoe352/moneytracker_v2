@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { RecurringTransactionModalComponent } from './recurring-transaction-modal';
 import { RecurringTransactionRowComponent } from './recurring-transaction-row-component';
+import { RecurringTransactionDoughnutComponent } from '../statistics/recurring-transaction-doughnut-chart-component';
 
 const LIST_URL = '/recurring-transactions';
 
@@ -27,6 +28,7 @@ const LIST_URL = '/recurring-transactions';
         MatButtonModule,
         TranslatePipe,
         RecurringTransactionRowComponent,
+        RecurringTransactionDoughnutComponent
     ],
 })
 export class RecurringTransactionsPageComponent {
@@ -52,10 +54,23 @@ export class RecurringTransactionsPageComponent {
         });
     }
 
+    /**
+     * Ismétlődő tranzakciók, lista elemek
+     */
     protected recurringTransactionListResource = resource({
         defaultValue: [],
         loader: async () => {
             return await firstValueFrom(this.service.listRecurringTransactions());
+        },
+    });
+
+    /**
+     * Ismétlődő tranzakciók, statisztikai elemek
+     */
+    protected recurringTransactionStatResource = resource({
+        defaultValue: [],
+        loader: async () => {
+            return await firstValueFrom(this.service.recurringTransactionsStat());
         },
     });
 

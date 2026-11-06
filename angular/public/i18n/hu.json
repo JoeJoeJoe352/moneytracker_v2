@@ -191,6 +191,12 @@
     "select_page": "Válassz oldalt"
   },
   "recurring_transaction": {
+    "chart": {
+      "title": "Ismétlődő kiadások ebben a hónapban",
+      "total": "Összesen",
+      "other": "Egyéb",
+      "empty": "Ebben a hónapban nincs ismétlődő kiadás."
+    },
     "title": "Ismétlődő tranzakcióim",
     "empty": "Nincs még felvett ismétlődő tranzakció",
     "not_found": "A keresett ismétlődő tranzakció nem található!",

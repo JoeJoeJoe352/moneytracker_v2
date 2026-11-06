@@ -109,6 +109,9 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
                     useValue: {
                         listRecurringTransactions: listSpy,
                         getRecurringTransactionById: getByIdSpy,
+                        // üres statisztika: a diagram az üres állapotot mutatja, így a
+                        // tesztkörnyezetben (canvas nélkül) nem rajzol
+                        recurringTransactionsStat: () => of([]),
                     },
                 },
                 { provide: MatDialog, useValue: { open: dialogOpenSpy } },

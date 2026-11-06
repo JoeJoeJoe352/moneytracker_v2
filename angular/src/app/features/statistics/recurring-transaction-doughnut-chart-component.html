@@ -1,0 +1,39 @@
+<section class="doughnut-chart">
+    <h2 class="title">{{ 'recurring_transaction.chart.title' | translate }}</h2>
+
+    @if (slices().length === 0) {
+        <p class="empty">{{ 'recurring_transaction.chart.empty' | translate }}</p>
+    } @else {
+        <div class="content">
+            <div class="chart-container">
+                <!-- a listában minden szelet szövegesen is szerepel, ezért a canvas csak dekoráció -->
+                <canvas
+                    baseChart
+                    type="doughnut"
+                    aria-hidden="true"
+                    [data]="chartData()"
+                    [options]="chartOptions"
+                ></canvas>
+            </div>
+
+            <div class="legend">
+                <p class="total">
+                    {{ 'recurring_transaction.chart.total' | translate }}:
+                    <strong>{{ formatHuf(total()) }}</strong>
+                </p>
+                <ul>
+                    @for (slice of slices(); track slice.label) {
+                        <li>
+                            <span class="swatch" [style.background-color]="slice.color"></span>
+                            <span class="name">{{ slice.label }}</span>
+                            <span class="amount">
+                                {{ formatHuf(slice.hufAmount) }}
+                                <span class="share">({{ sharePercent(slice.hufAmount) }}%)</span>
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+</section>

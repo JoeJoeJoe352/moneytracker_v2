@@ -10,6 +10,12 @@
     </button>
 </div>
 
+@if (recurringTransactionListResource.hasValue()) {
+    <mat-card>
+        <app-recurring-transaction-doughnut-chart-component [statData]="recurringTransactionStatResource.value()" />    
+    </mat-card>
+}
+
 <mat-card>
     <div class="recurring-list" aria-live="polite" [attr.aria-busy]="isListLoading()">
         @if (isListLoading()) {
