@@ -10,9 +10,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -32,7 +29,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.UserCreateCommand;
-import com.starbuck.moneytracker.dto.RecurringTransactionSummaryCreatedInMonthDto;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.Category;
@@ -665,26 +661,34 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     }
 
     /**
-     * Ismétlődő tranzakciónként összegzi a [from, to) intervallumban létrejött
-     * tranzakciókat: a from napja benne van, a to napja már nincs
+     * A [from, to) intervallumban ismétlődő tranzakcióból létrejött tranzakciókat
+     * adja vissza dátum szerint növekvő sorrendben: a from napja benne van, a to
+     * napja már nincs. Az egy ismétlődő tranzakcióhoz tartozók külön elemként jönnek
      */
     @Test
-    void summarizeRecurringTransactionCreatedInThisMonth_sumsPerRecurringTransactionWithinRange() {
+    void
+            summarizeRecurringTransactionCreatedInThisMonth_returnsRecurringGeneratedTransactionsWithinRangeOrderedByDate() {
         RecurringTransaction rent = this.persistRecurringTransaction("Albérlet", this.wallet);
         RecurringTransaction netflix = this.persistRecurringTransaction("Netflix", this.wallet);
-        this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM, new BigDecimal("-150000"));
-        this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.plusDays(14), new BigDecimal("-150000"));
-        this.persistRecurringGeneratedTransaction(netflix, SUMMARY_TO.minusDays(1), new BigDecimal("-4000"));
+        // szándékosan nem dátum sorrendben mentve, hogy a rendezés látszódjon
+        Transaction netflixLastDay =
+                this.persistRecurringGeneratedTransaction(netflix, SUMMARY_TO.minusDays(1), new BigDecimal("-4000"));
+        Transaction rentMidMonth =
+                this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.plusDays(14), new BigDecimal("-150000"));
+        Transaction rentFirstDay =
+                this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM, new BigDecimal("-150000"));
         // intervallumon kívül: előző hónap utolsó napja és a to napja
         this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.minusDays(1), new BigDecimal("-1"));
         this.persistRecurringGeneratedTransaction(netflix, SUMMARY_TO, new BigDecimal("-1"));
 
         var result = transactionService.summarizeRecurringTransactionCreatedInThisMonth(SUMMARY_FROM, SUMMARY_TO);
 
-        Map<Long, BigDecimal> sums = this.toSumMap(result);
-        assertEquals(Set.of(rent.getId(), netflix.getId()), sums.keySet());
-        assertEquals(0, new BigDecimal("-300000").compareTo(sums.get(rent.getId())));
-        assertEquals(0, new BigDecimal("-4000").compareTo(sums.get(netflix.getId())));
+        assertEquals(List.of(rentFirstDay.getId(), rentMidMonth.getId(), netflixLastDay.getId()), this.toIds(result));
+        // a wallet és az ismétlődő tranzakció is betöltve jön (JOIN FETCH)
+        Transaction last = result.get(2);
+        assertEquals(netflix.getId(), last.getRecurringTransaction().getId());
+        assertEquals("Netflix", last.getRecurringTransaction().getName());
+        assertEquals(this.wallet.getId(), last.getWallet().getId());
     }
 
     /**
@@ -722,16 +726,15 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     @Test
     void summarizeRecurringTransactionCreatedInThisMonth_ignoresDeletedTransactions() {
         RecurringTransaction rent = this.persistRecurringTransaction("Albérlet", this.wallet);
-        this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.plusDays(1), new BigDecimal("-150000"));
+        Transaction kept =
+                this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.plusDays(1), new BigDecimal("-150000"));
         Transaction deleted =
                 this.persistRecurringGeneratedTransaction(rent, SUMMARY_FROM.plusDays(2), new BigDecimal("-1"));
         transactionRepo.delete(deleted);
 
         var result = transactionService.summarizeRecurringTransactionCreatedInThisMonth(SUMMARY_FROM, SUMMARY_TO);
 
-        Map<Long, BigDecimal> sums = this.toSumMap(result);
-        assertEquals(Set.of(rent.getId()), sums.keySet());
-        assertEquals(0, new BigDecimal("-150000").compareTo(sums.get(rent.getId())));
+        assertEquals(List.of(kept.getId()), this.toIds(result));
     }
 
     /**
@@ -794,13 +797,10 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
     }
 
     /**
-     * Az összegzés sorrendje nem definiált, ezért id alapján map-be rendezzük
+     * A tranzakciók id-jai, a visszakapott sorrendben
      */
-    private Map<Long, BigDecimal> toSumMap(List<RecurringTransactionSummaryCreatedInMonthDto> result) {
-        return result.stream()
-                .collect(Collectors.toMap(
-                        RecurringTransactionSummaryCreatedInMonthDto::recurringTransactionId,
-                        RecurringTransactionSummaryCreatedInMonthDto::sum));
+    private List<Long> toIds(List<Transaction> transactions) {
+        return transactions.stream().map(Transaction::getId).toList();
     }
 
     /**
