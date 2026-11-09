@@ -104,12 +104,10 @@ public class RecurringTransactionService {
             recurringTransaction.setStatus(RecurringTransactionStatusEnum.ACTIVE);
         }
 
-        boolean isRecurrenceIntervalChanged =
-                !recurringTransaction.getRecurrenceInterval().equals(command.getRecurrenceInterval());
         boolean isNextOccurenceDateChanged =
                 !recurringTransaction.getNextOccurrenceDate().equals(command.getTransactionCreateDate());
 
-        if (isNextOccurenceDateChanged || isRecurrenceIntervalChanged) {
+        if (isNextOccurenceDateChanged) {
             recurringTransaction.setDates(command.getTransactionCreateDate());
         }
 
