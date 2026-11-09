@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -418,6 +419,85 @@ public class RecurringTransactionServiceTest {
         verify(transactionService).createTransactionFromRecurringTransaction(command, recurringTransaction);
         assertEquals(START_DATE.plusMonths(1), recurringTransaction.getNextOccurrenceDate());
         verify(recurringTransactionRepo).save(recurringTransaction);
+    }
+
+    /**
+     * Lemaradt előfordulások: date-ig (azt is beleértve) mindegyik létrejön, a saját napjára
+     */
+    @Test
+    void testGenerateTransactionFromTemplateCatchesUpAllMissedOccurrences() {
+        var recurringTransaction = existing();
+        LocalDate runDate = START_DATE.plusMonths(2);
+        when(recurringTransactionRepo.findDueRecurringTransactionByIdForUpdate(5L, runDate))
+                .thenReturn(Optional.of(recurringTransaction));
+        when(transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                        eq(recurringTransaction), any(LocalDate.class)))
+                .thenAnswer(invocation -> mock(TransactionSaveCommand.class));
+
+        int created = service.generateTransactionFromTemplate(5L, runDate);
+
+        assertEquals(3, created);
+        InOrder inOrder = inOrder(transactionFactory);
+        inOrder.verify(transactionFactory)
+                .createTransactionCommandFromRecurrentTransactionTemplate(recurringTransaction, START_DATE);
+        inOrder.verify(transactionFactory)
+                .createTransactionCommandFromRecurrentTransactionTemplate(
+                        recurringTransaction, START_DATE.plusMonths(1));
+        inOrder.verify(transactionFactory)
+                .createTransactionCommandFromRecurrentTransactionTemplate(
+                        recurringTransaction, START_DATE.plusMonths(2));
+        verify(transactionService, times(3)).createTransactionFromRecurringTransaction(any(), eq(recurringTransaction));
+        assertEquals(START_DATE.plusMonths(3), recurringTransaction.getNextOccurrenceDate());
+        // egyszer menti, a ciklus végén
+        verify(recurringTransactionRepo, times(1)).save(recurringTransaction);
+    }
+
+    /**
+     * Futásonként legfeljebb MAX_CATCH_UP_PER_RUN jön létre, a maradékot a következő futás folytatja
+     */
+    @Test
+    void testGenerateTransactionFromTemplateStopsAtTheCatchUpLimit() {
+        var recurringTransaction = existing();
+        recurringTransaction.setRecurrenceInterval(RecurrenceIntervalEnum.WEEKLY);
+        LocalDate runDate = START_DATE.plusWeeks(150);
+        when(recurringTransactionRepo.findDueRecurringTransactionByIdForUpdate(5L, runDate))
+                .thenReturn(Optional.of(recurringTransaction));
+        when(transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                        eq(recurringTransaction), any(LocalDate.class)))
+                .thenAnswer(invocation -> mock(TransactionSaveCommand.class));
+
+        int created = service.generateTransactionFromTemplate(5L, runDate);
+
+        assertEquals(RecurringTransactionService.MAX_CATCH_UP_PER_RUN, created);
+        verify(transactionService, times(RecurringTransactionService.MAX_CATCH_UP_PER_RUN))
+                .createTransactionFromRecurringTransaction(any(), eq(recurringTransaction));
+        // a 101. előfordulásnál folytatja
+        assertEquals(
+                START_DATE.plusWeeks(RecurringTransactionService.MAX_CATCH_UP_PER_RUN),
+                recurringTransaction.getNextOccurrenceDate());
+    }
+
+    /**
+     * Mind vagy egyik sem: ha egy előfordulás hibát dob, a kivétel továbbmegy (a @Transactional
+     * visszagörgeti a már létrehozottakat), és a sablon nem mentődik a továbbléptetett dátummal
+     */
+    @Test
+    void testGenerateTransactionFromTemplatePropagatesFailureWithoutSaving() {
+        var recurringTransaction = existing();
+        LocalDate runDate = START_DATE.plusMonths(2);
+        when(recurringTransactionRepo.findDueRecurringTransactionByIdForUpdate(5L, runDate))
+                .thenReturn(Optional.of(recurringTransaction));
+        when(transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                        eq(recurringTransaction), any(LocalDate.class)))
+                .thenAnswer(invocation -> mock(TransactionSaveCommand.class));
+        when(transactionService.createTransactionFromRecurringTransaction(any(), eq(recurringTransaction)))
+                .thenReturn(null)
+                .thenThrow(new IllegalArgumentException("broken"));
+
+        assertThrowsExactly(IllegalArgumentException.class, () -> service.generateTransactionFromTemplate(5L, runDate));
+
+        verify(transactionService, times(2)).createTransactionFromRecurringTransaction(any(), eq(recurringTransaction));
+        verify(recurringTransactionRepo, never()).save(any());
     }
 
     @Test

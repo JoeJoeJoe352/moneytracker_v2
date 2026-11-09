@@ -26,6 +26,13 @@ import com.starbuck.moneytracker.util.TransactionFactory;
 @Service
 public class RecurringTransactionService {
 
+    /**
+     * Ismétlődő tranzakciónként futásonként legfeljebb ennyi lemaradt tranzakció
+     * jön létre,
+     * hogy egy hosszú kimaradás se terhelje túl egy futást
+     */
+    public static final int MAX_CATCH_UP_PER_RUN = 100;
+
     private final RecurringTransactionRepository recurringTransactionRepo;
     private final RecurringTransactionCategoryRepository recurringTransactionCategoryRepo;
     private final CategoryService categoryService;
@@ -118,43 +125,67 @@ public class RecurringTransactionService {
         this.saveCategoryLinks(recurringTransaction, command.getCategoryIds());
     }
 
+    /*
+     * docker compose -f docker-compose.dev.yml exec backend ./mvnw clean compile
+     * docker compose -f docker-compose.dev.yml restart backend
+     *
+     */
+
     /**
-     * Felveszi a tranzakciót az ismétlődő tranzakció mintájára, és továbblépteti a
+     * Felveszi az ismétlődő tranzakció mintájára az összes, date-ig esedékes
+     * tranzakciót, mindegyiket a saját esedékessége napjára, és továbblépteti a
      * következő esedékességet.
+     * <p>
+     * Futásonként legfeljebb {@value #MAX_CATCH_UP_PER_RUN} tranzakciót hoz létre,
+     * a maradékot a következő futás folytatja.
      *
      * @param recurringTransactionId
      * @param date                   a scheduler futásának napja
+     * @return a létrehozott tranzakciók száma
+     * @throws IllegalStateException ha a következő esedékesség nem lépne előre
+     *                               (végtelen ciklus védelem)
      */
     @Transactional
-    public void generateTransactionFromTemplate(long recurringTransactionId, LocalDate date) {
+    public int generateTransactionFromTemplate(long recurringTransactionId, LocalDate date) {
         var found = recurringTransactionRepo.findDueRecurringTransactionByIdForUpdate(recurringTransactionId, date);
         // Ez akkor fordulhat elő, ha a user a listázás után, de e függvény meghívása
         // előtt inaktiválta a recurringTransactiont
         if (found.isEmpty()) {
-            return;
+            return 0;
         }
         RecurringTransaction recurringTransaction = found.get();
 
-        TransactionSaveCommand command = transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
-                recurringTransaction, recurringTransaction.getNextOccurrenceDate());
-        // nincs bejelentkezett user, ezért a jogosultság-ellenőrzés nélküli ágat hívjuk
-        transactionService.createTransactionFromRecurringTransaction(command, recurringTransaction);
+        int created = 0;
+        while (!recurringTransaction.getNextOccurrenceDate().isAfter(date) && created < MAX_CATCH_UP_PER_RUN) {
+            LocalDate occurrence = recurringTransaction.getNextOccurrenceDate();
+            TransactionSaveCommand command =
+                    transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                            recurringTransaction, occurrence);
+            // nincs bejelentkezett user, ezért a jogosultság-ellenőrzés nélküli ágat hívjuk
+            transactionService.createTransactionFromRecurringTransaction(command, recurringTransaction);
 
-        this.updateNextOccurrence(recurringTransaction);
+            this.advanceNextOccurrence(recurringTransaction, occurrence);
+            created++;
+        }
+        recurringTransactionRepo.save(recurringTransaction);
+        return created;
     }
 
     /**
-     * Frissíti a következő előfordulási idejét az ismétlődő tranzakciónak
+     * Továbblépteti az ismétlődő tranzakció következő esedékességét
      *
-     * @param recurringTransaction
+     * @throws IllegalStateException ha a következő esedékesség nem az aktuális után
+     *                               van
      */
-    private void updateNextOccurrence(RecurringTransaction recurringTransaction) {
+    private void advanceNextOccurrence(RecurringTransaction recurringTransaction, LocalDate occurrence) {
         LocalDate nextOccurrence = recurringTransaction
                 .getRecurrenceInterval()
-                .calculateNextOccurrence(
-                        recurringTransaction.getStartDate(), recurringTransaction.getNextOccurrenceDate());
+                .calculateNextOccurrence(recurringTransaction.getStartDate(), occurrence);
+        if (!nextOccurrence.isAfter(occurrence)) {
+            throw new IllegalStateException("Next occurrence (" + nextOccurrence + ") is not after " + occurrence
+                    + " for RecurringTransaction " + recurringTransaction.getId());
+        }
         recurringTransaction.setNextOccurrenceDate(nextOccurrence);
-        recurringTransactionRepo.save(recurringTransaction);
     }
 
     /**
