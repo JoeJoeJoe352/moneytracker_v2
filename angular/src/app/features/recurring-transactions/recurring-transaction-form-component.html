@@ -128,9 +128,9 @@
                         <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
                     }
                     <!-- a [min] miatt a datepicker saját matDatepickerMin hibát is ad -->
-                    @if (date.hasError('beforeToday') || date.hasError('matDatepickerMin')) {
+                    @if (date.hasError('beforeThisMonth') || date.hasError('matDatepickerMin')) {
                         <mat-error>{{
-                            'recurring_transaction.form.date_before_today' | translate
+                            'recurring_transaction.form.date_before_this_month' | translate
                         }}</mat-error>
                     }
                 }

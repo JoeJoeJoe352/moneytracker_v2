@@ -39,7 +39,7 @@ import {
 import { UserDataStore } from '@shared/stores/user-data-store';
 import { WalletDataUtil } from '@shared/utils/wallet-data-util';
 import { TimeHelper } from '@shared/services/time-helper';
-import { notBeforeToday } from './not-before-today-validator';
+import { notBeforeThisMonth } from './not-before-this-month-validator';
 
 @Component({
     selector: 'app-recurring-transaction-form-component',
@@ -100,11 +100,17 @@ export class RecurringTransactionFormComponent implements OnChanges {
      */
     public stopped = output<void>();
 
+    private readonly currentDate = new Date();
+
     /**
-     * Datepickerben első kiválasztható nap. A form előtt kell létrehozni, mert az alapértelmezett
+     * Datepickerben első kiválasztható nap (A hónap első napja). A form előtt kell létrehozni, mert az alapértelmezett
      * dátumként használja
      */
-    protected readonly firstSelectableDay = new Date();
+    protected readonly firstSelectableDay = new Date(
+        this.currentDate.getFullYear(),
+        this.currentDate.getMonth(),
+        1,
+    );
 
     /**
      * Form. A selectedWalletId előtt kell létrehozni, mert annak a valueChanges-ét figyeli
@@ -233,8 +239,8 @@ export class RecurringTransactionFormComponent implements OnChanges {
             name: ['', { validators: TRANSACTION_NAME_VALIDATORS }],
             isIncome: [false],
             price: this.fb.control<number | null>(null, { validators: POSITIVE_AMOUNT_VALIDATORS }),
-            date: this.fb.control<Date | null>(this.firstSelectableDay, {
-                validators: [...TRANSACTION_DATE_VALIDATORS, notBeforeToday],
+            date: this.fb.control<Date | null>(new Date(), {
+                validators: [...TRANSACTION_DATE_VALIDATORS, notBeforeThisMonth],
             }),
             recurrenceInterval: [RecurrenceIntervalEnum.MONTHLY],
             walletId: [this.userData.getDefaultWallet().id],

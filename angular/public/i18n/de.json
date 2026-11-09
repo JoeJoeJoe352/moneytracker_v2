@@ -226,7 +226,7 @@
       "stop": "Stoppen",
       "stop-success": "Wiederkehrende Transaktion gestoppt",
       "delete_confirm": "Möchtest du diese wiederkehrende Transaktion wirklich löschen? Bereits erstellte Transaktionen bleiben erhalten.",
-      "date_before_today": "Das Datum darf nicht vor dem heutigen Tag liegen!"
+      "date_before_this_month": "Das Datum darf nicht vor dem aktuellen Monat liegen!"
     }
   },
   "language": {
