@@ -104,8 +104,12 @@ public class RecurringTransactionService {
             recurringTransaction.setStatus(RecurringTransactionStatusEnum.ACTIVE);
         }
 
-        // Ha megváltozott a küldött dátum, akkor újra beállítjuk a kezdődátumot is
-        if (!recurringTransaction.getNextOccurrenceDate().equals(command.getTransactionCreateDate())) {
+        boolean isRecurrenceIntervalChanged =
+                !recurringTransaction.getRecurrenceInterval().equals(command.getRecurrenceInterval());
+        boolean isNextOccurenceDateChanged =
+                !recurringTransaction.getNextOccurrenceDate().equals(command.getTransactionCreateDate());
+
+        if (isNextOccurenceDateChanged || isRecurrenceIntervalChanged) {
             recurringTransaction.setDates(command.getTransactionCreateDate());
         }
 
@@ -124,12 +128,6 @@ public class RecurringTransactionService {
         recurringTransactionCategoryRepo.flush();
         this.saveCategoryLinks(recurringTransaction, command.getCategoryIds());
     }
-
-    /*
-     * docker compose -f docker-compose.dev.yml exec backend ./mvnw clean compile
-     * docker compose -f docker-compose.dev.yml restart backend
-     *
-     */
 
     /**
      * Felveszi az ismétlődő tranzakció mintájára az összes, date-ig esedékes
