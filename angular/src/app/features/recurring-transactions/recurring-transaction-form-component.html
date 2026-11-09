@@ -92,6 +92,7 @@
                 <mat-select
                     id="recurring-transaction-interval"
                     formControlName="recurrenceInterval"
+                    (selectionChange)="intervalTypeChanged.emit()"
                 >
                     @for (interval of recurrenceIntervals; track interval) {
                         <mat-option [value]="interval">{{

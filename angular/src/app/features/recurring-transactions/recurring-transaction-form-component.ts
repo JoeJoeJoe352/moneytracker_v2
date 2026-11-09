@@ -100,6 +100,11 @@ export class RecurringTransactionFormComponent implements OnChanges {
      */
     public stopped = output<void>();
 
+    /**
+     * Szerkesztéskor a user a mentetthez képest más ismétlődést (heti/havi) választott
+     */
+    public intervalTypeChanged = output<void>();
+
     private readonly currentDate = new Date();
 
     /**
