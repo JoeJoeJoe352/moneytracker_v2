@@ -1,22 +1,28 @@
-import { Component, computed, inject, resource } from '@angular/core';
+import { Component, computed, inject, resource, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RecurringTransactionService } from './recurring-transactions-service';
-import { firstValueFrom } from 'rxjs';
+import { filter, firstValueFrom, switchMap, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { _, TranslatePipe } from '@ngx-translate/core';
+import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { RESOURCE_STATUS_LOADING } from '@shared/constants';
 import { NotificationService } from '@shared/services/notification-service';
-import { RecurringTransactionResponseInterface } from './interfaces';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
+import {
+    RecurringTransactionResponseInterface,
+    RecurringTransactionSaveRequestInterface,
+} from './interfaces';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { RecurringTransactionModalComponent } from './recurring-transaction-modal';
 import { RecurringTransactionRowComponent } from './recurring-transaction-row-component';
 import { RecurringTransactionDoughnutComponent } from '../statistics/recurring-transaction-doughnut-chart-component';
 
 const LIST_URL = '/recurring-transactions';
+
+type RecurringTransactionModalRef = MatDialogRef<RecurringTransactionModalComponent, boolean>;
 
 @Component({
     selector: 'app-recurring-transactions-page-component',
@@ -28,7 +34,7 @@ const LIST_URL = '/recurring-transactions';
         MatButtonModule,
         TranslatePipe,
         RecurringTransactionRowComponent,
-        RecurringTransactionDoughnutComponent
+        RecurringTransactionDoughnutComponent,
     ],
 })
 export class RecurringTransactionsPageComponent {
@@ -37,6 +43,12 @@ export class RecurringTransactionsPageComponent {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly notification = inject(NotificationService);
+    private readonly translateService = inject(TranslateService);
+
+    /**
+     * Mentés/leállítás/törlés folyamatban van-e, addig a modal formja le van tiltva
+     */
+    private readonly isSaving = signal(false);
 
     constructor() {
         // /recurring-transactions/:id esetén a megadott ismétlődő tranzakció modalja nyílik fel
@@ -88,15 +100,108 @@ export class RecurringTransactionsPageComponent {
      * @param recurringTransaction Szerkesztendő ismétlődő tranzakció, null esetén új létrehozása
      */
     protected openModal(recurringTransaction: RecurringTransactionResponseInterface | null = null) {
-        RecurringTransactionModalComponent.open(this.dialog, { recurringTransaction })
+        const dialogRef = RecurringTransactionModalComponent.open(this.dialog, {
+            recurringTransaction,
+            isSaving: this.isSaving.asReadonly(),
+        });
+
+        const modal = dialogRef.componentInstance;
+        modal.saveRequested.subscribe((payload) =>
+            this.save(dialogRef, recurringTransaction, payload),
+        );
+        modal.stopRequested.subscribe(() => this.stop(dialogRef, recurringTransaction));
+        modal.deleteRequested.subscribe(() => this.delete(dialogRef, recurringTransaction));
+
+        dialogRef.afterClosed().subscribe((changed) => {
+            if (changed) {
+                this.recurringTransactionListResource.reload();
+                // a diagram is ezeket az adatokat mutatja
+                this.recurringTransactionStatResource.reload();
+            }
+            if (this.route.snapshot.params['id'] !== undefined) {
+                void this.navigateToList();
+            }
+        });
+    }
+
+    /**
+     * Elmenti (létrehozza vagy módosítja) az ismétlődő tranzakciót, siker esetén bezárja a modalt
+     */
+    private save(
+        dialogRef: RecurringTransactionModalRef,
+        recurringTransaction: RecurringTransactionResponseInterface | null,
+        payload: RecurringTransactionSaveRequestInterface,
+    ): void {
+        const request =
+            recurringTransaction === null
+                ? this.service.createRecurringTransaction(payload)
+                : this.service.updateRecurringTransaction(recurringTransaction.id, payload);
+
+        this.isSaving.set(true);
+        request.subscribe({
+            next: () => {
+                this.isSaving.set(false);
+                this.notification.show(_('etc.save-success'));
+                dialogRef.close(true);
+            },
+            error: () => this.isSaving.set(false),
+        });
+    }
+
+    /**
+     * Leállítja a szerkesztett ismétlődő tranzakciót, siker esetén bezárja a modalt
+     */
+    private stop(
+        dialogRef: RecurringTransactionModalRef,
+        recurringTransaction: RecurringTransactionResponseInterface | null,
+    ): void {
+        if (recurringTransaction === null) {
+            console.error('Tried to stop a not yet created recurring transaction');
+            return;
+        }
+
+        this.isSaving.set(true);
+        this.service.stopRecurringTransaction(recurringTransaction.id).subscribe({
+            next: () => {
+                this.isSaving.set(false);
+                this.notification.show(_('recurring_transaction.form.stop-success'));
+                dialogRef.close(true);
+            },
+            error: () => this.isSaving.set(false),
+        });
+    }
+
+    /**
+     * Megerősítés után törli a szerkesztett ismétlődő tranzakciót, siker esetén bezárja a modalt
+     */
+    private delete(
+        dialogRef: RecurringTransactionModalRef,
+        recurringTransaction: RecurringTransactionResponseInterface | null,
+    ): void {
+        if (recurringTransaction === null) {
+            console.error('Tried to delete a not yet created recurring transaction');
+            return;
+        }
+
+        ConfirmDialogComponent.open(this.dialog, {
+            message: this.translateService.instant(
+                _('recurring_transaction.form.delete_confirm'),
+            ) as string,
+            danger: true,
+        })
             .afterClosed()
-            .subscribe((saved) => {
-                if (saved) {
-                    this.recurringTransactionListResource.reload();
-                }
-                if (this.route.snapshot.params['id'] !== undefined) {
-                    void this.navigateToList();
-                }
+            .pipe(
+                filter((confirmed) => confirmed === true),
+                tap(() => this.isSaving.set(true)),
+                switchMap(() => this.service.deleteRecurringTransaction(recurringTransaction.id)),
+            )
+            .subscribe({
+                next: () => {
+                    this.isSaving.set(false);
+                    this.notification.show(_('etc.delete-success'));
+                    dialogRef.close(true);
+                },
+                error: () => this.isSaving.set(false),
             });
     }
 

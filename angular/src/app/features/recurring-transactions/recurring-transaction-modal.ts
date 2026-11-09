@@ -1,20 +1,13 @@
-import { Component, inject, resource, signal } from '@angular/core';
-import {
-    MAT_DIALOG_DATA,
-    MatDialog,
-    MatDialogModule,
-    MatDialogRef,
-} from '@angular/material/dialog';
+import { Component, inject, output, resource, Signal, signal } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { filter, firstValueFrom, Observable, switchMap, tap } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
+import { firstValueFrom, Observable, tap } from 'rxjs';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
-import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { NotificationService } from '@shared/services/notification-service';
 import { CategoryService } from '../transaction/category-service';
 import { CategoryResponseInterface } from '../transaction/interfaces';
 import { RecurringTransactionFormComponent } from './recurring-transaction-form-component';
-import { RecurringTransactionService } from './recurring-transactions-service';
 import {
     RecurringTransactionResponseInterface,
     RecurringTransactionSaveRequestInterface,
@@ -25,10 +18,14 @@ export interface RecurringTransactionModalInputInterface {
      * Szerkesztendő ismétlődő tranzakció, null esetén új létrehozása
      */
     recurringTransaction: RecurringTransactionResponseInterface | null;
+    /**
+     * Mentés/leállítás/törlés folyamatban van-e (a hívó kezeli), addig a form le van tiltva
+     */
+    isSaving: Signal<boolean>;
 }
 
 /**
- * Ismétlődő tranzakció létrehozó/szerkesztő modal. Sikeres mentés után true értékkel zárul be
+ * Ismétlődő tranzakció létrehozó/szerkesztő modal
  */
 @Component({
     selector: 'app-recurring-transaction-modal',
@@ -42,20 +39,24 @@ export interface RecurringTransactionModalInputInterface {
     ],
 })
 export class RecurringTransactionModalComponent {
-    private readonly dialogRef =
-        inject<MatDialogRef<RecurringTransactionModalComponent, boolean>>(MatDialogRef);
-    private readonly service = inject(RecurringTransactionService);
     private readonly categoryService = inject(CategoryService);
     private readonly notification = inject(NotificationService);
-    private readonly dialog = inject(MatDialog);
-    private readonly translateService = inject(TranslateService);
 
     protected readonly data = inject<RecurringTransactionModalInputInterface>(MAT_DIALOG_DATA);
 
     /**
-     * Mentés folyamatban van-e
+     * Mentésre kattintott a user
      */
-    protected readonly isSaving = signal(false);
+    public readonly saveRequested = output<RecurringTransactionSaveRequestInterface>();
+    /**
+     * Leállításra kattintott a user
+     */
+    public readonly stopRequested = output<void>();
+    /**
+     * Törlésre kattintott a user (a megerősítést a hívó kéri)
+     */
+    public readonly deleteRequested = output<void>();
+
     /**
      * Kategória mentés folyamatban van-e
      */
@@ -78,7 +79,7 @@ export class RecurringTransactionModalComponent {
     });
 
     /**
-     * Modal megnyitása. Sikeres mentés esetén true-val tér vissza az afterClosed()
+     * Modal megnyitása. Sikeres mentés/leállítás/törlés esetén true-val tér vissza az afterClosed()
      */
     public static open(dialog: MatDialog, data: RecurringTransactionModalInputInterface) {
         return dialog.open<
@@ -90,80 +91,6 @@ export class RecurringTransactionModalComponent {
             width: '600px',
             data,
         });
-    }
-
-    /**
-     * Elmenti (létrehozza vagy módosítja) az ismétlődő tranzakciót
-     */
-    protected save(payload: RecurringTransactionSaveRequestInterface): void {
-        const id = this.data.recurringTransaction?.id ?? null;
-        const request =
-            id === null
-                ? this.service.createRecurringTransaction(payload)
-                : this.service.updateRecurringTransaction(id, payload);
-
-        this.isSaving.set(true);
-        request.subscribe({
-            next: () => {
-                this.isSaving.set(false);
-                this.notification.show(_('etc.save-success'));
-                this.dialogRef.close(true);
-            },
-            error: () => this.isSaving.set(false),
-        });
-    }
-
-    /**
-     * Leállítja a szerkesztett ismétlődő tranzakciót
-     */
-    protected stop(): void {
-        const id = this.data.recurringTransaction?.id;
-        if (id === undefined) {
-            console.error('Tried to stop a not yet created recurring transaction');
-            return;
-        }
-
-        this.isSaving.set(true);
-        this.service.stopRecurringTransaction(id).subscribe({
-            next: () => {
-                this.isSaving.set(false);
-                this.notification.show(_('recurring_transaction.form.stop-success'));
-                this.dialogRef.close(true);
-            },
-            error: () => this.isSaving.set(false),
-        });
-    }
-
-    /**
-     * Megerősítés után törli a szerkesztett ismétlődő tranzakciót
-     */
-    protected delete(): void {
-        const id = this.data.recurringTransaction?.id;
-        if (id === undefined) {
-            console.error('Tried to delete a not yet created recurring transaction');
-            return;
-        }
-
-        ConfirmDialogComponent.open(this.dialog, {
-            message: this.translateService.instant(
-                _('recurring_transaction.form.delete_confirm'),
-            ) as string,
-            danger: true,
-        })
-            .afterClosed()
-            .pipe(
-                filter((confirmed) => confirmed === true),
-                tap(() => this.isSaving.set(true)),
-                switchMap(() => this.service.deleteRecurringTransaction(id)),
-            )
-            .subscribe({
-                next: () => {
-                    this.isSaving.set(false);
-                    this.notification.show(_('etc.delete-success'));
-                    this.dialogRef.close(true);
-                },
-                error: () => this.isSaving.set(false),
-            });
     }
 
     /**

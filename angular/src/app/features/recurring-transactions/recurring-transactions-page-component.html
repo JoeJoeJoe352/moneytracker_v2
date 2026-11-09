@@ -11,9 +11,13 @@
 </div>
 
 @if (recurringTransactionListResource.hasValue()) {
-    <mat-card>
-        <app-recurring-transaction-doughnut-chart-component [statData]="recurringTransactionStatResource.value()" />    
-    </mat-card>
+    <div class="chart-wrapper">
+        <mat-card>
+            <app-recurring-transaction-doughnut-chart-component
+                [statData]="recurringTransactionStatResource.value()"
+            />
+        </mat-card>
+    </div>
 }
 
 <mat-card>
