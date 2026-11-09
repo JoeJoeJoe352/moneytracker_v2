@@ -227,7 +227,8 @@
       "stop-success": "Az ismétlődő tranzakció leállítva",
       "delete_confirm": "Biztosan törölni szeretnéd az ismétlődő tranzakciót? A már létrejött tranzakciók megmaradnak.",
       "date_before_this_month": "A dátum nem lehet korábbi az aktuális hónapnál!"
-    }
+    },
+    "changed-interval": "Megváltozott az ismétlődés típusa. Ellenőrizd a következő esedékesség idejét!"
   },
   "language": {
     "title": "Nyelv",

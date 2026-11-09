@@ -37,6 +37,7 @@ class FakeDialogRef {
         saveRequested: new EventEmitter<RecurringTransactionSaveRequestInterface>(),
         stopRequested: new EventEmitter<void>(),
         deleteRequested: new EventEmitter<void>(),
+        intervalTypeChanged: new EventEmitter<void>(),
     };
 
     close = vi.fn((result?: boolean): void => {

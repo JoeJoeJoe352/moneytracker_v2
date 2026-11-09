@@ -56,6 +56,10 @@ export class RecurringTransactionModalComponent {
      * Törlésre kattintott a user (a megerősítést a hívó kéri)
      */
     public readonly deleteRequested = output<void>();
+    /**
+     * Szerkesztéskor a user a mentetthez képest más ismétlődést választott
+     */
+    public readonly intervalTypeChanged = output<void>();
 
     /**
      * Kategória mentés folyamatban van-e

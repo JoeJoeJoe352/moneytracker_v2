@@ -111,6 +111,16 @@ export class RecurringTransactionsPageComponent {
         );
         modal.stopRequested.subscribe(() => this.stop(dialogRef, recurringTransaction));
         modal.deleteRequested.subscribe(() => this.delete(dialogRef, recurringTransaction));
+        // csak tájékoztatás, ezért egy "Bezárás" gomb van, és az eredményét nem figyeljük
+        modal.intervalTypeChanged.subscribe(() => {
+            ConfirmDialogComponent.open(this.dialog, {
+                message: this.translateService.instant(
+                    _('recurring_transaction.changed-interval'),
+                ) as string,
+                confirmLabel: this.translateService.instant(_('etc.close')) as string,
+                hideCancelButton: true,
+            });
+        });
 
         dialogRef.afterClosed().subscribe((changed) => {
             if (changed) {

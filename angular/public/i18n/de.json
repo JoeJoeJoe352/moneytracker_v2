@@ -227,7 +227,8 @@
       "stop-success": "Wiederkehrende Transaktion gestoppt",
       "delete_confirm": "Möchtest du diese wiederkehrende Transaktion wirklich löschen? Bereits erstellte Transaktionen bleiben erhalten.",
       "date_before_this_month": "Das Datum darf nicht vor dem aktuellen Monat liegen!"
-    }
+    },
+    "changed-interval": "Das Wiederholungsintervall wurde geändert. Bitte überprüfe das Datum der nächsten Fälligkeit."
   },
   "language": {
     "title": "Sprache",

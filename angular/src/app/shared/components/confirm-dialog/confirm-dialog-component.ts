@@ -29,6 +29,10 @@ export interface ConfirmDialogData {
      * Veszélyes (pl. törlés) művelet-e, ekkor a megerősítő gomb piros lesz
      */
     danger?: boolean;
+    /**
+     * Cancel button legyen-e elrejtve
+     */
+    hideCancelButton?: boolean;
 }
 
 @Component({
