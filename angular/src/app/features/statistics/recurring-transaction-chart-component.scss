@@ -34,6 +34,30 @@
         margin: 0 0 8px;
     }
 
+    // a lekönyvelt és a tervezett rész magyarázata semleges színnel
+    .key {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin: 0 0 8px;
+        font-size: 0.875rem;
+        color: var(--moneytracker-dark-grey);
+
+        .swatch {
+            background-color: var(--moneytracker-dark-grey);
+
+            &.planned {
+                opacity: 0.5;
+            }
+        }
+    }
+
+    .key-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
     ul {
         margin: 0;
         padding: 0;

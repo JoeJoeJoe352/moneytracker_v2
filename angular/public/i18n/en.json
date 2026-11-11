@@ -195,7 +195,9 @@
       "title": "Recurring expenses this month",
       "total": "Total",
       "other": "Other",
-      "empty": "No recurring expenses this month."
+      "empty": "No recurring expenses this month.",
+      "booked": "Booked",
+      "planned": "Planned"
     },
     "title": "My recurring transactions",
     "empty": "No recurring transactions yet",

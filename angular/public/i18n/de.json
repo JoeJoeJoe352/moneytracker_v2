@@ -195,7 +195,9 @@
       "title": "Wiederkehrende Ausgaben in diesem Monat",
       "total": "Gesamt",
       "other": "Sonstiges",
-      "empty": "In diesem Monat gibt es keine wiederkehrenden Ausgaben."
+      "empty": "In diesem Monat gibt es keine wiederkehrenden Ausgaben.",
+      "booked": "Gebucht",
+      "planned": "Geplant"
     },
     "title": "Meine wiederkehrenden Transaktionen",
     "empty": "Noch keine wiederkehrenden Transaktionen",

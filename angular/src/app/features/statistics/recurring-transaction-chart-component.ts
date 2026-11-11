@@ -27,6 +27,8 @@ const SLICE_COLORS = [
 const OTHER_COLOR = '#898781';
 /** Ennyi saját szelet fér el, a többi összevonva "Egyéb" lesz */
 const MAX_SLICES = SLICE_COLORS.length - 1;
+/** A tervezett rész ugyanaz a szín fél átlátszósággal (#rrggbb + 80 alfa) */
+const PLANNED_ALPHA = '80';
 
 /**
  * Egy szelet a diagramon és a mellette lévő listában
@@ -35,8 +37,22 @@ interface Slice {
     /** Az ismétlődő tranzakció azonosítója, az "Egyéb" szeletnél nincs */
     id?: number;
     label: string;
+    /** A már létrejött (lekönyvelt) összeg forintban */
+    bookedAmount: number;
+    /** A hónapban még tervezett összeg forintban */
+    plannedAmount: number;
+    /** A kettő összege forintban */
     hufAmount: number;
     color: string;
+}
+
+/**
+ * Egy ív a diagramon: egy szelet lekönyvelt vagy tervezett része
+ */
+interface Arc {
+    slice: Slice;
+    planned: boolean;
+    amount: number;
 }
 
 /**
@@ -71,16 +87,21 @@ export class RecurringTransactionChartComponent {
     protected slices = computed<Slice[]>(() => {
         const expenses = this.statData()
             .filter((stat) => stat.transactionType === TransactionTypeEnum.OUTCOME)
-            .map((stat) => ({
-                id: stat.recurringTransactionId,
-                label: stat.name,
-                hufAmount: Math.abs(
-                    this.currencyConversionService.toHuf(
-                        stat.createdSum + stat.plannedSum,
-                        stat.currencyCode,
-                    ),
-                ),
-            }))
+            .map((stat) => {
+                const bookedAmount = Math.abs(
+                    this.currencyConversionService.toHuf(stat.createdSum, stat.currencyCode),
+                );
+                const plannedAmount = Math.abs(
+                    this.currencyConversionService.toHuf(stat.plannedSum, stat.currencyCode),
+                );
+                return {
+                    id: stat.recurringTransactionId,
+                    label: stat.name,
+                    bookedAmount,
+                    plannedAmount,
+                    hufAmount: bookedAmount + plannedAmount,
+                };
+            })
             .filter((expense) => expense.hufAmount > 0)
             .sort((a, b) => b.hufAmount - a.hufAmount);
 
@@ -93,24 +114,44 @@ export class RecurringTransactionChartComponent {
             [...own].sort((a, b) => a.id - b.id).map((expense, index) => [expense.id, index]),
         );
         const slices: Slice[] = own.map((expense) => ({
-            id: expense.id,
-            label: expense.label,
-            hufAmount: expense.hufAmount,
+            ...expense,
             color: SLICE_COLORS[colorIndexById.get(expense.id) ?? 0] ?? OTHER_COLOR,
         }));
 
         if (needsOther) {
-            const otherAmount = expenses
-                .slice(MAX_SLICES)
-                .reduce((sum, expense) => sum + expense.hufAmount, 0);
+            const rest = expenses.slice(MAX_SLICES);
+            const bookedAmount = rest.reduce((sum, expense) => sum + expense.bookedAmount, 0);
+            const plannedAmount = rest.reduce((sum, expense) => sum + expense.plannedAmount, 0);
             slices.push({
                 label: this.translateService.instant('recurring_transaction.chart.other') as string,
-                hufAmount: otherAmount,
+                bookedAmount,
+                plannedAmount,
+                hufAmount: bookedAmount + plannedAmount,
                 color: OTHER_COLOR,
             });
         }
         return slices;
     });
+
+    /**
+     * Ívek: szeletenként előbb a lekönyvelt, utána a tervezett rész, egymás mellett.
+     * A nulla összegű részek kimaradnak, hogy ne rajzolódjon üres ív a résekkel
+     */
+    private arcs = computed<Arc[]>(() =>
+        this.slices().flatMap((slice) =>
+            [
+                { slice, planned: false, amount: slice.bookedAmount },
+                { slice, planned: true, amount: slice.plannedAmount },
+            ].filter((arc) => arc.amount > 0),
+        ),
+    );
+
+    /**
+     * Az ív színe: a tervezett rész a szelet színe fél átlátszósággal
+     */
+    private arcColor(arc: Arc): string {
+        return arc.planned ? arc.slice.color + PLANNED_ALPHA : arc.slice.color;
+    }
 
     /**
      * A szeletek összege forintban
@@ -135,14 +176,15 @@ export class RecurringTransactionChartComponent {
      * Adatok átalakítása a chartjs számára
      */
     protected chartData = computed<ChartData<'pie'>>(() => {
-        const slices = this.slices();
+        const arcs = this.arcs();
+        const colors = arcs.map((arc) => this.arcColor(arc));
         return {
-            labels: slices.map((slice) => slice.label),
+            labels: arcs.map((arc) => arc.slice.label),
             datasets: [
                 {
-                    data: slices.map((slice) => slice.hufAmount),
-                    backgroundColor: slices.map((slice) => slice.color),
-                    hoverBackgroundColor: slices.map((slice) => slice.color),
+                    data: arcs.map((arc) => arc.amount),
+                    backgroundColor: colors,
+                    hoverBackgroundColor: colors,
                     // a szeletek közötti 2px-es rés a háttér színével
                     borderColor: '#ffffff',
                     borderWidth: 2,
@@ -158,7 +200,7 @@ export class RecurringTransactionChartComponent {
         onClick: (_event, elements) => {
             const index = elements[0]?.index;
             // az "Egyéb" szeletnek nincs azonosítója, az nem nyitható fel
-            const id = index === undefined ? undefined : this.slices()[index]?.id;
+            const id = index === undefined ? undefined : this.arcs()[index]?.slice.id;
             if (id !== undefined) {
                 this.openRecurringEditModal.emit(id);
             }
@@ -168,8 +210,15 @@ export class RecurringTransactionChartComponent {
             legend: { display: false },
             tooltip: {
                 callbacks: {
-                    label: (context) =>
-                        `${this.formatHuf(context.parsed)} (${this.sharePercent(context.parsed)}%)`,
+                    label: (context) => {
+                        const arc = this.arcs()[context.dataIndex];
+                        const kind = this.translateService.instant(
+                            arc?.planned
+                                ? 'recurring_transaction.chart.planned'
+                                : 'recurring_transaction.chart.booked',
+                        ) as string;
+                        return `${kind}: ${this.formatHuf(context.parsed)} (${this.sharePercent(context.parsed)}%)`;
+                    },
                 },
             },
         },

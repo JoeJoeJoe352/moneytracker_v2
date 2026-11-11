@@ -21,6 +21,16 @@
                     {{ 'recurring_transaction.chart.total' | translate }}:
                     <strong>{{ formatHuf(total()) }}</strong>
                 </p>
+                <p class="key">
+                    <span class="key-item">
+                        <span class="swatch"></span>
+                        {{ 'recurring_transaction.chart.booked' | translate }}
+                    </span>
+                    <span class="key-item">
+                        <span class="swatch planned"></span>
+                        {{ 'recurring_transaction.chart.planned' | translate }}
+                    </span>
+                </p>
                 <ul>
                     @for (slice of slices(); track slice.label) {
                         <li>

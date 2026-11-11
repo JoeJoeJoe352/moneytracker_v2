@@ -195,7 +195,9 @@
       "title": "Ismétlődő kiadások ebben a hónapban",
       "total": "Összesen",
       "other": "Egyéb",
-      "empty": "Ebben a hónapban nincs ismétlődő kiadás."
+      "empty": "Ebben a hónapban nincs ismétlődő kiadás.",
+      "booked": "Lekönyvelt",
+      "planned": "Tervezett"
     },
     "title": "Ismétlődő tranzakcióim",
     "empty": "Nincs még felvett ismétlődő tranzakció",
