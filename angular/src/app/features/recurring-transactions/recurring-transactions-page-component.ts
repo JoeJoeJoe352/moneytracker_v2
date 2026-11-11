@@ -97,21 +97,40 @@ export class RecurringTransactionsPageComponent {
      * Létrehozó/szerkesztő modal megnyitása, sikeres mentés után újratölti a listát.
      * Bezáráskor kiveszi az id-t az URL-ből, ha URL alapján nyílt meg
      *
-     * @param recurringTransaction Szerkesztendő ismétlődő tranzakció, null esetén új létrehozása
+     * @param recurringTransactionId Szerkesztendő ismétlődő tranzakció, null esetén új létrehozása
      */
-    protected openModal(recurringTransaction: RecurringTransactionResponseInterface | null = null) {
+    protected openModal(recurringTransactionId: number | null = null) {
+        if (!this.recurringTransactionListResource.hasValue()) {
+            console.error(
+                'Calling open modal, but listResource not loaded yet: ' + recurringTransactionId,
+            );
+            return;
+        }
+
+        let recurringTransaction = null;
+        if (recurringTransactionId !== null) {
+            recurringTransaction = this.recurringTransactionListResource
+                .value()
+                .find((transactionData) => transactionData.id === recurringTransactionId);
+
+            if (!recurringTransaction) {
+                console.error('RecurringTransaction not found: ' + recurringTransactionId);
+                return;
+            }
+        }
+
         const dialogRef = RecurringTransactionModalComponent.open(this.dialog, {
             recurringTransaction,
             isSaving: this.isSaving.asReadonly(),
         });
 
         const modal = dialogRef.componentInstance;
+
         modal.saveRequested.subscribe((payload) =>
             this.save(dialogRef, recurringTransaction, payload),
         );
         modal.stopRequested.subscribe(() => this.stop(dialogRef, recurringTransaction));
         modal.deleteRequested.subscribe(() => this.delete(dialogRef, recurringTransaction));
-        // csak tájékoztatás, ezért egy "Bezárás" gomb van, és az eredményét nem figyeljük
         modal.intervalTypeChanged.subscribe(() => {
             ConfirmDialogComponent.open(this.dialog, {
                 message: this.translateService.instant(
@@ -224,7 +243,7 @@ export class RecurringTransactionsPageComponent {
             const recurringTransaction = await firstValueFrom(
                 this.service.getRecurringTransactionById(id),
             );
-            this.openModal(recurringTransaction);
+            this.openModal(recurringTransaction.id);
         } catch (err) {
             if (err instanceof HttpErrorResponse && err.status === 404) {
                 this.notification.show(_('recurring_transaction.not_found'));

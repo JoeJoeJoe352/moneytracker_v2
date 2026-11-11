@@ -15,6 +15,7 @@
         <mat-card>
             <app-recurring-transaction-doughnut-chart-component
                 [statData]="recurringTransactionStatResource.value()"
+                (openRecurringEditModal)="openModal($event)"
             />
         </mat-card>
     </div>
@@ -32,7 +33,7 @@
             @for (transaction of recurringTransactionListResource.value(); track transaction.id) {
                 <app-recurring-transaction-row-component
                     [transaction]="transaction"
-                    (selected)="openModal(transaction)"
+                    (selected)="openModal(transaction.id)"
                 />
             } @empty {
                 <p class="text-center">{{ 'recurring_transaction.empty' | translate }}</p>

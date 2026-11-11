@@ -1,5 +1,7 @@
-import { Component, computed, inject, input } from '@angular/core';
-import { MonthlyStatInterface } from '../recurring-transactions/interfaces';
+import { Component, computed, inject, input, output } from '@angular/core';
+import {
+    MonthlyStatInterface,
+} from '../recurring-transactions/interfaces';
 import { BaseChartDirective, provideCharts } from 'ng2-charts';
 import { ArcElement, ChartData, ChartOptions, DoughnutController, Tooltip } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -11,7 +13,16 @@ import { CurrencyConversionService } from '@app/shared/services/currency-convers
  * Kategorikus színek, fix sorrendben (színtévesztők számára is megkülönböztethető
  * szomszédos párok). 8-nál több szelet nem kap új színt, hanem az "Egyéb"-be kerül
  */
-const SLICE_COLORS = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#6250d6', '#e34948'];
+const SLICE_COLORS = [
+    '#2a78d6',
+    '#eb6834',
+    '#1baf7a',
+    '#eda100',
+    '#e87ba4',
+    '#008300',
+    '#6250d6',
+    '#e34948',
+];
 /** Az "Egyéb" szelet semleges szürke, hogy ne tűnjön egy újabb tételnek */
 const OTHER_COLOR = '#898781';
 /** Ennyi saját szelet fér el, a többi összevonva "Egyéb" lesz */
@@ -47,6 +58,8 @@ export class RecurringTransactionDoughnutComponent {
     private readonly currencyConversionService = inject(CurrencyConversionService);
 
     public statData = input.required<MonthlyStatInterface[]>();
+
+    public openRecurringEditModal = output<number>();
 
     /**
      * Szeletek: csak a kiadások (a bevétel és a kiadás nem egy egész részei),
@@ -99,7 +112,9 @@ export class RecurringTransactionDoughnutComponent {
     /**
      * A szeletek összege forintban
      */
-    protected total = computed(() => this.slices().reduce((sum, slice) => sum + slice.hufAmount, 0));
+    protected total = computed(() =>
+        this.slices().reduce((sum, slice) => sum + slice.hufAmount, 0),
+    );
 
     protected formatHuf(amount: number): string {
         return this.currencyFormatPipe.transform(amount, CurrencyCodesEnum.huf);
@@ -134,10 +149,20 @@ export class RecurringTransactionDoughnutComponent {
         };
     });
 
+    private recurringTransactionAt(index: number | undefined): MonthlyStatInterface | undefined {
+        return index === undefined ? undefined : this.statData()[index];
+    }
+
     protected chartOptions: ChartOptions<'doughnut'> = {
         responsive: true,
         maintainAspectRatio: false,
         cutout: '65%',
+        onClick: (_event, elements) => {
+            const recurringTransaction = this.recurringTransactionAt(elements[0]?.index);
+            if (recurringTransaction) {
+                this.openRecurringEditModal.emit(recurringTransaction.recurringTransactionId);
+            }
+        },
         plugins: {
             // a jelmagyarázat HTML-ben van a diagram mellett, névvel és összeggel
             legend: { display: false },
