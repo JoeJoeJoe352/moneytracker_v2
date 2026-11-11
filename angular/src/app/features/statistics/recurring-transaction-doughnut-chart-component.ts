@@ -149,7 +149,17 @@ export class RecurringTransactionDoughnutComponent {
         };
     });
 
+    /**
+     * Meghatározza a sorszám alapján a recurringTransaction adatot.
+     * Az utolsó elem az other, ezért ott már undefined-el tér vissza
+     * 
+     * @param index 
+     * @returns 
+     */
     private recurringTransactionAt(index: number | undefined): MonthlyStatInterface | undefined {
+        if (!index || index >= MAX_SLICES) {
+            return undefined
+        }
         return index === undefined ? undefined : this.statData()[index];
     }
 
