@@ -1,4 +1,4 @@
-<section class="doughnut-chart">
+<section class="pie-chart">
     <h2 class="title">{{ 'recurring_transaction.chart.title' | translate }}</h2>
 
     @if (slices().length === 0) {
@@ -9,7 +9,7 @@
                 <!-- a listában minden szelet szövegesen is szerepel, ezért aria hidden -->
                 <canvas
                     baseChart
-                    type="doughnut"
+                    type="pie"
                     aria-hidden="true"
                     [data]="chartData()"
                     [options]="chartOptions"

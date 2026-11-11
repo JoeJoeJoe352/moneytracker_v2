@@ -13,7 +13,7 @@
 @if (recurringTransactionListResource.hasValue()) {
     <div class="chart-wrapper">
         <mat-card>
-            <app-recurring-transaction-doughnut-chart-component
+            <app-recurring-transaction-chart-component
                 [statData]="recurringTransactionStatResource.value()"
                 (openRecurringEditModal)="openModal($event)"
             />

@@ -18,7 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { RecurringTransactionModalComponent } from './recurring-transaction-modal';
 import { RecurringTransactionRowComponent } from './recurring-transaction-row-component';
-import { RecurringTransactionDoughnutComponent } from '../statistics/recurring-transaction-doughnut-chart-component';
+import { RecurringTransactionChartComponent } from '../statistics/recurring-transaction-chart-component';
 
 const LIST_URL = '/recurring-transactions';
 
@@ -34,7 +34,7 @@ type RecurringTransactionModalRef = MatDialogRef<RecurringTransactionModalCompon
         MatButtonModule,
         TranslatePipe,
         RecurringTransactionRowComponent,
-        RecurringTransactionDoughnutComponent,
+        RecurringTransactionChartComponent,
     ],
 })
 export class RecurringTransactionsPageComponent {

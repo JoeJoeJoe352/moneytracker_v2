@@ -3,7 +3,7 @@ import {
     MonthlyStatInterface,
 } from '../recurring-transactions/interfaces';
 import { BaseChartDirective, provideCharts } from 'ng2-charts';
-import { ArcElement, ChartData, ChartOptions, DoughnutController, Tooltip } from 'chart.js';
+import { ArcElement, ChartData, ChartOptions, PieController, Tooltip } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CurrencyCodesEnum, TransactionTypeEnum } from '@app/shared/enums';
 import { CurrencyFormatPipe } from '@app/shared/pipes/currency-format-pipe';
@@ -32,6 +32,8 @@ const MAX_SLICES = SLICE_COLORS.length - 1;
  * Egy szelet a diagramon és a mellette lévő listában
  */
 interface Slice {
+    /** Az ismétlődő tranzakció azonosítója, az "Egyéb" szeletnél nincs */
+    id?: number;
     label: string;
     hufAmount: number;
     color: string;
@@ -42,17 +44,17 @@ interface Slice {
  * még tervezett összeg együtt, forintra átváltva
  */
 @Component({
-    selector: 'app-recurring-transaction-doughnut-chart-component',
-    templateUrl: './recurring-transaction-doughnut-chart-component.html',
-    styleUrl: './recurring-transaction-doughnut-chart-component.scss',
+    selector: 'app-recurring-transaction-chart-component',
+    templateUrl: './recurring-transaction-chart-component.html',
+    styleUrl: './recurring-transaction-chart-component.scss',
     imports: [BaseChartDirective, TranslatePipe],
     providers: [
         CurrencyFormatPipe,
         // Így a bundle size türhető mértéken marad, mert akkor tölti csak be, ahol használva van a diagram
-        provideCharts({ registerables: [DoughnutController, ArcElement, Tooltip] }),
+        provideCharts({ registerables: [PieController, ArcElement, Tooltip] }),
     ],
 })
-export class RecurringTransactionDoughnutComponent {
+export class RecurringTransactionChartComponent {
     private readonly currencyFormatPipe = inject(CurrencyFormatPipe);
     private readonly translateService = inject(TranslateService);
     private readonly currencyConversionService = inject(CurrencyConversionService);
@@ -91,6 +93,7 @@ export class RecurringTransactionDoughnutComponent {
             [...own].sort((a, b) => a.id - b.id).map((expense, index) => [expense.id, index]),
         );
         const slices: Slice[] = own.map((expense) => ({
+            id: expense.id,
             label: expense.label,
             hufAmount: expense.hufAmount,
             color: SLICE_COLORS[colorIndexById.get(expense.id) ?? 0] ?? OTHER_COLOR,
@@ -131,7 +134,7 @@ export class RecurringTransactionDoughnutComponent {
     /**
      * Adatok átalakítása a chartjs számára
      */
-    protected chartData = computed<ChartData<'doughnut'>>(() => {
+    protected chartData = computed<ChartData<'pie'>>(() => {
         const slices = this.slices();
         return {
             labels: slices.map((slice) => slice.label),
@@ -149,28 +152,15 @@ export class RecurringTransactionDoughnutComponent {
         };
     });
 
-    /**
-     * Meghatározza a sorszám alapján a recurringTransaction adatot.
-     * Az utolsó elem az other, ezért ott már undefined-el tér vissza
-     * 
-     * @param index 
-     * @returns 
-     */
-    private recurringTransactionAt(index: number | undefined): MonthlyStatInterface | undefined {
-        if (!index || index >= MAX_SLICES) {
-            return undefined
-        }
-        return index === undefined ? undefined : this.statData()[index];
-    }
-
-    protected chartOptions: ChartOptions<'doughnut'> = {
+    protected chartOptions: ChartOptions<'pie'> = {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '65%',
         onClick: (_event, elements) => {
-            const recurringTransaction = this.recurringTransactionAt(elements[0]?.index);
-            if (recurringTransaction) {
-                this.openRecurringEditModal.emit(recurringTransaction.recurringTransactionId);
+            const index = elements[0]?.index;
+            // az "Egyéb" szeletnek nincs azonosítója, az nem nyitható fel
+            const id = index === undefined ? undefined : this.slices()[index]?.id;
+            if (id !== undefined) {
+                this.openRecurringEditModal.emit(id);
             }
         },
         plugins: {
