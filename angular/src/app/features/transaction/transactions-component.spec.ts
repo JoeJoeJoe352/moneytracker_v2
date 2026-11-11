@@ -9,13 +9,17 @@ import { MatDialog } from '@angular/material/dialog';
 import { TransactionsListComponent } from './transactions-component';
 import { TransactionService } from './transaction-service';
 import { CategoryService } from './category-service';
-import { TransactionHistoryInterface, TransactionListElementData } from './interfaces';
+import {
+    NavigationDataToRecurringTransaction,
+    TransactionHistoryInterface,
+    TransactionListElementData,
+} from './interfaces';
 import { TransactionModalStateService } from './transaction-modal-state-service';
 import { TransactionModalComponent } from './transaction-modal';
 import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NotificationService } from '@shared/services/notification-service';
-
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 /**
  * A MatDialog.open() valós helyett használt, kézzel vezérelhető dialogRef, ami lehetővé teszi a
  * dialog "componentInstance"-ének (kimenő eseményeinek) és afterClosed()-jének szimulálását,
@@ -83,10 +87,12 @@ describe('TransactionsListComponent (Vitest)', () => {
     };
     let queryParamsSubject: BehaviorSubject<Record<string, string>>;
     let dialogOpenSpy: ReturnType<typeof vi.fn>;
+    /** A ConfirmDialogComponent "válasza" (afterClosed eredménye) */
+    let confirmResult: boolean;
     let transactionModalDialogRefs: FakeDialogRef<{
         deleteTransactionRequested: EventEmitter<number>;
         saved: EventEmitter<unknown>;
-        recurringTransactionOpenRequest: EventEmitter<number>;
+        recurringTransactionOpenRequest: EventEmitter<NavigationDataToRecurringTransaction>;
     }>[];
 
     async function setup(
@@ -115,15 +121,20 @@ describe('TransactionsListComponent (Vitest)', () => {
         queryParamsSubject = new BehaviorSubject<Record<string, string>>(options.queryParams ?? {});
 
         transactionModalDialogRefs = [];
+        confirmResult = true;
         dialogOpenSpy = vi.fn((componentType: unknown) => {
             if (componentType === TransactionModalComponent) {
                 const dialogRef = new FakeDialogRef({
                     deleteTransactionRequested: new EventEmitter<number>(),
                     saved: new EventEmitter<unknown>(),
-                    recurringTransactionOpenRequest: new EventEmitter<number>(),
+                    recurringTransactionOpenRequest:
+                        new EventEmitter<NavigationDataToRecurringTransaction>(),
                 });
                 transactionModalDialogRefs.push(dialogRef);
                 return dialogRef;
+            }
+            if (componentType === ConfirmDialogComponent) {
+                return { afterClosed: () => of(confirmResult) };
             }
             throw new Error('Unexpected dialog component opened: ' + String(componentType));
         });
@@ -437,16 +448,51 @@ describe('TransactionsListComponent (Vitest)', () => {
         expect(routerMock.navigate).not.toHaveBeenCalled();
     });
 
-    it('should navigate to the recurring transaction and close the modal when it is requested from the modal', async () => {
+    async function openModalFromList(): Promise<(typeof transactionModalDialogRefs)[number]> {
         await setup({ isHistoryMode: false });
         fixture.nativeElement.querySelector('app-transaction-card').click();
         fixture.detectChanges();
-        const dialogRef = transactionModalDialogRefs[0]!;
+        return transactionModalDialogRefs[0]!;
+    }
 
-        dialogRef.componentInstance.recurringTransactionOpenRequest.emit(7);
+    it('should navigate to the recurring transaction and close the modal without confirm when the form is not dirty', async () => {
+        const dialogRef = await openModalFromList();
 
+        dialogRef.componentInstance.recurringTransactionOpenRequest.emit({
+            recurringTransactionId: 7,
+            isDirty: false,
+        });
+
+        expect(dialogOpenSpy).not.toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
         expect(routerMock.navigate).toHaveBeenCalledWith(['/recurring-transactions', 7]);
         expect(dialogRef.close).toHaveBeenCalled();
+    });
+
+    it('should ask for confirmation, then navigate and close the modal when the form is dirty and the user confirms', async () => {
+        const dialogRef = await openModalFromList();
+
+        dialogRef.componentInstance.recurringTransactionOpenRequest.emit({
+            recurringTransactionId: 7,
+            isDirty: true,
+        });
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
+        expect(routerMock.navigate).toHaveBeenCalledWith(['/recurring-transactions', 7]);
+        expect(dialogRef.close).toHaveBeenCalled();
+    });
+
+    it('should neither navigate nor close the modal when the form is dirty and the user cancels the confirmation', async () => {
+        const dialogRef = await openModalFromList();
+        confirmResult = false;
+
+        dialogRef.componentInstance.recurringTransactionOpenRequest.emit({
+            recurringTransactionId: 7,
+            isDirty: true,
+        });
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(ConfirmDialogComponent, expect.anything());
+        expect(routerMock.navigate).not.toHaveBeenCalledWith(['/recurring-transactions', 7]);
+        expect(dialogRef.close).not.toHaveBeenCalled();
     });
 
     it('should not remove the id from the url when the modal opened from the route closes during another navigation', async () => {

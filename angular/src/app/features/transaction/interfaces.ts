@@ -158,3 +158,14 @@ export interface TransactionDetailListElementData {
     isComplexPriceMode: boolean;
     categories: string[];
 }
+
+/**
+ * A tranzakciós formból az ismétlődő tranzakció megnyitásakor küldött adatok
+ */
+export interface NavigationDataToRecurringTransaction {
+    recurringTransactionId: number;
+    /**
+     * Vannak-e mentetlen változtatások a formban (ha igen, navigálás előtt megerősítés kell)
+     */
+    isDirty: boolean;
+}

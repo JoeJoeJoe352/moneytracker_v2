@@ -1,17 +1,15 @@
-import { describe, it, expect, vi, afterEach, MockInstance } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal, WritableSignal } from '@angular/core';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
-import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
 import { NotificationService } from '@shared/services/notification-service';
 import { CategoryService } from '../transaction/category-service';
 import { CategoryResponseInterface } from '../transaction/interfaces';
 import { RecurringTransactionModalComponent } from './recurring-transaction-modal';
-import { RecurringTransactionService } from './recurring-transactions-service';
 import {
     RecurringTransactionResponseInterface,
     RecurringTransactionSaveRequestInterface,
@@ -72,14 +70,13 @@ const payload: RecurringTransactionSaveRequestInterface = {
     isRestart: false,
 };
 
+/**
+ * A mentést/leállítást/törlést a hívó (oldal) végzi, azt a
+ * recurring-transactions-page-component.spec.ts teszteli. Itt csak az események
+ * továbbítását és a kategóriák kezelését
+ */
 describe('RecurringTransactionModalComponent (Vitest)', () => {
     let fixture: ComponentFixture<RecurringTransactionModalComponent>;
-    let serviceMock: {
-        createRecurringTransaction: ReturnType<typeof vi.fn>;
-        updateRecurringTransaction: ReturnType<typeof vi.fn>;
-        stopRecurringTransaction: ReturnType<typeof vi.fn>;
-        deleteRecurringTransaction: ReturnType<typeof vi.fn>;
-    };
     let categoryServiceMock: {
         listCategories: ReturnType<typeof vi.fn>;
         saveCategory: ReturnType<typeof vi.fn>;
@@ -88,9 +85,7 @@ describe('RecurringTransactionModalComponent (Vitest)', () => {
         show: ReturnType<typeof vi.fn>;
         showGeneralError: ReturnType<typeof vi.fn>;
     };
-    let dialogRefMock: { close: ReturnType<typeof vi.fn> };
-    let confirmOpenSpy: MockInstance<typeof ConfirmDialogComponent.open>;
-    let confirmResult: Subject<boolean | undefined>;
+    let isSaving: WritableSignal<boolean>;
 
     afterEach(() => {
         vi.restoreAllMocks();
@@ -101,12 +96,6 @@ describe('RecurringTransactionModalComponent (Vitest)', () => {
         listCategoriesResult: Observable<CategoryResponseInterface[]> = of(categories),
         waitForStable = true,
     ) {
-        serviceMock = {
-            createRecurringTransaction: vi.fn(() => of(undefined)),
-            updateRecurringTransaction: vi.fn(() => of(undefined)),
-            stopRecurringTransaction: vi.fn(() => of(undefined)),
-            deleteRecurringTransaction: vi.fn(() => of(undefined)),
-        };
         categoryServiceMock = {
             listCategories: vi.fn(() => listCategoriesResult),
             saveCategory: vi.fn((data: { name: string }) =>
@@ -114,21 +103,13 @@ describe('RecurringTransactionModalComponent (Vitest)', () => {
             ),
         };
         notificationMock = { show: vi.fn(), showGeneralError: vi.fn() };
-        dialogRefMock = { close: vi.fn() };
-        confirmResult = new Subject<boolean | undefined>();
-        // A modal a MatDialogModule importja miatt saját MatDialog példányt kap, ezért nem a
-        // MatDialog-ot mockoljuk, hanem a megerősítő dialog megnyitását
-        confirmOpenSpy = vi.spyOn(ConfirmDialogComponent, 'open').mockReturnValue({
-            afterClosed: () => confirmResult.asObservable(),
-        } as ReturnType<typeof ConfirmDialogComponent.open>);
+        isSaving = signal(false);
 
         TestBed.configureTestingModule({
             imports: [RecurringTransactionModalComponent],
             providers: [
                 provideTranslateService(),
-                { provide: MAT_DIALOG_DATA, useValue: { recurringTransaction } },
-                { provide: MatDialogRef, useValue: dialogRefMock },
-                { provide: RecurringTransactionService, useValue: serviceMock },
+                { provide: MAT_DIALOG_DATA, useValue: { recurringTransaction, isSaving } },
                 { provide: CategoryService, useValue: categoryServiceMock },
                 { provide: NotificationService, useValue: notificationMock },
             ],
@@ -207,127 +188,46 @@ describe('RecurringTransactionModalComponent (Vitest)', () => {
         expect(form()!.categoryList()).toEqual([]);
     });
 
-    it('should create a new recurring transaction, notify and close with true on save', async () => {
-        await setup(null);
-
-        form()!.saved.emit(payload);
-
-        expect(serviceMock.createRecurringTransaction).toHaveBeenCalledWith(payload);
-        expect(serviceMock.updateRecurringTransaction).not.toHaveBeenCalled();
-        expect(notificationMock.show).toHaveBeenCalledWith('etc.save-success');
-        expect(dialogRefMock.close).toHaveBeenCalledWith(true);
-    });
-
-    it('should update the edited recurring transaction on save', async () => {
+    it('should emit saveRequested with the payload when the form is saved', async () => {
         await setup(editedTransaction);
+        const emitted: RecurringTransactionSaveRequestInterface[] = [];
+        fixture.componentInstance.saveRequested.subscribe((data) => emitted.push(data));
 
         form()!.saved.emit(payload);
 
-        expect(serviceMock.updateRecurringTransaction).toHaveBeenCalledWith(5, payload);
-        expect(serviceMock.createRecurringTransaction).not.toHaveBeenCalled();
-        expect(dialogRefMock.close).toHaveBeenCalledWith(true);
+        expect(emitted).toEqual([payload]);
     });
 
-    it('should disable the form while saving', async () => {
-        const saveSubject = new Subject<void>();
-        await setup(null);
-        serviceMock.createRecurringTransaction.mockReturnValue(saveSubject.asObservable());
+    it('should emit stopRequested when the form is stopped', async () => {
+        await setup(editedTransaction);
+        const stopSpy = vi.fn();
+        fixture.componentInstance.stopRequested.subscribe(stopSpy);
 
-        form()!.saved.emit(payload);
+        form()!.stopped.emit();
+
+        expect(stopSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should emit deleteRequested when the form is deleted', async () => {
+        await setup(editedTransaction);
+        const deleteSpy = vi.fn();
+        fixture.componentInstance.deleteRequested.subscribe(deleteSpy);
+
+        form()!.deleted.emit();
+
+        expect(deleteSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should disable the form while the caller is saving', async () => {
+        await setup(editedTransaction);
+        expect(form()!.isFormDisabled()).toBe(false);
+
+        isSaving.set(true);
         fixture.detectChanges();
-
         expect(form()!.isFormDisabled()).toBe(true);
 
-        saveSubject.next();
-        saveSubject.complete();
+        isSaving.set(false);
         fixture.detectChanges();
-
-        expect(dialogRefMock.close).toHaveBeenCalledWith(true);
-    });
-
-    it('should keep the modal open and enable the form again when saving fails', async () => {
-        await setup(null);
-        serviceMock.createRecurringTransaction.mockReturnValue(
-            throwError(() => new Error('server error')),
-        );
-
-        form()!.saved.emit(payload);
-        fixture.detectChanges();
-
-        expect(dialogRefMock.close).not.toHaveBeenCalled();
-        expect(form()!.isFormDisabled()).toBe(false);
-    });
-
-    it('should stop the edited recurring transaction, notify and close with true', async () => {
-        await setup(editedTransaction);
-
-        form()!.stopped.emit();
-
-        expect(serviceMock.stopRecurringTransaction).toHaveBeenCalledWith(5);
-        expect(notificationMock.show).toHaveBeenCalledWith(
-            'recurring_transaction.form.stop-success',
-        );
-        expect(dialogRefMock.close).toHaveBeenCalledWith(true);
-    });
-
-    it('should keep the modal open when stopping fails', async () => {
-        await setup(editedTransaction);
-        serviceMock.stopRecurringTransaction.mockReturnValue(
-            throwError(() => new Error('server error')),
-        );
-
-        form()!.stopped.emit();
-        fixture.detectChanges();
-
-        expect(dialogRefMock.close).not.toHaveBeenCalled();
-        expect(form()!.isFormDisabled()).toBe(false);
-    });
-
-    it('should ask for confirmation before deleting', async () => {
-        await setup(editedTransaction);
-
-        form()!.deleted.emit();
-
-        expect(confirmOpenSpy).toHaveBeenCalledWith(expect.anything(), {
-            message: 'recurring_transaction.form.delete_confirm',
-            danger: true,
-        });
-        expect(serviceMock.deleteRecurringTransaction).not.toHaveBeenCalled();
-    });
-
-    it('should delete the recurring transaction, notify and close with true after confirming', async () => {
-        await setup(editedTransaction);
-
-        form()!.deleted.emit();
-        confirmResult.next(true);
-
-        expect(serviceMock.deleteRecurringTransaction).toHaveBeenCalledWith(5);
-        expect(notificationMock.show).toHaveBeenCalledWith('etc.delete-success');
-        expect(dialogRefMock.close).toHaveBeenCalledWith(true);
-    });
-
-    it('should not delete when the confirmation is cancelled', async () => {
-        await setup(editedTransaction);
-
-        form()!.deleted.emit();
-        confirmResult.next(false);
-        confirmResult.next(undefined);
-
-        expect(serviceMock.deleteRecurringTransaction).not.toHaveBeenCalled();
-        expect(dialogRefMock.close).not.toHaveBeenCalled();
-    });
-
-    it('should keep the modal open and enable the form again when deleting fails', async () => {
-        await setup(editedTransaction);
-        serviceMock.deleteRecurringTransaction.mockReturnValue(
-            throwError(() => new Error('server error')),
-        );
-
-        form()!.deleted.emit();
-        confirmResult.next(true);
-        fixture.detectChanges();
-
-        expect(dialogRefMock.close).not.toHaveBeenCalled();
         expect(form()!.isFormDisabled()).toBe(false);
     });
 

@@ -191,6 +191,14 @@
     "select_page": "Seite auswählen"
   },
   "recurring_transaction": {
+    "chart": {
+      "title": "Wiederkehrende Ausgaben in diesem Monat",
+      "total": "Gesamt",
+      "other": "Sonstiges",
+      "empty": "In diesem Monat gibt es keine wiederkehrenden Ausgaben.",
+      "booked": "Gebucht",
+      "planned": "Geplant"
+    },
     "title": "Meine wiederkehrenden Transaktionen",
     "empty": "Noch keine wiederkehrenden Transaktionen",
     "not_found": "Die gesuchte wiederkehrende Transaktion wurde nicht gefunden!",
@@ -220,8 +228,9 @@
       "stop": "Stoppen",
       "stop-success": "Wiederkehrende Transaktion gestoppt",
       "delete_confirm": "Möchtest du diese wiederkehrende Transaktion wirklich löschen? Bereits erstellte Transaktionen bleiben erhalten.",
-      "date_before_today": "Das Datum darf nicht vor dem heutigen Tag liegen!"
-    }
+      "date_before_this_month": "Das Datum darf nicht vor dem aktuellen Monat liegen!"
+    },
+    "changed-interval": "Das Wiederholungsintervall wurde geändert. Bitte überprüfe das Datum der nächsten Fälligkeit."
   },
   "language": {
     "title": "Sprache",

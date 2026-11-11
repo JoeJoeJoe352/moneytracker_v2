@@ -51,6 +51,14 @@ function daysFromToday(days: number): Date {
     return date;
 }
 
+/**
+ * Az előző hónap utolsó napja: az első olyan nap, ami már nem választható (bármelyik napon fut a teszt)
+ */
+function lastDayOfPreviousMonth(): Date {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 0);
+}
+
 function dateString(date: Date): string {
     return new TimeHelper().formatDateToString(date);
 }
@@ -212,18 +220,18 @@ describe('RecurringTransactionFormComponent (Vitest)', () => {
         });
     });
 
-    it('should show an error and not emit "saved" when the date is before today', () => {
+    it('should show an error and not emit "saved" when the date is before the current month', () => {
         fixture.detectChanges();
         const saved = captureSaved();
 
         component.name.setValue('Netflix');
         component.price.setValue(4990);
-        component.date.setValue(daysFromToday(-1));
+        component.date.setValue(lastDayOfPreviousMonth());
         submitButton().click();
         fixture.detectChanges();
 
-        expect(component.date.hasError('beforeToday')).toBe(true);
-        expect(errorTexts()).toContain('recurring_transaction.form.date_before_today');
+        expect(component.date.hasError('beforeThisMonth')).toBe(true);
+        expect(errorTexts()).toContain('recurring_transaction.form.date_before_this_month');
         expect(saved.value).toBeUndefined();
     });
 
@@ -334,12 +342,12 @@ describe('RecurringTransactionFormComponent (Vitest)', () => {
         expect(saved.value).toMatchObject({ name: 'Albérlet', isRestart: true });
     });
 
-    it('should not restart a stopped recurring transaction whose next occurrence is in the past', () => {
+    it('should not restart a stopped recurring transaction whose next occurrence is before the current month', () => {
         fixture.componentRef.setInput(
             'recurringTransaction',
             recurringTransaction({
                 status: RecurringTransactionStatusEnum.STOPPED,
-                nextOccurrenceDate: dateString(daysFromToday(-5)),
+                nextOccurrenceDate: dateString(lastDayOfPreviousMonth()),
             }),
         );
         fixture.detectChanges();
@@ -349,7 +357,7 @@ describe('RecurringTransactionFormComponent (Vitest)', () => {
         fixture.detectChanges();
 
         expect(saved.value).toBeUndefined();
-        expect(errorTexts()).toContain('recurring_transaction.form.date_before_today');
+        expect(errorTexts()).toContain('recurring_transaction.form.date_before_this_month');
     });
 
     it('should disable the form and all buttons when isFormDisabled is true', () => {

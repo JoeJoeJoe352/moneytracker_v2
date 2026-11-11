@@ -1,3 +1,11 @@
+@if (isModalLoading()) {
+    <mat-progress-bar
+        class="modal-loading"
+        mode="indeterminate"
+        [attr.aria-label]="'etc.loading' | translate"
+    />
+}
+
 <mat-card class="title-card">
     <mat-card-header>
         <h1 mat-card-title>{{ 'recurring_transaction.title' | translate }}</h1>
@@ -5,10 +13,21 @@
 </mat-card>
 
 <div class="actions">
-    <button matButton="filled" type="button" (click)="openModal()">
+    <button matButton="filled" type="button" [disabled]="isModalLoading()" (click)="openModal()">
         + {{ 'recurring_transaction.form.create' | translate }}
     </button>
 </div>
+
+@if (recurringTransactionListResource.hasValue()) {
+    <div class="chart-wrapper">
+        <mat-card>
+            <app-recurring-transaction-chart-component
+                [statData]="recurringTransactionStatResource.value()"
+                (openRecurringEditModal)="openModal($event)"
+            />
+        </mat-card>
+    </div>
+}
 
 <mat-card>
     <div class="recurring-list" aria-live="polite" [attr.aria-busy]="isListLoading()">
@@ -22,7 +41,7 @@
             @for (transaction of recurringTransactionListResource.value(); track transaction.id) {
                 <app-recurring-transaction-row-component
                     [transaction]="transaction"
-                    (selected)="openModal(transaction)"
+                    (selected)="openModal(transaction.id)"
                 />
             } @empty {
                 <p class="text-center">{{ 'recurring_transaction.empty' | translate }}</p>

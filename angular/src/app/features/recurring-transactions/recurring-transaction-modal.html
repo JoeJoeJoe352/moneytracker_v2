@@ -19,14 +19,15 @@
         </mat-dialog-content>
     } @else {
         <app-recurring-transaction-form-component
-            [isFormDisabled]="isSaving()"
+            [isFormDisabled]="data.isSaving()"
             [categoryList]="categoriesResource.value()"
             [recurringTransaction]="data.recurringTransaction"
             [isCategorySaveInProgress]="isAddingCategoryInProgress()"
             [addCategoryCallback]="saveCategory"
-            (saved)="save($event)"
-            (stopped)="stop()"
-            (deleted)="delete()"
+            (saved)="saveRequested.emit($event)"
+            (stopped)="stopRequested.emit()"
+            (deleted)="deleteRequested.emit()"
+            (intervalTypeChanged)="intervalTypeChanged.emit()"
         />
     }
 </div>

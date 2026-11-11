@@ -22,9 +22,10 @@ public class RecurringTransactionScheduler {
     }
 
     /**
-     * Note: ha hosszabb szerverleállás van és kimarad pár hét, akkor fel fogja
-     * venni a régebbi tranzakciókat is, a jó időpontban, de futásonként (jelenleg
-     * óránként) csak egyet
+     * 15 percenként létrehozza az esedékes ismétlődő tranzakciókat. A lemaradt
+     * előfordulásokat (pl. hónapon belül korábbi kezdés, vagy szerverleállás miatt)
+     * is mind létrehozza a saját napjukra, ismétlődő tranzakciónként futásonként
+     * legfeljebb RecurringTransactionService.MAX_CATCH_UP_PER_RUN darabot
      */
     @Scheduled(cron = "0 */15 * * * *")
     public void generateRecurrentTransactions() {
@@ -36,7 +37,14 @@ public class RecurringTransactionScheduler {
         // mindegyik külön tranzakcióban fut, így egy hibás nem akasztja meg a többit
         for (Long recurringTransactionId : recurringTransactionIds) {
             try {
-                recurringTransactionService.generateTransactionFromTemplate(recurringTransactionId, actualDate);
+                int created =
+                        recurringTransactionService.generateTransactionFromTemplate(recurringTransactionId, actualDate);
+                if (created > 1) {
+                    logger.info(
+                            "Generated {} missed transactions for RecurringTransaction with ID {}",
+                            created,
+                            recurringTransactionId);
+                }
             } catch (RuntimeException e) {
                 logger.error(
                         "Generating transaction failed for RecurringTransaction with ID {}", recurringTransactionId, e);

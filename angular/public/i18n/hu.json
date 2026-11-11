@@ -191,6 +191,14 @@
     "select_page": "Válassz oldalt"
   },
   "recurring_transaction": {
+    "chart": {
+      "title": "Ismétlődő kiadások ebben a hónapban",
+      "total": "Összesen",
+      "other": "Egyéb",
+      "empty": "Ebben a hónapban nincs ismétlődő kiadás.",
+      "booked": "Lekönyvelt",
+      "planned": "Tervezett"
+    },
     "title": "Ismétlődő tranzakcióim",
     "empty": "Nincs még felvett ismétlődő tranzakció",
     "not_found": "A keresett ismétlődő tranzakció nem található!",
@@ -220,8 +228,9 @@
       "stop": "Leállítás",
       "stop-success": "Az ismétlődő tranzakció leállítva",
       "delete_confirm": "Biztosan törölni szeretnéd az ismétlődő tranzakciót? A már létrejött tranzakciók megmaradnak.",
-      "date_before_today": "A dátum nem lehet korábbi a mai napnál!"
-    }
+      "date_before_this_month": "A dátum nem lehet korábbi az aktuális hónapnál!"
+    },
+    "changed-interval": "Megváltozott az ismétlődés típusa. Ellenőrizd a következő esedékesség idejét!"
   },
   "language": {
     "title": "Nyelv",

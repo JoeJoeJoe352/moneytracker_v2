@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+    MonthlyStatInterface,
     RecurringTransactionResponseInterface,
     RecurringTransactionSaveRequestInterface,
 } from './interfaces';
@@ -55,5 +56,12 @@ export class RecurringTransactionService {
      */
     deleteRecurringTransaction(id: number): Observable<void> {
         return this.http.delete<void>(`/api/recurring-transaction/${id}`);
+    }
+
+    /**
+     * Visszatér a felhasználó ismétlődő tranzakcióival
+     */
+    recurringTransactionsStat(): Observable<MonthlyStatInterface[]> {
+        return this.http.get<MonthlyStatInterface[]>('/api/recurring-transaction/monthly-stat');
     }
 }

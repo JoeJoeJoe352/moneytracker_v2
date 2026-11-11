@@ -39,5 +39,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      */
     @Query(
             "SELECT c FROM Category c WHERE (c.user.id = ?2 OR c.user.id IS NULL) AND c.status = ACTIVE AND c.id in (?1)")
-    List<Category> findAllById(List<Long> ids, long userId);
+    List<Category> findAllByIdsForUser(List<Long> ids, long userId);
 }

@@ -383,6 +383,71 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
                 recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
     }
 
+    /**
+     * Hónapon belül korábbi kezdés: egy futás az összes lemaradt heti előfordulást létrehozza,
+     * mindegyiket a saját napjára
+     */
+    @Test
+    void testMissedWeeklyOccurrencesAreAllGeneratedInOneRun() {
+        // GIVEN
+        createRecurringTransaction(
+                "Heti bevásárlás",
+                LocalDate.of(2026, 10, 3),
+                RecurrenceIntervalEnum.WEEKLY,
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-20000"),
+                List.of());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN: a futás napja (10-31) is benne van
+        assertEquals(
+                List.of(
+                        LocalDate.of(2026, 10, 3),
+                        LocalDate.of(2026, 10, 10),
+                        LocalDate.of(2026, 10, 17),
+                        LocalDate.of(2026, 10, 24),
+                        LocalDate.of(2026, 10, 31)),
+                this.transactionDates());
+        assertEquals(
+                LocalDate.of(2026, 11, 7),
+                recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
+    }
+
+    /**
+     * Hosszabb kimaradás után a havi előfordulások a hónap végét is helyesen kezelik
+     * (31-i kezdés: 30-i hónapokban 30-án, utána újra 31-én)
+     */
+    @Test
+    void testMissedMonthlyOccurrencesKeepTheStartDayAfterShortMonths() {
+        // GIVEN
+        createRecurringTransaction(
+                "Albérlet",
+                LocalDate.of(2026, 5, 31),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                new BigDecimal("-150000"),
+                List.of());
+
+        // WHEN
+        scheduler.generateRecurrentTransactions();
+
+        // THEN
+        assertEquals(
+                List.of(
+                        LocalDate.of(2026, 5, 31),
+                        LocalDate.of(2026, 6, 30),
+                        LocalDate.of(2026, 7, 31),
+                        LocalDate.of(2026, 8, 31),
+                        LocalDate.of(2026, 9, 30),
+                        LocalDate.of(2026, 10, 31)),
+                this.transactionDates());
+        assertEquals(
+                LocalDate.of(2026, 11, 30),
+                recurringTransactionRepo.findAll().getFirst().getNextOccurrenceDate());
+    }
+
     @Test
     void testOnlyDueRecurringTransactionsAreGenerated() {
         // GIVEN
@@ -713,6 +778,16 @@ public class RecurringTransactionSchedulerTest extends MySqlContainerTest {
         assertEquals(
                 "Spotify átnevezve",
                 transactionrepo.findById(transactionId).orElseThrow().getName());
+    }
+
+    /**
+     * A létrejött tranzakciók dátumai növekvő sorrendben
+     */
+    private List<LocalDate> transactionDates() {
+        return transactionrepo.findAll().stream()
+                .map(Transaction::getTransactionDate)
+                .sorted()
+                .toList();
     }
 
     private RecurringTransaction createRecurringTransaction(

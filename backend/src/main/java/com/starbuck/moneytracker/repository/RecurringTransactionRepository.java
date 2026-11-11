@@ -34,7 +34,8 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
     List<RecurringTransaction> findByWalletId(long walletId);
 
     /**
-     * A user összes ismétlődő tranzakciója, a legközelebb esedékes elöl. A kategória
+     * A user összes ismétlődő tranzakciója, a legközelebb esedékes elöl. A
+     * kategória
      * kapcsolatokat is betölti, hogy a mapper ne kérdezze le őket egyenként
      *
      * @param userId
@@ -50,12 +51,13 @@ public interface RecurringTransactionRepository extends JpaRepository<RecurringT
 
     /**
      * Összes user adott napig (azt is beleértve) esedékes, aktív ismétlődő
-     * tranzakcióinak id-jai
+     * tranzakcióinak id-jai.
+     * Limitált, hogy biztos befejezze a következő cron indulásáig
      */
     @Query("""
             SELECT r.id FROM RecurringTransaction r
             WHERE r.nextOccurrenceDate <= ?1 AND r.status = 'ACTIVE' AND r.wallet.status = 'ACTIVE'
-            ORDER BY r.nextOccurrenceDate ASC, r.id ASC
+            ORDER BY r.nextOccurrenceDate ASC, r.id ASC LIMIT 1000
             """)
     List<Long> findDueTransactionIds(LocalDate date);
 

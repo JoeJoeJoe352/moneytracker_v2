@@ -1,5 +1,6 @@
 package com.starbuck.moneytracker.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,6 +69,26 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                 ORDER BY w.id
             """)
     List<WalletSummaryResponseDto> summarizeTransactionPricesForMonthAndType(long userId, TransactionTypeEnum type);
+
+    /**
+     * Adott hónapra összegzi az automatikusan létrehozott tranzakciók árát
+     *
+     * @param userId
+     * @param from
+     * @param to
+     * @return
+     */
+    @Query("""
+            SELECT t
+            FROM Transaction t
+            LEFT JOIN FETCH t.wallet w
+            JOIN FETCH t.recurringTransaction rt
+            WHERE t.transactionDate >= :from AND t.transactionDate < :to
+                AND w.user.id = :userId AND w.status = ACTIVE AND rt.status <> DELETED
+            ORDER BY t.transactionDate ASC
+                """)
+    List<Transaction> findRecurringGeneratedTransactionsInRange(
+            @Param("userId") long userId, @Param("from") LocalDate from, @Param("to") LocalDate to);
 
     /**
      * Id alapján lekéri a tranzakciós adatokat

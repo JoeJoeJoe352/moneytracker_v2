@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -49,6 +50,7 @@ import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailCategoryRepository;
 import com.starbuck.moneytracker.repository.TransactionDetailRepository;
 import com.starbuck.moneytracker.repository.TransactionRepository;
+import com.starbuck.moneytracker.service.CategoryService;
 import com.starbuck.moneytracker.service.TransactionDetailService;
 import com.starbuck.moneytracker.service.TransactionService;
 import com.starbuck.moneytracker.service.WalletService;
@@ -79,6 +81,9 @@ class TransactionServiceTest {
     private CategoryRepository categoryRepo;
 
     @Mock
+    private ConversionService conversionService;
+
+    @Mock
     private WalletService walletService;
 
     @Mock
@@ -100,8 +105,9 @@ class TransactionServiceTest {
     void setUp() {
         // Valódi TransactionDetailService a mockolt repókkal, így a detail mentést
         // ellenőrző tesztek változatlanul működnek
+        var categoryService = new CategoryService(categoryRepo, currentUser, conversionService);
         var transactionDetailService = new TransactionDetailService(
-                transactionDetailRepo, categoryRepo, transactionDetailCategoryRepository, currentUser, detailFactory);
+                transactionDetailRepo, categoryService, transactionDetailCategoryRepository, detailFactory);
         transactionService = new TransactionService(
                 transactionRepo, transactionDetailService, currentUser, walletService, balanceSyncRepo);
     }
@@ -433,7 +439,7 @@ class TransactionServiceTest {
         User userInDB = new User(1l, "alma", "pass", "email");
         Mockito.when(currentUser.getUser()).thenReturn(userInDB);
 
-        Mockito.when(categoryRepo.findAllById(List.of(5L), 1L))
+        Mockito.when(categoryRepo.findAllByIdsForUser(List.of(5L), 1L))
                 .thenReturn(List.of(new Category(5L, "teszt", userInDB, LangEnum.HU)));
 
         // WHEN

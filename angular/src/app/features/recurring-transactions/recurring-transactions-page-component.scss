@@ -1,3 +1,13 @@
+// a modal adatainak lekérése alatt a képernyő tetején látszik, bármi is indította
+// (sor, diagram vagy URL)
+.modal-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
 .actions {
     display: flex;
     justify-content: flex-end;
@@ -13,4 +23,8 @@
         justify-content: center;
         margin: 12px;
     }
+}
+
+.chart-wrapper {
+    margin-bottom: 12px;
 }

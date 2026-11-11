@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
-import com.starbuck.moneytracker.validation.FutureOrPresentInZone;
+import com.starbuck.moneytracker.validation.NotBeforeCurrentMonthInZone;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -23,7 +23,9 @@ public record RecurringTransactionSaveRequestDto(
         @NotNull(message = "priceSum is mandatory") @Digits(integer = 8, fraction = 2)
         BigDecimal priceSum,
 
-        @NotNull(message = "startDate is mandatory") @FutureOrPresentInZone
+        // a hónapon belül korábbi kezdés is megengedett: a scheduler a már esedékes
+        // előfordulásokat utólag létrehozza
+        @NotNull(message = "startDate is mandatory") @NotBeforeCurrentMonthInZone
         LocalDate startDate,
 
         @NotNull(message = "recurrenceInterval is mandatory")

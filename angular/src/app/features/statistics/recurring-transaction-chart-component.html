@@ -1,0 +1,49 @@
+<section class="pie-chart">
+    <h2 class="title">{{ 'recurring_transaction.chart.title' | translate }}</h2>
+
+    @if (slices().length === 0) {
+        <p class="empty">{{ 'recurring_transaction.chart.empty' | translate }}</p>
+    } @else {
+        <div class="content">
+            <div class="chart-container">
+                <!-- a listában minden szelet szövegesen is szerepel, ezért aria hidden -->
+                <canvas
+                    baseChart
+                    type="pie"
+                    aria-hidden="true"
+                    [data]="chartData()"
+                    [options]="chartOptions"
+                ></canvas>
+            </div>
+
+            <div class="legend">
+                <p class="total">
+                    {{ 'recurring_transaction.chart.total' | translate }}:
+                    <strong>{{ formatHuf(total()) }}</strong>
+                </p>
+                <p class="key">
+                    <span class="key-item">
+                        <span class="swatch"></span>
+                        {{ 'recurring_transaction.chart.booked' | translate }}
+                    </span>
+                    <span class="key-item">
+                        <span class="swatch planned"></span>
+                        {{ 'recurring_transaction.chart.planned' | translate }}
+                    </span>
+                </p>
+                <ul>
+                    @for (slice of slices(); track slice.label) {
+                        <li>
+                            <span class="swatch" [style.background-color]="slice.color"></span>
+                            <span class="name">{{ slice.label }}</span>
+                            <span class="amount">
+                                {{ formatHuf(slice.hufAmount) }}
+                                <span class="share">({{ sharePercent(slice.hufAmount) }}%)</span>
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+</section>

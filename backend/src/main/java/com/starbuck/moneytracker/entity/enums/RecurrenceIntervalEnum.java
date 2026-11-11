@@ -5,8 +5,8 @@ import java.time.LocalDate;
 public enum RecurrenceIntervalEnum {
     WEEKLY {
         @Override
-        public LocalDate calculateNextOccurrence(LocalDate startDate, LocalDate actualDate) {
-            return actualDate.plusWeeks(1);
+        public LocalDate calculateNextOccurrence(LocalDate startDate, LocalDate calculateNextOccurenceFromDate) {
+            return calculateNextOccurenceFromDate.plusWeeks(1);
         }
     },
     MONTHLY {
@@ -19,8 +19,8 @@ public enum RecurrenceIntervalEnum {
          * márciusban újra 31.-én kell lenni
          */
         @Override
-        public LocalDate calculateNextOccurrence(LocalDate startDate, LocalDate actualDate) {
-            LocalDate nextOccurrenceRaw = actualDate.plusMonths(1);
+        public LocalDate calculateNextOccurrence(LocalDate startDate, LocalDate calculateNextOccurenceFromDate) {
+            LocalDate nextOccurrenceRaw = calculateNextOccurenceFromDate.plusMonths(1);
             int dayFromStartDate = startDate.getDayOfMonth();
             int nextOccurrenceDay = Math.min(nextOccurrenceRaw.lengthOfMonth(), dayFromStartDate);
 
@@ -30,6 +30,13 @@ public enum RecurrenceIntervalEnum {
 
     /**
      * Kiszámolja a következő tranzakció létrehozás dátumát
+     *
+     * @param startDate                      Kezdődátum. A nap meghatározására
+     *                                       szolgál
+     * @param calculateNextOccurenceFromDate Dátum, amitől kezdve számoljuk a
+     *                                       következő tranzakció
+     *                                       létrejöttét
+     * @return
      */
-    public abstract LocalDate calculateNextOccurrence(LocalDate startDate, LocalDate actualDate);
+    public abstract LocalDate calculateNextOccurrence(LocalDate startDate, LocalDate calculateNextOccurenceFromDate);
 }

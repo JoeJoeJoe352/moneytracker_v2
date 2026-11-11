@@ -11,7 +11,7 @@ import { TransactionFormComponent } from './transaction-form-component';
 import { CategorySelectComponent } from './category-select-component';
 import { TransactionService } from '../transaction-service';
 import { TransactionUtils } from '../transaction-utils';
-import { TransactionDataFromBackend } from '../interfaces';
+import { NavigationDataToRecurringTransaction, TransactionDataFromBackend } from '../interfaces';
 import {
     CurrencyCodesEnum,
     TransactionSpecialTypeEnum,
@@ -25,10 +25,8 @@ describe('TransactionFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransactionFormComponent>;
     let component: TransactionFormComponent;
     let dialogOpenSpy: ReturnType<typeof vi.fn>;
-    let confirmResult: boolean;
 
     beforeEach(async () => {
-        confirmResult = true;
         TestBed.configureTestingModule({
             imports: [TransactionFormComponent],
             providers: [
@@ -68,8 +66,8 @@ describe('TransactionFormComponent (Vitest)', () => {
             ],
         });
         // A komponens importálja a MatDialogModule-t, ami saját MatDialog-ot ad, ezért providers helyett
-        // overrideProvider kell. A megerősítő dialog eredménye tesztenként a confirmResult-tal állítható
-        dialogOpenSpy = vi.fn(() => ({ afterClosed: () => of(confirmResult) }));
+        // overrideProvider kell. A form maga nem nyithat dialogot, ezt a spy-jal ellenőrizzük
+        dialogOpenSpy = vi.fn(() => ({ afterClosed: () => of(true) }));
         TestBed.overrideProvider(MatDialog, { useValue: { open: dialogOpenSpy } });
         await TestBed.compileComponents();
 
@@ -484,24 +482,26 @@ describe('TransactionFormComponent (Vitest)', () => {
         return fixture.nativeElement.querySelector('.open-recurring-transaction');
     }
 
-    function setRecurringTransaction(recurringTransactionId: number | null): number[] {
+    function setRecurringTransaction(
+        recurringTransactionId: number | null,
+    ): NavigationDataToRecurringTransaction[] {
         fixture.componentRef.setInput('transaction', {
             ...createBackendTransaction(TransactionSpecialTypeEnum.RECURRING),
             recurringTransactionId,
         });
         fixture.detectChanges();
 
-        const emittedIds: number[] = [];
-        component.recurringTransactionOpenRequest.subscribe((id) => emittedIds.push(id));
-        return emittedIds;
+        const emitted: NavigationDataToRecurringTransaction[] = [];
+        component.recurringTransactionOpenRequest.subscribe((data) => emitted.push(data));
+        return emitted;
     }
 
-    it('should show the open button for a recurring transaction and emit its id without confirm when the form is untouched', () => {
-        const emittedIds = setRecurringTransaction(5);
+    it('should show the open button for a recurring transaction and emit its id as not dirty when the form is untouched', () => {
+        const emitted = setRecurringTransaction(5);
 
         openRecurringButton()!.click();
 
-        expect(emittedIds).toEqual([5]);
+        expect(emitted).toEqual([{ recurringTransactionId: 5, isDirty: false }]);
         expect(dialogOpenSpy).not.toHaveBeenCalled();
     });
 
@@ -518,25 +518,14 @@ describe('TransactionFormComponent (Vitest)', () => {
         expect(openRecurringButton()).toBeNull();
     });
 
-    it('should ask for confirmation and emit the id when the form has unsaved changes and the user confirms', () => {
-        const emittedIds = setRecurringTransaction(5);
+    it('should emit the id as dirty without opening a confirm itself when the form has unsaved changes', () => {
+        const emitted = setRecurringTransaction(5);
         component.name.setValue('Módosított név');
         component.name.markAsDirty();
 
         openRecurringButton()!.click();
 
-        expect(dialogOpenSpy).toHaveBeenCalledTimes(1);
-        expect(emittedIds).toEqual([5]);
-    });
-
-    it('should not emit the id when the form has unsaved changes and the user cancels the confirmation', () => {
-        confirmResult = false;
-        const emittedIds = setRecurringTransaction(5);
-        component.name.markAsDirty();
-
-        openRecurringButton()!.click();
-
-        expect(dialogOpenSpy).toHaveBeenCalledTimes(1);
-        expect(emittedIds).toEqual([]);
+        expect(emitted).toEqual([{ recurringTransactionId: 5, isDirty: true }]);
+        expect(dialogOpenSpy).not.toHaveBeenCalled();
     });
 });

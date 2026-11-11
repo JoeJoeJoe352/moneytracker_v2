@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,40 +9,52 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.starbuck.moneytracker.commands.RecurringTransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
+import com.starbuck.moneytracker.dto.RecurringTransactionMonthlySummaryDto;
 import com.starbuck.moneytracker.entity.Category;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.RecurringTransactionCategory;
+import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.RecurringTransactionStatusEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
-import com.starbuck.moneytracker.repository.CategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionCategoryRepository;
 import com.starbuck.moneytracker.repository.RecurringTransactionRepository;
+import com.starbuck.moneytracker.service.domainservice.RecurringTransactionSummaryDomainService;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 import com.starbuck.moneytracker.util.TransactionFactory;
 
 @Service
 public class RecurringTransactionService {
 
+    /**
+     * Ismétlődő tranzakciónként futásonként legfeljebb ennyi lemaradt tranzakció
+     * jön létre,
+     * hogy egy hosszú kimaradás se terhelje túl egy futást
+     */
+    public static final int MAX_CATCH_UP_PER_RUN = 100;
+
     private final RecurringTransactionRepository recurringTransactionRepo;
     private final RecurringTransactionCategoryRepository recurringTransactionCategoryRepo;
-    private final CategoryRepository categoryRepo;
+    private final CategoryService categoryService;
     private final WalletService walletService;
     private final CurrentUserUtil currentUser;
     private final TransactionService transactionService;
     private final TransactionFactory transactionFactory;
 
+    private final RecurringTransactionSummaryDomainService summaryCalculator =
+            new RecurringTransactionSummaryDomainService();
+
     public RecurringTransactionService(
             RecurringTransactionRepository recurringTransactionRepo,
             RecurringTransactionCategoryRepository recurringTransactionCategoryRepo,
-            CategoryRepository categoryRepo,
+            CategoryService categoryService,
             WalletService walletService,
             CurrentUserUtil currentUser,
             TransactionService transactionService,
             TransactionFactory transactionFactory) {
         this.recurringTransactionRepo = recurringTransactionRepo;
         this.recurringTransactionCategoryRepo = recurringTransactionCategoryRepo;
-        this.categoryRepo = categoryRepo;
+        this.categoryService = categoryService;
         this.walletService = walletService;
         this.currentUser = currentUser;
         this.transactionService = transactionService;
@@ -91,8 +104,10 @@ public class RecurringTransactionService {
             recurringTransaction.setStatus(RecurringTransactionStatusEnum.ACTIVE);
         }
 
-        // Ha megváltozott a küldött dátum, akkor újra beállítjuk a kezdődátumot is
-        if (!recurringTransaction.getNextOccurrenceDate().equals(command.getTransactionCreateDate())) {
+        boolean isNextOccurenceDateChanged =
+                !recurringTransaction.getNextOccurrenceDate().equals(command.getTransactionCreateDate());
+
+        if (isNextOccurenceDateChanged) {
             recurringTransaction.setDates(command.getTransactionCreateDate());
         }
 
@@ -113,42 +128,60 @@ public class RecurringTransactionService {
     }
 
     /**
-     * Felveszi a tranzakciót az ismétlődő tranzakció mintájára, és továbblépteti a
+     * Felveszi az ismétlődő tranzakció mintájára az összes, date-ig esedékes
+     * tranzakciót, mindegyiket a saját esedékessége napjára, és továbblépteti a
      * következő esedékességet.
+     * <p>
+     * Futásonként legfeljebb {@value #MAX_CATCH_UP_PER_RUN} tranzakciót hoz létre,
+     * a maradékot a következő futás folytatja.
      *
      * @param recurringTransactionId
      * @param date                   a scheduler futásának napja
+     * @return a létrehozott tranzakciók száma
+     * @throws IllegalStateException ha a következő esedékesség nem lépne előre
+     *                               (végtelen ciklus védelem)
      */
     @Transactional
-    public void generateTransactionFromTemplate(long recurringTransactionId, LocalDate date) {
+    public int generateTransactionFromTemplate(long recurringTransactionId, LocalDate date) {
         var found = recurringTransactionRepo.findDueRecurringTransactionByIdForUpdate(recurringTransactionId, date);
         // Ez akkor fordulhat elő, ha a user a listázás után, de e függvény meghívása
         // előtt inaktiválta a recurringTransactiont
         if (found.isEmpty()) {
-            return;
+            return 0;
         }
         RecurringTransaction recurringTransaction = found.get();
 
-        TransactionSaveCommand command = transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
-                recurringTransaction, recurringTransaction.getNextOccurrenceDate());
-        // nincs bejelentkezett user, ezért a jogosultság-ellenőrzés nélküli ágat hívjuk
-        transactionService.createTransactionFromRecurringTransaction(command, recurringTransaction);
+        int created = 0;
+        while (!recurringTransaction.getNextOccurrenceDate().isAfter(date) && created < MAX_CATCH_UP_PER_RUN) {
+            LocalDate occurrence = recurringTransaction.getNextOccurrenceDate();
+            TransactionSaveCommand command =
+                    transactionFactory.createTransactionCommandFromRecurrentTransactionTemplate(
+                            recurringTransaction, occurrence);
+            // nincs bejelentkezett user, ezért a jogosultság-ellenőrzés nélküli ágat hívjuk
+            transactionService.createTransactionFromRecurringTransaction(command, recurringTransaction);
 
-        this.updateNextOccurrence(recurringTransaction);
+            this.advanceNextOccurrence(recurringTransaction, occurrence);
+            created++;
+        }
+        recurringTransactionRepo.save(recurringTransaction);
+        return created;
     }
 
     /**
-     * Frissíti a következő előfordulási idejét az ismétlődő tranzakciónak
+     * Továbblépteti az ismétlődő tranzakció következő esedékességét
      *
-     * @param recurringTransaction
+     * @throws IllegalStateException ha a következő esedékesség nem az aktuális után
+     *                               van
      */
-    private void updateNextOccurrence(RecurringTransaction recurringTransaction) {
+    private void advanceNextOccurrence(RecurringTransaction recurringTransaction, LocalDate occurrence) {
         LocalDate nextOccurrence = recurringTransaction
                 .getRecurrenceInterval()
-                .calculateNextOccurrence(
-                        recurringTransaction.getStartDate(), recurringTransaction.getNextOccurrenceDate());
+                .calculateNextOccurrence(recurringTransaction.getStartDate(), occurrence);
+        if (!nextOccurrence.isAfter(occurrence)) {
+            throw new IllegalStateException("Next occurrence (" + nextOccurrence + ") is not after " + occurrence
+                    + " for RecurringTransaction " + recurringTransaction.getId());
+        }
         recurringTransaction.setNextOccurrenceDate(nextOccurrence);
-        recurringTransactionRepo.save(recurringTransaction);
     }
 
     /**
@@ -159,6 +192,24 @@ public class RecurringTransactionService {
     @Transactional(readOnly = true)
     public List<RecurringTransaction> listRecurringTransactions() {
         return recurringTransactionRepo.findAllForUser(currentUser.getUser().getId());
+    }
+
+    /**
+     * Statisztikát csinál az ismétlődő tranzakciókból az adott hónapra. Betölti a
+     * hónapban már létrejött tranzakciókat és a user ismétlődő tranzakcióit, a
+     * számolást a RecurringTransactionSummaryDomainService végzi
+     *
+     * @param yearMonth
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public List<RecurringTransactionMonthlySummaryDto> summarizeRecurrentTransactions(YearMonth yearMonth) {
+        List<Transaction> createdTransactions = transactionService.summarizeRecurringTransactionCreatedInThisMonth(
+                yearMonth.atDay(1), yearMonth.plusMonths(1).atDay(1));
+        List<RecurringTransaction> recurringTransactions =
+                recurringTransactionRepo.findAllForUser(currentUser.getUser().getId());
+
+        return summaryCalculator.summarizeMonthlyStatistic(yearMonth, createdTransactions, recurringTransactions);
     }
 
     /**
@@ -208,13 +259,7 @@ public class RecurringTransactionService {
             return;
         }
 
-        var foundCategories =
-                categoryRepo.findAllById(categoryIds, currentUser.getUser().getId());
-        if (foundCategories.size() != categoryIds.size()) {
-            throw new IllegalArgumentException("Input contains a category id that doesn't belong to the user");
-        }
-
-        for (Category category : foundCategories) {
+        for (Category category : categoryService.getCategoriesForUser(categoryIds)) {
             recurringTransactionCategoryRepo.save(new RecurringTransactionCategory(recurringTransaction, category));
         }
     }

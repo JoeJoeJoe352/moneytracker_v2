@@ -1,4 +1,5 @@
 import {
+    CurrencyCodesEnum,
     RecurrenceIntervalEnum,
     RecurringTransactionStatusEnum,
     TransactionTypeEnum,
@@ -34,4 +35,15 @@ export interface RecurringTransactionSaveRequestInterface {
      * Leállított ismétlődő tranzakció újraindítása
      */
     isRestart: boolean;
+}
+
+export interface MonthlyStatInterface {
+    recurringTransactionId: number;
+    name: string;
+    recurringTransactionPrice: number;
+    nextOccurrenceDate: string;
+    transactionType: TransactionTypeEnum;
+    createdSum: number;
+    plannedSum: number;
+    currencyCode: CurrencyCodesEnum;
 }
