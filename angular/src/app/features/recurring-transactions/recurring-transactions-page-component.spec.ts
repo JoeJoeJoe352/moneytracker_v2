@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EventEmitter } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,6 +15,7 @@ import {
     RecurringTransactionModalInputInterface,
 } from './recurring-transaction-modal';
 import { RecurringTransactionService } from './recurring-transactions-service';
+import { RecurringTransactionChartComponent } from '../statistics/recurring-transaction-chart-component';
 import {
     RecurringTransactionResponseInterface,
     RecurringTransactionSaveRequestInterface,
@@ -124,7 +126,16 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         } = {},
     ) {
         listSpy = vi.fn(() => listResult);
-        getByIdSpy = vi.fn(() => options.getByIdResult ?? of(rent));
+        // alapból a listában lévő elemet adja vissza id alapján, ismeretlen id-ra 404
+        getByIdSpy = vi.fn((id: number) => {
+            if (options.getByIdResult) {
+                return options.getByIdResult;
+            }
+            const found = [rent, pocketMoney].find((transaction) => transaction.id === id);
+            return found
+                ? of(found)
+                : throwError(() => new HttpErrorResponse({ status: 404 }));
+        });
         // üres statisztika: a diagram az üres állapotot mutatja, így a
         // tesztkörnyezetben (canvas nélkül) nem rajzol
         statSpy = vi.fn(() => of([]));
@@ -206,10 +217,35 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
     }
 
     /**
+     * Az oldalon lévő diagram komponens (a szelet kattintását az output kézi kiváltásával
+     * szimuláljuk, mert a tesztkörnyezetben nincs canvas)
+     */
+    function chart(): RecurringTransactionChartComponent {
+        return fixture.debugElement.query(By.directive(RecurringTransactionChartComponent))
+            .componentInstance as RecurringTransactionChartComponent;
+    }
+
+    function loadingBar(): HTMLElement | null {
+        return fixture.nativeElement.querySelector('mat-progress-bar.modal-loading');
+    }
+
+    function createButton(): HTMLButtonElement {
+        return fixture.nativeElement.querySelector('.actions button');
+    }
+
+    /**
+     * Megvárja, hogy a szerkesztő modal előtti API lekérés (aszinkron) lefusson
+     */
+    function settle(): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve));
+    }
+
+    /**
      * A sor kattintásával megnyitott (szerkesztő) modal
      */
-    function openEditModal(): FakeDialogRef {
+    async function openEditModal(): Promise<FakeDialogRef> {
         rows()[0]!.click();
+        await settle();
         return dialogRefs.at(-1)!;
     }
 
@@ -259,7 +295,93 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         await setup();
 
         rows()[1]!.click();
+        await settle();
 
+        expect(getByIdSpy).toHaveBeenCalledWith(pocketMoney.id);
+        expect(openedModalData().recurringTransaction).toEqual(pocketMoney);
+    });
+
+    it('should open the modal with the data loaded from the api instead of the list item', async () => {
+        const fresh = { ...rent, name: 'Albérlet (frissített)' };
+        await setup(undefined, true, { getByIdResult: of(fresh) });
+
+        rows()[0]!.click();
+        await settle();
+
+        expect(openedModalData().recurringTransaction).toEqual(fresh);
+    });
+
+    it('should not open the modal before the recurring transaction is loaded', async () => {
+        const getByIdSubject = new Subject<RecurringTransactionResponseInterface>();
+        await setup(undefined, true, { getByIdResult: getByIdSubject.asObservable() });
+
+        rows()[0]!.click();
+        await settle();
+        expect(dialogOpenSpy).not.toHaveBeenCalled();
+
+        getByIdSubject.next(rent);
+        await settle();
+        expect(openedModalData().recurringTransaction).toEqual(rent);
+    });
+
+    it('should show the loading bar and disable the create button while the recurring transaction is loading', async () => {
+        const getByIdSubject = new Subject<RecurringTransactionResponseInterface>();
+        await setup(undefined, true, { getByIdResult: getByIdSubject.asObservable() });
+
+        rows()[0]!.click();
+        fixture.detectChanges();
+
+        expect(loadingBar()).not.toBeNull();
+        expect(createButton().disabled).toBe(true);
+
+        getByIdSubject.next(rent);
+        await settle();
+        fixture.detectChanges();
+
+        expect(loadingBar()).toBeNull();
+        expect(createButton().disabled).toBe(false);
+    });
+
+    it('should hide the loading bar when loading the recurring transaction fails', async () => {
+        const getByIdSubject = new Subject<RecurringTransactionResponseInterface>();
+        await setup(undefined, true, { getByIdResult: getByIdSubject.asObservable() });
+
+        rows()[0]!.click();
+        getByIdSubject.error(new HttpErrorResponse({ status: 404 }));
+        await settle();
+        fixture.detectChanges();
+
+        expect(loadingBar()).toBeNull();
+    });
+
+    it('should not show the loading bar when the list is idle', async () => {
+        await setup();
+
+        expect(loadingBar()).toBeNull();
+    });
+
+    it('should ignore further clicks while a recurring transaction is loading', async () => {
+        const getByIdSubject = new Subject<RecurringTransactionResponseInterface>();
+        await setup(undefined, true, { getByIdResult: getByIdSubject.asObservable() });
+
+        rows()[0]!.click();
+        rows()[1]!.click();
+        chart().openRecurringEditModal.emit(pocketMoney.id);
+        getByIdSubject.next(rent);
+        await settle();
+
+        expect(getByIdSpy).toHaveBeenCalledTimes(1);
+        expect(dialogOpenSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should allow opening another modal after the previous one has loaded', async () => {
+        await setup();
+
+        await openEditModal();
+        rows()[1]!.click();
+        await settle();
+
+        expect(getByIdSpy).toHaveBeenCalledTimes(2);
         expect(openedModalData().recurringTransaction).toEqual(pocketMoney);
     });
 
@@ -267,6 +389,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         await setup();
 
         rows()[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+        await settle();
 
         expect(openedModalData().recurringTransaction).toEqual(rent);
     });
@@ -275,13 +398,58 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         await setup();
 
         rows()[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+        await settle();
 
         expect(openedModalData().recurringTransaction).toEqual(rent);
     });
 
+    it('should open the modal with the recurring transaction whose id the chart emits', async () => {
+        await setup();
+
+        chart().openRecurringEditModal.emit(pocketMoney.id);
+        await settle();
+
+        expect(getByIdSpy).toHaveBeenCalledWith(pocketMoney.id);
+        expect(openedModalData().recurringTransaction).toEqual(pocketMoney);
+    });
+
+    it('should show a not found message without navigating when the clicked recurring transaction no longer exists', async () => {
+        await setup();
+
+        chart().openRecurringEditModal.emit(99);
+        await settle();
+
+        expect(dialogOpenSpy).not.toHaveBeenCalled();
+        expect(notificationMock.show).toHaveBeenCalledWith('recurring_transaction.not_found');
+        expect(routerMock.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should show a general error without navigating when loading the clicked recurring transaction fails', async () => {
+        await setup(undefined, true, {
+            getByIdResult: throwError(() => new HttpErrorResponse({ status: 500 })),
+        });
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        rows()[0]!.click();
+        await settle();
+
+        expect(dialogOpenSpy).not.toHaveBeenCalled();
+        expect(notificationMock.showGeneralError).toHaveBeenCalled();
+        expect(routerMock.navigate).not.toHaveBeenCalled();
+        consoleErrorSpy.mockRestore();
+    });
+
+    it('should not load anything from the api when clicking the create button', async () => {
+        await setup();
+
+        fixture.nativeElement.querySelector('.actions button').click();
+
+        expect(getByIdSpy).not.toHaveBeenCalled();
+    });
+
     it('should reload the list and the statistics after the modal is closed with a successful save', async () => {
         await setup();
-        rows()[0]!.click();
+        await openEditModal();
 
         dialogRefs.at(-1)!.close(true);
         await fixture.whenStable();
@@ -292,7 +460,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
 
     it('should not reload the list nor the statistics when the modal is closed without saving', async () => {
         await setup();
-        rows()[0]!.click();
+        await openEditModal();
 
         dialogRefs.at(-1)!.close(undefined);
         await fixture.whenStable();
@@ -318,7 +486,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
 
     it('should update the edited recurring transaction on save', async () => {
         await setup();
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.saveRequested.emit(payload);
 
@@ -331,7 +499,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         const saveSubject = new Subject<void>();
         await setup();
         serviceMock.updateRecurringTransaction.mockReturnValue(saveSubject.asObservable());
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.saveRequested.emit(payload);
         expect(openedModalData().isSaving()).toBe(true);
@@ -348,7 +516,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         serviceMock.updateRecurringTransaction.mockReturnValue(
             throwError(() => new Error('server error')),
         );
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.saveRequested.emit(payload);
 
@@ -358,7 +526,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
 
     it('should stop the edited recurring transaction, notify and close the modal with true', async () => {
         await setup();
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.stopRequested.emit();
 
@@ -374,7 +542,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         serviceMock.stopRecurringTransaction.mockReturnValue(
             throwError(() => new Error('server error')),
         );
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.stopRequested.emit();
 
@@ -384,7 +552,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
 
     it('should ask for confirmation before deleting', async () => {
         await setup();
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.deleteRequested.emit();
 
@@ -399,7 +567,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
 
     it('should delete the recurring transaction, notify and close the modal with true after confirming', async () => {
         await setup();
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.deleteRequested.emit();
         confirmResult.next(true);
@@ -411,7 +579,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
 
     it('should not delete when the confirmation is cancelled', async () => {
         await setup();
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.deleteRequested.emit();
         confirmResult.next(false);
@@ -426,7 +594,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
         serviceMock.deleteRecurringTransaction.mockReturnValue(
             throwError(() => new Error('server error')),
         );
-        const dialogRef = openEditModal();
+        const dialogRef = await openEditModal();
 
         dialogRef.componentInstance.deleteRequested.emit();
         confirmResult.next(true);
@@ -503,7 +671,7 @@ describe('RecurringTransactionsPageComponent (Vitest)', () => {
 
     it('should not navigate when a modal opened from the list (without id route param) is closed', async () => {
         await setup();
-        rows()[0]!.click();
+        await openEditModal();
 
         dialogRefs.at(-1)!.close(true);
 

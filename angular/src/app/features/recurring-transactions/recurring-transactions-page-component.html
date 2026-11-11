@@ -1,3 +1,11 @@
+@if (isModalLoading()) {
+    <mat-progress-bar
+        class="modal-loading"
+        mode="indeterminate"
+        [attr.aria-label]="'etc.loading' | translate"
+    />
+}
+
 <mat-card class="title-card">
     <mat-card-header>
         <h1 mat-card-title>{{ 'recurring_transaction.title' | translate }}</h1>
@@ -5,7 +13,7 @@
 </mat-card>
 
 <div class="actions">
-    <button matButton="filled" type="button" (click)="openModal()">
+    <button matButton="filled" type="button" [disabled]="isModalLoading()" (click)="openModal()">
         + {{ 'recurring_transaction.form.create' | translate }}
     </button>
 </div>

@@ -6,6 +6,7 @@ import { RecurringTransactionService } from './recurring-transactions-service';
 import { filter, firstValueFrom, switchMap, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatProgressBar } from '@angular/material/progress-bar';
 import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { RESOURCE_STATUS_LOADING } from '@shared/constants';
 import { NotificationService } from '@shared/services/notification-service';
@@ -31,6 +32,7 @@ type RecurringTransactionModalRef = MatDialogRef<RecurringTransactionModalCompon
     imports: [
         MatCardModule,
         MatProgressSpinner,
+        MatProgressBar,
         MatButtonModule,
         TranslatePipe,
         RecurringTransactionRowComponent,
@@ -49,6 +51,12 @@ export class RecurringTransactionsPageComponent {
      * Mentés/leállítás/törlés folyamatban van-e, addig a modal formja le van tiltva
      */
     private readonly isSaving = signal(false);
+
+    /**
+     * A szerkesztő modal adatainak lekérése folyamatban van-e. Ezalatt töltésjelző látszik,
+     * és újabb modal nem nyitható (pl. dupla kattintásnál)
+     */
+    protected readonly isModalLoading = signal(false);
 
     constructor() {
         // /recurring-transactions/:id esetén a megadott ismétlődő tranzakció modalja nyílik fel
@@ -94,31 +102,28 @@ export class RecurringTransactionsPageComponent {
     });
 
     /**
+     * Létrehozó/szerkesztő modal megnyitása. 
+     *
+     * @param recurringTransactionId Szerkesztendő ismétlődő tranzakció id. Null esetén új létrehozása
+     */
+    protected openModal(recurringTransactionId: number | null = null) {
+        if (this.isModalLoading()) {
+            return;
+        }
+        if (recurringTransactionId === null) {
+            this.openModalFor(null);
+            return;
+        }
+        void this.openModalById(recurringTransactionId);
+    }
+
+    /**
      * Létrehozó/szerkesztő modal megnyitása, sikeres mentés után újratölti a listát.
      * Bezáráskor kiveszi az id-t az URL-ből, ha URL alapján nyílt meg
      *
-     * @param recurringTransactionId Szerkesztendő ismétlődő tranzakció, null esetén új létrehozása
+     * @param recurringTransaction Szerkesztendő ismétlődő tranzakció, null esetén új létrehozása
      */
-    protected openModal(recurringTransactionId: number | null = null) {
-        if (!this.recurringTransactionListResource.hasValue()) {
-            console.error(
-                'Calling open modal, but listResource not loaded yet: ' + recurringTransactionId,
-            );
-            return;
-        }
-
-        let recurringTransaction = null;
-        if (recurringTransactionId !== null) {
-            recurringTransaction = this.recurringTransactionListResource
-                .value()
-                .find((transactionData) => transactionData.id === recurringTransactionId);
-
-            if (!recurringTransaction) {
-                console.error('RecurringTransaction not found: ' + recurringTransactionId);
-                return;
-            }
-        }
-
+    private openModalFor(recurringTransaction: RecurringTransactionResponseInterface | null) {
         const dialogRef = RecurringTransactionModalComponent.open(this.dialog, {
             recurringTransaction,
             isSaving: this.isSaving.asReadonly(),
@@ -236,14 +241,19 @@ export class RecurringTransactionsPageComponent {
 
     /**
      * Lekéri az adott id-jú ismétlődő tranzakciót, és megnyitja a modalját. Ha nem található
-     * (pl. más useré, vagy törölték), értesítést mutat, és visszanavigál a listára
+     * (pl. más useré, vagy törölték), értesítést mutat, és ha URL alapján nyílt volna meg,
+     * visszanavigál a listára
      */
     private async openModalById(id: number): Promise<void> {
+        if (this.isModalLoading()) {
+            return;
+        }
+        this.isModalLoading.set(true);
         try {
             const recurringTransaction = await firstValueFrom(
                 this.service.getRecurringTransactionById(id),
             );
-            this.openModal(recurringTransaction.id);
+            this.openModalFor(recurringTransaction);
         } catch (err) {
             if (err instanceof HttpErrorResponse && err.status === 404) {
                 this.notification.show(_('recurring_transaction.not_found'));
@@ -251,7 +261,11 @@ export class RecurringTransactionsPageComponent {
                 console.error('Problem with loading the recurring transaction', err);
                 this.notification.showGeneralError();
             }
-            void this.navigateToList();
+            if (this.route.snapshot.params['id'] !== undefined) {
+                void this.navigateToList();
+            }
+        } finally {
+            this.isModalLoading.set(false);
         }
     }
 
