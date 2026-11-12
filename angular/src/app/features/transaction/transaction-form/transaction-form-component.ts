@@ -71,6 +71,7 @@ export class TransactionFormComponent implements OnChanges {
     protected readonly userData = inject(UserDataStore);
     protected readonly walletUtil = inject(WalletDataUtil);
     protected readonly transactionUtils = inject(TransactionUtils);
+    private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
     /**
      * Az "új tétel" gomb sora, hogy addRow()-nál az oldal aljára tudjunk görgetni
@@ -267,12 +268,23 @@ export class TransactionFormComponent implements OnChanges {
      */
     protected addRow(): void {
         this.details.push(this.generateNewEmptyRow());
-        setTimeout(() =>
+        setTimeout(() => {
+            const detailNameInputs =
+                this.elementRef.nativeElement.querySelectorAll<HTMLInputElement>('.detail-name');
+
+            const lastInputElement = detailNameInputs[detailNameInputs.length - 1];
+
+            if (lastInputElement) {
+                lastInputElement.focus({ preventScroll: true });
+            } else {
+                console.error('The inputs with detail-name class are missing');
+            }
+
             this.detailAddButton()?.nativeElement.scrollIntoView({
                 behavior: 'smooth',
                 block: 'nearest',
-            }),
-        );
+            });
+        });
     }
 
     /**
