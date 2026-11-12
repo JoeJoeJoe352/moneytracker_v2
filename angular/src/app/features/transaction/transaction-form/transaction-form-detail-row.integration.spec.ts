@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { inject } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -132,6 +132,52 @@ describe('TransactionForm + TransactionDetailRow integration (Vitest)', () => {
             fixture.nativeElement.querySelectorAll('app-transaction-detail-form-component').length,
         ).toBe(3);
         expect(component.details.length).toBe(3);
+    });
+
+    it('should focus the name input of the newly added detail row', () => {
+        // az addRow setTimeout-ban fókuszál, ezért a timereket mi léptetjük
+        vi.useFakeTimers();
+        try {
+            fixture.nativeElement.querySelector('.detail-add-row button').click();
+            fixture.detectChanges();
+            vi.runAllTimers();
+
+            expect(document.activeElement).toBe(
+                fixture.nativeElement.querySelector('#detail-name-2'),
+            );
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('should not focus any detail row when an existing transaction is loaded', () => {
+        const detailNameInputs = Array.from(
+            fixture.nativeElement.querySelectorAll('.detail-name'),
+        );
+
+        expect(detailNameInputs.length).toBe(2);
+        expect(detailNameInputs).not.toContain(document.activeElement);
+    });
+
+    it('should not focus a detail-name input outside of the form component', () => {
+        // a keresésnek a komponensen belül kell maradnia, nem az egész document-ben
+        const outsideInput = document.createElement('input');
+        outsideInput.className = 'detail-name';
+        document.body.appendChild(outsideInput);
+        vi.useFakeTimers();
+        try {
+            fixture.nativeElement.querySelector('.detail-add-row button').click();
+            fixture.detectChanges();
+            vi.runAllTimers();
+
+            expect(document.activeElement).not.toBe(outsideInput);
+            expect(document.activeElement).toBe(
+                fixture.nativeElement.querySelector('#detail-name-2'),
+            );
+        } finally {
+            vi.useRealTimers();
+            outsideInput.remove();
+        }
     });
 
     it('should remove a detail row when its own delete button is clicked', () => {
