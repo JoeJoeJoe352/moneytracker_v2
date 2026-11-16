@@ -261,7 +261,8 @@ public class TransactionService {
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
 
         if (transaction.isTransferTransaction()) {
-            throw new IllegalArgumentException("Use deleteLinkedTransaction() to delete transfer type transactions");
+            throw new IllegalArgumentException(
+                    "Use deleteLinkedTransaction api endpoint to delete transfer type transactions");
         }
 
         if (transaction.isSyncTransaction()) {
@@ -271,7 +272,6 @@ public class TransactionService {
                             "Transaction " + transactionId + " is a sync transaction, but has no BalanceSync"));
 
             this.balanceSyncRepo.delete(balanceSync);
-            this.transactionRepo.save(transaction);
         }
 
         this.transactionRepo.delete(transaction);
