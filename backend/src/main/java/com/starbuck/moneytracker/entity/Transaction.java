@@ -75,13 +75,20 @@ public class Transaction {
     private Wallet wallet;
 
     /**
-     * Az ismétlődő tranzakció, amiből ez a tranzakció létrejött. Csak létrehozáskor íródik: a törölt
-     * ismétlődő tranzakciót a Hibernate null-ként tölti be (@SQLRestriction), és módosításkor
-     * különben ezt a null-t írná vissza, elveszítve a kapcsolatot
+     * Az ismétlődő tranzakció, amiből ez a tranzakció létrejött.
      */
     @ManyToOne(optional = true)
     @JoinColumn(name = "recurring_transaction_id", nullable = true, updatable = false)
     private RecurringTransaction recurringTransaction;
+
+    /**
+     * Átvezetés része-e a tranzakció
+     *
+     * @return boolean
+     */
+    public boolean isTransferTransaction() {
+        return this.specialType == TransactionSpecialTypeEnum.TRANSFER;
+    }
 
     /**
      * Törölt-e a tranzakció
