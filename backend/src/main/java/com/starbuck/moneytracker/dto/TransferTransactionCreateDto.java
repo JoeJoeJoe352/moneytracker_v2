@@ -13,12 +13,12 @@ public record TransferTransactionCreateDto(
         @NotBlank @Length(min = 3, max = 120, message = "srcTransactionName must be between 3 and 120 characters")
         String srcTransactionName,
 
-        @NotNull long srcWalletId,
+        @NotNull Long srcWalletId,
 
         @NotBlank @Length(min = 3, max = 120, message = "dstTransactionName must be between 3 and 120 characters")
         String dstTransactionName,
 
-        @NotNull long dstWalletId,
+        @NotNull Long dstWalletId,
 
         @NotNull LocalDate transactionDate,
 
