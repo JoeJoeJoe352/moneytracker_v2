@@ -243,8 +243,8 @@ public class TransactionService {
      */
     @Transactional
     public void deleteTransaction(long transactionId) {
-        // getTransactionByIdForActualUser itt nem használható, mert itt feleslegesen
-        // töltené be a detailokat
+        // Azért nem a getTransactionByIdForActualUser van használva, mert itt
+        // feleslegesen töltené be a detailokat
         Long userId = currentUser.getUser().getId();
         Transaction transaction = this.transactionRepo
                 .findById(transactionId)
