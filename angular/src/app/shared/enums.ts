@@ -23,6 +23,7 @@ export enum TransactionTypeEnum {
 export enum TransactionSpecialTypeEnum {
     SYNC = 'SYNC',
     RECURRING = 'RECURRING',
+    TRANSFER = 'TRANSFER',
 }
 
 export enum RecurrenceIntervalEnum {

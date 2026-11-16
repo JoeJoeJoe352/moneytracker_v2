@@ -27,12 +27,14 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.starbuck.moneytracker.commands.TransactionDetailSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.dto.TransactionFilterDto;
 import com.starbuck.moneytracker.entity.BalanceSync;
 import com.starbuck.moneytracker.entity.Category;
+import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransactionDetail;
 import com.starbuck.moneytracker.entity.TransactionDetailCategory;
@@ -41,6 +43,7 @@ import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enums.LangEnum;
+import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
@@ -701,8 +704,7 @@ class TransactionServiceTest {
      */
     @Test
     void deleteTransaction_deletesBalanceSyncOfSyncTransaction() {
-        Transaction transaction = createTransactionForUser1(5L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.SYNC);
         BalanceSync balanceSync = new BalanceSync(
                 Instant.parse("2026-10-01T10:00:00Z"), transaction.getWallet(), new BigDecimal("50.00"));
         Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
@@ -720,8 +722,7 @@ class TransactionServiceTest {
      */
     @Test
     void deleteTransaction_throwsWhenSyncTransactionHasNoBalanceSync() {
-        Transaction transaction = createTransactionForUser1(5L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.SYNC);
         Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
         Mockito.when(balanceSyncRepo.findBySyncTransactionId(5L)).thenReturn(Optional.empty());
 
@@ -739,9 +740,8 @@ class TransactionServiceTest {
      */
     @Test
     void updateTransaction_keepsSpecialTypeOfSyncTransaction() {
-        Transaction transaction = createTransactionForUser1(5L);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.SYNC);
         transaction.getWallet().setId(3L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
         transaction.setTransactionDetails(List.of());
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                 .thenReturn(Optional.of(transaction));
@@ -770,9 +770,8 @@ class TransactionServiceTest {
      */
     @Test
     void updateTransaction_throwsWhenSyncTransactionWalletChanged() {
-        Transaction transaction = createTransactionForUser1(5L);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.SYNC);
         transaction.getWallet().setId(3L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                 .thenReturn(Optional.of(transaction));
 
@@ -799,9 +798,8 @@ class TransactionServiceTest {
      */
     @Test
     void updateTransaction_throwsWhenRecurringTransactionWalletChanged() {
-        Transaction transaction = createTransactionForUser1(5L);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.RECURRING);
         transaction.getWallet().setId(3L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.RECURRING);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                 .thenReturn(Optional.of(transaction));
 
@@ -822,7 +820,121 @@ class TransactionServiceTest {
         assertEquals(3L, transaction.getWallet().getId());
     }
 
+    /**
+     * Sima tranzakció létrehozásakor nincs special type
+     */
+    @Test
+    void createTransaction_savesWithoutSpecialTypeByDefault() {
+        Transaction result = transactionService.createTransaction(createSimpleSaveCommand());
+
+        assertNull(result.getSpecialType());
+    }
+
+    /**
+     * A command special type-ja létrehozáskor átkerül a tranzakcióba
+     */
+    @Test
+    void createTransaction_savesSpecialTypeFromCommand() {
+        TransactionSaveCommand command = createSimpleSaveCommand().setSyncSpecialType();
+
+        Transaction result = transactionService.createTransaction(command);
+
+        assertEquals(TransactionSpecialTypeEnum.SYNC, result.getSpecialType());
+    }
+
+    /**
+     * TRANSFER típusú tranzakció nem hozható létre a sima létrehozással, és semmi
+     * nem mentődik
+     */
+    @Test
+    void createTransaction_throwsForTransferCommand() {
+        TransactionSaveCommand command = createSimpleSaveCommand();
+        // a command-on nincs publikus mód TRANSFER beállítására, ez fejlesztői hibát
+        // szimulál
+        ReflectionTestUtils.setField(command, "specialType", TransactionSpecialTypeEnum.TRANSFER);
+
+        assertThrows(UnsupportedOperationException.class, () -> {
+            transactionService.createTransaction(command);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).save(any(Transaction.class));
+        Mockito.verifyNoInteractions(transactionDetailRepo);
+    }
+
+    /**
+     * Ismétlődő tranzakcióból generált tranzakció RECURRING special type-ot kap
+     */
+    @Test
+    void createTransactionFromRecurringTransaction_savesRecurringSpecialType() {
+        RecurringTransaction recurringTransaction = new RecurringTransaction(
+                "Spotify",
+                new BigDecimal("-10.00"),
+                LocalDate.of(2026, 10, 1),
+                RecurrenceIntervalEnum.MONTHLY,
+                TransactionTypeEnum.OUTCOME,
+                defaultWallet);
+        TransactionSaveCommand command = createSimpleSaveCommand().setRecurringSpecialType();
+
+        Transaction result =
+                transactionService.createTransactionFromRecurringTransaction(command, recurringTransaction);
+
+        assertEquals(TransactionSpecialTypeEnum.RECURRING, result.getSpecialType());
+        assertEquals(recurringTransaction, result.getRecurringTransaction());
+    }
+
+    /**
+     * TRANSFER típusú tranzakció nem módosítható a sima módosítással, és semmi nem
+     * változik
+     */
+    @Test
+    void updateTransaction_throwsForTransferTransaction() {
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.TRANSFER);
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
+                .thenReturn(Optional.of(transaction));
+
+        TransactionSaveCommand updateCommand = createSimpleSaveCommand();
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.updateTransaction(5L, updateCommand);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).save(any(Transaction.class));
+        Mockito.verifyNoInteractions(transactionDetailRepo);
+        assertEquals("teszt", transaction.getName());
+    }
+
+    /**
+     * TRANSFER típusú tranzakció nem törölhető a sima törléssel
+     */
+    @Test
+    void deleteTransaction_throwsForTransferTransaction() {
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.TRANSFER);
+        Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.deleteTransaction(5L);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
+        Mockito.verifyNoInteractions(balanceSyncRepo);
+    }
+
+    private TransactionSaveCommand createSimpleSaveCommand() {
+        return new TransactionSaveCommand(
+                "simpleTransaction",
+                new BigDecimal("-10.00"),
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                List.of(),
+                List.of(),
+                1L);
+    }
+
     private Transaction createTransactionForUser1(Long id) {
+        return createTransactionForUser1(id, null);
+    }
+
+    private Transaction createTransactionForUser1(Long id, TransactionSpecialTypeEnum specialType) {
         Wallet wallet = new Wallet(
                 "wallet", new User(1L, "name", "password", "email"), CurrencyEnum.HUF, WalletTypeEnum.DEFAULT);
         return new Transaction(
@@ -830,6 +942,7 @@ class TransactionServiceTest {
                 "teszt",
                 LocalDate.now(),
                 TransactionTypeEnum.OUTCOME,
+                specialType,
                 new BigDecimal("-10.00"),
                 GeneralStatusEnum.ACTIVE,
                 wallet);

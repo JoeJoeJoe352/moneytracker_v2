@@ -16,6 +16,7 @@ import com.starbuck.moneytracker.dto.WalletSummaryResponseDto;
 import com.starbuck.moneytracker.entity.RecurringTransaction;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.Wallet;
+import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.BalanceSyncRepository;
@@ -56,6 +57,11 @@ public class TransactionService {
      */
     @Transactional
     public Transaction createTransaction(TransactionSaveCommand createCommand) {
+        if (createCommand.getSpecialType() == TransactionSpecialTypeEnum.TRANSFER) {
+            throw new UnsupportedOperationException(
+                    "Use createLinkedTransaction() to create transfer type transactions");
+        }
+
         Wallet wallet = walletService.getWalletById(createCommand.getWalletId());
 
         Transaction savedTransactionModel = this.transactionRepo.save(newTransaction(createCommand, wallet));
@@ -85,14 +91,13 @@ public class TransactionService {
     }
 
     private Transaction newTransaction(TransactionSaveCommand command, Wallet wallet) {
-        Transaction transaction = new Transaction(
+        return new Transaction(
                 command.getTransactionName(),
                 command.getTransactionDate(),
                 command.getTransactionType(),
+                command.getSpecialType(),
                 costCalculator.calculateTransactionCost(command),
                 wallet);
-        transaction.setSpecialType(command.getSpecialType());
-        return transaction;
     }
 
     /**
@@ -106,6 +111,10 @@ public class TransactionService {
         Wallet wallet = walletService.getWalletById(updateCommand.getWalletId());
 
         Transaction transaction = this.getTransactionByIdForActualUser(id);
+
+        if (transaction.isTransferTransaction()) {
+            throw new IllegalArgumentException("Transfer transactions must be updated together with their other side");
+        }
 
         // A szinkronizációs tranzakció a BalanceSync-en keresztül egy wallethez kötött,
         // áthelyezve rossz wallet egyenlegét korrigálná
@@ -243,13 +252,18 @@ public class TransactionService {
      */
     @Transactional
     public void deleteTransaction(long transactionId) {
-        // getTransactionByIdForActualUser itt nem használható, mert itt feleslegesen
-        // töltené be a detailokat
+        // Azért nem a getTransactionByIdForActualUser van használva, mert itt
+        // feleslegesen töltené be a detailokat
         Long userId = currentUser.getUser().getId();
         Transaction transaction = this.transactionRepo
                 .findById(transactionId)
                 .filter(t -> t.getWallet().getUser().getId().equals(userId))
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
+
+        if (transaction.isTransferTransaction()) {
+            throw new IllegalArgumentException(
+                    "Use deleteLinkedTransaction api endpoint to delete transfer type transactions");
+        }
 
         if (transaction.isSyncTransaction()) {
             var balanceSync = balanceSyncRepo
@@ -258,9 +272,6 @@ public class TransactionService {
                             "Transaction " + transactionId + " is a sync transaction, but has no BalanceSync"));
 
             this.balanceSyncRepo.delete(balanceSync);
-
-            transaction.setSpecialType(null);
-            this.transactionRepo.save(transaction);
         }
 
         this.transactionRepo.delete(transaction);

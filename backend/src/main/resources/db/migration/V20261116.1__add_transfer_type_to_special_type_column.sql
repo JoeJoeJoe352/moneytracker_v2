@@ -1,0 +1,2 @@
+ALTER TABLE transactions
+MODIFY special_type Enum ('SYNC', 'RECURRING', 'TRANSFER') DEFAULT NULL;
