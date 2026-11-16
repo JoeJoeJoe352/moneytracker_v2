@@ -91,14 +91,13 @@ public class TransactionService {
     }
 
     private Transaction newTransaction(TransactionSaveCommand command, Wallet wallet) {
-        Transaction transaction = new Transaction(
+        return new Transaction(
                 command.getTransactionName(),
                 command.getTransactionDate(),
                 command.getTransactionType(),
+                command.getSpecialType(),
                 costCalculator.calculateTransactionCost(command),
                 wallet);
-        transaction.setSpecialType(command.getSpecialType());
-        return transaction;
     }
 
     /**
@@ -272,8 +271,6 @@ public class TransactionService {
                             "Transaction " + transactionId + " is a sync transaction, but has no BalanceSync"));
 
             this.balanceSyncRepo.delete(balanceSync);
-
-            transaction.setSpecialType(null);
             this.transactionRepo.save(transaction);
         }
 

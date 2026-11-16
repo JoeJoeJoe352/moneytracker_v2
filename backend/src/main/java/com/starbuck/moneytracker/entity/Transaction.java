@@ -50,7 +50,7 @@ public class Transaction {
     private TransactionTypeEnum transactionType;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
+    @Column(nullable = true, updatable = false)
     private TransactionSpecialTypeEnum specialType;
 
     @Column(nullable = false, precision = 10, scale = 2)
@@ -145,8 +145,6 @@ public class Transaction {
         return this.transactionType.equals(TransactionTypeEnum.OUTCOME);
     }
 
-    // AUTOMATIKUSAN GENERÁLT
-
     public Transaction() {}
 
     public Transaction(
@@ -157,10 +155,23 @@ public class Transaction {
             BigDecimal priceSum,
             GeneralStatusEnum status,
             Wallet wallet) {
+        this(id, name, transactionDate, transactionType, null, priceSum, status, wallet);
+    }
+
+    public Transaction(
+            Long id,
+            String name,
+            LocalDate transactionDate,
+            TransactionTypeEnum transactionType,
+            TransactionSpecialTypeEnum specialType,
+            BigDecimal priceSum,
+            GeneralStatusEnum status,
+            Wallet wallet) {
         this.id = id;
         this.name = name;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
+        this.specialType = specialType;
         this.priceSum = priceSum;
         this.status = status;
         this.wallet = wallet;
@@ -172,9 +183,23 @@ public class Transaction {
             TransactionTypeEnum transactionType,
             BigDecimal priceSum,
             Wallet wallet) {
+        this(name, transactionDate, transactionType, null, priceSum, wallet);
+    }
+
+    /**
+     * A specialType csak itt, létrehozáskor adható meg, utólag nem módosítható
+     */
+    public Transaction(
+            String name,
+            LocalDate transactionDate,
+            TransactionTypeEnum transactionType,
+            TransactionSpecialTypeEnum specialType,
+            BigDecimal priceSum,
+            Wallet wallet) {
         this.name = name;
         this.transactionDate = transactionDate;
         this.transactionType = transactionType;
+        this.specialType = specialType;
         this.priceSum = priceSum;
         this.wallet = wallet;
     }
@@ -261,10 +286,6 @@ public class Transaction {
 
     public TransactionSpecialTypeEnum getSpecialType() {
         return specialType;
-    }
-
-    public void setSpecialType(TransactionSpecialTypeEnum specialType) {
-        this.specialType = specialType;
     }
 
     public RecurringTransaction getRecurringTransaction() {

@@ -701,8 +701,7 @@ class TransactionServiceTest {
      */
     @Test
     void deleteTransaction_deletesBalanceSyncOfSyncTransaction() {
-        Transaction transaction = createTransactionForUser1(5L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.SYNC);
         BalanceSync balanceSync = new BalanceSync(
                 Instant.parse("2026-10-01T10:00:00Z"), transaction.getWallet(), new BigDecimal("50.00"));
         Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
@@ -720,8 +719,7 @@ class TransactionServiceTest {
      */
     @Test
     void deleteTransaction_throwsWhenSyncTransactionHasNoBalanceSync() {
-        Transaction transaction = createTransactionForUser1(5L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.SYNC);
         Mockito.when(transactionRepo.findById(5L)).thenReturn(Optional.of(transaction));
         Mockito.when(balanceSyncRepo.findBySyncTransactionId(5L)).thenReturn(Optional.empty());
 
@@ -739,9 +737,8 @@ class TransactionServiceTest {
      */
     @Test
     void updateTransaction_keepsSpecialTypeOfSyncTransaction() {
-        Transaction transaction = createTransactionForUser1(5L);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.SYNC);
         transaction.getWallet().setId(3L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
         transaction.setTransactionDetails(List.of());
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                 .thenReturn(Optional.of(transaction));
@@ -770,9 +767,8 @@ class TransactionServiceTest {
      */
     @Test
     void updateTransaction_throwsWhenSyncTransactionWalletChanged() {
-        Transaction transaction = createTransactionForUser1(5L);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.SYNC);
         transaction.getWallet().setId(3L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                 .thenReturn(Optional.of(transaction));
 
@@ -799,9 +795,8 @@ class TransactionServiceTest {
      */
     @Test
     void updateTransaction_throwsWhenRecurringTransactionWalletChanged() {
-        Transaction transaction = createTransactionForUser1(5L);
+        Transaction transaction = createTransactionForUser1(5L, TransactionSpecialTypeEnum.RECURRING);
         transaction.getWallet().setId(3L);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.RECURRING);
         Mockito.when(transactionRepo.getTransactionByIdWithDetails(anyLong(), anyLong()))
                 .thenReturn(Optional.of(transaction));
 
@@ -823,6 +818,10 @@ class TransactionServiceTest {
     }
 
     private Transaction createTransactionForUser1(Long id) {
+        return createTransactionForUser1(id, null);
+    }
+
+    private Transaction createTransactionForUser1(Long id, TransactionSpecialTypeEnum specialType) {
         Wallet wallet = new Wallet(
                 "wallet", new User(1L, "name", "password", "email"), CurrencyEnum.HUF, WalletTypeEnum.DEFAULT);
         return new Transaction(
@@ -830,6 +829,7 @@ class TransactionServiceTest {
                 "teszt",
                 LocalDate.now(),
                 TransactionTypeEnum.OUTCOME,
+                specialType,
                 new BigDecimal("-10.00"),
                 GeneralStatusEnum.ACTIVE,
                 wallet);

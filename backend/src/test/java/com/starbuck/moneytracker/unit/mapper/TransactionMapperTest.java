@@ -191,8 +191,7 @@ class TransactionMapperTest {
     }
 
     private Transaction createRecurringTransaction(RecurringTransactionStatusEnum recurringStatus) {
-        Transaction transaction = createSyncTransaction();
-        transaction.setSpecialType(TransactionSpecialTypeEnum.RECURRING);
+        Transaction transaction = createTransactionWithSpecialType(TransactionSpecialTypeEnum.RECURRING);
 
         RecurringTransaction recurringTransaction = new RecurringTransaction(
                 "Spotify",
@@ -209,15 +208,19 @@ class TransactionMapperTest {
     }
 
     private Transaction createSyncTransaction() {
+        return createTransactionWithSpecialType(TransactionSpecialTypeEnum.SYNC);
+    }
+
+    private Transaction createTransactionWithSpecialType(TransactionSpecialTypeEnum specialType) {
         Transaction transaction = new Transaction(
                 1L,
                 "sync",
                 LocalDate.now(),
                 TransactionTypeEnum.OUTCOME,
+                specialType,
                 new BigDecimal("-10.00"),
                 GeneralStatusEnum.ACTIVE,
                 defaultWallet);
-        transaction.setSpecialType(TransactionSpecialTypeEnum.SYNC);
 
         TransactionDetail detail = new TransactionDetail(
                 1L, TransactionDetail.DEFAULT_DETAIL_NAME, new BigDecimal("-10.00"), null, null, transaction);
