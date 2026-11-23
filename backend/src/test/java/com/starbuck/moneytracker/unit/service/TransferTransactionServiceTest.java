@@ -188,7 +188,7 @@ class TransferTransactionServiceTest {
      */
     @Test
     void updateLinkedTransaction_throwsWhenTransferNotFound() {
-        Mockito.when(transferSidesRepo.findById(7L)).thenReturn(Optional.empty());
+        Mockito.when(transferSidesRepo.findActiveById(7L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> {
             transferService.updateLinkedTransaction(7L, updateCommand());
@@ -241,14 +241,62 @@ class TransferTransactionServiceTest {
         side.setId(7L);
 
         Mockito.lenient().when(currentUser.getUser()).thenReturn(new User(1L, "name", "password", "email"));
-        Mockito.when(transferSidesRepo.findById(7L)).thenReturn(Optional.of(side));
+        Mockito.when(transferSidesRepo.findActiveById(7L)).thenReturn(Optional.of(side));
+        // módosításhoz detailokkal, törléshez detailok nélkül töltődik be
         Mockito.lenient()
                 .when(transactionRepo.getTransactionByIdWithDetails(10L, 1L))
                 .thenReturn(Optional.of(src));
         Mockito.lenient()
                 .when(transactionRepo.getTransactionByIdWithDetails(11L, 1L))
                 .thenReturn(Optional.of(dst));
+        Mockito.lenient().when(transactionRepo.findById(10L)).thenReturn(Optional.of(src));
+        Mockito.lenient().when(transactionRepo.findById(11L)).thenReturn(Optional.of(dst));
         return side;
+    }
+
+    /**
+     * Átvezetés törlésekor mindkét oldal törlődik, az összekötés megmarad
+     */
+    @Test
+    void deleteLinkedTransaction_deletesBothSidesAndKeepsLink() {
+        TransferTransactionSide side = mockExistingTransfer();
+
+        transferService.deleteLinkedTransaction(7L);
+
+        Mockito.verify(transactionRepo).delete(side.getSrcTransaction());
+        Mockito.verify(transactionRepo).delete(side.getDstTransaction());
+        Mockito.verify(transferSidesRepo, Mockito.never()).delete(any(TransferTransactionSide.class));
+    }
+
+    /**
+     * Nem létező (vagy már törölt) átvezetés törlése kivételt dob, és semmi nem
+     * törlődik
+     */
+    @Test
+    void deleteLinkedTransaction_throwsWhenTransferNotFound() {
+        Mockito.when(transferSidesRepo.findActiveById(7L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transferService.deleteLinkedTransaction(7L);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
+    }
+
+    /**
+     * Más user átvezetése nem törölhető: ha a cél oldal nem a bejelentkezett useré,
+     * a forrás oldal sem törlődik
+     */
+    @Test
+    void deleteLinkedTransaction_throwsWhenTransferBelongsToOtherUser() {
+        mockExistingTransfer();
+        Mockito.when(transactionRepo.findById(11L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transferService.deleteLinkedTransaction(7L);
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
     }
 
     private TransferTransactionUpdateCommand updateCommand() {

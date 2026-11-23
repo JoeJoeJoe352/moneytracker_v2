@@ -330,13 +330,7 @@ public class TransactionService {
      */
     @Transactional
     public void deleteTransaction(long transactionId) {
-        // Azért nem a getTransactionByIdForActualUser van használva, mert itt
-        // feleslegesen töltené be a detailokat
-        Long userId = currentUser.getUser().getId();
-        Transaction transaction = this.transactionRepo
-                .findById(transactionId)
-                .filter(t -> t.getWallet().getUser().getId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
+        Transaction transaction = findTransactionForDelete(transactionId);
 
         if (transaction.isTransferTransaction()) {
             throw new IllegalArgumentException(
@@ -353,6 +347,47 @@ public class TransactionService {
         }
 
         this.transactionRepo.delete(transaction);
+    }
+
+    /**
+     * Párban lévő (TRANSFER) tranzakciók két oldalának együttes törlése (soft
+     * delete). Mindkét oldalnak a bejelentkezett useréhez kell tartoznia, és
+     * mindkettőt ellenőrzi, mielőtt bármelyiket törölné. A hívónak tranzakción
+     * belül kell futnia
+     *
+     * @param srcId a forrás oldali tranzakció id-ja
+     * @param dstId a cél oldali tranzakció id-ja
+     */
+    protected void deleteTransactionPair(long srcId, long dstId) {
+        Transaction srcTransaction = findTransferTransactionForDelete(srcId);
+        Transaction dstTransaction = findTransferTransactionForDelete(dstId);
+
+        this.transactionRepo.delete(srcTransaction);
+        this.transactionRepo.delete(dstTransaction);
+    }
+
+    private Transaction findTransferTransactionForDelete(long transactionId) {
+        Transaction transaction = findTransactionForDelete(transactionId);
+
+        if (!transaction.isTransferTransaction()) {
+            throw new IllegalArgumentException("Transaction " + transactionId + " is not a transfer transaction");
+        }
+        return transaction;
+    }
+
+    /**
+     * A bejelentkezett user adott id-jú tranzakciója törléshez
+     *
+     * @throws EntityNotFoundException, ha nincs ilyen, vagy nem a useré
+     */
+    private Transaction findTransactionForDelete(long transactionId) {
+        // Azért nem a getTransactionByIdForActualUser van használva, mert itt
+        // feleslegesen töltené be a detailokat
+        Long userId = currentUser.getUser().getId();
+        return this.transactionRepo
+                .findById(transactionId)
+                .filter(t -> t.getWallet().getUser().getId().equals(userId))
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
     }
 
     /**

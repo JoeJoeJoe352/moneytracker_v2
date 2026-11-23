@@ -29,8 +29,8 @@ import com.starbuck.moneytracker.repository.TransactionRepository;
 import com.starbuck.moneytracker.util.CurrentUserUtil;
 
 /**
- * A createTransactionPair és az updateTransactionPair nem publikus, ezért a
- * teszt a service csomagban van
+ * A createTransactionPair, az updateTransactionPair és a deleteTransactionPair
+ * nem publikus, ezért a teszt a service csomagban van
  */
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTransactionPairTest {
@@ -146,7 +146,22 @@ class TransactionServiceTransactionPairTest {
     }
 
     /**
+     * Nem TRANSFER típusú tranzakció nem törölhető párként. Ha a cél oldal nem
+     * TRANSFER, a forrás oldal sem törlődik
+     */
+    @Test
+    void deleteTransactionPair_throwsWhenTransactionIsNotTransfer() {
+        mockTransactionForUser(10L, TransactionSpecialTypeEnum.TRANSFER, 1L);
+        mockTransactionForUser(11L, null, 2L);
+
+        assertThrows(IllegalArgumentException.class, () -> transactionService.deleteTransactionPair(10L, 11L));
+
+        Mockito.verify(transactionRepo, Mockito.never()).delete(any(Transaction.class));
+    }
+
+    /**
      * A bejelentkezett user (id: 1) adott id-jú tranzakcióját állítja be a mockon
+     * (módosításhoz és törléshez is)
      */
     private void mockTransactionForUser(Long id, TransactionSpecialTypeEnum specialType, Long walletId) {
         User user = new User(1L, "name", "password", "email");
@@ -162,8 +177,11 @@ class TransactionServiceTransactionPairTest {
                 GeneralStatusEnum.ACTIVE,
                 wallet);
 
-        Mockito.when(currentUser.getUser()).thenReturn(user);
-        Mockito.when(transactionRepo.getTransactionByIdWithDetails(id, 1L)).thenReturn(Optional.of(transaction));
+        Mockito.lenient().when(currentUser.getUser()).thenReturn(user);
+        Mockito.lenient()
+                .when(transactionRepo.getTransactionByIdWithDetails(id, 1L))
+                .thenReturn(Optional.of(transaction));
+        Mockito.lenient().when(transactionRepo.findById(id)).thenReturn(Optional.of(transaction));
     }
 
     private TransactionSaveCommand createCommand(TransactionTypeEnum type, String price, Long walletId) {

@@ -55,9 +55,7 @@ public class TransferTransactionService {
      */
     @Transactional
     public void updateLinkedTransaction(long transferId, TransferTransactionUpdateCommand command) {
-        TransferTransactionSide side = repository
-                .findById(transferId)
-                .orElseThrow(() -> new EntityNotFoundException("Transfer transaction not found: " + transferId));
+        TransferTransactionSide side = getActiveTransfer(transferId);
 
         Transaction src = side.getSrcTransaction();
         Transaction dst = side.getDstTransaction();
@@ -75,6 +73,34 @@ public class TransferTransactionService {
 
         // a user jogosultságát a TransactionService ellenőrzi mindkét oldalra
         transactionService.updateTransactionPair(src.getId(), srcCommand, dst.getId(), dstCommand);
+    }
+
+    /**
+     * Átvezetés törlése: mindkét oldal törlődik (soft delete). Az összekötés
+     * megmarad, de a törölt átvezetést a lekérdezések már nem találják meg.
+     *
+     * @param transferId az átvezetés (TransferTransactionSide) id-ja
+     * @throws EntityNotFoundException ha nincs ilyen (aktív) átvezetés, vagy nem a
+     *                                 bejelentkezett useré
+     */
+    @Transactional
+    public void deleteLinkedTransaction(long transferId) {
+        TransferTransactionSide side = getActiveTransfer(transferId);
+
+        // a user jogosultságát a TransactionService ellenőrzi mindkét oldalra
+        transactionService.deleteTransactionPair(
+                side.getSrcTransaction().getId(), side.getDstTransaction().getId());
+    }
+
+    /**
+     * Az adott id-jú átvezetés, ha egyik oldala sincs törölve
+     *
+     * @throws EntityNotFoundException ha nincs ilyen aktív átvezetés
+     */
+    private TransferTransactionSide getActiveTransfer(long transferId) {
+        return repository
+                .findActiveById(transferId)
+                .orElseThrow(() -> new EntityNotFoundException("Transfer transaction not found: " + transferId));
     }
 
     /**

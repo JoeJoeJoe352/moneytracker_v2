@@ -1,6 +1,7 @@
 package com.starbuck.moneytracker.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,5 +41,14 @@ public class TransferTransactionController {
     public void updateTransferTransaction(
             @Valid @RequestBody TransferTransactionUpdateDto dto, @PathVariable Long transferId) {
         this.service.updateLinkedTransaction(transferId, mapper.fromUpdateRequest(dto));
+    }
+
+    /**
+     * Törli a user adott id-jú átvezetését (mindkét oldalát)
+     */
+    @DeleteMapping(path = "/{transferId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteTransferTransaction(@PathVariable Long transferId) {
+        this.service.deleteLinkedTransaction(transferId);
     }
 }
