@@ -156,6 +156,9 @@ class TransactionServiceTest {
         Transaction result = transactionService.createTransaction(command);
 
         // THEN
+        // a tranzakció maga is elmentődik, nem csak a detailja
+        Mockito.verify(transactionRepo).save(result);
+
         // Az elmentett detail példányt csak így tudjuk megszerezni
         Mockito.verify(transactionDetailRepo).save(captor.capture());
 

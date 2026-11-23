@@ -62,11 +62,50 @@ public class TransactionService {
                     "Use createLinkedTransaction() to create transfer type transactions");
         }
 
-        Wallet wallet = walletService.getWalletById(createCommand.getWalletId());
+        return saveNewTransaction(createCommand, createCommand.getSpecialType());
+    }
 
-        Transaction savedTransactionModel = this.transactionRepo.save(newTransaction(createCommand, wallet));
+    /**
+     * Párban lévő tranzakciók két oldalának létrehozása.
+     *
+     * @param srcCommand a forrás oldal parancsa
+     * @param dstCommand a cél oldal parancsa
+     * @return a két elmentett tranzakció
+     */
+    protected TransactionPair createTransactionPair(
+            TransactionSaveCommand srcCommand, TransactionSaveCommand dstCommand) {
+        if (srcCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER
+                || dstCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER) {
+            throw new IllegalArgumentException("Both sides of a transaction pair must be TRANSFER type");
+        }
+        Wallet srcWallet = walletService.getWalletById(srcCommand.getWalletId());
+        Wallet dstWallet = walletService.getWalletById(dstCommand.getWalletId());
 
-        transactionDetailService.saveDetails(savedTransactionModel, createCommand);
+        if (srcWallet.getCurrencyCode() != dstWallet.getCurrencyCode()) {
+            throw new IllegalArgumentException("Both sides of a transaction pair must have the same currency");
+        }
+
+        Transaction srcTransaction = saveNewTransaction(srcCommand, srcCommand.getSpecialType());
+        Transaction dstTransaction = saveNewTransaction(dstCommand, dstCommand.getSpecialType());
+        return new TransactionPair(srcTransaction, dstTransaction);
+    }
+
+    /**
+     * Elmenti a tranzakciót és a detailjait a bejelentkezett user nevében. A
+     * wallet és a kategóriák id-ját ellenőrzi, hogy a userhez tartoznak-e
+     */
+    private Transaction saveNewTransaction(TransactionSaveCommand command, TransactionSpecialTypeEnum specialType) {
+        Wallet wallet = walletService.getWalletById(command.getWalletId());
+
+        Transaction savedTransactionModel = this.transactionRepo.save(new Transaction(
+                command.getTransactionName(),
+                command.getTransactionDate(),
+                command.getTransactionType(),
+                specialType,
+                costCalculator.calculateTransactionCost(command),
+                wallet));
+
+        transactionDetailService.saveDetails(savedTransactionModel, command);
         return savedTransactionModel;
     }
 
@@ -82,22 +121,19 @@ public class TransactionService {
     @Transactional
     public Transaction createTransactionFromRecurringTransaction(
             TransactionSaveCommand command, RecurringTransaction recurringTransaction) {
-        Transaction transaction = newTransaction(command, recurringTransaction.getWallet());
-        transaction.setRecurringTransaction(recurringTransaction);
-        Transaction savedTransactionModel = this.transactionRepo.save(transaction);
-
-        transactionDetailService.saveDetailsWithoutOwnershipCheck(savedTransactionModel, command);
-        return savedTransactionModel;
-    }
-
-    private Transaction newTransaction(TransactionSaveCommand command, Wallet wallet) {
-        return new Transaction(
+        Transaction transaction = new Transaction(
                 command.getTransactionName(),
                 command.getTransactionDate(),
                 command.getTransactionType(),
                 command.getSpecialType(),
                 costCalculator.calculateTransactionCost(command),
-                wallet);
+                recurringTransaction.getWallet());
+
+        transaction.setRecurringTransaction(recurringTransaction);
+        Transaction savedTransactionModel = this.transactionRepo.save(transaction);
+
+        transactionDetailService.saveDetailsWithoutOwnershipCheck(savedTransactionModel, command);
+        return savedTransactionModel;
     }
 
     /**
@@ -123,17 +159,65 @@ public class TransactionService {
             throw new IllegalArgumentException("Wallet of sync or recurring transaction " + id + " cannot be changed");
         }
 
-        transaction.setName(updateCommand.getTransactionName());
-        transaction.setTransactionDate(updateCommand.getTransactionDate());
-        transaction.setTransactionType(updateCommand.getTransactionType());
-        transaction.setPriceSum(costCalculator.calculateTransactionCost(updateCommand));
+        updateTransaction(transaction, updateCommand, wallet);
+    }
+
+    /**
+     * Párban lévő (TRANSFER) tranzakciók két oldalának együttes módosítása. Mindkét
+     * oldalnak a bejelentkezett useréhez kell tartoznia, és a walletjük nem
+     * változhat. A hívónak tranzakción belül kell futnia, hogy a két oldal együtt
+     * módosuljon vagy együtt guruljon vissza
+     *
+     * @param srcId      a forrás oldali tranzakció id-ja
+     * @param srcCommand a forrás oldal új adatai
+     * @param dstId      a cél oldali tranzakció id-ja
+     * @param dstCommand a cél oldal új adatai
+     */
+    protected void updateTransactionPair(
+            long srcId, TransactionSaveCommand srcCommand, long dstId, TransactionSaveCommand dstCommand) {
+        if (srcCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER
+                || dstCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER) {
+            throw new IllegalArgumentException("Both sides of a transaction pair must be TRANSFER type");
+        }
+
+        Transaction srcTransaction = getTransferTransactionForUpdate(srcId, srcCommand);
+        Transaction dstTransaction = getTransferTransactionForUpdate(dstId, dstCommand);
+
+        updateTransaction(srcTransaction, srcCommand, srcTransaction.getWallet());
+        updateTransaction(dstTransaction, dstCommand, dstTransaction.getWallet());
+    }
+
+    /**
+     * Betölti a pár egyik oldalát módosításhoz, és ellenőrzi, hogy TRANSFER
+     * típusú, valamint a walletje nem változik
+     */
+    private Transaction getTransferTransactionForUpdate(long id, TransactionSaveCommand command) {
+        Transaction transaction = this.getTransactionByIdForActualUser(id);
+
+        if (!transaction.isTransferTransaction()) {
+            throw new IllegalArgumentException("Transaction " + id + " is not a transfer transaction");
+        }
+        if (!Objects.equals(transaction.getWallet().getId(), command.getWalletId())) {
+            throw new IllegalArgumentException("Wallet of transfer transaction " + id + " cannot be changed");
+        }
+        return transaction;
+    }
+
+    /**
+     * A tranzakció adatainak felülírása a parancs alapján, és a detailok cseréje
+     */
+    private void updateTransaction(Transaction transaction, TransactionSaveCommand command, Wallet wallet) {
+        transaction.setName(command.getTransactionName());
+        transaction.setTransactionDate(command.getTransactionDate());
+        transaction.setTransactionType(command.getTransactionType());
+        transaction.setPriceSum(costCalculator.calculateTransactionCost(command));
         transaction.setWallet(wallet);
         transactionRepo.save(transaction);
 
         // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
         // kikeresni a meglévőket és frissíteni.
         transactionDetailService.deleteDetails(transaction);
-        transactionDetailService.saveDetails(transaction, updateCommand);
+        transactionDetailService.saveDetails(transaction, command);
     }
 
     /**
@@ -252,13 +336,7 @@ public class TransactionService {
      */
     @Transactional
     public void deleteTransaction(long transactionId) {
-        // Azért nem a getTransactionByIdForActualUser van használva, mert itt
-        // feleslegesen töltené be a detailokat
-        Long userId = currentUser.getUser().getId();
-        Transaction transaction = this.transactionRepo
-                .findById(transactionId)
-                .filter(t -> t.getWallet().getUser().getId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
+        Transaction transaction = findTransactionForDelete(transactionId);
 
         if (transaction.isTransferTransaction()) {
             throw new IllegalArgumentException(
@@ -275,6 +353,47 @@ public class TransactionService {
         }
 
         this.transactionRepo.delete(transaction);
+    }
+
+    /**
+     * Párban lévő (TRANSFER) tranzakciók két oldalának együttes törlése (soft
+     * delete). Mindkét oldalnak a bejelentkezett useréhez kell tartoznia, és
+     * mindkettőt ellenőrzi, mielőtt bármelyiket törölné. A hívónak tranzakción
+     * belül kell futnia
+     *
+     * @param srcId a forrás oldali tranzakció id-ja
+     * @param dstId a cél oldali tranzakció id-ja
+     */
+    protected void deleteTransactionPair(long srcId, long dstId) {
+        Transaction srcTransaction = findTransferTransactionForDelete(srcId);
+        Transaction dstTransaction = findTransferTransactionForDelete(dstId);
+
+        this.transactionRepo.delete(srcTransaction);
+        this.transactionRepo.delete(dstTransaction);
+    }
+
+    private Transaction findTransferTransactionForDelete(long transactionId) {
+        Transaction transaction = findTransactionForDelete(transactionId);
+
+        if (!transaction.isTransferTransaction()) {
+            throw new IllegalArgumentException("Transaction " + transactionId + " is not a transfer transaction");
+        }
+        return transaction;
+    }
+
+    /**
+     * A bejelentkezett user adott id-jú tranzakciója törléshez
+     *
+     * @throws EntityNotFoundException, ha nincs ilyen, vagy nem a useré
+     */
+    private Transaction findTransactionForDelete(long transactionId) {
+        // Azért nem a getTransactionByIdForActualUser van használva, mert itt
+        // feleslegesen töltené be a detailokat
+        Long userId = currentUser.getUser().getId();
+        return this.transactionRepo
+                .findById(transactionId)
+                .filter(t -> t.getWallet().getUser().getId().equals(userId))
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found: " + transactionId));
     }
 
     /**
