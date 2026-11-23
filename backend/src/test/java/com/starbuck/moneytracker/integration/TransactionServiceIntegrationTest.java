@@ -42,6 +42,7 @@ import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
 import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enums.LangEnum;
 import com.starbuck.moneytracker.entity.enums.RecurrenceIntervalEnum;
+import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
 import com.starbuck.moneytracker.exception.EntityNotFoundException;
@@ -423,6 +424,52 @@ class TransactionServiceIntegrationTest extends MySqlContainerTest {
         assertEquals(new BigDecimal("300.00"), result.get(0).getTotal());
         assertEquals(new BigDecimal("150.00"), result.get(1).getTotal());
         assertEquals(new BigDecimal("0.00"), result.get(2).getTotal());
+    }
+
+    /**
+     * Az átvezetések (TRANSFER) nem számítanak bele a havi kiadásokba és bevételekbe, a többi
+     * speciális típusú (pl. SYNC) és a sima tranzakciók igen
+     */
+    @Test
+    void sumForMonth_ignoresTransferTransactions() {
+        // Given
+        var savingsWallet = walletRepo.save(new Wallet("savings", this.user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT));
+        this.persistSimpleTransaction(
+                "expense", TransactionTypeEnum.OUTCOME, new BigDecimal(-200), LocalDate.now(), this.wallet);
+        transactionRepo.save(new Transaction(
+                "sync",
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                TransactionSpecialTypeEnum.SYNC,
+                new BigDecimal(-30),
+                this.wallet));
+        // Az átvezetés két oldala
+        transactionRepo.save(new Transaction(
+                "transferOut",
+                LocalDate.now(),
+                TransactionTypeEnum.OUTCOME,
+                TransactionSpecialTypeEnum.TRANSFER,
+                new BigDecimal(-500),
+                this.wallet));
+        transactionRepo.save(new Transaction(
+                "transferIn",
+                LocalDate.now(),
+                TransactionTypeEnum.INCOME,
+                TransactionSpecialTypeEnum.TRANSFER,
+                new BigDecimal(500),
+                savingsWallet));
+
+        // When
+        List<WalletSummaryResponseDto> expenses = transactionService.sumAllExpenseForMonth();
+        List<WalletSummaryResponseDto> incomes = transactionService.sumAllIncomeForMonth();
+
+        // Then
+        assertEquals(2, expenses.size());
+        assertEquals(new BigDecimal("230.00"), expenses.get(0).getTotal());
+        assertEquals(new BigDecimal("0.00"), expenses.get(1).getTotal());
+        assertEquals(2, incomes.size());
+        assertEquals(new BigDecimal("0.00"), incomes.get(0).getTotal());
+        assertEquals(new BigDecimal("0.00"), incomes.get(1).getTotal());
     }
 
     /**

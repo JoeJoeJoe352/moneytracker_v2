@@ -49,7 +49,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     }
 
     /**
-     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt
+     * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt.
+     * Az átvezetések nem számítanak bele, mert csak a user walletjei között
+     * mozgatnak pénzt.
+     * A sima tranzakciók specialType-ja NULL, ezért kell az IS NULL is
      *
      * @param userId
      * @return
@@ -63,7 +66,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                 LEFT JOIN w.transactions t ON
                     YEAR(t.transactionDate) = YEAR(CURDATE()) AND
                     MONTH(t.transactionDate) = MONTH(CURDATE()) AND
-                    t.transactionType = ?2
+                    t.transactionType = ?2 AND
+                    (t.specialType IS NULL OR t.specialType <> TRANSFER)
                 WHERE w.user.id = ?1 AND w.status = ACTIVE
                 GROUP BY w.id
                 ORDER BY w.id
