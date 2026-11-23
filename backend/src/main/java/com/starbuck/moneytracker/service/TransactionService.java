@@ -78,6 +78,12 @@ public class TransactionService {
                 || dstCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER) {
             throw new IllegalArgumentException("Both sides of a transaction pair must be TRANSFER type");
         }
+        Wallet srcWallet = walletService.getWalletById(srcCommand.getWalletId());
+        Wallet dstWallet = walletService.getWalletById(dstCommand.getWalletId());
+
+        if (srcWallet.getCurrencyCode() != dstWallet.getCurrencyCode()) {
+            throw new IllegalArgumentException("Both sides of a transaction pair must have the same currency");
+        }
 
         Transaction srcTransaction = saveNewTransaction(srcCommand, srcCommand.getSpecialType());
         Transaction dstTransaction = saveNewTransaction(dstCommand, dstCommand.getSpecialType());

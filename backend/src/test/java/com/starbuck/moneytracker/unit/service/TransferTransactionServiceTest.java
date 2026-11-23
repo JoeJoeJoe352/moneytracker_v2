@@ -153,6 +153,22 @@ class TransferTransactionServiceTest {
     }
 
     /**
+     * Különböző pénznemű walletek között nem lehet átvezetni: kivétel keletkezik,
+     * és se a tranzakciók, se az összekötés nem mentődik
+     */
+    @Test
+    void createLinkedTransaction_throwsWhenWalletCurrenciesDiffer() {
+        dstWallet.setCurrencyCode(CurrencyEnum.EUR);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transferService.createLinkedTransaction(createCommand());
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).save(any(Transaction.class));
+        Mockito.verifyNoInteractions(transactionDetailRepo, transferSidesRepo);
+    }
+
+    /**
      * Átvezetés módosításakor mindkét oldal új nevet, dátumot és előjeles összeget
      * kap, a walletek és a típusok változatlanok
      */
