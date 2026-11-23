@@ -13,12 +13,8 @@ public record TransferTransactionUpdateDto(
         @NotBlank @Length(min = 3, max = 120, message = "srcTransactionName must be between 3 and 120 characters")
         String srcTransactionName,
 
-        @NotNull Long srcTransactionId,
-
         @NotBlank @Length(min = 3, max = 120, message = "dstTransactionName must be between 3 and 120 characters")
         String dstTransactionName,
-
-        @NotNull Long dstTransactionId,
 
         @NotNull LocalDate transactionDate,
 

@@ -17,12 +17,10 @@ class TransferTransactionUpdateCommandTest {
 
     @Test
     void validInput_setsFields() {
-        var command = new TransferTransactionUpdateCommand("Kimenő", 10L, "Bejövő", 11L, DATE, PRICE);
+        var command = new TransferTransactionUpdateCommand("Kimenő", "Bejövő", DATE, PRICE);
 
         assertEquals("Kimenő", command.getSrcTransactionName());
-        assertEquals(10L, command.getSrcTransactionId());
         assertEquals("Bejövő", command.getDstTransactionName());
-        assertEquals(11L, command.getDstTransactionId());
         assertEquals(DATE, command.getTransactionDate());
         assertEquals(PRICE, command.getPriceSum());
     }
@@ -31,27 +29,6 @@ class TransferTransactionUpdateCommandTest {
     void zeroPrice_throws() {
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> new TransferTransactionUpdateCommand("Kimenő", 10L, "Bejövő", 11L, DATE, BigDecimal.ZERO));
-    }
-
-    @Test
-    void nullSrcTransactionId_throws() {
-        assertThrowsExactly(
-                IllegalArgumentException.class,
-                () -> new TransferTransactionUpdateCommand("Kimenő", null, "Bejövő", 11L, DATE, PRICE));
-    }
-
-    @Test
-    void nullDstTransactionId_throws() {
-        assertThrowsExactly(
-                IllegalArgumentException.class,
-                () -> new TransferTransactionUpdateCommand("Kimenő", 10L, "Bejövő", null, DATE, PRICE));
-    }
-
-    @Test
-    void sameSrcAndDstTransaction_throws() {
-        assertThrowsExactly(
-                IllegalArgumentException.class,
-                () -> new TransferTransactionUpdateCommand("Kimenő", 10L, "Bejövő", 10L, DATE, PRICE));
+                () -> new TransferTransactionUpdateCommand("Kimenő", "Bejövő", DATE, BigDecimal.ZERO));
     }
 }

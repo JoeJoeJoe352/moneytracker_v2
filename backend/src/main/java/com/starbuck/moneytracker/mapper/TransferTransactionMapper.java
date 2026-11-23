@@ -35,9 +35,7 @@ public class TransferTransactionMapper {
     public TransferTransactionUpdateCommand fromUpdateRequest(TransferTransactionUpdateDto request) {
         return new TransferTransactionUpdateCommand(
                 request.srcTransactionName(),
-                request.srcTransactionId(),
                 request.dstTransactionName(),
-                request.dstTransactionId(),
                 request.transactionDate(),
                 request.priceSum());
     }

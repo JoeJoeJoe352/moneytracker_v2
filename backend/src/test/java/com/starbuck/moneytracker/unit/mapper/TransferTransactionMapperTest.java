@@ -47,21 +47,19 @@ class TransferTransactionMapperTest {
 
     @Test
     void fromUpdateRequest_mapsAllFields() {
-        var request = new TransferTransactionUpdateDto("Kimenő", 10L, "Bejövő", 11L, DATE, PRICE);
+        var request = new TransferTransactionUpdateDto("Kimenő", "Bejövő", DATE, PRICE);
 
         TransferTransactionUpdateCommand command = mapper.fromUpdateRequest(request);
 
         assertEquals("Kimenő", command.getSrcTransactionName());
-        assertEquals(10L, command.getSrcTransactionId());
         assertEquals("Bejövő", command.getDstTransactionName());
-        assertEquals(11L, command.getDstTransactionId());
         assertEquals(DATE, command.getTransactionDate());
         assertEquals(PRICE, command.getPriceSum());
     }
 
     @Test
     void fromUpdateRequest_throwsForSameTransactions() {
-        var request = new TransferTransactionUpdateDto("Kimenő", 10L, "Bejövő", 10L, DATE, PRICE);
+        var request = new TransferTransactionUpdateDto("Kimenő", "Bejövő", DATE, PRICE);
 
         assertThrowsExactly(IllegalArgumentException.class, () -> mapper.fromUpdateRequest(request));
     }
