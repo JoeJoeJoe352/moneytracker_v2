@@ -97,7 +97,11 @@
     position: relative;
     overflow: hidden;
     color: var(--moneytracker-white);
-    background: linear-gradient(135deg, var(--moneytracker-green) 0%, var(--moneytracker-darkest-green) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--moneytracker-green) 0%,
+        var(--moneytracker-darkest-green) 100%
+    );
 
     &::after {
         content: '';
@@ -126,6 +130,12 @@
 
     .stat-trend {
         color: rgba(255, 255, 255, 0.85);
+    }
+
+    .stat-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     .stat-action-button {

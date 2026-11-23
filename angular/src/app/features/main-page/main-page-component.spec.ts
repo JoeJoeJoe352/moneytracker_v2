@@ -10,6 +10,7 @@ import { CategoryService } from '../transaction/category-service';
 import { MoneySumInterface, NavigationDataToRecurringTransaction } from '../transaction/interfaces';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionModalComponent } from '../transaction/transaction-modal';
+import { TransferTransactionModalComponent } from '../transaction/transfer-transaction/transfer-transaction-modal';
 import { CurrencyCodesEnum } from '@shared/enums';
 import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { StatCardComponent } from './stat-card-component';
@@ -55,13 +56,20 @@ describe('MainPageComponent (Vitest)', () => {
         saved: EventEmitter<unknown>;
         recurringTransactionOpenRequest: EventEmitter<NavigationDataToRecurringTransaction>;
     }>[];
+    let transferModalDialogRefs: FakeDialogRef<object>[];
 
     function setup() {
         getMoneySum$ = new Subject<MoneySumInterface>();
         getMoneySumSpy = vi.fn(() => getMoneySum$.asObservable());
 
         transactionModalDialogRefs = [];
+        transferModalDialogRefs = [];
         dialogOpenSpy = vi.fn((componentType: unknown) => {
+            if (componentType === TransferTransactionModalComponent) {
+                const dialogRef = new FakeDialogRef({});
+                transferModalDialogRefs.push(dialogRef);
+                return dialogRef;
+            }
             if (componentType === TransactionModalComponent) {
                 const dialogRef = new FakeDialogRef({
                     deleteTransactionRequested: new EventEmitter<number>(),
@@ -239,5 +247,66 @@ describe('MainPageComponent (Vitest)', () => {
 
         expect(getMoneySumSpy).toHaveBeenCalledTimes(2);
         expect(listStub.reloadTrigger()).toBe(1);
+    });
+
+    it('should open the transfer modal when the transfer button is clicked', () => {
+        const transferButton = fixture.nativeElement.querySelector(
+            '.balance-card .transfer-button',
+        ) as HTMLButtonElement;
+        transferButton.click();
+        fixture.detectChanges();
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(
+            TransferTransactionModalComponent,
+            expect.anything(),
+        );
+        expect(transferModalDialogRefs).toHaveLength(1);
+    });
+
+    it('should reload the money sum and the list after a transfer is saved', async () => {
+        getMoneySum$.next({
+            moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+        });
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(getMoneySumSpy).toHaveBeenCalledTimes(1);
+
+        const listStub = fixture.debugElement.query(
+            (de) => de.componentInstance instanceof StubTransactionsListComponent,
+        ).componentInstance as StubTransactionsListComponent;
+
+        (fixture.nativeElement.querySelector('.transfer-button') as HTMLButtonElement).click();
+        expect(transferModalDialogRefs).toHaveLength(1);
+        transferModalDialogRefs[0]?.close(true);
+        fixture.detectChanges();
+        TestBed.tick();
+
+        expect(getMoneySumSpy).toHaveBeenCalledTimes(2);
+        expect(listStub.reloadTrigger()).toBe(1);
+    });
+
+    it('should not reload anything when the transfer modal is closed without saving', async () => {
+        getMoneySum$.next({
+            moneySum: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            incomeSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+            expenseSumThisMonth: [{ currencyCode: CurrencyCodesEnum.huf, total: 0 }],
+        });
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const listStub = fixture.debugElement.query(
+            (de) => de.componentInstance instanceof StubTransactionsListComponent,
+        ).componentInstance as StubTransactionsListComponent;
+
+        (fixture.nativeElement.querySelector('.transfer-button') as HTMLButtonElement).click();
+        expect(transferModalDialogRefs).toHaveLength(1);
+        transferModalDialogRefs[0]?.close(false);
+        fixture.detectChanges();
+        TestBed.tick();
+
+        expect(getMoneySumSpy).toHaveBeenCalledTimes(1);
+        expect(listStub.reloadTrigger()).toBe(0);
     });
 });

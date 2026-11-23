@@ -118,6 +118,18 @@
     },
     "recurring_transaction": "Recurring transaction"
   },
+  "transfer_transaction": {
+    "create": "Create transfer",
+    "source": "From",
+    "destination": "To",
+    "src_name": "Outgoing transaction name",
+    "src_wallet": "Source wallet",
+    "dst_name": "Incoming transaction name",
+    "dst_wallet": "Destination wallet",
+    "dst_wallet.required": "The destination wallet is required!",
+    "same_wallet": "The source and destination wallet cannot be the same!",
+    "different_currency": "You can only transfer between wallets with the same currency!"
+  },
   "wallet": {
     "create": "Create wallet",
     "update": "Update wallet",
@@ -163,6 +175,7 @@
     "increase": "Increase",
     "decrease": "Decrease",
     "create_transaction.button": "Create transaction",
+    "create_transfer.button": "Transfer",
     "no_transaction": "No transactions yet",
     "balance_change_this_month": "this month",
     "total_income": "Income this month",

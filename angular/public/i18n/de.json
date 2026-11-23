@@ -118,6 +118,18 @@
     },
     "recurring_transaction": "Wiederkehrende Transaktion"
   },
+  "transfer_transaction": {
+    "create": "Überweisung erstellen",
+    "source": "Von",
+    "destination": "Nach",
+    "src_name": "Name der ausgehenden Transaktion",
+    "src_wallet": "Quell-Wallet",
+    "dst_name": "Name der eingehenden Transaktion",
+    "dst_wallet": "Ziel-Wallet",
+    "dst_wallet.required": "Das Ziel-Wallet ist erforderlich!",
+    "same_wallet": "Quell- und Ziel-Wallet dürfen nicht identisch sein!",
+    "different_currency": "Überweisungen sind nur zwischen Wallets mit gleicher Währung möglich!"
+  },
   "wallet": {
     "create": "Wallet erstellen",
     "update": "Wallet bearbeiten",
@@ -163,6 +175,7 @@
     "increase": "Anstieg",
     "decrease": "Rückgang",
     "create_transaction.button": "Transaktion erstellen",
+    "create_transfer.button": "Überweisung",
     "no_transaction": "Noch keine Transaktion erfasst",
     "balance_change_this_month": "in diesem Monat",
     "total_income": "Einnahmen in diesem Monat",

@@ -1,0 +1,6 @@
+<div class="modal-header">
+    <h2 mat-dialog-title>{{ 'transfer_transaction.create' | translate }}</h2>
+    <app-dialog-close-button />
+</div>
+
+<app-transfer-transaction-form-component [isFormDisabled]="isSaving()" (saved)="save($event)" />

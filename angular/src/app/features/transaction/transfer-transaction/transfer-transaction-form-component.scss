@@ -1,0 +1,21 @@
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    mat-form-field {
+        flex: 1 1 220px;
+    }
+}
+
+.side-title {
+    margin: 8px 0 4px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.wallet-error {
+    min-height: 20px;
+    margin-bottom: 8px;
+    color: var(--moneytracker-red);
+}

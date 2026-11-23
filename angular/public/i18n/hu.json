@@ -118,6 +118,18 @@
     },
     "recurring_transaction": "Ismétlődő tranzakció"
   },
+  "transfer_transaction": {
+    "create": "Átvezetés létrehozása",
+    "source": "Honnan",
+    "destination": "Hová",
+    "src_name": "Kimenő tranzakció neve",
+    "src_wallet": "Forrás tárca",
+    "dst_name": "Bejövő tranzakció neve",
+    "dst_wallet": "Cél tárca",
+    "dst_wallet.required": "A cél tárca megadása kötelező!",
+    "same_wallet": "A forrás és a cél tárca nem lehet ugyanaz!",
+    "different_currency": "Csak azonos pénznemű tárcák között lehet átvezetni!"
+  },
   "wallet": {
     "create": "Tárca létrehozása",
     "update": "Tárca módosítása",
@@ -163,6 +175,7 @@
     "increase": "Növekedés",
     "decrease": "Csökkenés",
     "create_transaction.button": "Tranzakció létrehozása",
+    "create_transfer.button": "Átvezetés",
     "no_transaction": "Nincs még felvett tranzakció",
     "balance_change_this_month": "ebben a hónapban",
     "total_income": "Bevétel ebben a hónapban",

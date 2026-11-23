@@ -46,14 +46,24 @@
                     </div>
                 }
             </div>
-            <button
-                matButton="outlined"
-                type="button"
-                class="stat-action-button"
-                (click)="modal.open()"
-            >
-                + {{ 'mainpage.create_transaction.button' | translate }}
-            </button>
+            <div class="stat-actions">
+                <button
+                    matButton="outlined"
+                    type="button"
+                    class="stat-action-button"
+                    (click)="modal.open()"
+                >
+                    + {{ 'mainpage.create_transaction.button' | translate }}
+                </button>
+                <button
+                    matButton="outlined"
+                    type="button"
+                    class="stat-action-button transfer-button"
+                    (click)="openTransferModal()"
+                >
+                    ⇄ {{ 'mainpage.create_transfer.button' | translate }}
+                </button>
+            </div>
         </mat-card>
     </div>
 
