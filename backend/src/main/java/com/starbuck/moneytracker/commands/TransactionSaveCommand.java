@@ -81,7 +81,7 @@ public class TransactionSaveCommand {
     }
 
     /**
-     * Beállítja, hogy a tranzakció "SYNC" speciális típusú. Opcionális
+     * Beállítja, hogy a tranzakció "SYNC" (Szinkronizációs) speciális típusú.
      */
     public TransactionSaveCommand setSyncSpecialType() {
         this.specialType = TransactionSpecialTypeEnum.SYNC;
@@ -89,11 +89,18 @@ public class TransactionSaveCommand {
     }
 
     /**
-     * Beállítja, hogy a tranzakció "RECURRING" speciális típusú. Az ismétlődő
-     * tranzakcióhoz kötést a TransactionService végzi az entitás alapján
+     * Beállítja, hogy a tranzakció "RECURRING" (Ismétlődő) speciális típusú.
      */
     public TransactionSaveCommand setRecurringSpecialType() {
         this.specialType = TransactionSpecialTypeEnum.RECURRING;
+        return this;
+    }
+
+    /**
+     * Beállítja, hogy a tranzakció "TRANSFER" (Átvezetéses) speciális típusú.
+     */
+    public TransactionSaveCommand setTransferSpecialType() {
+        this.specialType = TransactionSpecialTypeEnum.TRANSFER;
         return this;
     }
 

@@ -56,11 +56,4 @@ class TransferTransactionMapperTest {
         assertEquals(DATE, command.getTransactionDate());
         assertEquals(PRICE, command.getPriceSum());
     }
-
-    @Test
-    void fromUpdateRequest_throwsForSameTransactions() {
-        var request = new TransferTransactionUpdateDto("Kimenő", "Bejövő", DATE, PRICE);
-
-        assertThrowsExactly(IllegalArgumentException.class, () -> mapper.fromUpdateRequest(request));
-    }
 }

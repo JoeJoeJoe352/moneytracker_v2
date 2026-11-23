@@ -62,11 +62,44 @@ public class TransactionService {
                     "Use createLinkedTransaction() to create transfer type transactions");
         }
 
-        Wallet wallet = walletService.getWalletById(createCommand.getWalletId());
+        return saveNewTransaction(createCommand, createCommand.getSpecialType());
+    }
 
-        Transaction savedTransactionModel = this.transactionRepo.save(newTransaction(createCommand, wallet));
+    /**
+     * Párban lévő tranzakciók két oldalának létrehozása.
+     *
+     * @param srcCommand a forrás oldal parancsa
+     * @param dstCommand a cél oldal parancsa
+     * @return a két elmentett tranzakció
+     */
+    protected TransactionPair createTransactionPair(
+            TransactionSaveCommand srcCommand, TransactionSaveCommand dstCommand) {
+        if (srcCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER
+                || dstCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER) {
+            throw new IllegalArgumentException("Both sides of a transaction pair must be TRANSFER type");
+        }
 
-        transactionDetailService.saveDetails(savedTransactionModel, createCommand);
+        Transaction srcTransaction = saveNewTransaction(srcCommand, srcCommand.getSpecialType());
+        Transaction dstTransaction = saveNewTransaction(dstCommand, dstCommand.getSpecialType());
+        return new TransactionPair(srcTransaction, dstTransaction);
+    }
+
+    /**
+     * Elmenti a tranzakciót és a detailjait a bejelentkezett user nevében. A
+     * wallet és a kategóriák id-ját ellenőrzi, hogy a userhez tartoznak-e
+     */
+    private Transaction saveNewTransaction(TransactionSaveCommand command, TransactionSpecialTypeEnum specialType) {
+        Wallet wallet = walletService.getWalletById(command.getWalletId());
+
+        Transaction savedTransactionModel = this.transactionRepo.save(new Transaction(
+                command.getTransactionName(),
+                command.getTransactionDate(),
+                command.getTransactionType(),
+                specialType,
+                costCalculator.calculateTransactionCost(command),
+                wallet));
+
+        transactionDetailService.saveDetails(savedTransactionModel, command);
         return savedTransactionModel;
     }
 
@@ -82,22 +115,19 @@ public class TransactionService {
     @Transactional
     public Transaction createTransactionFromRecurringTransaction(
             TransactionSaveCommand command, RecurringTransaction recurringTransaction) {
-        Transaction transaction = newTransaction(command, recurringTransaction.getWallet());
-        transaction.setRecurringTransaction(recurringTransaction);
-        Transaction savedTransactionModel = this.transactionRepo.save(transaction);
-
-        transactionDetailService.saveDetailsWithoutOwnershipCheck(savedTransactionModel, command);
-        return savedTransactionModel;
-    }
-
-    private Transaction newTransaction(TransactionSaveCommand command, Wallet wallet) {
-        return new Transaction(
+        Transaction transaction = new Transaction(
                 command.getTransactionName(),
                 command.getTransactionDate(),
                 command.getTransactionType(),
                 command.getSpecialType(),
                 costCalculator.calculateTransactionCost(command),
-                wallet);
+                recurringTransaction.getWallet());
+
+        transaction.setRecurringTransaction(recurringTransaction);
+        Transaction savedTransactionModel = this.transactionRepo.save(transaction);
+
+        transactionDetailService.saveDetailsWithoutOwnershipCheck(savedTransactionModel, command);
+        return savedTransactionModel;
     }
 
     /**
