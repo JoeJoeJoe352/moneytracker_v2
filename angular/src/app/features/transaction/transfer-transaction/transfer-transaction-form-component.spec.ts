@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { TransferTransactionFormComponent } from './transfer-transaction-form-component';
-import { TransferTransactionFormValue } from './interfaces';
+import { TransferTransactionFormValue, TransferTransactionResponse } from './interfaces';
 import { CurrencyCodesEnum, WalletTypesEnum } from '@shared/enums';
 import { WalletDataInterface } from '../../wallet/interfaces';
 import { UserDataStore } from '@app/shared/stores/user-data-store';
@@ -24,6 +24,16 @@ const wallets: WalletDataInterface[] = [
     },
     { id: 3, name: 'Euró', type: WalletTypesEnum.default, currencyCode: CurrencyCodesEnum.eur },
 ];
+
+const existingTransfer: TransferTransactionResponse = {
+    transferId: 7,
+    srcTransactionName: 'Megtakarításba',
+    srcWalletId: 1,
+    dstTransactionName: 'Napi költésből',
+    dstWalletId: 2,
+    transactionDate: '2026-11-01',
+    priceSum: 1000,
+};
 
 describe('TransferTransactionFormComponent (Vitest)', () => {
     let fixture: ComponentFixture<TransferTransactionFormComponent>;
@@ -154,5 +164,68 @@ describe('TransferTransactionFormComponent (Vitest)', () => {
         fixture.componentRef.setInput('isFormDisabled', false);
         fixture.detectChanges();
         expect(component.srcTransactionName.enabled).toBe(true);
+    });
+
+    it('should not show the delete button when creating a new transfer', () => {
+        expect(fixture.nativeElement.querySelector('.mat-button-danger')).toBeNull();
+    });
+
+    it('should prefill the form and lock both wallets for an existing transfer', () => {
+        fixture.componentRef.setInput('transfer', existingTransfer);
+        fixture.detectChanges();
+
+        expect(component.srcTransactionName.value).toBe('Megtakarításba');
+        expect(component.srcWalletId.value).toBe(1);
+        expect(component.dstTransactionName.value).toBe('Napi költésből');
+        expect(component.dstWalletId.value).toBe(2);
+        expect(component.transactionDate.value).toEqual(new Date(2026, 10, 1));
+        expect(component.priceSum.value).toBe(1000);
+        expect(component.srcWalletId.disabled).toBe(true);
+        expect(component.dstWalletId.disabled).toBe(true);
+        expect(component.srcTransactionName.enabled).toBe(true);
+    });
+
+    it('should keep the wallets locked for an existing transfer after the form is re-enabled', () => {
+        fixture.componentRef.setInput('transfer', existingTransfer);
+        fixture.detectChanges();
+
+        fixture.componentRef.setInput('isFormDisabled', true);
+        fixture.detectChanges();
+        fixture.componentRef.setInput('isFormDisabled', false);
+        fixture.detectChanges();
+
+        expect(component.srcTransactionName.enabled).toBe(true);
+        expect(component.srcWalletId.disabled).toBe(true);
+        expect(component.dstWalletId.disabled).toBe(true);
+    });
+
+    it('should emit the edited values including the locked wallets on submit', () => {
+        fixture.componentRef.setInput('transfer', existingTransfer);
+        fixture.detectChanges();
+        component.priceSum.setValue(2500);
+
+        submit();
+
+        expect(emitted).toEqual([
+            {
+                srcTransactionName: 'Megtakarításba',
+                srcWalletId: 1,
+                dstTransactionName: 'Napi költésből',
+                dstWalletId: 2,
+                transactionDate: new Date(2026, 10, 1),
+                priceSum: 2500,
+            },
+        ]);
+    });
+
+    it('should emit deleted when the delete button of an existing transfer is clicked', () => {
+        fixture.componentRef.setInput('transfer', existingTransfer);
+        fixture.detectChanges();
+        let deletedCount = 0;
+        component.deleted.subscribe(() => deletedCount++);
+
+        (fixture.nativeElement.querySelector('.mat-button-danger') as HTMLButtonElement).click();
+
+        expect(deletedCount).toBe(1);
     });
 });

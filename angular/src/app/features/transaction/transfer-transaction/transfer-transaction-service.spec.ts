@@ -42,4 +42,43 @@ describe('TransferTransactionService (Vitest)', () => {
         });
         request.flush(null);
     });
+
+    it('should get the transfer by one of its transaction ids', () => {
+        service.getTransferTransactionByTransactionId(10).subscribe();
+
+        const request = httpMock.expectOne('/api/transfer-transaction/by-transaction/10');
+        expect(request.request.method).toBe('GET');
+        request.flush(null);
+    });
+
+    it('should put only the names, date and amount (no wallets) on update', () => {
+        service
+            .updateTransferTransaction(7, {
+                srcTransactionName: 'Megtakarításba',
+                srcWalletId: 1,
+                dstTransactionName: 'Napi költésből',
+                dstWalletId: 2,
+                transactionDate: new Date(2026, 10, 5),
+                priceSum: 2500,
+            })
+            .subscribe();
+
+        const request = httpMock.expectOne('/api/transfer-transaction/7');
+        expect(request.request.method).toBe('PUT');
+        expect(request.request.body).toEqual({
+            srcTransactionName: 'Megtakarításba',
+            dstTransactionName: 'Napi költésből',
+            transactionDate: '2026-11-05',
+            priceSum: 2500,
+        });
+        request.flush(null);
+    });
+
+    it('should delete the transfer by its transfer id', () => {
+        service.deleteTransferTransaction(7).subscribe();
+
+        const request = httpMock.expectOne('/api/transfer-transaction/7');
+        expect(request.request.method).toBe('DELETE');
+        request.flush(null);
+    });
 });

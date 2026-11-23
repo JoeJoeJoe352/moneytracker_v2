@@ -16,7 +16,13 @@ import {
 } from './interfaces';
 import { TransactionModalStateService } from './transaction-modal-state-service';
 import { TransactionModalComponent } from './transaction-modal';
-import { CurrencyCodesEnum, TransactionTypeEnum, WalletTypesEnum } from '@shared/enums';
+import {
+    CurrencyCodesEnum,
+    TransactionSpecialTypeEnum,
+    TransactionTypeEnum,
+    WalletTypesEnum,
+} from '@shared/enums';
+import { TransferTransactionModalComponent } from './transfer-transaction/transfer-transaction-modal';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NotificationService } from '@shared/services/notification-service';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog-component';
@@ -60,6 +66,20 @@ const sampleLastTransactions: TransactionHistoryInterface = {
     transactions: sampleTransactions,
 };
 
+/** A /transaction/last válasza egy átvezetés egyik oldalával */
+const sampleTransferLastTransactions: TransactionHistoryInterface = {
+    transactions: [
+        {
+            ...sampleTransactions[0]!,
+            id: 3,
+            name: 'Megtakarításba',
+            priceSum: -1000,
+            transactionType: TransactionTypeEnum.OUTCOME,
+            specialType: TransactionSpecialTypeEnum.TRANSFER,
+        },
+    ],
+};
+
 /** A /transaction/history válasza */
 const sampleHistory: TransactionHistoryInterface = {
     transactions: sampleTransactions,
@@ -94,6 +114,7 @@ describe('TransactionsListComponent (Vitest)', () => {
         saved: EventEmitter<unknown>;
         recurringTransactionOpenRequest: EventEmitter<NavigationDataToRecurringTransaction>;
     }>[];
+    let transferModalDialogRefs: FakeDialogRef<object>[];
 
     async function setup(
         options: {
@@ -121,8 +142,14 @@ describe('TransactionsListComponent (Vitest)', () => {
         queryParamsSubject = new BehaviorSubject<Record<string, string>>(options.queryParams ?? {});
 
         transactionModalDialogRefs = [];
+        transferModalDialogRefs = [];
         confirmResult = true;
         dialogOpenSpy = vi.fn((componentType: unknown) => {
+            if (componentType === TransferTransactionModalComponent) {
+                const dialogRef = new FakeDialogRef({});
+                transferModalDialogRefs.push(dialogRef);
+                return dialogRef;
+            }
             if (componentType === TransactionModalComponent) {
                 const dialogRef = new FakeDialogRef({
                     deleteTransactionRequested: new EventEmitter<number>(),
@@ -379,6 +406,47 @@ describe('TransactionsListComponent (Vitest)', () => {
         expect(transactionServiceMock.getTransactionById).toHaveBeenCalledWith(1);
         expect(dialogOpenSpy).toHaveBeenCalledWith(TransactionModalComponent, expect.anything());
         expect(transactionModalDialogRefs).toHaveLength(1);
+    });
+
+    it('should open the transfer modal instead of the transaction modal when a transfer card is clicked', async () => {
+        await setup({ getLastTransactionsResult: of(sampleTransferLastTransactions) });
+
+        const card = fixture.nativeElement.querySelector('app-transaction-card');
+        card.click();
+        fixture.detectChanges();
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(TransferTransactionModalComponent, {
+            restoreFocus: true,
+            width: '600px',
+            data: { transactionId: 3 },
+        });
+        expect(dialogOpenSpy).not.toHaveBeenCalledWith(TransactionModalComponent, expect.anything());
+        expect(transactionServiceMock.getTransactionById).not.toHaveBeenCalled();
+    });
+
+    it('should reload the list and notify the parent after the transfer modal saved or deleted', async () => {
+        await setup({ getLastTransactionsResult: of(sampleTransferLastTransactions) });
+        let emitted = false;
+        component.transactionsChanged.subscribe(() => (emitted = true));
+
+        fixture.nativeElement.querySelector('app-transaction-card').click();
+        expect(transferModalDialogRefs).toHaveLength(1);
+        transferModalDialogRefs[0]?.close(true);
+        await fixture.whenStable();
+
+        expect(transactionServiceMock.getLastTransactions).toHaveBeenCalledTimes(2);
+        expect(emitted).toBe(true);
+    });
+
+    it('should not reload the list when the transfer modal is closed without changes', async () => {
+        await setup({ getLastTransactionsResult: of(sampleTransferLastTransactions) });
+
+        fixture.nativeElement.querySelector('app-transaction-card').click();
+        expect(transferModalDialogRefs).toHaveLength(1);
+        transferModalDialogRefs[0]?.close(false);
+        await fixture.whenStable();
+
+        expect(transactionServiceMock.getLastTransactions).toHaveBeenCalledTimes(1);
     });
 
     it('should open the modal with the transaction id from the route param', async () => {

@@ -1,6 +1,28 @@
 <div class="modal-header">
-    <h2 mat-dialog-title>{{ 'transfer_transaction.create' | translate }}</h2>
+    <h2 mat-dialog-title>
+        {{
+            (data.transactionId === null
+                ? 'transfer_transaction.create'
+                : 'transfer_transaction.update'
+            ) | translate
+        }}
+    </h2>
     <app-dialog-close-button />
 </div>
 
-<app-transfer-transaction-form-component [isFormDisabled]="isSaving()" (saved)="save($event)" />
+<div aria-live="polite" [attr.aria-busy]="transferResource.isLoading()">
+    @if (transferResource.isLoading()) {
+        <mat-dialog-content>
+            <div class="text-center">
+                <mat-spinner [attr.aria-label]="'etc.loading' | translate" />
+            </div>
+        </mat-dialog-content>
+    } @else {
+        <app-transfer-transaction-form-component
+            [isFormDisabled]="isSaving()"
+            [transfer]="transferResource.value()"
+            (saved)="save($event)"
+            (deleted)="confirmDelete()"
+        />
+    }
+</div>

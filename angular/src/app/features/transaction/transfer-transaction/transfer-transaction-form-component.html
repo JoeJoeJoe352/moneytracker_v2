@@ -34,6 +34,11 @@
                         >
                     }
                 </mat-select>
+                @if (transfer()) {
+                    <mat-hint class="wallet-locked-hint">{{
+                        'transfer_transaction.wallet_locked' | translate
+                    }}</mat-hint>
+                }
             </mat-form-field>
         </div>
 
@@ -70,6 +75,11 @@
                         >
                     }
                 </mat-select>
+                @if (transfer()) {
+                    <mat-hint class="wallet-locked-hint">{{
+                        'transfer_transaction.wallet_locked' | translate
+                    }}</mat-hint>
+                }
                 @if (dstWalletId.hasError('required') && dstWalletId.touched) {
                     <mat-error>{{
                         'transfer_transaction.dst_wallet.required' | translate
@@ -128,6 +138,17 @@
         </div>
     </mat-dialog-content>
     <mat-dialog-actions>
+        @if (transfer()) {
+            <button
+                mat-flat-button
+                type="button"
+                class="mat-button-danger"
+                [disabled]="isFormDisabled()"
+                (click)="deleted.emit()"
+            >
+                {{ 'transaction.delete' | translate }}
+            </button>
+        }
         <button mat-flat-button type="submit" [disabled]="isFormDisabled()">
             {{ 'transaction.save' | translate }}
         </button>

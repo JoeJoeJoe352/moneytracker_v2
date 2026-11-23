@@ -1,6 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { TransactionListElementData } from '../transaction/interfaces';
+import { EditTransactionEvent, TransactionListElementData } from '../transaction/interfaces';
 import { CurrencyCodesEnum, TransactionTypeEnum } from '@app/shared/enums';
 import { BaseChartDirective, provideCharts } from 'ng2-charts';
 import {
@@ -47,7 +47,7 @@ export class TransactionBarChartComponent {
     /**
      * Akkor emitál, amikor a user rákattint egy oszlopra (a tranzakció szerkesztéséhez)
      */
-    public editTransaction = output<{ transactionId: number }>();
+    public editTransaction = output<EditTransactionEvent>();
 
     // a canvas nem érti a CSS változókat, ezért itt kiolvassuk a tényleges színeket
     private readonly rootStyle = getComputedStyle(this.document.documentElement);
@@ -163,7 +163,10 @@ export class TransactionBarChartComponent {
             onClick: (_event, elements) => {
                 const transaction = this.transactionAt(elements[0]?.index);
                 if (transaction) {
-                    this.editTransaction.emit({ transactionId: transaction.id });
+                    this.editTransaction.emit({
+                        transactionId: transaction.id,
+                        specialType: transaction.specialType,
+                    });
                 }
             },
             onHover: (event, elements) => {

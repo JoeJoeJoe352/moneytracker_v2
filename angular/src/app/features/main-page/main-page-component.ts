@@ -15,8 +15,6 @@ import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { TransferTransactionModalComponent } from '../transaction/transfer-transaction/transfer-transaction-modal';
 
 @Component({
     selector: 'app-main-page-component',
@@ -38,7 +36,6 @@ export class MainPageComponent {
     private readonly transactionService = inject(TransactionService);
     protected readonly modal = inject(TransactionModalStateService);
     protected readonly walletUtils = inject(WalletDataUtil);
-    private readonly dialog = inject(MatDialog);
 
     protected transactionType = TransactionTypeEnum;
     /**
@@ -52,19 +49,6 @@ export class MainPageComponent {
         this.modal.changed
             .pipe(takeUntilDestroyed())
             .subscribe(() => this.reloadAfterTransactionsChanged());
-    }
-
-    /**
-     * Átvezetés létrehozó modal megnyitása, sikeres mentés után újratölti a listát és az összesítést
-     */
-    protected openTransferModal(): void {
-        TransferTransactionModalComponent.open(this.dialog)
-            .afterClosed()
-            .subscribe((saved) => {
-                if (saved) {
-                    this.reloadAfterTransactionsChanged();
-                }
-            });
     }
 
     /**

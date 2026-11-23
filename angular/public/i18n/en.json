@@ -117,7 +117,8 @@
       "complex_price_mode": "Enter quantity and unit price",
       "total_price": "Total price"
     },
-    "recurring_transaction": "Recurring transaction"
+    "recurring_transaction": "Recurring transaction",
+    "transfer_transaction": "Transfer transaction"
   },
   "transfer_transaction": {
     "create": "Create transfer",
@@ -129,7 +130,10 @@
     "dst_wallet": "Destination wallet",
     "dst_wallet.required": "The destination wallet is required!",
     "same_wallet": "The source and destination wallet cannot be the same!",
-    "different_currency": "You can only transfer between wallets with the same currency!"
+    "different_currency": "You can only transfer between wallets with the same currency!",
+    "update": "Edit transfer",
+    "wallet_locked": "The wallet of an existing transfer cannot be changed",
+    "delete.confirm": "Are you sure you want to delete the transfer? Both sides will be deleted."
   },
   "wallet": {
     "create": "Create wallet",

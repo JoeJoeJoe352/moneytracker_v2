@@ -24,7 +24,8 @@ import {
     TRANSACTION_NAME_VALIDATORS,
 } from '../transaction-form/transaction-field-validators';
 import { transferWalletsValidator } from './transfer-wallets-validator';
-import { TransferTransactionFormValue } from './interfaces';
+import { TransferTransactionFormValue, TransferTransactionResponse } from './interfaces';
+import { TimeHelper } from '@shared/services/time-helper';
 
 /**
  * Átvezetés form: a forrás walletből a cél walletbe kerül az összeg. Mindkét
@@ -49,6 +50,7 @@ export class TransferTransactionFormComponent implements OnChanges {
     private readonly fb = inject(FormBuilder);
     protected readonly userData = inject(UserDataStore);
     private readonly walletUtil = inject(WalletDataUtil);
+    private readonly timeHelper = inject(TimeHelper);
 
     /**
      * Datepickerben utolsó kiválasztható nap
@@ -59,9 +61,17 @@ export class TransferTransactionFormComponent implements OnChanges {
      */
     public readonly isFormDisabled = input.required<boolean>();
     /**
+     * Szerkesztendő átvezetés, null esetén új átvezetés létrehozása
+     */
+    public readonly transfer = input<TransferTransactionResponse | null>(null);
+    /**
      * Mentés gombra kattintott a user, érvényes formmal
      */
     public readonly saved = output<TransferTransactionFormValue>();
+    /**
+     * Törlés gombra kattintott a user (a megerősítést a hívó kéri)
+     */
+    public readonly deleted = output<void>();
 
     protected readonly form = this.fb.group(
         {
@@ -130,6 +140,25 @@ export class TransferTransactionFormComponent implements OnChanges {
             } else {
                 this.form.enable();
             }
+        }
+
+        const transfer = this.transfer();
+        if (changes['transfer'] && transfer !== null) {
+            this.form.patchValue({
+                srcTransactionName: transfer.srcTransactionName,
+                srcWalletId: transfer.srcWalletId,
+                dstTransactionName: transfer.dstTransactionName,
+                dstWalletId: transfer.dstWalletId,
+                transactionDate: this.timeHelper.stringToDate(transfer.transactionDate),
+                priceSum: transfer.priceSum,
+            });
+        }
+
+        // Meglévő átvezetés walletjei nem módosíthatók (a backend sem engedi). Ngonchanges végén
+        // kell letiltani, mert a fenti enable() újra engedélyezné
+        if (transfer !== null) {
+            this.srcWalletId.disable({ emitEvent: false });
+            this.dstWalletId.disable({ emitEvent: false });
         }
     }
 

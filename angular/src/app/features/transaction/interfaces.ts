@@ -133,6 +133,15 @@ export interface TransactionHistoryInterface {
 }
 
 /**
+ * A user egy tranzakciót szeretne megnyitni (listából, diagramról). A special type alapján dől el,
+ * melyik modal nyílik meg (átvezetésnél az átvezetés modal)
+ */
+export interface EditTransactionEvent {
+    transactionId: number;
+    specialType: TransactionSpecialTypeEnum | null;
+}
+
+/**
  * Egy, a listában szereplő elem adatai
  */
 export interface TransactionListElementData {

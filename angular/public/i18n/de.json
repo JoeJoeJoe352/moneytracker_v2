@@ -117,7 +117,8 @@
       "complex_price_mode": "Menge und Einzelpreis angeben",
       "total_price": "Gesamtpreis"
     },
-    "recurring_transaction": "Wiederkehrende Transaktion"
+    "recurring_transaction": "Wiederkehrende Transaktion",
+    "transfer_transaction": "Überweisungstransaktion"
   },
   "transfer_transaction": {
     "create": "Überweisung erstellen",
@@ -129,7 +130,10 @@
     "dst_wallet": "Ziel-Wallet",
     "dst_wallet.required": "Das Ziel-Wallet ist erforderlich!",
     "same_wallet": "Quell- und Ziel-Wallet dürfen nicht identisch sein!",
-    "different_currency": "Überweisungen sind nur zwischen Wallets mit gleicher Währung möglich!"
+    "different_currency": "Überweisungen sind nur zwischen Wallets mit gleicher Währung möglich!",
+    "update": "Überweisung bearbeiten",
+    "wallet_locked": "Das Wallet einer bestehenden Überweisung kann nicht geändert werden",
+    "delete.confirm": "Möchtest du die Überweisung wirklich löschen? Beide Seiten werden gelöscht."
   },
   "wallet": {
     "create": "Wallet erstellen",

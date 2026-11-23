@@ -17,7 +17,7 @@
                         [class.active-card]="!isTransactionListReLoading()"
                         [class.disabled-card]="isTransactionListReLoading()"
                         [transaction]="transaction"
-                        (click)="openModalEmit(transaction.id)"
+                        (click)="openModalEmit(transaction)"
                     />
                 </div>
             } @empty {
