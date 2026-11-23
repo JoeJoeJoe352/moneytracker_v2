@@ -28,7 +28,7 @@
             <mat-form-field>
                 <mat-label>{{ 'transfer_transaction.src_wallet' | translate }}</mat-label>
                 <mat-select id="transfer-src-wallet" formControlName="srcWalletId">
-                    @for (item of userData.getWallets(); track item.id) {
+                    @for (item of srcWalletOptions(); track item.id) {
                         <mat-option [value]="item.id"
                             >{{ item.name }} ({{ item.currencyCode }})</mat-option
                         >
@@ -64,7 +64,7 @@
             <mat-form-field>
                 <mat-label>{{ 'transfer_transaction.dst_wallet' | translate }}</mat-label>
                 <mat-select id="transfer-dst-wallet" formControlName="dstWalletId">
-                    @for (item of userData.getWallets(); track item.id) {
+                    @for (item of dstWalletOptions(); track item.id) {
                         <mat-option [value]="item.id"
                             >{{ item.name }} ({{ item.currencyCode }})</mat-option
                         >

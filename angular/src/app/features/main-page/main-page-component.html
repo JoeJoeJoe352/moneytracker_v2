@@ -4,7 +4,7 @@
         <mat-card class="stat-card balance-card">
             <div class="stat-card-header">
                 <span class="stat-icon-badge">
-                    <mat-icon aria-hidden="true" fontIcon="account_balance_wallet"></mat-icon>
+                    <mat-icon aria-hidden="true" fontIcon="account_balance_wallet"/>
                 </span>
                 <div class="stat-label">{{ 'mainpage.total_balance' | translate }}</div>
             </div>
@@ -61,7 +61,8 @@
                     class="stat-action-button transfer-button"
                     (click)="openTransferModal()"
                 >
-                    ⇄ {{ 'mainpage.create_transfer.button' | translate }}
+                    <mat-icon fontIcon="swap_horiz" />
+                    {{ 'mainpage.create_transfer.button' | translate }}
                 </button>
             </div>
         </mat-card>

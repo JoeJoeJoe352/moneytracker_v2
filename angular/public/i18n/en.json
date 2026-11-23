@@ -89,6 +89,7 @@
     "categories.add": "Add categories",
     "is_sync_transaction": "Transaction created during a balance sync",
     "is_recurring_transaction": "Transaction created from a recurring transaction",
+    "is_transfer_transaction": "This is part of a transfer, so it cannot be edited or deleted here",
     "recurring_transaction.open": "Open recurring transaction",
     "recurring_transaction.open_unsaved_confirm": "Your unsaved changes will be lost. Do you want to open the recurring transaction anyway?",
     "wallet.sync_locked": "The wallet of a sync transaction cannot be changed",

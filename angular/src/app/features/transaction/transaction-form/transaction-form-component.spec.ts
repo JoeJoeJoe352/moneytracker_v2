@@ -478,6 +478,55 @@ describe('TransactionFormComponent (Vitest)', () => {
         expect(fixture.nativeElement.querySelector('.wallet-locked-hint')).toBeNull();
     });
 
+    it('should make the whole form read-only for one side of a transfer', () => {
+        fixture.componentRef.setInput(
+            'transaction',
+            createBackendTransaction(TransactionSpecialTypeEnum.TRANSFER),
+        );
+        fixture.detectChanges();
+
+        expect(component.name.disabled).toBe(true);
+        expect(component.price.disabled).toBe(true);
+        expect(component.walletId.disabled).toBe(true);
+        expect(fixture.nativeElement.querySelector('button[type="submit"]').disabled).toBe(true);
+        expect(fixture.nativeElement.querySelector('.mat-button-danger').disabled).toBe(true);
+    });
+
+    it('should keep a transfer read-only after the form is re-enabled', () => {
+        fixture.componentRef.setInput(
+            'transaction',
+            createBackendTransaction(TransactionSpecialTypeEnum.TRANSFER),
+        );
+        fixture.detectChanges();
+
+        fixture.componentRef.setInput('isTransactionFormDisabled', true);
+        fixture.detectChanges();
+        fixture.componentRef.setInput('isTransactionFormDisabled', false);
+        fixture.detectChanges();
+
+        expect(component.name.disabled).toBe(true);
+        expect(fixture.nativeElement.querySelector('button[type="submit"]').disabled).toBe(true);
+    });
+
+    it('should not emit saved or deleted for a transfer even if the form is submitted', () => {
+        fixture.componentRef.setInput(
+            'transaction',
+            createBackendTransaction(TransactionSpecialTypeEnum.TRANSFER),
+        );
+        fixture.detectChanges();
+
+        let savedCount = 0;
+        let deletedCount = 0;
+        component.saved.subscribe(() => savedCount++);
+        component.deleted.subscribe(() => deletedCount++);
+
+        fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+        fixture.nativeElement.querySelector('.mat-button-danger').click();
+
+        expect(savedCount).toBe(0);
+        expect(deletedCount).toBe(0);
+    });
+
     function openRecurringButton(): HTMLButtonElement | null {
         return fixture.nativeElement.querySelector('.open-recurring-transaction');
     }

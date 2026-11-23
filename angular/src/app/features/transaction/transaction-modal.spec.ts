@@ -96,6 +96,12 @@ describe('TransactionModalComponent (Vitest)', () => {
         expect(warningBlock()?.textContent).not.toContain('transaction.is_sync_transaction');
     });
 
+    it('should show the transfer warning for one side of a transfer', async () => {
+        await setup({ ...baseTransaction, specialType: TransactionSpecialTypeEnum.TRANSFER });
+
+        expect(warningBlock()?.textContent).toContain('transaction.is_transfer_transaction');
+    });
+
     it('should not show the sync warning when creating a new transaction', async () => {
         await setup(null);
 

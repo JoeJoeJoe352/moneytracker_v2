@@ -4,8 +4,13 @@ import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { TransactionSpecialTypeEnum, TransactionTypeEnum } from '@shared/enums';
-import { TranslatePipe } from '@ngx-translate/core';
+import { _, TranslatePipe } from '@ngx-translate/core';
 import { MatTooltip } from '@angular/material/tooltip';
+
+interface IconData {
+    iconName: string;
+    translateKey: string;
+}
 
 @Component({
     selector: 'app-transaction-card',
@@ -56,7 +61,20 @@ export default class TransactionCardComponent {
     /**
      * Ismétlődő tranzakció-e
      */
-    protected isRecurringTransaction = computed(() => {
-        return this.transaction().specialType === TransactionSpecialTypeEnum.RECURRING
-    })
+    protected getSpecialTypeIcon: Signal<IconData | null> = computed(() => {
+        switch (this.transaction().specialType) {
+            case TransactionSpecialTypeEnum.RECURRING:
+                return {
+                    iconName: 'event_repeat',
+                    translateKey: _("transaction.recurring_transaction"),
+                };
+            case TransactionSpecialTypeEnum.TRANSFER:
+                return {
+                    iconName: 'swap_horiz',
+                    translateKey: _("transaction.transfer_transaction"),
+                };
+            default:
+                return null;
+        }
+    });
 }

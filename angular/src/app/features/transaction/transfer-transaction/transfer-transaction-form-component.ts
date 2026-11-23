@@ -76,6 +76,36 @@ export class TransferTransactionFormComponent implements OnChanges {
     );
 
     /**
+     * Kiindulási wallet dropdown opciói
+     */
+    protected srcWalletOptions = computed(() => {
+        return this.userData.getWallets();
+    });
+
+    /**
+     * Érkezési wallet dropdown opciói (Filterezve az src és az eltérő valutájú walletek)
+     */
+    protected dstWalletOptions = computed(() => {
+        const selectedWalletCurrency = this.userData
+            .getWallets()
+            .find((wallet) => wallet.id === this.selectedSrcWalletId());
+
+        if (!selectedWalletCurrency) {
+            throw new Error(
+                'There is no wallet for the user with this is: ' + this.selectedSrcWalletId(),
+            );
+        }
+
+        return this.userData
+            .getWallets()
+            .filter(
+                (wallet) =>
+                    wallet.id !== selectedWalletCurrency.id &&
+                    wallet.currencyCode === selectedWalletCurrency.currencyCode,
+            );
+    });
+
+    /**
      * A kiválasztott forrás wallet azonosítója
      */
     private readonly selectedSrcWalletId = toSignal(this.form.controls.srcWalletId.valueChanges, {
