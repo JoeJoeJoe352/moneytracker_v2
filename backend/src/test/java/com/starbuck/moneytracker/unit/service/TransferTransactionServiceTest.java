@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,11 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.ConversionService;
 
 import com.starbuck.moneytracker.commands.TransferTransactionCreateCommand;
+import com.starbuck.moneytracker.commands.TransferTransactionUpdateCommand;
 import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransferTransactionSide;
 import com.starbuck.moneytracker.entity.User;
 import com.starbuck.moneytracker.entity.Wallet;
 import com.starbuck.moneytracker.entity.enums.CurrencyEnum;
+import com.starbuck.moneytracker.entity.enums.GeneralStatusEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionSpecialTypeEnum;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
 import com.starbuck.moneytracker.entity.enums.WalletTypeEnum;
@@ -92,7 +95,9 @@ class TransferTransactionServiceTest {
 
         User user = new User(1L, "name", "password", "email");
         srcWallet = new Wallet("src", user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT);
+        srcWallet.setId(1L);
         dstWallet = new Wallet("dst", user, CurrencyEnum.HUF, WalletTypeEnum.DEFAULT);
+        dstWallet.setId(2L);
 
         Mockito.lenient().when(walletService.getWalletById(1L)).thenReturn(srcWallet);
         Mockito.lenient().when(walletService.getWalletById(2L)).thenReturn(dstWallet);
@@ -145,6 +150,110 @@ class TransferTransactionServiceTest {
         });
 
         Mockito.verifyNoInteractions(transferSidesRepo);
+    }
+
+    /**
+     * Átvezetés módosításakor mindkét oldal új nevet, dátumot és előjeles összeget
+     * kap, a walletek és a típusok változatlanok
+     */
+    @Test
+    void updateLinkedTransaction_updatesBothSides() {
+        TransferTransactionSide side = mockExistingTransfer();
+
+        transferService.updateLinkedTransaction(7L, updateCommand());
+
+        Transaction src = side.getSrcTransaction();
+        assertEquals("new src", src.getName());
+        assertEquals(LocalDate.of(2026, 11, 20), src.getTransactionDate());
+        assertEquals(TransactionTypeEnum.OUTCOME, src.getTransactionType());
+        assertEquals(TransactionSpecialTypeEnum.TRANSFER, src.getSpecialType());
+        assertEquals(0, new BigDecimal("-250.00").compareTo(src.getPriceSum()));
+        assertSame(srcWallet, src.getWallet());
+
+        Transaction dst = side.getDstTransaction();
+        assertEquals("new dst", dst.getName());
+        assertEquals(LocalDate.of(2026, 11, 20), dst.getTransactionDate());
+        assertEquals(TransactionTypeEnum.INCOME, dst.getTransactionType());
+        assertEquals(TransactionSpecialTypeEnum.TRANSFER, dst.getSpecialType());
+        assertEquals(0, new BigDecimal("250.00").compareTo(dst.getPriceSum()));
+        assertSame(dstWallet, dst.getWallet());
+
+        Mockito.verify(transactionRepo).save(src);
+        Mockito.verify(transactionRepo).save(dst);
+        Mockito.verify(transferSidesRepo, Mockito.never()).save(any(TransferTransactionSide.class));
+    }
+
+    /**
+     * Nem létező átvezetés módosítása kivételt dob, és semmi nem mentődik
+     */
+    @Test
+    void updateLinkedTransaction_throwsWhenTransferNotFound() {
+        Mockito.when(transferSidesRepo.findById(7L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transferService.updateLinkedTransaction(7L, updateCommand());
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).save(any(Transaction.class));
+    }
+
+    /**
+     * Más user átvezetése nem módosítható: a tranzakció nem található a
+     * bejelentkezett usernek, és semmi nem mentődik
+     */
+    @Test
+    void updateLinkedTransaction_throwsWhenTransferBelongsToOtherUser() {
+        mockExistingTransfer();
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(10L, 1L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transferService.updateLinkedTransaction(7L, updateCommand());
+        });
+
+        Mockito.verify(transactionRepo, Mockito.never()).save(any(Transaction.class));
+        Mockito.verifyNoInteractions(transactionDetailRepo);
+    }
+
+    /**
+     * Egy létező átvezetést (id: 7, forrás tranzakció: 10, cél tranzakció: 11)
+     * állít be a mockokon, a bejelentkezett user (id: 1) nevében
+     */
+    private TransferTransactionSide mockExistingTransfer() {
+        Transaction src = new Transaction(
+                10L,
+                "old src",
+                LocalDate.of(2026, 11, 1),
+                TransactionTypeEnum.OUTCOME,
+                TransactionSpecialTypeEnum.TRANSFER,
+                new BigDecimal("-100.00"),
+                GeneralStatusEnum.ACTIVE,
+                srcWallet);
+        Transaction dst = new Transaction(
+                11L,
+                "old dst",
+                LocalDate.of(2026, 11, 1),
+                TransactionTypeEnum.INCOME,
+                TransactionSpecialTypeEnum.TRANSFER,
+                new BigDecimal("100.00"),
+                GeneralStatusEnum.ACTIVE,
+                dstWallet);
+        TransferTransactionSide side = new TransferTransactionSide(src, dst);
+        side.setId(7L);
+
+        Mockito.lenient().when(currentUser.getUser()).thenReturn(new User(1L, "name", "password", "email"));
+        Mockito.when(transferSidesRepo.findById(7L)).thenReturn(Optional.of(side));
+        Mockito.lenient()
+                .when(transactionRepo.getTransactionByIdWithDetails(10L, 1L))
+                .thenReturn(Optional.of(src));
+        Mockito.lenient()
+                .when(transactionRepo.getTransactionByIdWithDetails(11L, 1L))
+                .thenReturn(Optional.of(dst));
+        return side;
+    }
+
+    private TransferTransactionUpdateCommand updateCommand() {
+        return new TransferTransactionUpdateCommand(
+                "new src", "new dst", LocalDate.of(2026, 11, 20), new BigDecimal("250.00"));
     }
 
     private TransferTransactionCreateCommand createCommand() {

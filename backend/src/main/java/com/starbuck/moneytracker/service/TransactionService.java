@@ -153,17 +153,65 @@ public class TransactionService {
             throw new IllegalArgumentException("Wallet of sync or recurring transaction " + id + " cannot be changed");
         }
 
-        transaction.setName(updateCommand.getTransactionName());
-        transaction.setTransactionDate(updateCommand.getTransactionDate());
-        transaction.setTransactionType(updateCommand.getTransactionType());
-        transaction.setPriceSum(costCalculator.calculateTransactionCost(updateCommand));
+        updateTransaction(transaction, updateCommand, wallet);
+    }
+
+    /**
+     * Párban lévő (TRANSFER) tranzakciók két oldalának együttes módosítása. Mindkét
+     * oldalnak a bejelentkezett useréhez kell tartoznia, és a walletjük nem
+     * változhat. A hívónak tranzakción belül kell futnia, hogy a két oldal együtt
+     * módosuljon vagy együtt guruljon vissza
+     *
+     * @param srcId      a forrás oldali tranzakció id-ja
+     * @param srcCommand a forrás oldal új adatai
+     * @param dstId      a cél oldali tranzakció id-ja
+     * @param dstCommand a cél oldal új adatai
+     */
+    protected void updateTransactionPair(
+            long srcId, TransactionSaveCommand srcCommand, long dstId, TransactionSaveCommand dstCommand) {
+        if (srcCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER
+                || dstCommand.getSpecialType() != TransactionSpecialTypeEnum.TRANSFER) {
+            throw new IllegalArgumentException("Both sides of a transaction pair must be TRANSFER type");
+        }
+
+        Transaction srcTransaction = getTransferTransactionForUpdate(srcId, srcCommand);
+        Transaction dstTransaction = getTransferTransactionForUpdate(dstId, dstCommand);
+
+        updateTransaction(srcTransaction, srcCommand, srcTransaction.getWallet());
+        updateTransaction(dstTransaction, dstCommand, dstTransaction.getWallet());
+    }
+
+    /**
+     * Betölti a pár egyik oldalát módosításhoz, és ellenőrzi, hogy TRANSFER
+     * típusú, valamint a walletje nem változik
+     */
+    private Transaction getTransferTransactionForUpdate(long id, TransactionSaveCommand command) {
+        Transaction transaction = this.getTransactionByIdForActualUser(id);
+
+        if (!transaction.isTransferTransaction()) {
+            throw new IllegalArgumentException("Transaction " + id + " is not a transfer transaction");
+        }
+        if (!Objects.equals(transaction.getWallet().getId(), command.getWalletId())) {
+            throw new IllegalArgumentException("Wallet of transfer transaction " + id + " cannot be changed");
+        }
+        return transaction;
+    }
+
+    /**
+     * A tranzakció adatainak felülírása a parancs alapján, és a detailok cseréje
+     */
+    private void updateTransaction(Transaction transaction, TransactionSaveCommand command, Wallet wallet) {
+        transaction.setName(command.getTransactionName());
+        transaction.setTransactionDate(command.getTransactionDate());
+        transaction.setTransactionType(command.getTransactionType());
+        transaction.setPriceSum(costCalculator.calculateTransactionCost(command));
         transaction.setWallet(wallet);
         transactionRepo.save(transaction);
 
         // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
         // kikeresni a meglévőket és frissíteni.
         transactionDetailService.deleteDetails(transaction);
-        transactionDetailService.saveDetails(transaction, updateCommand);
+        transactionDetailService.saveDetails(transaction, command);
     }
 
     /**

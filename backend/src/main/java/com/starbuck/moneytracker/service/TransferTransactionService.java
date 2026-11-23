@@ -5,11 +5,14 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.starbuck.moneytracker.commands.AbstractTransferTransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransactionSaveCommand;
 import com.starbuck.moneytracker.commands.TransferTransactionCreateCommand;
 import com.starbuck.moneytracker.commands.TransferTransactionUpdateCommand;
+import com.starbuck.moneytracker.entity.Transaction;
 import com.starbuck.moneytracker.entity.TransferTransactionSide;
 import com.starbuck.moneytracker.entity.enums.TransactionTypeEnum;
+import com.starbuck.moneytracker.exception.EntityNotFoundException;
 import com.starbuck.moneytracker.repository.TransferTransactionSidesRepository;
 
 @Service
@@ -31,30 +34,63 @@ public class TransferTransactionService {
      */
     @Transactional
     public TransferTransactionSide createLinkedTransaction(TransferTransactionCreateCommand command) {
-        TransactionSaveCommand srcCommand = new TransactionSaveCommand(
-                        command.getSrcTransactionName(),
-                        TransactionTypeEnum.OUTCOME.applySign(command.getPriceSum()),
-                        command.getTransactionDate(),
-                        TransactionTypeEnum.OUTCOME,
-                        List.of(),
-                        List.of(),
-                        command.getSrcWalletId())
-                .setTransferSpecialType();
-
-        TransactionSaveCommand dstCommand = new TransactionSaveCommand(
-                        command.getDstTransactionName(),
-                        TransactionTypeEnum.INCOME.applySign(command.getPriceSum()),
-                        command.getTransactionDate(),
-                        TransactionTypeEnum.INCOME,
-                        List.of(),
-                        List.of(),
-                        command.getDstWalletId())
-                .setTransferSpecialType();
+        TransactionSaveCommand srcCommand = createSideCommand(
+                command.getSrcTransactionName(), TransactionTypeEnum.OUTCOME, command.getSrcWalletId(), command);
+        TransactionSaveCommand dstCommand = createSideCommand(
+                command.getDstTransactionName(), TransactionTypeEnum.INCOME, command.getDstWalletId(), command);
 
         TransactionPair pair = transactionService.createTransactionPair(srcCommand, dstCommand);
         TransferTransactionSide sideObj = new TransferTransactionSide(pair.srcTransaction(), pair.dstTransaction());
         return repository.save(sideObj);
     }
 
-    public void updateLinkedTransaction(long transferId, TransferTransactionUpdateCommand command) {}
+    /**
+     * Átvezetés módosítása: a két oldal neve, dátuma és összege együtt változik. A
+     * walletek nem módosíthatók. Egy tranzakcióban fut, így vagy mindkét oldal
+     * módosul, vagy egyik sem
+     *
+     * @param transferId az átvezetés (TransferTransactionSide) id-ja
+     * @throws EntityNotFoundException ha nincs ilyen átvezetés, vagy nem a
+     *                                 bejelentkezett useré
+     */
+    @Transactional
+    public void updateLinkedTransaction(long transferId, TransferTransactionUpdateCommand command) {
+        TransferTransactionSide side = repository
+                .findById(transferId)
+                .orElseThrow(() -> new EntityNotFoundException("Transfer transaction not found: " + transferId));
+
+        Transaction src = side.getSrcTransaction();
+        Transaction dst = side.getDstTransaction();
+
+        TransactionSaveCommand srcCommand = createSideCommand(
+                command.getSrcTransactionName(),
+                TransactionTypeEnum.OUTCOME,
+                src.getWallet().getId(),
+                command);
+        TransactionSaveCommand dstCommand = createSideCommand(
+                command.getDstTransactionName(),
+                TransactionTypeEnum.INCOME,
+                dst.getWallet().getId(),
+                command);
+
+        // a user jogosultságát a TransactionService ellenőrzi mindkét oldalra
+        transactionService.updateTransactionPair(src.getId(), srcCommand, dst.getId(), dstCommand);
+    }
+
+    /**
+     * Az átvezetés egyik oldalának mentési parancsa. Az összeg a típusnak megfelelő
+     * előjelet kapja (forrás: negatív, cél: pozitív)
+     */
+    private TransactionSaveCommand createSideCommand(
+            String name, TransactionTypeEnum type, Long walletId, AbstractTransferTransactionSaveCommand command) {
+        return new TransactionSaveCommand(
+                        name,
+                        type.applySign(command.getPriceSum()),
+                        command.getTransactionDate(),
+                        type,
+                        List.of(),
+                        List.of(),
+                        walletId)
+                .setTransferSpecialType();
+    }
 }
