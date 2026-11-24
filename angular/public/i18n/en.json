@@ -130,8 +130,7 @@
     "dst_name": "Incoming transaction name",
     "dst_wallet": "Destination wallet",
     "dst_wallet.required": "The destination wallet is required!",
-    "same_wallet": "The source and destination wallet cannot be the same!",
-    "different_currency": "You can only transfer between wallets with the same currency!",
+    "no_dst_wallet": "There is no destination wallet with {{currency}} currency!",
     "update": "Edit transfer",
     "wallet_locked": "The wallet of an existing transfer cannot be changed",
     "delete.confirm": "Are you sure you want to delete the transfer? Both sides will be deleted."

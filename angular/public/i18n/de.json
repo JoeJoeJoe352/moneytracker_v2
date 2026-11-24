@@ -130,8 +130,7 @@
     "dst_name": "Name der eingehenden Transaktion",
     "dst_wallet": "Ziel-Wallet",
     "dst_wallet.required": "Das Ziel-Wallet ist erforderlich!",
-    "same_wallet": "Quell- und Ziel-Wallet dürfen nicht identisch sein!",
-    "different_currency": "Überweisungen sind nur zwischen Wallets mit gleicher Währung möglich!",
+    "no_dst_wallet": "Es gibt kein Ziel-Wallet mit der Währung {{currency}}!",
     "update": "Überweisung bearbeiten",
     "wallet_locked": "Das Wallet einer bestehenden Überweisung kann nicht geändert werden",
     "delete.confirm": "Möchtest du die Überweisung wirklich löschen? Beide Seiten werden gelöscht."

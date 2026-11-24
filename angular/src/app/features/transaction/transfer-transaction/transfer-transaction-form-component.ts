@@ -8,7 +8,7 @@ import {
     SimpleChanges,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -95,25 +95,9 @@ export class TransferTransactionFormComponent implements OnChanges {
     /**
      * Érkezési wallet dropdown opciói (Filterezve az src és az eltérő valutájú walletek)
      */
-    protected dstWalletOptions = computed(() => {
-        const selectedWalletCurrency = this.userData
-            .getWallets()
-            .find((wallet) => wallet.id === this.selectedSrcWalletId());
-
-        if (!selectedWalletCurrency) {
-            throw new Error(
-                'There is no wallet for the user with this is: ' + this.selectedSrcWalletId(),
-            );
-        }
-
-        return this.userData
-            .getWallets()
-            .filter(
-                (wallet) =>
-                    wallet.id !== selectedWalletCurrency.id &&
-                    wallet.currencyCode === selectedWalletCurrency.currencyCode,
-            );
-    });
+    protected dstWalletOptions = computed(() =>
+        this.getDstWalletOptions(this.selectedSrcWalletId()),
+    );
 
     /**
      * A kiválasztott forrás wallet azonosítója
@@ -123,15 +107,58 @@ export class TransferTransactionFormComponent implements OnChanges {
     });
 
     /**
+     * A kiválasztott forrás wallet adatai
+     */
+    protected readonly selectedSrcWalletData = computed(() =>
+        this.findWallet(this.selectedSrcWalletId()),
+    );
+
+    /**
      * A forrás wallet pénznemének szimbóluma (a cél walletnek ugyanez kell legyen)
      */
     protected readonly currencySymbol = computed(() => {
-        const wallet = this.userData
-            .getWallets()
-            .find((item) => item.id === this.selectedSrcWalletId());
-
-        return wallet ? this.walletUtil.getCurrencySymbolForCurrencyCode(wallet.currencyCode) : '';
+        const selectedSrcWalletData = this.selectedSrcWalletData();
+        return selectedSrcWalletData
+            ? this.walletUtil.getCurrencySymbolForCurrencyCode(selectedSrcWalletData.currencyCode)
+            : '';
     });
+
+    constructor() {
+        // Forrás wallet váltásakor a cél walletet töröljük, ha az már nem választható
+        // (ugyanaz a wallet, vagy eltérő a pénznem), különben a form csendben invalid maradna
+        this.srcWalletId.valueChanges.pipe(takeUntilDestroyed()).subscribe((srcWalletId) => {
+            const dstWalletId = this.dstWalletId.value;
+            const isDstStillValid = this.getDstWalletOptions(srcWalletId).some(
+                (wallet) => wallet.id === dstWalletId,
+            );
+            if (dstWalletId !== null && !isDstStillValid) {
+                this.dstWalletId.setValue(null);
+            }
+        });
+    }
+
+    /**
+     * A megadott forrás wallethez választható cél walletek (az src és az eltérő pénznemű
+     * walletek nélkül)
+     */
+    private getDstWalletOptions(srcWalletId: number | null) {
+        const srcWallet = this.findWallet(srcWalletId);
+
+        if (!srcWallet) {
+            throw new Error('There is no wallet for the user with this id: ' + srcWalletId);
+        }
+
+        return this.userData
+            .getWallets()
+            .filter(
+                (wallet) =>
+                    wallet.id !== srcWallet.id && wallet.currencyCode === srcWallet.currencyCode,
+            );
+    }
+
+    private findWallet(walletId: number | null) {
+        return this.userData.getWallets().find((wallet) => wallet.id === walletId);
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['isFormDisabled']) {
@@ -143,7 +170,8 @@ export class TransferTransactionFormComponent implements OnChanges {
         }
 
         const transfer = this.transfer();
-        if (changes['transfer'] && transfer !== null) {
+        const isEditMode = transfer !== null;
+        if (isEditMode && changes['transfer']) {
             this.form.patchValue({
                 srcTransactionName: transfer.srcTransactionName,
                 srcWalletId: transfer.srcWalletId,
@@ -156,7 +184,7 @@ export class TransferTransactionFormComponent implements OnChanges {
 
         // Meglévő átvezetés walletjei nem módosíthatók (a backend sem engedi). Ngonchanges végén
         // kell letiltani, mert a fenti enable() újra engedélyezné
-        if (transfer !== null) {
+        if (isEditMode) {
             this.srcWalletId.disable({ emitEvent: false });
             this.dstWalletId.disable({ emitEvent: false });
         }
@@ -173,12 +201,6 @@ export class TransferTransactionFormComponent implements OnChanges {
         // A cast azért kell, mert az érvényes form kötelező mezői már nem lehetnek null-ok
         this.saved.emit(this.form.getRawValue() as TransferTransactionFormValue);
     }
-
-    /**
-     * A cél wallet hibája: a form szintű wallet hibákat a cél wallet mezőnél jelezzük
-     */
-    protected readonly hasWalletError = (error: 'sameWallet' | 'differentCurrency'): boolean =>
-        this.form.hasError(error) && (this.dstWalletId.touched || this.srcWalletId.touched);
 
     // Getterek
 

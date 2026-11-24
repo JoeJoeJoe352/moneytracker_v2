@@ -126,7 +126,6 @@ describe('TransferTransactionFormComponent (Vitest)', () => {
         submit();
 
         expect(emitted).toEqual([]);
-        expect(walletErrorText()).toBe('transfer_transaction.same_wallet');
     });
 
     it('should not emit when the wallets have different currencies', () => {
@@ -136,14 +135,42 @@ describe('TransferTransactionFormComponent (Vitest)', () => {
         submit();
 
         expect(emitted).toEqual([]);
-        expect(walletErrorText()).toBe('transfer_transaction.different_currency');
     });
 
-    it('should not show a wallet error before the user touched the wallet fields', () => {
+    it('should clear the destination wallet when the source is switched to the same wallet', () => {
+        fillValidForm();
+
+        component.srcWalletId.setValue(2);
+
+        expect(component.dstWalletId.value).toBeNull();
+    });
+
+    it('should clear the destination wallet when the source is switched to another currency', () => {
+        fillValidForm();
+
+        component.srcWalletId.setValue(3);
+
+        expect(component.dstWalletId.value).toBeNull();
+    });
+
+    it('should keep the destination wallet when it is still valid for the new source', () => {
+        component.srcWalletId.setValue(2);
         component.dstWalletId.setValue(1);
+
+        component.srcWalletId.setValue(2);
+
+        expect(component.dstWalletId.value).toBe(1);
+    });
+
+    it('should not show the no destination wallet message when there is a valid destination', () => {
+        expect(walletErrorText()).toBe('');
+    });
+
+    it('should show the no destination wallet message when no wallet has the same currency', () => {
+        component.srcWalletId.setValue(3);
         fixture.detectChanges();
 
-        expect(walletErrorText()).toBe('');
+        expect(walletErrorText()).toBe('transfer_transaction.no_dst_wallet');
     });
 
     it('should reject a non-positive amount', () => {

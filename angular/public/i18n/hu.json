@@ -130,8 +130,7 @@
     "dst_name": "Bejövő tranzakció neve",
     "dst_wallet": "Cél tárca",
     "dst_wallet.required": "A cél tárca megadása kötelező!",
-    "same_wallet": "A forrás és a cél tárca nem lehet ugyanaz!",
-    "different_currency": "Csak azonos pénznemű tárcák között lehet átvezetni!",
+    "no_dst_wallet": "Nem található cél tárca {{currency}} pénznemmel!",
     "update": "Átvezetés módosítása",
     "wallet_locked": "Meglévő átvezetés tárcája nem módosítható",
     "delete.confirm": "Biztosan törölni szeretnéd az átvezetést? Mindkét oldala törlődik."

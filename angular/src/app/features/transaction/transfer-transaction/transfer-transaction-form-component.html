@@ -89,12 +89,12 @@
             </mat-form-field>
         </div>
 
-        <!-- A két walletre vonatkozó (form szintű) hibák -->
         <div class="wallet-error" role="alert">
-            @if (hasWalletError('sameWallet')) {
-                {{ 'transfer_transaction.same_wallet' | translate }}
-            } @else if (hasWalletError('differentCurrency')) {
-                {{ 'transfer_transaction.different_currency' | translate }}
+            @if (dstWalletOptions().length === 0) {
+                {{
+                    'transfer_transaction.no_dst_wallet'
+                        | translate: { currency: selectedSrcWalletData()?.currencyCode }
+                }}
             }
         </div>
 
