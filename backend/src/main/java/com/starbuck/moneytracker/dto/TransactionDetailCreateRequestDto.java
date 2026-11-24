@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 public record TransactionDetailCreateRequestDto(
         @Digits(integer = 8, fraction = 2) BigDecimal price,
 
-        @Length(min = 3, max = 20, message = "Name must be between 3 and 20 characters")
+        @Length(min = 3, max = 120, message = "Name must be between 3 and 20 characters")
         String name,
 
         @Digits(integer = 8, fraction = 2) BigDecimal weight,
