@@ -122,6 +122,7 @@
   },
   "transfer_transaction": {
     "create": "Create transfer",
+    "description": "Transfer between wallets. You can only transfer between wallets with the same currency!",
     "source": "From",
     "destination": "To",
     "src_name": "Outgoing transaction name",

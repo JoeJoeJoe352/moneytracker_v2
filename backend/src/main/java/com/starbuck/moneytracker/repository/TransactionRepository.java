@@ -52,7 +52,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      * Kiszámolja a tranzakciók alapján, hogy jelenlegi hónapban mennyi kiadás volt.
      * Az átvezetések nem számítanak bele, mert csak a user walletjei között
      * mozgatnak pénzt.
-     * A sima tranzakciók specialType-ja NULL, ezért kell az IS NULL is
      *
      * @param userId
      * @return

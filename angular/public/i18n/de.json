@@ -122,6 +122,7 @@
   },
   "transfer_transaction": {
     "create": "Überweisung erstellen",
+    "description": "Überweisung zwischen Wallets. Überweisungen sind nur zwischen Wallets mit gleicher Währung möglich!",
     "source": "Von",
     "destination": "Nach",
     "src_name": "Name der ausgehenden Transaktion",

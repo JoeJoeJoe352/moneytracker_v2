@@ -1,5 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form transfer-transaction-form">
     <mat-dialog-content>
+        <p>{{ 'transfer_transaction.description' | translate }}</p>
         <!-- Forrás oldal -->
         <h3 class="side-title">{{ 'transfer_transaction.source' | translate }}</h3>
         <div class="form-row">

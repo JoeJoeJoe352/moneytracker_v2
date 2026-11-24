@@ -122,6 +122,7 @@
   },
   "transfer_transaction": {
     "create": "Átvezetés létrehozása",
+    "description": "Átvezetés tárcák között. Csak azonos pénznemű tárcák között lehet átvezetni!",
     "source": "Honnan",
     "destination": "Hová",
     "src_name": "Kimenő tranzakció neve",
