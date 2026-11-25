@@ -257,10 +257,7 @@
     "changed-interval": "Das Wiederholungsintervall wurde geändert. Bitte überprüfe das Datum der nächsten Fälligkeit."
   },
   "language": {
-    "title": "Sprache",
-    "hu": "Ungarn",
-    "de": "Deutsch",
-    "en": "Englisch"
+    "title": "Sprache"
   },
   "app-update": {
     "available": "Eine neue Version der App ist verfügbar.",

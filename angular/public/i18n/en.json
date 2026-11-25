@@ -257,10 +257,7 @@
     "changed-interval": "The recurrence interval has changed. Please check the date of the next occurrence."
   },
   "language": {
-    "title": "Language",
-    "hu": "Hungarian",
-    "de": "German",
-    "en": "English"
+    "title": "Language"
   },
   "app-update": {
     "available": "A new version of the app is available.",

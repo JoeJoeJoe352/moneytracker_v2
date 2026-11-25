@@ -257,10 +257,7 @@
     "changed-interval": "Megváltozott az ismétlődés típusa. Ellenőrizd a következő esedékesség idejét!"
   },
   "language": {
-    "title": "Nyelv",
-    "hu": "Magyar",
-    "de": "Német",
-    "en": "Angol"
+    "title": "Nyelv"
   },
   "app-update": {
     "available": "Elérhető az alkalmazás új verziója.",
