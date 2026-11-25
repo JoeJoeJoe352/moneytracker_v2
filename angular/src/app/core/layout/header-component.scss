@@ -18,4 +18,21 @@ mat-toolbar {
         // és ez oldalra görgetést tud okozni. 
         padding-right: 12px;
     }
+
+    // csak oldalsáv nélküli nézetben jelenik meg, a header bal szélére tolva
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: auto;
+        padding-left: 16px;
+        color: var(--moneytracker-black);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 18px;
+
+        img {
+            height: 32px;
+        }
+    }
 }

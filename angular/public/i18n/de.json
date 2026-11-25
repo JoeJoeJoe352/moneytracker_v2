@@ -13,7 +13,13 @@
     "financial-stress": "Finanzieller Stress nimmt ab — weniger Überraschungen, mehr Kontrolle.",
     "faster": "Du kannst schneller sparen — du siehst, wo du klug optimieren kannst.",
     "security": "Es gibt dir Sicherheit und Freiheit — du weißt genau, ob du dir etwas leisten kannst.",
-    "goals": "Es hilft dir, langfristige Ziele zu erreichen — Wohnung, Reisen, Rücklage, was auch immer wichtig ist."
+    "goals": "Es hilft dir, langfristige Ziele zu erreichen — Wohnung, Reisen, Rücklage, was auch immer wichtig ist.",
+    "tagline": "Verwalte deine Geldbörsen, Einnahmen und Ausgaben an einem Ort — und wisse immer, wo du stehst.",
+    "register": "Kostenlos starten",
+    "login": "Anmelden",
+    "toDashboard": "Zur Startseite",
+    "ctaTitle": "Bereit, deine Finanzen in die Hand zu nehmen?",
+    "ctaText": "Erstelle in einer Minute ein Konto und beginne noch heute."
   },
   "login": {
     "title": "Anmeldung",

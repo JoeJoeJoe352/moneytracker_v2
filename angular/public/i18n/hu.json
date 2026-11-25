@@ -13,7 +13,13 @@
     "financial-stress": "Csökken a pénzügyi stressz — kevesebb a váratlan helyzet, több a kontroll.",
     "faster": "Gyorsabban tudsz félretenni — látod, hol tudsz okosan optimalizálni.",
     "security": "Biztonságot és szabadságot ad — pontosan tudod, hogy megengedhetsz-e valamit magadnak.",
-    "goals": "Segít elérni hosszú távú célokat — lakás, utazás, tartalék, bármi, ami fontos."
+    "goals": "Segít elérni hosszú távú célokat — lakás, utazás, tartalék, bármi, ami fontos.",
+    "tagline": "Kövesd a tárcáidat, bevételeidet és kiadásaidat egy helyen — és mindig tudd, hol tartasz.",
+    "register": "Kezdd el ingyen",
+    "login": "Bejelentkezés",
+    "toDashboard": "Tovább a főoldalra",
+    "ctaTitle": "Készen állsz, hogy kézbe vedd a pénzügyeidet?",
+    "ctaText": "Regisztrálj egy perc alatt, és kezdd el még ma."
   },
   "login": {
     "title": "Bejelentkezés",

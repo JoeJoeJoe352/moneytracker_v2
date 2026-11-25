@@ -1,5 +1,5 @@
 import { Component, computed, inject, Signal, signal } from '@angular/core';
-import { _, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SupportedLangEnum } from '../../shared/enums';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -29,15 +29,15 @@ export class LanguageSwitcherComponent {
         return [
             {
                 id: SupportedLangEnum.hu,
-                name: this.translateService.instant(_('language.hu')) as string,
+                name: 'Magyar',
             },
             {
                 id: SupportedLangEnum.en,
-                name: this.translateService.instant(_('language.en')) as string,
+                name: 'English',
             },
             {
                 id: SupportedLangEnum.de,
-                name: this.translateService.instant(_('language.de')) as string,
+                name: 'Deutsch',
             },
         ];
     });
