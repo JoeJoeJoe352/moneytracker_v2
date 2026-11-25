@@ -1,39 +1,44 @@
-<mat-card class="title-card">
-    <mat-card-header>
-        <h1 mat-card-title>{{ 'welcome.title' | translate }}</h1>
-    </mat-card-header>
-</mat-card>
+<section class="hero">
+    <div class="hero-content">
+        <h1>{{ 'welcome.title' | translate }}</h1>
+        <p class="hero-tagline">{{ 'welcome.tagline' | translate }}</p>
+        <ng-container *ngTemplateOutlet="ctaButtons" />
+    </div>
+</section>
 
-<mat-card>
-    <mat-card-content>
-        <p>
-            {{ 'welcome.welcomeText' | translate }}
-        </p>
-        <mat-card-subtitle>
-            <h2 mat-card-subtitle>{{ 'welcome.benefitsTitle' | translate }}</h2>
-        </mat-card-subtitle>
-        <ul>
-            <li>
-                {{ 'welcome.liquidityTitle' | translate }}
+<section class="intro">
+    <p>{{ 'welcome.welcomeText' | translate }}</p>
+</section>
+
+<section class="benefits">
+    <h2>{{ 'welcome.benefitsTitle' | translate }}</h2>
+    <ul class="benefit-grid">
+        @for (benefit of benefits; track benefit.langKey) {
+            <li class="benefit-card">
+                <mat-icon class="benefit-icon" aria-hidden="true" [fontIcon]="benefit.icon" />
+                <p>{{ benefit.langKey | translate }}</p>
             </li>
-            <li>
-                {{ 'welcome.easier' | translate }}
-            </li>
-            <li>
-                {{ 'welcome.decisions' | translate }}
-            </li>
-            <li>
-                {{ 'welcome.financial-stress' | translate }}
-            </li>
-            <li>
-                {{ 'welcome.faster' | translate }}
-            </li>
-            <li>
-                {{ 'welcome.security' | translate }}
-            </li>
-            <li>
-                {{ 'welcome.goals' | translate }}
-            </li>
-        </ul>
-    </mat-card-content>
-</mat-card>
+        }
+    </ul>
+</section>
+
+<section class="closing-cta">
+    <h2>{{ 'welcome.ctaTitle' | translate }}</h2>
+    <p>{{ 'welcome.ctaText' | translate }}</p>
+    <ng-container *ngTemplateOutlet="ctaButtons" />
+</section>
+
+<ng-template #ctaButtons>
+    <div class="cta-buttons">
+        @if (userData.isUserLogged()) {
+            <a mat-flat-button routerLink="/">{{ 'welcome.toDashboard' | translate }}</a>
+        } @else {
+            <button mat-flat-button type="button" (click)="openRegister()">
+                {{ 'welcome.register' | translate }}
+            </button>
+            <button mat-stroked-button type="button" (click)="openLogin()">
+                {{ 'welcome.login' | translate }}
+            </button>
+        }
+    </div>
+</ng-template>

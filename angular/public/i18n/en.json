@@ -13,7 +13,13 @@
     "financial-stress": "Financial stress decreases — fewer surprises, more control.",
     "faster": "You can save faster — you see where you can optimize smartly.",
     "security": "It gives security and freedom — you know exactly whether you can afford something.",
-    "goals": "It helps you reach long-term goals — housing, travel, savings, whatever matters."
+    "goals": "It helps you reach long-term goals — housing, travel, savings, whatever matters.",
+    "tagline": "Track your wallets, income and expenses in one place — and always know where you stand.",
+    "register": "Get started for free",
+    "login": "Log in",
+    "toDashboard": "Go to dashboard",
+    "ctaTitle": "Ready to take control of your money?",
+    "ctaText": "Create an account in a minute and start tracking today."
   },
   "login": {
     "title": "Log in",
@@ -251,10 +257,7 @@
     "changed-interval": "The recurrence interval has changed. Please check the date of the next occurrence."
   },
   "language": {
-    "title": "Language",
-    "hu": "Hungarian",
-    "de": "German",
-    "en": "English"
+    "title": "Language"
   },
   "app-update": {
     "available": "A new version of the app is available.",

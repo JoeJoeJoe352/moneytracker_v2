@@ -1,23 +1,26 @@
-<div class="app-shell">
-    <button
-        type="button"
-        class="mobile-menu-backdrop"
-        [class.mobile-menu-backdrop-open]="isMobileMenuOpen()"
-        [tabIndex]="isMobileMenuOpen() ? 0 : -1"
-        [attr.aria-label]="'header.menu.close' | translate"
-        (click)="closeMobileMenu()"
-    ></button>
-    <app-sidebar
-        id="app-sidebar-nav"
-        role="navigation"
-        class="app-shell-sidebar"
-        [class.mobile-menu-open]="isMobileMenuOpen()"
-        [class.mobile-menu-closed]="!isMobileMenuOpen()"
-    />
+<div class="app-shell" [class.app-shell-no-sidebar]="isSidebarHidden()">
+    @if (!isSidebarHidden()) {
+        <button
+            type="button"
+            class="mobile-menu-backdrop"
+            [class.mobile-menu-backdrop-open]="isMobileMenuOpen()"
+            [tabIndex]="isMobileMenuOpen() ? 0 : -1"
+            [attr.aria-label]="'header.menu.close' | translate"
+            (click)="closeMobileMenu()"
+        ></button>
+        <app-sidebar
+            id="app-sidebar-nav"
+            role="navigation"
+            class="app-shell-sidebar"
+            [class.mobile-menu-open]="isMobileMenuOpen()"
+            [class.mobile-menu-closed]="!isMobileMenuOpen()"
+        />
+    }
     <div class="app-shell-main">
         <app-header
             role="banner"
             class="app-shell-header"
+            [isSidebarHidden]="isSidebarHidden()"
             [(isMobileMenuOpen)]="isMobileMenuOpen"
         />
         <main class="app-shell-content" role="main">

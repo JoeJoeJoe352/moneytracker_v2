@@ -34,3 +34,9 @@
         }
     }
 }
+
+// Oldalsáv nélküli nézet (landing oldal): a tartalom a teljes szélességet kitölti
+.app-shell-no-sidebar .app-shell-main .app-shell-content {
+    margin-right: 0;
+    padding: 0;
+}
