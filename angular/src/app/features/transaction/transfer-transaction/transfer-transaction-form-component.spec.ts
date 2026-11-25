@@ -81,10 +81,18 @@ describe('TransferTransactionFormComponent (Vitest)', () => {
         fixture.detectChanges();
     }
 
-    function walletErrorText(): string {
-        const element = fixture.debugElement.query(By.css('.wallet-error'))
-            .nativeElement as HTMLElement;
-        return element.textContent?.trim() ?? '';
+    /**
+     * Lenyitja a cél wallet dropdownt, és visszaadja az opciók szövegét
+     */
+    function dstWalletOptionTexts(): string[] {
+        const trigger = fixture.nativeElement.querySelector(
+            '#transfer-dst-wallet .mat-mdc-select-trigger',
+        ) as HTMLElement;
+        trigger.click();
+        fixture.detectChanges();
+        return Array.from(document.querySelectorAll('mat-option')).map(
+            (option) => option.textContent?.trim() ?? '',
+        );
     }
 
     it('should start with the default wallet as source and an empty, invalid form', () => {
@@ -162,15 +170,15 @@ describe('TransferTransactionFormComponent (Vitest)', () => {
         expect(component.dstWalletId.value).toBe(1);
     });
 
-    it('should not show the no destination wallet message when there is a valid destination', () => {
-        expect(walletErrorText()).toBe('');
+    it('should offer only the other wallets with the same currency as destination', () => {
+        expect(dstWalletOptionTexts()).toEqual(['Megtakarítás (HUF)']);
     });
 
-    it('should show the no destination wallet message when no wallet has the same currency', () => {
+    it('should show the no destination wallet option when no wallet has the same currency', () => {
         component.srcWalletId.setValue(3);
         fixture.detectChanges();
 
-        expect(walletErrorText()).toBe('transfer_transaction.no_dst_wallet');
+        expect(dstWalletOptionTexts()).toEqual(['transfer_transaction.no_dst_wallet']);
     });
 
     it('should reject a non-positive amount', () => {
