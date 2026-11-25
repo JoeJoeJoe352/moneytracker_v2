@@ -70,6 +70,14 @@
             <mat-form-field>
                 <mat-label>{{ 'transfer_transaction.dst_wallet' | translate }}</mat-label>
                 <mat-select id="transfer-dst-wallet" formControlName="dstWalletId">
+                    @if (dstWalletOptions().length === 0) {
+                        <mat-option [value]="null">
+                            {{
+                                'transfer_transaction.no_dst_wallet'
+                                    | translate: { currency: selectedSrcWalletData()?.currencyCode }
+                            }}
+                        </mat-option>
+                    }
                     @for (item of dstWalletOptions(); track item.id) {
                         <mat-option [value]="item.id"
                             >{{ item.name }} ({{ item.currencyCode }})</mat-option
@@ -87,15 +95,6 @@
                     }}</mat-error>
                 }
             </mat-form-field>
-        </div>
-
-        <div class="wallet-error" role="alert">
-            @if (dstWalletOptions().length === 0) {
-                {{
-                    'transfer_transaction.no_dst_wallet'
-                        | translate: { currency: selectedSrcWalletData()?.currencyCode }
-                }}
-            }
         </div>
 
         <!-- Közös adatok -->
