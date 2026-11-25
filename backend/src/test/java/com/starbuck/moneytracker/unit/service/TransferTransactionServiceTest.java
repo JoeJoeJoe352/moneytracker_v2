@@ -257,7 +257,13 @@ class TransferTransactionServiceTest {
         side.setId(7L);
 
         Mockito.lenient().when(currentUser.getUser()).thenReturn(new User(1L, "name", "password", "email"));
-        Mockito.when(transferSidesRepo.findActiveById(7L)).thenReturn(Optional.of(side));
+        Mockito.lenient().when(transferSidesRepo.findActiveById(7L)).thenReturn(Optional.of(side));
+        Mockito.lenient()
+                .when(transferSidesRepo.findActiveBySideTransactionId(10L))
+                .thenReturn(Optional.of(side));
+        Mockito.lenient()
+                .when(transferSidesRepo.findActiveBySideTransactionId(11L))
+                .thenReturn(Optional.of(side));
         // módosításhoz detailokkal, törléshez detailok nélkül töltődik be
         Mockito.lenient()
                 .when(transactionRepo.getTransactionByIdWithDetails(10L, 1L))
@@ -268,6 +274,45 @@ class TransferTransactionServiceTest {
         Mockito.lenient().when(transactionRepo.findById(10L)).thenReturn(Optional.of(src));
         Mockito.lenient().when(transactionRepo.findById(11L)).thenReturn(Optional.of(dst));
         return side;
+    }
+
+    /**
+     * Az átvezetés bármelyik oldalának id-jával lekérhető
+     */
+    @Test
+    void getLinkedTransactionByTransactionId_returnsTransferForEitherSide() {
+        TransferTransactionSide side = mockExistingTransfer();
+
+        assertSame(side, transferService.getLinkedTransactionByTransactionId(10L));
+        assertSame(side, transferService.getLinkedTransactionByTransactionId(11L));
+    }
+
+    /**
+     * Más user tranzakciójához tartozó átvezetés nem kérhető le, az átvezetést nem is keresi
+     */
+    @Test
+    void getLinkedTransactionByTransactionId_throwsWhenTransactionBelongsToOtherUser() {
+        mockExistingTransfer();
+        Mockito.when(transactionRepo.getTransactionByIdWithDetails(10L, 1L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transferService.getLinkedTransactionByTransactionId(10L);
+        });
+
+        Mockito.verify(transferSidesRepo, Mockito.never()).findActiveBySideTransactionId(Mockito.anyLong());
+    }
+
+    /**
+     * Ha a tranzakció nem része (aktív) átvezetésnek, kivétel keletkezik
+     */
+    @Test
+    void getLinkedTransactionByTransactionId_throwsWhenTransactionIsNotPartOfTransfer() {
+        mockExistingTransfer();
+        Mockito.when(transferSidesRepo.findActiveBySideTransactionId(10L)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            transferService.getLinkedTransactionByTransactionId(10L);
+        });
     }
 
     /**

@@ -58,4 +58,11 @@ export class TransactionModalComponent {
     protected isRecurringTransaction = computed(() => {
         return this.data.transaction()?.specialType === TransactionSpecialTypeEnum.RECURRING;
     });
+
+    /**
+     * Átvezetés egyik oldala-e (itt csak olvasható)
+     */
+    protected isTransferTransaction = computed(() => {
+        return this.data.transaction()?.specialType === TransactionSpecialTypeEnum.TRANSFER;
+    });
 }

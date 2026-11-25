@@ -13,7 +13,7 @@
             </div>
         </mat-dialog-content>
     } @else {
-        @if (isSyncTransaction() || isRecurringTransaction()) {
+        @if (isSyncTransaction() || isRecurringTransaction() || isTransferTransaction()) {
             <mat-dialog-content>
                 <div class="warning-block">
                     <div>
@@ -21,6 +21,8 @@
                             {{ 'transaction.is_sync_transaction' | translate }}
                         } @else if (isRecurringTransaction()) {
                             {{ 'transaction.is_recurring_transaction' | translate }}
+                        } @else if (isTransferTransaction()) {
+                            {{ 'transaction.is_transfer_transaction' | translate }}
                         }
                     </div>
                 </div>

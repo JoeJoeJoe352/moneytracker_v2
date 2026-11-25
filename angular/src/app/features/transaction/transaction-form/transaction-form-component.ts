@@ -153,6 +153,14 @@ export class TransactionFormComponent implements OnChanges {
     );
 
     /**
+     * Átvezetés egyik oldala-e. Az átvezetés oldalai csak együtt módosíthatók/törölhetők (a
+     * backend külön elutasítja), ezért ilyenkor a form csak olvasható
+     */
+    protected readonly isTransferTransaction = computed(
+        () => this.transaction()?.specialType === TransactionSpecialTypeEnum.TRANSFER,
+    );
+
+    /**
      * Az ismétlődő tranzakció id-ja, amiből a tranzakció létrejött. Null, ha nincs (vagy már
      * törölték), ilyenkor a megnyitás gomb sem jelenik meg
      */
@@ -208,6 +216,11 @@ export class TransactionFormComponent implements OnChanges {
         if (this.isSyncTransaction() || this.isRecurringTransaction()) {
             this.walletId.disable({ emitEvent: false });
         }
+
+        // Az átvezetés oldala csak olvasható. Ugyanezért kell a végén letiltani, mint a walletet
+        if (this.isTransferTransaction()) {
+            this.transactionForm.disable({ emitEvent: false });
+        }
     }
 
     /**
@@ -243,6 +256,10 @@ export class TransactionFormComponent implements OnChanges {
      * Form elküldésekori műveletek
      */
     protected onSubmit(): void {
+        // Letiltott formot is el lehetne küldeni (pl. Enterrel), de átvezetést itt nem lehet menteni
+        if (this.isTransferTransaction()) {
+            return;
+        }
         if (this.transactionForm.invalid) {
             this.transactionForm.markAllAsTouched();
             return;

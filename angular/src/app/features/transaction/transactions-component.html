@@ -18,7 +18,7 @@
 @if (isHistoryMode() && isThereEnoughElementToShowChart()) {
     <app-transaction-bar-chart-component
         [transactionList]="reversedTransactionData()"
-        (editTransaction)="modal.open($event.transactionId)"
+        (editTransaction)="modal.openForTransaction($event)"
     />
 }
 
@@ -26,7 +26,7 @@
     [title]="isHistoryMode() ? null : ('mainpage.last_transactions' | translate)"
     [listStatus]="transactionListData.status()"
     [transactions]="transactionListData.hasValue() ? transactionListData.value().transactions : []"
-    (editTransaction)="modal.open($event.transactionId)"
+    (editTransaction)="modal.openForTransaction($event)"
 />
 
 @let pageData = this.pageData();

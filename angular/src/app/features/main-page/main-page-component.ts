@@ -46,10 +46,17 @@ export class MainPageComponent {
     protected reloadTransactionListTrigger = signal(0);
 
     constructor() {
-        this.modal.changed.pipe(takeUntilDestroyed()).subscribe(() => {
-            this.reloadTransactionListTrigger.update((value) => value + 1);
-            this.reloadSummaryList();
-        });
+        this.modal.changed
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.reloadAfterTransactionsChanged());
+    }
+
+    /**
+     * Tranzakció mentése/törlése után a listát és az összesítést is újratöltjük
+     */
+    private reloadAfterTransactionsChanged(): void {
+        this.reloadTransactionListTrigger.update((value) => value + 1);
+        this.reloadSummaryList();
     }
 
     /**

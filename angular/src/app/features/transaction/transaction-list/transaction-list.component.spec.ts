@@ -73,7 +73,8 @@ describe('TransactionListComponent (Vitest)', () => {
         const card = fixture.nativeElement.querySelector('app-transaction-card');
         card.click();
 
-        expect(spy).toHaveBeenCalledWith({ transactionId: 5 });
+        // a tesztadatban nincs specialType, ezért undefined-ként megy tovább
+        expect(spy).toHaveBeenCalledWith({ transactionId: 5, specialType: undefined });
     });
 
     it('should show empty message when no transactions', () => {

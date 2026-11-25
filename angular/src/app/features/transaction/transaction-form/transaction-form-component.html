@@ -181,6 +181,7 @@
                         mat-mini-fab
                         type="button"
                         class="mat-fab-green"
+                        [disabled]="isTransferTransaction()"
                         [attr.aria-label]="'transaction.detail.add-detail' | translate"
                         (click)="addRow()"
                     >
@@ -196,7 +197,7 @@
                 mat-flat-button
                 type="button"
                 class="mat-button-danger"
-                [disabled]="isTransactionFormDisabled()"
+                [disabled]="isTransactionFormDisabled() || isTransferTransaction()"
                 (click)="deleted.emit(currentTransaction.id)"
             >
                 {{ 'transaction.delete' | translate }}
@@ -214,7 +215,11 @@
             </button>
         }
 
-        <button mat-flat-button type="submit" [disabled]="isTransactionFormDisabled()">
+        <button
+            mat-flat-button
+            type="submit"
+            [disabled]="isTransactionFormDisabled() || isTransferTransaction()"
+        >
             {{ 'transaction.save' | translate }}
         </button>
     </mat-dialog-actions>

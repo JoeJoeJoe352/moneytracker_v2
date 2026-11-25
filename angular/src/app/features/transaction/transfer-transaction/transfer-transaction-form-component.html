@@ -1,0 +1,151 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form transfer-transaction-form">
+    <mat-dialog-content>
+        <p>{{ 'transfer_transaction.description' | translate }}</p>
+        @if (transfer()) {
+            <p class="text-center">
+                {{ 'transfer_transaction.wallet_locked' | translate }}
+            </p>
+        }
+        <!-- Forrás oldal -->
+        <h3 class="side-title">{{ 'transfer_transaction.source' | translate }}</h3>
+        <div class="form-row">
+            <mat-form-field>
+                <mat-label>{{ 'transfer_transaction.src_name' | translate }}</mat-label>
+                <input
+                    cdkFocusInitial
+                    id="transfer-src-name"
+                    matInput
+                    type="text"
+                    formControlName="srcTransactionName"
+                />
+                @if (srcTransactionName.invalid && srcTransactionName.touched) {
+                    @if (srcTransactionName.hasError('required')) {
+                        <mat-error>{{ 'transaction.name.required' | translate }}</mat-error>
+                    }
+                    @if (srcTransactionName.hasError('minlength')) {
+                        <mat-error>{{ 'transaction.name.minlength' | translate }}</mat-error>
+                    }
+                    @if (srcTransactionName.hasError('maxlength')) {
+                        <mat-error>{{ 'transaction.name.maxlength' | translate }}</mat-error>
+                    }
+                }
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>{{ 'transfer_transaction.src_wallet' | translate }}</mat-label>
+                <mat-select id="transfer-src-wallet" formControlName="srcWalletId">
+                    @for (item of srcWalletOptions(); track item.id) {
+                        <mat-option [value]="item.id"
+                            >{{ item.name }} ({{ item.currencyCode }})</mat-option
+                        >
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <!-- Cél oldal -->
+        <h3 class="side-title">{{ 'transfer_transaction.destination' | translate }}</h3>
+        <div class="form-row">
+            <mat-form-field>
+                <mat-label>{{ 'transfer_transaction.dst_name' | translate }}</mat-label>
+                <input
+                    id="transfer-dst-name"
+                    matInput
+                    type="text"
+                    formControlName="dstTransactionName"
+                />
+                @if (dstTransactionName.invalid && dstTransactionName.touched) {
+                    @if (dstTransactionName.hasError('required')) {
+                        <mat-error>{{ 'transaction.name.required' | translate }}</mat-error>
+                    }
+                    @if (dstTransactionName.hasError('minlength')) {
+                        <mat-error>{{ 'transaction.name.minlength' | translate }}</mat-error>
+                    }
+                    @if (dstTransactionName.hasError('maxlength')) {
+                        <mat-error>{{ 'transaction.name.maxlength' | translate }}</mat-error>
+                    }
+                }
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>{{ 'transfer_transaction.dst_wallet' | translate }}</mat-label>
+                <mat-select id="transfer-dst-wallet" formControlName="dstWalletId">
+                    @if (dstWalletOptions().length === 0) {
+                        <mat-option [value]="null">
+                            {{
+                                'transfer_transaction.no_dst_wallet'
+                                    | translate: { currency: selectedSrcWalletData()?.currencyCode }
+                            }}
+                        </mat-option>
+                    }
+                    @for (item of dstWalletOptions(); track item.id) {
+                        <mat-option [value]="item.id"
+                            >{{ item.name }} ({{ item.currencyCode }})</mat-option
+                        >
+                    }
+                </mat-select>
+                @if (dstWalletId.hasError('required') && dstWalletId.touched) {
+                    <mat-error>{{
+                        'transfer_transaction.dst_wallet.required' | translate
+                    }}</mat-error>
+                }
+            </mat-form-field>
+        </div>
+
+        <!-- Közös adatok -->
+        <div class="form-row">
+            <mat-form-field>
+                <mat-label>{{ 'transaction.price' | translate }}</mat-label>
+                <input id="transfer-price" matInput type="number" formControlName="priceSum" />
+                <span matTextSuffix>{{ currencySymbol() }}</span>
+                @if (priceSum.invalid && priceSum.touched) {
+                    @if (priceSum.hasError('required')) {
+                        <mat-error>{{ 'transaction.price.required' | translate }}</mat-error>
+                    }
+                    @if (priceSum.hasError('greaterThan')) {
+                        <mat-error>{{ 'transaction.price.min' | translate }}</mat-error>
+                    }
+                }
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>{{ 'transaction.date' | translate }}</mat-label>
+                <input
+                    id="transfer-date"
+                    matInput
+                    [matDatepicker]="transferDatePicker"
+                    formControlName="transactionDate"
+                    [placeholder]="'transaction.date.placeholder' | translate"
+                    [max]="lastSelectableDay"
+                />
+                <mat-hint>{{ 'etc.datepicker.format' | translate }}</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="transferDatePicker" />
+                <mat-datepicker #transferDatePicker />
+                @if (transactionDate.invalid && transactionDate.touched) {
+                    @if (transactionDate.hasError('required')) {
+                        <mat-error>{{ 'transaction.date.required' | translate }}</mat-error>
+                    }
+                    @if (transactionDate.hasError('invalidDate')) {
+                        <mat-error>{{ 'transaction.date.invalid' | translate }}</mat-error>
+                    }
+                }
+            </mat-form-field>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        @if (transfer()) {
+            <button
+                mat-flat-button
+                type="button"
+                class="mat-button-danger"
+                [disabled]="isFormDisabled()"
+                (click)="deleted.emit()"
+            >
+                {{ 'transaction.delete' | translate }}
+            </button>
+        }
+        <button mat-flat-button type="submit" [disabled]="isFormDisabled()">
+            {{ 'transaction.save' | translate }}
+        </button>
+    </mat-dialog-actions>
+</form>

@@ -2,6 +2,7 @@ package com.starbuck.moneytracker.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.starbuck.moneytracker.dto.TransferTransactionCreateDto;
+import com.starbuck.moneytracker.dto.TransferTransactionResponseDto;
 import com.starbuck.moneytracker.dto.TransferTransactionUpdateDto;
 import com.starbuck.moneytracker.mapper.TransferTransactionMapper;
 import com.starbuck.moneytracker.service.TransferTransactionService;
@@ -31,6 +33,14 @@ public class TransferTransactionController {
     @PostMapping()
     public void createTransferTransaction(@Valid @RequestBody TransferTransactionCreateDto dto) {
         this.service.createLinkedTransaction(mapper.fromCreateRequest(dto));
+    }
+
+    /**
+     * Lekéri az átvezetést, aminek a megadott tranzakció az egyik oldala
+     */
+    @GetMapping(path = "/by-transaction/{transactionId}")
+    public TransferTransactionResponseDto getTransferTransactionByTransactionId(@PathVariable Long transactionId) {
+        return mapper.toResponseDto(service.getLinkedTransactionByTransactionId(transactionId));
     }
 
     /**

@@ -89,6 +89,7 @@
     "categories.add": "Add categories",
     "is_sync_transaction": "Transaction created during a balance sync",
     "is_recurring_transaction": "Transaction created from a recurring transaction",
+    "is_transfer_transaction": "This is part of a transfer, so it cannot be edited or deleted here",
     "recurring_transaction.open": "Open recurring transaction",
     "recurring_transaction.open_unsaved_confirm": "Your unsaved changes will be lost. Do you want to open the recurring transaction anyway?",
     "wallet.sync_locked": "The wallet of a sync transaction cannot be changed",
@@ -116,7 +117,23 @@
       "complex_price_mode": "Enter quantity and unit price",
       "total_price": "Total price"
     },
-    "recurring_transaction": "Recurring transaction"
+    "recurring_transaction": "Recurring transaction",
+    "transfer_transaction": "Transfer transaction"
+  },
+  "transfer_transaction": {
+    "create": "Create transfer",
+    "description": "Transfer between wallets. You can only transfer between wallets with the same currency!",
+    "source": "From",
+    "destination": "To",
+    "src_name": "Outgoing transaction name",
+    "src_wallet": "Source wallet",
+    "dst_name": "Incoming transaction name",
+    "dst_wallet": "Destination wallet",
+    "dst_wallet.required": "The destination wallet is required!",
+    "no_dst_wallet": "There is no destination wallet with {{currency}} currency!",
+    "update": "Edit transfer",
+    "wallet_locked": "The wallet of an existing transfer cannot be changed",
+    "delete.confirm": "Are you sure you want to delete the transfer? Both sides will be deleted."
   },
   "wallet": {
     "create": "Create wallet",
@@ -163,6 +180,7 @@
     "increase": "Increase",
     "decrease": "Decrease",
     "create_transaction.button": "Create transaction",
+    "create_transfer.button": "Transfer",
     "no_transaction": "No transactions yet",
     "balance_change_this_month": "this month",
     "total_income": "Income this month",

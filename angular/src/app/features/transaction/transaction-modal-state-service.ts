@@ -6,10 +6,13 @@ import { TransactionActionService } from './transaction-action-service';
 import { CategoryService } from './category-service';
 import {
     CategoryResponseInterface,
+    EditTransactionEvent,
     NewTransaction,
     TransactionDataFromBackend,
 } from './interfaces';
 import { TransactionModalComponent, TransactionModalInputInterface } from './transaction-modal';
+import { TransferTransactionModalComponent } from './transfer-transaction/transfer-transaction-modal';
+import { TransactionSpecialTypeEnum } from '@shared/enums';
 import { NotificationService } from '@shared/services/notification-service';
 import { _ } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -203,6 +206,35 @@ export class TransactionModalStateService {
             this.dialogRef = null;
             this.closed.next();
         });
+    }
+
+    /**
+     * Egy meglévő tranzakció megnyitása (listából, diagramról). Átvezetés oldalánál az átvezetés
+     * modal nyílik meg, mert az oldalai csak együtt módosíthatók
+     */
+    public openForTransaction(event: EditTransactionEvent): void {
+        if (event.specialType === TransactionSpecialTypeEnum.TRANSFER) {
+            this.openTransfer(event.transactionId);
+        } else {
+            this.open(event.transactionId);
+        }
+    }
+
+    /**
+     * Átvezetés létrehozó/szerkesztő modal megnyitása. Sikeres mentés/törlés után a changed,
+     * bezáráskor a closed emittál, ugyanúgy, mint a tranzakció modalnál
+     *
+     * @param transactionId az átvezetés egyik oldalának id-ja, null esetén új átvezetés
+     */
+    public openTransfer(transactionId: number | null = null): void {
+        TransferTransactionModalComponent.open(this.dialog, { transactionId })
+            .afterClosed()
+            .subscribe((changed) => {
+                if (changed) {
+                    this.changed.next();
+                }
+                this.closed.next();
+            });
     }
 
     /**

@@ -1,5 +1,5 @@
 import { Component, computed, input, output } from '@angular/core';
-import { TransactionListElementData } from '../interfaces';
+import { EditTransactionEvent, TransactionListElementData } from '../interfaces';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
@@ -28,7 +28,7 @@ export default class TransactionListComponent {
     /**
      * Ha user módosítani szeretne egy tranzakciót
      */
-    public editTransaction = output<{ transactionId: number }>();
+    public editTransaction = output<EditTransactionEvent>();
 
     /**
      * Kezdő betöltődés alatt van-e a lista
@@ -47,10 +47,13 @@ export default class TransactionListComponent {
     /**
      * Modal felnyitás
      */
-    protected openModalEmit(transactionId: number) {
+    protected openModalEmit(transaction: TransactionListElementData) {
         if (this.isTransactionListReLoading()) {
             return;
         }
-        this.editTransaction.emit({ transactionId: transactionId });
+        this.editTransaction.emit({
+            transactionId: transaction.id,
+            specialType: transaction.specialType,
+        });
     }
 }

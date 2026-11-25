@@ -89,6 +89,7 @@
     "categories.add": "Kategorien hinzufügen",
     "is_sync_transaction": "Bei einer Guthaben-Synchronisierung erstellte Transaktion",
     "is_recurring_transaction": "Aus einer wiederkehrenden Transaktion erstellte Transaktion",
+    "is_transfer_transaction": "Dies ist Teil einer Überweisung und kann hier nicht bearbeitet oder gelöscht werden",
     "recurring_transaction.open": "Wiederkehrende Transaktion öffnen",
     "recurring_transaction.open_unsaved_confirm": "Deine nicht gespeicherten Änderungen gehen verloren. Möchtest du die wiederkehrende Transaktion trotzdem öffnen?",
     "wallet.sync_locked": "Das Wallet einer Synchronisierungstransaktion kann nicht geändert werden",
@@ -116,7 +117,23 @@
       "complex_price_mode": "Menge und Einzelpreis angeben",
       "total_price": "Gesamtpreis"
     },
-    "recurring_transaction": "Wiederkehrende Transaktion"
+    "recurring_transaction": "Wiederkehrende Transaktion",
+    "transfer_transaction": "Überweisungstransaktion"
+  },
+  "transfer_transaction": {
+    "create": "Überweisung erstellen",
+    "description": "Überweisung zwischen Wallets. Überweisungen sind nur zwischen Wallets mit gleicher Währung möglich!",
+    "source": "Von",
+    "destination": "Nach",
+    "src_name": "Name der ausgehenden Transaktion",
+    "src_wallet": "Quell-Wallet",
+    "dst_name": "Name der eingehenden Transaktion",
+    "dst_wallet": "Ziel-Wallet",
+    "dst_wallet.required": "Das Ziel-Wallet ist erforderlich!",
+    "no_dst_wallet": "Es gibt kein Ziel-Wallet mit der Währung {{currency}}!",
+    "update": "Überweisung bearbeiten",
+    "wallet_locked": "Das Wallet einer bestehenden Überweisung kann nicht geändert werden",
+    "delete.confirm": "Möchtest du die Überweisung wirklich löschen? Beide Seiten werden gelöscht."
   },
   "wallet": {
     "create": "Wallet erstellen",
@@ -163,6 +180,7 @@
     "increase": "Anstieg",
     "decrease": "Rückgang",
     "create_transaction.button": "Transaktion erstellen",
+    "create_transfer.button": "Überweisung",
     "no_transaction": "Noch keine Transaktion erfasst",
     "balance_change_this_month": "in diesem Monat",
     "total_income": "Einnahmen in diesem Monat",

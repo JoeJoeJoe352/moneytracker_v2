@@ -1,0 +1,21 @@
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    mat-form-field {
+        flex: 1 1 220px;
+    }
+}
+
+// Két közvetlenül egymás alatti sor közé kell térköz: az outline mező lebegő labelje
+// a mező fölé lóg, így a felette lévő sor mat-errorjába érne
+.form-row + .form-row {
+    margin-top: 8px;
+}
+
+.side-title {
+    margin: 8px 0 4px;
+    font-size: 16px;
+    font-weight: 600;
+}

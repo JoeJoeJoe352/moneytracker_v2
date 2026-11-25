@@ -93,6 +93,25 @@ public class TransferTransactionService {
     }
 
     /**
+     * Az átvezetés, aminek a megadott tranzakció az egyik oldala (a listában a user egy oldalra
+     * kattint, nem az átvezetésre)
+     *
+     * @param transactionId az átvezetés forrás vagy cél oldali tranzakciójának id-ja
+     * @throws EntityNotFoundException ha nincs ilyen tranzakció, nem a bejelentkezett useré, vagy
+     *                                 nem tartozik aktív átvezetéshez
+     */
+    @Transactional(readOnly = true)
+    public TransferTransactionSide getLinkedTransactionByTransactionId(long transactionId) {
+        // a user jogosultságát a TransactionService ellenőrzi (más user tranzakciója nem található)
+        transactionService.getTransactionByIdForActualUser(transactionId);
+
+        return repository
+                .findActiveBySideTransactionId(transactionId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Transfer transaction not found for transaction: " + transactionId));
+    }
+
+    /**
      * Az adott id-jú átvezetés, ha egyik oldala sincs törölve
      *
      * @throws EntityNotFoundException ha nincs ilyen aktív átvezetés

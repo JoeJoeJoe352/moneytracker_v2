@@ -89,6 +89,7 @@
     "categories.add": "Kategóriák hozzáadása",
     "is_sync_transaction": "Szinkronizáció során létrejött tranzakció",
     "is_recurring_transaction": "Ismétlődő tranzakció során létrejött tranzakció",
+    "is_transfer_transaction": "Átvezetés része, ezért itt nem módosítható és nem törölhető",
     "recurring_transaction.open": "Ismétlődő tranzakció megnyitása",
     "recurring_transaction.open_unsaved_confirm": "A nem mentett módosításaid elvesznek. Biztosan megnyitod az ismétlődő tranzakciót?",
     "wallet.sync_locked": "Szinkronizációs tranzakció tárcája nem módosítható",
@@ -116,7 +117,23 @@
       "complex_price_mode": "Mennyiség és egységár",
       "total_price": "Teljes ár"
     },
-    "recurring_transaction": "Ismétlődő tranzakció"
+    "recurring_transaction": "Ismétlődő tranzakció",
+    "transfer_transaction": "Átvezetés tranzakció"
+  },
+  "transfer_transaction": {
+    "create": "Átvezetés létrehozása",
+    "description": "Átvezetés tárcák között. Csak azonos pénznemű tárcák között lehet átvezetni!",
+    "source": "Honnan",
+    "destination": "Hová",
+    "src_name": "Kimenő tranzakció neve",
+    "src_wallet": "Forrás tárca",
+    "dst_name": "Bejövő tranzakció neve",
+    "dst_wallet": "Cél tárca",
+    "dst_wallet.required": "A cél tárca megadása kötelező!",
+    "no_dst_wallet": "Nem található cél tárca {{currency}} pénznemmel!",
+    "update": "Átvezetés módosítása",
+    "wallet_locked": "Meglévő átvezetés tárcája nem módosítható",
+    "delete.confirm": "Biztosan törölni szeretnéd az átvezetést? Mindkét oldala törlődik."
   },
   "wallet": {
     "create": "Tárca létrehozása",
@@ -163,6 +180,7 @@
     "increase": "Növekedés",
     "decrease": "Csökkenés",
     "create_transaction.button": "Tranzakció létrehozása",
+    "create_transfer.button": "Átvezetés",
     "no_transaction": "Nincs még felvett tranzakció",
     "balance_change_this_month": "ebben a hónapban",
     "total_income": "Bevétel ebben a hónapban",
