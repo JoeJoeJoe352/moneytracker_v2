@@ -1,6 +1,11 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form transfer-transaction-form">
     <mat-dialog-content>
         <p>{{ 'transfer_transaction.description' | translate }}</p>
+        @if (transfer()) {
+            <p class="text-center">
+                {{ 'transfer_transaction.wallet_locked' | translate }}
+            </p>
+        }
         <!-- Forrás oldal -->
         <h3 class="side-title">{{ 'transfer_transaction.source' | translate }}</h3>
         <div class="form-row">
@@ -35,11 +40,6 @@
                         >
                     }
                 </mat-select>
-                @if (transfer()) {
-                    <mat-hint class="wallet-locked-hint">{{
-                        'transfer_transaction.wallet_locked' | translate
-                    }}</mat-hint>
-                }
             </mat-form-field>
         </div>
 
@@ -84,11 +84,6 @@
                         >
                     }
                 </mat-select>
-                @if (transfer()) {
-                    <mat-hint class="wallet-locked-hint">{{
-                        'transfer_transaction.wallet_locked' | translate
-                    }}</mat-hint>
-                }
                 @if (dstWalletId.hasError('required') && dstWalletId.touched) {
                     <mat-error>{{
                         'transfer_transaction.dst_wallet.required' | translate

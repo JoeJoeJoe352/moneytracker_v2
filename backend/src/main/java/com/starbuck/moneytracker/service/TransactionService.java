@@ -216,6 +216,7 @@ public class TransactionService {
 
         // egyszerűbb törölni a detailokat + hozzájuk tartozó kategóriákat, mint
         // kikeresni a meglévőket és frissíteni.
+        // TODO legyen majd törlés nélküli update
         transactionDetailService.deleteDetails(transaction);
         transactionDetailService.saveDetails(transaction, command);
     }
