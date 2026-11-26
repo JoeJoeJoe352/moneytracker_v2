@@ -4,15 +4,18 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { LinkInterface } from './interfaces';
 
+/**
+ * Kiírja a kapott linkek listáját 
+ */
 @Component({
-    selector: 'app-header-link-list',
-    templateUrl: './header-link-list-component.html',
-    styleUrl: './header-link-list-component.scss',
+    selector: 'app-menu-link',
+    templateUrl: './menu-link-component.html',
+    styleUrl: './menu-link-component.scss',
     imports: [TranslatePipe, RouterLink, RouterLinkActive, MatIcon],
 })
-export class HeaderLinkListComponent implements OnInit {
+export class MenuLinkComponent implements OnInit {
     /**
-     * Linkek listája, amik jelenjenek meg a fejlécben
+     * Megjelenő link adatai
      */
     linkData = input.required<LinkInterface>();
 

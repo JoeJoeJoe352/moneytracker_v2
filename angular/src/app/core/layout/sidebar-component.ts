@@ -3,7 +3,7 @@ import { AuthService } from '../../features/auth/auth-service';
 import { Router, RouterLink } from '@angular/router';
 import { LinkInterface } from './interfaces';
 import { _, TranslatePipe } from '@ngx-translate/core';
-import { HeaderLinkListComponent } from './header-link-list-component';
+import { MenuLinkComponent } from './menu-link-component';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { AuthDialogService } from '../../features/auth/auth-dialog-service';
@@ -14,7 +14,7 @@ import { UserDataStore } from '@app/shared/stores/user-data-store';
     selector: 'app-sidebar',
     templateUrl: './sidebar-component.html',
     styleUrl: './sidebar-component.scss',
-    imports: [RouterLink, TranslatePipe, HeaderLinkListComponent, MatIconButton, MatIcon],
+    imports: [RouterLink, TranslatePipe, MenuLinkComponent, MatIconButton, MatIcon],
 })
 export class SidebarComponent {
     private readonly authDialog = inject(AuthDialogService);
@@ -46,7 +46,11 @@ export class SidebarComponent {
                 icon: 'event_repeat',
             });
         } else {
-            links.push({ langKey: 'header.login', icon: 'login', action: () => this.authDialog.openLogin() });
+            links.push({
+                langKey: 'header.login',
+                icon: 'login',
+                action: () => this.authDialog.openLogin(),
+            });
             links.push({
                 langKey: 'header.register',
                 icon: 'how_to_reg',
