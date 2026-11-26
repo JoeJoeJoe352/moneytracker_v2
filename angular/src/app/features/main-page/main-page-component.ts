@@ -1,35 +1,20 @@
-import { Component, computed, inject, resource, Signal, signal } from '@angular/core';
+import { Component, inject, resource, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TransactionService } from '../transaction/transaction-service';
 import { DecimalPipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { TransactionModalStateService } from '../transaction/transaction-modal-state-service';
 import { TransactionsListComponent } from '../transaction/transactions-component';
 import { WalletDataUtil } from '@shared/utils/wallet-data-util';
-import { WalletSummaryInterface } from '../transaction/interfaces';
-import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { StatCardComponent } from './stat-card-component';
+import { BalanceCardComponent } from './balance-card-component';
 import { TransactionTypeEnum } from '@shared/enums';
-import { MatCard } from '@angular/material/card';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-main-page-component',
     templateUrl: './main-page-component.html',
     styleUrl: './main-page-component.scss',
-    imports: [
-        TransactionsListComponent,
-        TranslatePipe,
-        CurrencyFormatPipe,
-        StatCardComponent,
-        MatCard,
-        MatIcon,
-        MatProgressSpinner,
-        MatButton,
-    ],
+    imports: [TransactionsListComponent, StatCardComponent, BalanceCardComponent],
     providers: [TransactionModalStateService, DecimalPipe],
 })
 export class MainPageComponent {
@@ -83,30 +68,5 @@ export class MainPageComponent {
                 ),
             };
         },
-    });
-
-    /**
-     * Az egyenleg nettó változása ebben a hónapban
-     */
-    protected balanceChangeThisMonth: Signal<WalletSummaryInterface[]> = computed(() => {
-        const income = this.moneySummarizedPerCurrency.value()?.incomeSumThisMonth;
-        const expense = this.moneySummarizedPerCurrency.value()?.expenseSumThisMonth;
-        if (!income || !expense) {
-            return [];
-        }
-
-        const currencyCodes = new Set([
-            ...income.map((item) => item.currencyCode),
-            ...expense.map((item) => item.currencyCode),
-        ]);
-
-        return Array.from(currencyCodes).map((currencyCode) => {
-            const incomeTotal =
-                income.find((item) => item.currencyCode === currencyCode)?.total ?? 0;
-            const expenseTotal =
-                expense.find((item) => item.currencyCode === currencyCode)?.total ?? 0;
-
-            return { currencyCode, total: incomeTotal - expenseTotal };
-        });
     });
 }

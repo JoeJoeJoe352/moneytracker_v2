@@ -1,0 +1,52 @@
+// Bankkártya-szerű megjelenés
+.balance-card {
+    position: relative;
+    overflow: hidden;
+    color: var(--moneytracker-white);
+    background: linear-gradient(
+        135deg,
+        var(--moneytracker-green) 0%,
+        var(--moneytracker-darkest-green) 100%
+    );
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: -56px;
+        right: -56px;
+        width: 176px;
+        height: 176px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-icon-badge {
+        background-color: rgba(255, 255, 255, 0.18);
+        color: var(--moneytracker-white);
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .stat-trend {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .stat-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .stat-action-button {
+        --mat-button-outlined-outline-color: var(--moneytracker-white);
+        --mat-button-outlined-label-text-color: var(--moneytracker-white);
+        --mat-button-outlined-state-layer-color: var(--moneytracker-white);
+    }
+}

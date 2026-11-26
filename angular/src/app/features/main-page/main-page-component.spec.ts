@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, EventEmitter, input, output } from '@angular/core';
 import { Observable, Subject, of } from 'rxjs';
-import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MainPageComponent } from './main-page-component';
 import { TransactionService } from '../transaction/transaction-service';
@@ -12,12 +12,8 @@ import { TransactionModalStateService } from '../transaction/transaction-modal-s
 import { TransactionModalComponent } from '../transaction/transaction-modal';
 import { TransferTransactionModalComponent } from '../transaction/transfer-transaction/transfer-transaction-modal';
 import { CurrencyCodesEnum } from '@shared/enums';
-import { CurrencyFormatPipe } from '@shared/pipes/currency-format-pipe';
 import { StatCardComponent } from './stat-card-component';
-import { MatCard } from '@angular/material/card';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatButton } from '@angular/material/button';
+import { BalanceCardComponent } from './balance-card-component';
 
 @Component({
     selector: 'app-transactions-list-component',
@@ -112,16 +108,7 @@ describe('MainPageComponent (Vitest)', () => {
         });
         TestBed.overrideComponent(MainPageComponent, {
             set: {
-                imports: [
-                    StubTransactionsListComponent,
-                    TranslatePipe,
-                    CurrencyFormatPipe,
-                    StatCardComponent,
-                    MatCard,
-                    MatIcon,
-                    MatProgressSpinner,
-                    MatButton,
-                ],
+                imports: [StubTransactionsListComponent, StatCardComponent, BalanceCardComponent],
             },
         });
 
