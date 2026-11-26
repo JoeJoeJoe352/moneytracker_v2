@@ -9,6 +9,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { DialogCloseButton } from '@app/shared/components/mat-modal-close';
 import { STRICT_EMAIL_REGEX } from '@app/shared/constants';
 
+/**
+ * Login form kezelése
+ */
 @Component({
     selector: 'app-login-component',
     templateUrl: './login-component.html',

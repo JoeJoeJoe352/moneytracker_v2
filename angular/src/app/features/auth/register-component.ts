@@ -19,6 +19,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { DialogCloseButton } from '@shared/components/mat-modal-close';
 
+/**
+ * Regisztrációs form kezelése
+ */
 @Component({
     selector: 'app-register-component',
     templateUrl: './register-component.html',

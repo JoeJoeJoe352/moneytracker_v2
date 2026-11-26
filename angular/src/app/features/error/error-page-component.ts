@@ -23,6 +23,9 @@ export class ErrorPageComponent implements AfterViewInit {
         this.backToHomepageButton().nativeElement.focus();
     }
 
+    /**
+     * Átirányítás a főoldalra
+     */
     protected redirectToMainPage() {
         return this.router.navigate(['/']);
     }
