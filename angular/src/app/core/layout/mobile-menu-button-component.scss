@@ -1,0 +1,7 @@
+@use 'variables' as *;
+
+:host {
+    @media (min-width: $sidebar-menu-breakpoint) {
+        display: none;
+    }
+}

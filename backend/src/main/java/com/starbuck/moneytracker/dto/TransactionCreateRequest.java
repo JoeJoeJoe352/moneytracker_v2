@@ -27,8 +27,8 @@ public record TransactionCreateRequest(
         @NotNull(message = "Date is mandatory") @PastOrPresentInZone
         LocalDate transactionDate,
 
-        @Valid @NotNull(message = "TransactionDetails are mandatory")
-        List<TransactionDetailCreateRequestDto> transactionDetails,
+        @NotNull(message = "TransactionDetails are mandatory")
+        List<@Valid TransactionDetailCreateRequestDto> transactionDetails,
 
         @NotNull List<Long> globalCategories,
 

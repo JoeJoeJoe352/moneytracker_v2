@@ -1,40 +1,19 @@
-import { Component, input, model } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatToolbar } from '@angular/material/toolbar';
-import { MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 import { LanguageSwitcherComponent } from './language-switch-component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { MobileMenuButtonComponent } from './mobile-menu-button-component';
 import { RouterLink } from '@angular/router';
+import { LayoutStore } from './layout-store';
 
+/**
+ * Fejléc menü megjelenítésére szolgáló komponens
+ */
 @Component({
     selector: 'app-header',
     templateUrl: './header-component.html',
-    styleUrls: ['./header-component.scss', './mobile-menu.scss'],
-    imports: [
-        MatToolbar,
-        MatIconButton,
-        MatIcon,
-        LanguageSwitcherComponent,
-        TranslatePipe,
-        RouterLink,
-    ],
+    styleUrl: './header-component.scss',
+    imports: [MatToolbar, LanguageSwitcherComponent, MobileMenuButtonComponent, RouterLink],
 })
 export class HeaderComponent {
-    /**
-     * Nyitva van-e a mobile menü
-     */
-    isMobileMenuOpen = model(false);
-
-    /**
-     * Rejtve van-e az oldalsáv (pl. landing oldal). Ilyenkor nincs hamburger gomb,
-     * a logó pedig a headerben jelenik meg az oldalsáv helyett
-     */
-    isSidebarHidden = input(false);
-
-    /**
-     * hamburger menu lenyitása/bezárása
-     */
-    toggleMenu(): void {
-        this.isMobileMenuOpen.update((open) => !open);
-    }
+    protected readonly layoutStore = inject(LayoutStore);
 }

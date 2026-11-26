@@ -1,0 +1,13 @@
+<button
+    mat-icon-button
+    class="menu-toggle"
+    type="button"
+    [attr.aria-label]="
+        (layoutStore.isMobileMenuOpen() ? 'header.menu.close' : 'header.menu.open') | translate
+    "
+    aria-controls="app-sidebar-nav"
+    [attr.aria-expanded]="layoutStore.isMobileMenuOpen()"
+    (click)="layoutStore.toggleMobileMenu()"
+>
+    <mat-icon aria-hidden="true" fontIcon="menu"></mat-icon>
+</button>

@@ -335,6 +335,33 @@ class TransactionCreateE2ETest extends MySqlContainerTest {
         assertEquals(0, transactionRepository.count());
     }
 
+    /**
+     * A tranzakció tételei is validálódnak (pl.: túl rövid tételnév esetén 400-at ad
+     * vissza, és nem hoz létre semmit az adatbázisban)
+     */
+    @Test
+    void createTransaction_returnsBadRequestForInvalidDetail() {
+        // a tétel neve ("ab") rövidebb, mint az elvárt minimum 3 karakter
+        TransactionDetailCreateRequestDto invalidDetail =
+                new TransactionDetailCreateRequestDto(new BigDecimal("100.00"), "ab", null, null, List.of());
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                "Valid transaction name",
+                null,
+                TransactionTypeEnum.INCOME,
+                LocalDate.now(ZoneOffset.UTC),
+                List.of(invalidDetail),
+                List.of(),
+                this.wallet.getId());
+
+        var headers = this.getHeaderWithCookie();
+
+        ResponseEntity<Void> response =
+                restTemplate.postForEntity("/transaction", new HttpEntity<>(request, headers), Void.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(0, transactionRepository.count());
+    }
+
     private HttpHeaders getHeaderWithCookie() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
